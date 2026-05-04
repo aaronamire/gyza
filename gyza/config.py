@@ -1,0 +1,65 @@
+"""
+Gyza configuration.
+
+A single dataclass holds the tunables that callers (CLI, demos, runners)
+need at startup. JSON file at ~/.gyza/config.json overrides defaults.
+Environment variables override JSON for sensitive values.
+"""
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import dataclass, field, fields
+from pathlib import Path
+
+
+def _resolve(p: str) -> str:
+    return os.path.expanduser(p)
+
+
+@dataclass
+class GyzaConfig:
+    blackboard_db_path: str = "~/.gyza/blackboard.db"
+    memory_db_path: str = "~/.gyza/memory.db"
+    compositor_key_path: str = "~/.gyza/compositor.key"
+    anthropic_api_key: str = field(
+        default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY", "")
+    )
+    default_model: str = "claude-sonnet-4-5"
+    poll_interval_s: float = 1.0
+    spawn_threshold: float = 5.0
+    drift_rate: float = 0.03
+    lsh_planes: int = 64
+    inflation_halflife_s: float = 30.0
+
+    def resolved_paths(self) -> dict[str, str]:
+        return {
+            "blackboard_db_path": _resolve(self.blackboard_db_path),
+            "memory_db_path": _resolve(self.memory_db_path),
+            "compositor_key_path": _resolve(self.compositor_key_path),
+        }
+
+
+def load_config(path: str = "~/.gyza/config.json") -> GyzaConfig:
+    p = Path(_resolve(path))
+    cfg = GyzaConfig()
+    if not p.exists():
+        return cfg
+    try:
+        data = json.loads(p.read_text())
+    except (OSError, json.JSONDecodeError):
+        return cfg
+    if not isinstance(data, dict):
+        return cfg
+    valid = {f.name for f in fields(cfg)}
+    for k, v in data.items():
+        if k in valid:
+            setattr(cfg, k, v)
+    # Env override for the API key — never commit a key to the JSON.
+    env_key = os.environ.get("ANTHROPIC_API_KEY")
+    if env_key:
+        cfg.anthropic_api_key = env_key
+    return cfg
+
+
+__all__ = ["GyzaConfig", "load_config"]

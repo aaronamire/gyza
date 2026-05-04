@@ -1,0 +1,17 @@
+# Gyza Phase 1 — local blackboard, no networking.
+# Reuses the marshal venv at ~/dev/marshal/.os.
+
+blake3
+cryptography
+numpy
+lancedb
+sentence-transformers
+
+# uuidv7: Python 3.14 ships uuid.uuid7() in the stdlib; gyza uses that.
+# If you target an older Python, install one of: uuid6, uuid-utils.
+
+# Phase 2 — peer-to-peer transport.
+aioquic
+pytest-asyncio
+zeroconf
+pysyncobj
