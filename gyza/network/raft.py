@@ -214,6 +214,16 @@ class GyzaRaftNode(SyncObj):
         )
         self._applied_count += 1
 
+    @replicated
+    def raft_noop(self, token: int) -> int:
+        """Replicated no-op used by `wait_for_sync` to flush this node's
+        apply pointer through the cluster. Calling with `sync=True`
+        blocks until this node has committed AND applied the entry,
+        which proves every earlier committed entry has also been
+        applied here (pysyncobj applies in log order)."""
+        self._applied_count += 1
+        return token
+
     # ------------------------------------------------------------------
     # Introspection helpers (public)
     # ------------------------------------------------------------------

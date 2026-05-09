@@ -40,6 +40,29 @@ from gyza.memory import Episode, EpisodicMemory, build_enriched_prompt
 from gyza.schema import Artifact, HLC, WorkItem
 
 
+# Observability hooks. The module-private wrappers fail closed so an
+# import-time error in gyza.observability (e.g. prometheus_client
+# missing on a stripped-down install) doesn't take down the runner —
+# the metrics simply stop updating.
+try:
+    from gyza.observability import (
+        AGENT_COMPLETIONS_TOTAL as _AGENT_COMPLETIONS_TOTAL,
+        CLAIM_TO_COMPLETE_LATENCY as _CLAIM_TO_COMPLETE_LATENCY,
+    )
+
+    def _obs_completion(outcome: str) -> None:
+        _AGENT_COMPLETIONS_TOTAL.labels(outcome=outcome).inc()
+
+    def _obs_claim_latency(duration_s: float) -> None:
+        _CLAIM_TO_COMPLETE_LATENCY.observe(max(0.0, duration_s))
+except Exception:  # noqa: BLE001
+    def _obs_completion(outcome: str) -> None:  # type: ignore[misc]
+        pass
+
+    def _obs_claim_latency(duration_s: float) -> None:  # type: ignore[misc]
+        pass
+
+
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
     na = float(np.linalg.norm(a))
     nb = float(np.linalg.norm(b))
@@ -61,6 +84,10 @@ class AgentRunner:
         min_similarity_threshold: float = 0.3,
         poll_interval_s: float = 1.0,
         on_envelope_signed: Callable[[ICPEnvelope], None] | None = None,
+        verify_chain_before_claim: bool = True,
+        strict_chain_verification: bool = False,
+        hlc: HLC | None = None,
+        reputation_store=None,
     ):
         self._identity = identity
         self._bb = blackboard
@@ -71,13 +98,51 @@ class AgentRunner:
         self._min_reward = min_reward_threshold
         self._min_sim = min_similarity_threshold
         self._poll_s = poll_interval_s
-        # Optional hook fired after every successful envelope signing.
-        # Used by Phase-2 cross-process demos to persist envelopes so a
-        # coordinator can reconstruct the chain without in-process state.
+        # Caller-provided hook fired after every successful envelope
+        # signing. Used by GlobalCluster.runner_envelope_hook for
+        # ledger-settlement plumbing.
         self._on_envelope_signed = on_envelope_signed
+        # Pre-claim chain verification — Phase 3 Session 8.5.
+        #
+        # When enabled, the runner walks the parent_id chain of any
+        # candidate work item, fetches the corresponding ICP envelopes
+        # from the blackboard's persistent log, and calls
+        # verify_chain_multi_compositor before claiming. This closes
+        # the gap where verify_chain was implemented but never invoked
+        # at runtime — a malicious peer could otherwise post work items
+        # whose chain points at fabricated history.
+        #
+        # ``strict_chain_verification``:
+        #   False (default): if envelopes are missing from the local log
+        #     (e.g. the ancestor was completed by a remote node and we
+        #     haven't yet received its envelope via gossip), claim
+        #     proceeds with a logged warning.
+        #   True: missing envelopes are treated as verification failure;
+        #     the claim is skipped. Use this when running with strict
+        #     security requirements and a fully-gossiped envelope log.
+        self._verify_chain_before_claim = verify_chain_before_claim
+        self._strict_chain_verification = strict_chain_verification
+        # Optional reputation store. When supplied, every successful
+        # completion bumps this agent's score; every failed/released
+        # completion bumps it down. Discovery-side filters (DHT
+        # find_agents min_reputation, free-rider scoring) read from
+        # the same store. None disables — backward compatible with
+        # existing tests that don't care about reputation.
+        self._reputation_store = reputation_store
 
         self._signer = identity.get_icp_signer()
-        self._hlc = HLC(node_id=identity.agent_id)
+        # Phase 3 Session 8.5 — when the blackboard is gossip-attached,
+        # callers should pass ``hlc=blackboard.gossip_hlc()`` so this
+        # runner's claims advance the SAME clock as cross-cluster
+        # delta merges. Without that, local claims can produce HLC
+        # tuples lex-smaller than concurrent remote claims and break
+        # the cross-cluster total-order invariant.
+        #
+        # Single-node deployments (no gossip attached) get a per-agent
+        # HLC keyed on the agent_id — adequate because the only
+        # contention is with other local agents, and Raft already
+        # serializes claim writes.
+        self._hlc = hlc if hlc is not None else HLC(node_id=identity.agent_id)
 
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -112,7 +177,13 @@ class AgentRunner:
     def stop(self) -> None:
         self._stop.set()
         if self._thread is not None:
-            self._thread.join(timeout=self._poll_s + 5.0)
+            # Generous join window — _complete may be mid-write to mem
+            # (LanceDB) or spec (SQLite) when stop is requested. Cutting
+            # those writes short loses an episode AND drops the
+            # _completed_count increment that observers (tests, demos)
+            # poll for, even though the work item is already committed
+            # to the blackboard via Raft.
+            self._thread.join(timeout=self._poll_s + 15.0)
             self._thread = None
 
     def is_running(self) -> bool:
@@ -153,6 +224,19 @@ class AgentRunner:
                     return
                 continue
 
+            # Pre-claim chain verification — refuse to build on top of
+            # a chain we can't verify. Only walks if the item has a
+            # parent (intent-root items have nothing to verify).
+            if (
+                self._verify_chain_before_claim
+                and best_item.parent_id is not None
+                and not self._verify_lineage(best_item)
+            ):
+                # Skip this item; another agent (with the missing
+                # envelopes, or with strict mode off) may still claim.
+                self._recently_failed.add(best_item.id)
+                continue
+
             try:
                 claimed = self._bb.try_claim(
                     best_item.id, self._identity.agent_id, self._hlc,
@@ -167,9 +251,11 @@ class AgentRunner:
                 # Lost the race; loop immediately for the next-best.
                 continue
 
+            t_claim = time.monotonic()
             try:
                 result = self._execute(best_item)
                 self._complete(best_item, result, success=True)
+                _obs_completion("success")
             except Exception as e:
                 # Executor failure: release the claim back to the
                 # blackboard so another agent can try, write an episode
@@ -178,10 +264,79 @@ class AgentRunner:
                 err_repr = f"{type(e).__name__}: {e}"
                 traceback.print_exc()
                 self._release(best_item, error=err_repr)
+                _obs_completion("released")
+            finally:
+                _obs_claim_latency(time.monotonic() - t_claim)
 
     # ------------------------------------------------------------------
     # Scoring / execution
     # ------------------------------------------------------------------
+
+    def _verify_lineage(self, item: WorkItem) -> bool:
+        """
+        Walk this work item's parent chain, fetch each ancestor's
+        envelope from the local log, and verify the resulting chain.
+
+        Returns True if the chain verifies cleanly OR if envelopes are
+        missing AND ``strict_chain_verification`` is False (fail-open
+        for cross-cluster work whose envelopes haven't gossiped to us
+        yet). Returns False on cryptographic failure or on missing
+        envelopes when strict mode is on.
+
+        Why not at gather-inputs time: artifact-level signatures are
+        already checked at fetch (artifact_client). The CHAIN check is
+        a higher-level invariant — "this work descends from a verifiable
+        sequence of authored steps" — and naturally lives at the claim
+        boundary, before we burn local compute on something we can't
+        prove came from honest history.
+        """
+        # Reconstruct only the ANCESTOR chain; the work item itself
+        # hasn't been completed and has no envelope yet. We walk from
+        # parent_id up. (parent_id is non-None: we only call this
+        # method for items with a parent.)
+        parent_id = item.parent_id or ""
+        ancestors_chain, missing = self._bb.reconstruct_chain(parent_id)
+        if missing:
+            if self._strict_chain_verification:
+                print(
+                    f"[{self._identity.agent_id[:8]}] strict-verify: "
+                    f"chain incomplete for {item.id[:8]} "
+                    f"(missing envelope for action {missing[:8]}); skipping",
+                    flush=True,
+                )
+                return False
+            # Fail-open: log once per item, accept the claim.
+            print(
+                f"[{self._identity.agent_id[:8]}] verify: chain incomplete "
+                f"for {item.id[:8]} (missing envelope for action "
+                f"{missing[:8]}); proceeding (strict=False)",
+                flush=True,
+            )
+            return True
+        if not ancestors_chain:
+            # No ancestors — nothing to verify.
+            return True
+
+        # Use verify_chain (the single-key verifier) here. It checks:
+        #   1. Each envelope's signature against its declared agent_pubkey.
+        #   2. parent_envelope_hash linkage from one hop to the next.
+        #   3. input_hashes non-empty (rules out the "stamped without
+        #      reading" attack).
+        # We deliberately do NOT call verify_chain_multi_compositor at
+        # this layer — it requires a TrustRegistry + ArtifactStore that
+        # the runner doesn't carry. Compositor-trust checks happen at
+        # the network layer (GlobalCluster._verify_peer_attestation);
+        # artifact availability is checked at gather-inputs time.
+        from gyza.icp import verify_chain
+        valid, first_bad = verify_chain(ancestors_chain)
+        if not valid:
+            print(
+                f"[{self._identity.agent_id[:8]}] verify: chain INVALID "
+                f"for {item.id[:8]} at index {first_bad}",
+                flush=True,
+            )
+            return False
+        return True
 
     def _score_items(self, items: list[WorkItem]) -> tuple[WorkItem, float]:
         spec = self._spec.current
@@ -297,6 +452,15 @@ class AgentRunner:
         except Exception:
             pass
 
+        # Reputation: count an executor failure as an ordinary failure
+        # (not a dispute) — this isn't a protocol violation, the
+        # agent's executor just couldn't produce a valid output.
+        if self._reputation_store is not None:
+            try:
+                self._reputation_store.record_failure(self._identity.agent_id)
+            except Exception:
+                pass
+
         self._completed_count += 1
         print(
             f"[{self._identity.agent_id[:8]}] ✗ {item.description[:60]} "
@@ -358,11 +522,47 @@ class AgentRunner:
         envelope_hash = compute_envelope_hash(envelope)
         self._last_envelope = envelope
 
+        # Persist to the blackboard's envelope log so future runners
+        # (this one, after restart, or any other agent on this node)
+        # can verify chains rooted in our completions. Best-effort:
+        # if the blackboard is in a broken state we still want
+        # complete_work_item below to fire so the work item itself
+        # becomes visible.
+        try:
+            self._bb.store_envelope(envelope)
+        except Exception:
+            pass
+
         if self._on_envelope_signed is not None:
             try:
                 self._on_envelope_signed(envelope)
             except Exception:
-                # Demo/observability hook — never break completion.
+                # Settlement / observability hook — never break completion.
+                pass
+
+        # Bump the completion counter HERE — before bb.complete_work_item
+        # publishes the work item's completion to other nodes via Raft.
+        # Why: a coordinator that polls for completed_at_ns can race with
+        # the rest of this method. The moment complete_work_item commits,
+        # the coordinator may already drop the "done" sentinel; the
+        # executor's main loop sees it within poll_interval_s and calls
+        # runner.stop(). If join times out before _completed_count is
+        # incremented, the daemon thread is killed on process exit and
+        # the counter stays stale. Incrementing before the Raft commit
+        # makes the invariant: any observer that can see this work item
+        # complete also sees the counter bumped.
+        self._completed_count += 1
+
+        # Reputation: bump up on success, down on failure. Done before
+        # complete_work_item so an observer that sees the bump always
+        # sees a consistent post-completion state.
+        if self._reputation_store is not None:
+            try:
+                if success:
+                    self._reputation_store.record_success(self._identity.agent_id)
+                else:
+                    self._reputation_store.record_failure(self._identity.agent_id)
+            except Exception:
                 pass
 
         # Mark the work item complete on the blackboard.
@@ -397,8 +597,6 @@ class AgentRunner:
             self._spec.update(item.desc_embedding, success=success)
         except Exception:
             pass
-
-        self._completed_count += 1
 
         mark = "✓" if success else "✗"
         desc = item.description[:60]

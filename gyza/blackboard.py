@@ -79,6 +79,32 @@ CREATE TABLE IF NOT EXISTS artifact_files (
     size_bytes   INTEGER NOT NULL,
     stored_at_ns INTEGER NOT NULL
 );
+
+-- Phase 3 Session 8.5: persistent ICP envelope log.
+-- Before this existed, envelope verification was only possible inside
+-- the runner that signed them (via the in-memory _last_envelope chain),
+-- so verify_chain_multi_compositor was never invoked at runtime against
+-- arriving work — the cross-cluster security boundary was decorative.
+-- The log lets any subsequent operation (claim verification, audit,
+-- dispute reconstruction) walk a chain by looking up envelopes by their
+-- BLAKE3 hash.
+--
+-- payload_json holds the full canonical-JSON serialization of the
+-- ICPEnvelope dataclass; verify_envelope re-derives the digest from
+-- the stored fields, so corruption inside the JSON is detected at
+-- verify time rather than write time.
+CREATE TABLE IF NOT EXISTS icp_envelopes (
+    envelope_hash         TEXT PRIMARY KEY,
+    intent_id             TEXT NOT NULL,
+    action_id             TEXT NOT NULL,
+    agent_pubkey          TEXT NOT NULL,
+    parent_envelope_hash  TEXT,
+    payload_json          TEXT NOT NULL,
+    timestamp_ns          INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_icp_action ON icp_envelopes(action_id);
+CREATE INDEX IF NOT EXISTS idx_icp_intent ON icp_envelopes(intent_id);
+CREATE INDEX IF NOT EXISTS idx_icp_parent ON icp_envelopes(parent_envelope_hash);
 """
 
 
@@ -326,6 +352,132 @@ class Blackboard:
             conn.execute("ROLLBACK")
             raise
 
+    def merge_claim_direct(
+        self,
+        work_item_id: str,
+        agent_pubkey: str,
+        hlc_l: int,
+        hlc_c: int,
+        hlc_node: str,
+    ) -> bool:
+        """
+        Idempotently merge a remotely-asserted claim into the local row
+        using the HLC total order ``(l, c, node_id)`` as LWW key.
+
+        Differs from ``try_claim_direct`` in two places:
+
+        * Accepts a claim *over* an existing claim if the incoming HLC
+          tuple is greater than the current one (cross-cluster gossip
+          case where two nodes raced and the loser sees the winner's
+          delta after its own apply).
+        * Refuses to touch a row that has been completed: completion is
+          monotonic and overwriting the claim of a finished item would
+          corrupt the historical record. Returns ``False``.
+
+        Returns ``True`` iff the row's claim fields were updated.
+
+        Caller is responsible for advancing its own HLC via
+        ``HLC.recv(hlc_l, hlc_c, hlc_node)`` before issuing the next
+        local claim — without that step, a subsequent local claim could
+        produce an HLC tuple lex-smaller than the just-merged remote
+        claim and fail the total-order invariant.
+        """
+        conn = self._conn()
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            row = conn.execute(
+                "SELECT claimed_by, claim_hlc_l, claim_hlc_c, claim_hlc_node, "
+                "completed_at_ns FROM work_items WHERE id=?",
+                (work_item_id,),
+            ).fetchone()
+            if row is None:
+                # Item not present locally — caller should apply the
+                # work_item record first (gossip deltas always carry
+                # creation alongside claim).
+                conn.execute("ROLLBACK")
+                return False
+            if row["completed_at_ns"] is not None:
+                conn.execute("ROLLBACK")
+                return False
+
+            # LWW: incoming wins iff its HLC is strictly greater than
+            # the current one in lex order. Unclaimed rows have HLC
+            # (0, 0, "") which compares smaller than any real HLC.
+            cur_l = row["claim_hlc_l"] or 0
+            cur_c = row["claim_hlc_c"] or 0
+            cur_node = row["claim_hlc_node"] or ""
+            if (hlc_l, hlc_c, hlc_node) <= (cur_l, cur_c, cur_node):
+                conn.execute("ROLLBACK")
+                return False
+
+            claimed_at_ns = int(hlc_l) * 1_000_000
+            conn.execute(
+                """
+                UPDATE work_items
+                SET claimed_by=?, claimed_at_ns=?,
+                    claim_hlc_l=?, claim_hlc_c=?, claim_hlc_node=?
+                WHERE id=?
+                """,
+                (agent_pubkey, claimed_at_ns,
+                 hlc_l, hlc_c, hlc_node, work_item_id),
+            )
+            conn.execute("COMMIT")
+            return True
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+
+    def merge_completion_direct(
+        self,
+        work_item_id: str,
+        output_hash: str,
+        icp_envelope_hash: str,
+        success: bool,
+        completed_at_ns: int,
+    ) -> bool:
+        """
+        Apply a completion record only if the row is not already
+        completed (monotonic — first writer wins on each replica).
+
+        Returns ``True`` iff the row was updated.
+
+        Why first-writer-wins rather than newest-writer-wins: a stale
+        node could replay an old completion long after a more recent
+        one has been applied. Refusing to overwrite ensures the
+        ``completed_at_ns / output_hash / icp_envelope_hash`` triple
+        stays stable once any node has accepted a completion.
+        Convergence still holds because all nodes are exchanging the
+        same set of completion deltas — they will each settle on
+        whichever completion was first to arrive locally. Disagreements
+        across nodes about *which* completion won are rare (would
+        require concurrent independent completions of the same item)
+        and resolved at the application layer via ICP-chain reconciliation.
+        """
+        conn = self._conn()
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            row = conn.execute(
+                "SELECT completed_at_ns FROM work_items WHERE id=?",
+                (work_item_id,),
+            ).fetchone()
+            if row is None or row["completed_at_ns"] is not None:
+                conn.execute("ROLLBACK")
+                return False
+            conn.execute(
+                """
+                UPDATE work_items
+                SET completed_at_ns=?, output_hash=?, icp_envelope_hash=?, success=?
+                WHERE id=? AND completed_at_ns IS NULL
+                """,
+                (completed_at_ns, output_hash, icp_envelope_hash,
+                 int(success), work_item_id),
+            )
+            conn.execute("COMMIT")
+            return True
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+
     def complete_work_item(
         self,
         work_item_id: str,
@@ -411,6 +563,125 @@ class Blackboard:
             (lineage_root,),
         ).fetchall()
         return [_row_to_work_item(r) for r in rows]
+
+    # ------------------------------------------------------------------
+    # ICP envelope log (Phase 3 Session 8.5)
+    # ------------------------------------------------------------------
+    #
+    # Persistent log of every envelope this node has signed (and, when
+    # cross-cluster envelope gossip is wired, every envelope it has
+    # observed). Stored verbatim as canonical JSON so verify_envelope
+    # can re-derive the digest from the same field order that produced
+    # the signature.
+    #
+    # Why a separate table from work_items: work_items.icp_envelope_hash
+    # is the *pointer* — useful for cross-referencing — but the actual
+    # envelope payload (with signature, agent_pubkey, parent link) is
+    # what verification needs. Embedding the payload in work_items would
+    # bloat the table and conflate "the work happened" with "the
+    # cryptographic proof of it."
+
+    def store_envelope(self, envelope) -> str:
+        """
+        Persist an ICPEnvelope. Returns the envelope hash. Idempotent
+        on hash collision (UPSERT) — re-storing the same envelope is a
+        no-op rather than a constraint violation.
+        """
+        from gyza.icp import compute_envelope_hash
+        from dataclasses import asdict
+        env_hash = compute_envelope_hash(envelope)
+        payload = json.dumps(
+            asdict(envelope), sort_keys=True, separators=(",", ":"),
+        )
+        self._conn().execute(
+            """
+            INSERT OR REPLACE INTO icp_envelopes
+                (envelope_hash, intent_id, action_id, agent_pubkey,
+                 parent_envelope_hash, payload_json, timestamp_ns)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                env_hash, envelope.intent_id, envelope.action_id,
+                envelope.agent_pubkey, envelope.parent_envelope_hash,
+                payload, envelope.timestamp_ns,
+            ),
+        )
+        return env_hash
+
+    def get_envelope(self, envelope_hash: str):
+        """Retrieve an ICPEnvelope by hash, or None if absent."""
+        from gyza.icp import ICPEnvelope
+        row = self._conn().execute(
+            "SELECT payload_json FROM icp_envelopes WHERE envelope_hash=?",
+            (envelope_hash,),
+        ).fetchone()
+        if row is None:
+            return None
+        d = json.loads(row["payload_json"])
+        return ICPEnvelope(**d)
+
+    def get_envelope_for_action(self, action_id: str):
+        """Retrieve the envelope that signed the completion of a given
+        work item. Returns None if no envelope is logged. Returns the
+        most recent envelope if multiple exist (shouldn't happen in
+        normal flow, but a re-execution after release could produce
+        two; LWW by timestamp is the right policy)."""
+        from gyza.icp import ICPEnvelope
+        row = self._conn().execute(
+            "SELECT payload_json FROM icp_envelopes WHERE action_id=? "
+            "ORDER BY timestamp_ns DESC LIMIT 1",
+            (action_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return ICPEnvelope(**json.loads(row["payload_json"]))
+
+    def reconstruct_chain(self, work_item_id: str) -> "tuple[list, str]":
+        """
+        Walk parent_id back from ``work_item_id`` to its lineage_root,
+        collecting one envelope per ancestor. Returns
+        ``(envelopes_root_first, missing_action_id_or_empty)``.
+
+        - On full reconstruction, the second element is "" and the
+          first is a list of ICPEnvelope ordered root → leaf.
+        - If any ancestor has no envelope in the log (e.g. a remote
+          envelope that hasn't been gossiped to us, or a parent that
+          hasn't completed yet), the second element is that ancestor's
+          action_id and the first is the partial chain we DID have.
+
+        Callers that need a strict guarantee should treat
+        ``missing != ""`` as verification failure.
+        """
+        # Walk: find the work item, climb parent_id until None.
+        ancestors: list[str] = []
+        cursor_id: str | None = work_item_id
+        # Bound the climb so a corrupted parent cycle (shouldn't happen
+        # under the schema's FK but defense-in-depth) doesn't loop.
+        for _ in range(10_000):
+            if cursor_id is None:
+                break
+            row = self._conn().execute(
+                "SELECT id, parent_id FROM work_items WHERE id=?",
+                (cursor_id,),
+            ).fetchone()
+            if row is None:
+                # Unknown work item in chain — caller should treat as missing.
+                return [], cursor_id
+            ancestors.append(cursor_id)
+            cursor_id = row["parent_id"]
+        else:
+            raise RuntimeError(
+                f"chain walk exceeded depth limit starting at {work_item_id}"
+            )
+        # ancestors is leaf → root; reverse to get root → leaf.
+        ancestors.reverse()
+        chain = []
+        for action_id in ancestors:
+            env = self.get_envelope_for_action(action_id)
+            if env is None:
+                return chain, action_id
+            chain.append(env)
+        return chain, ""
 
     # ------------------------------------------------------------------
     # Artifacts

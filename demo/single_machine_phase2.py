@@ -90,9 +90,13 @@ def main() -> int:
         coord.kill()
         rc_coord = -1
 
-    # Give executor a moment to see the done sentinel.
+    # Give the executor a generous window to see the done sentinel,
+    # stop its agent runner, and tear down the Raft node. pysyncobj's
+    # destroy() can take a few seconds when the journal queue drains;
+    # a stingy timeout here surfaces as a misleading rc=-1 even though
+    # the chain already verified on the coordinator side.
     try:
-        rc_exec = exec_p.wait(timeout=15)
+        rc_exec = exec_p.wait(timeout=45)
     except subprocess.TimeoutExpired:
         exec_p.kill()
         rc_exec = -1

@@ -135,6 +135,85 @@ def test_refresh_rewards_updates_drifted(bb):
     assert refreshed.reward > 0.1
 
 
+def test_merge_claim_unclaimed_wins(bb):
+    """LWW merge over an unclaimed row succeeds (incoming HLC > (0,0,'')) ."""
+    intent_id = bb.post_intent(_goal_spec(_intent_id("e")))
+    w = _work_item(intent_id)
+    bb.post_work_item(w)
+
+    ok = bb.merge_claim_direct(w.id, "agent_remote", hlc_l=1, hlc_c=0, hlc_node="nodeR")
+    assert ok is True
+
+    row = bb.get_by_lineage(intent_id)[0]
+    assert row.claimed_by == "agent_remote"
+    assert (row.claim_hlc_l, row.claim_hlc_c, row.claim_hlc_node) == (1, 0, "nodeR")
+
+
+def test_merge_claim_lww_overwrites_older(bb):
+    """A later HLC overwrites an earlier one — cross-cluster race resolution."""
+    intent_id = bb.post_intent(_goal_spec(_intent_id("f")))
+    w = _work_item(intent_id)
+    bb.post_work_item(w)
+
+    assert bb.merge_claim_direct(w.id, "agent_a", 5, 0, "nodeA") is True
+    # Newer HLC by node_id tie-break.
+    assert bb.merge_claim_direct(w.id, "agent_b", 5, 0, "nodeB") is True
+    # Older HLC must be rejected.
+    assert bb.merge_claim_direct(w.id, "agent_c", 5, 0, "nodeA") is False
+    # Strictly older (l,c) — also rejected.
+    assert bb.merge_claim_direct(w.id, "agent_d", 4, 99, "nodeZ") is False
+
+    row = bb.get_by_lineage(intent_id)[0]
+    assert row.claimed_by == "agent_b"
+
+
+def test_merge_claim_refuses_completed_row(bb):
+    """Completed item is final — cannot reassign claim via merge."""
+    intent_id = bb.post_intent(_goal_spec(_intent_id("g")))
+    w = _work_item(intent_id)
+    bb.post_work_item(w)
+    hlc = HLC(node_id="local")
+    assert bb.try_claim(w.id, "agent_local", hlc) is True
+    bb.complete_work_item(w.id, "a" * 64, "b" * 64, True, hlc)
+
+    # Try to overwrite — must fail even with a much later HLC.
+    assert bb.merge_claim_direct(w.id, "agent_intruder", 999, 0, "nodeZ") is False
+    row = bb.get_by_lineage(intent_id)[0]
+    assert row.claimed_by == "agent_local"
+
+
+def test_merge_completion_monotonic(bb):
+    """First completion wins; subsequent merge_completion_direct no-ops."""
+    intent_id = bb.post_intent(_goal_spec(_intent_id("h")))
+    w = _work_item(intent_id)
+    bb.post_work_item(w)
+    hlc = HLC(node_id="local")
+    assert bb.try_claim(w.id, "agent_a", hlc) is True
+
+    h1 = "a" * 64
+    e1 = "b" * 64
+    assert bb.merge_completion_direct(w.id, h1, e1, True, completed_at_ns=100) is True
+
+    # Second completion with different fields must NOT overwrite.
+    h2 = "c" * 64
+    e2 = "d" * 64
+    assert bb.merge_completion_direct(w.id, h2, e2, False, completed_at_ns=200) is False
+    row = bb.get_by_lineage(intent_id)[0]
+    assert row.output_hash == h1
+    assert row.icp_envelope_hash == e1
+    assert row.completed_at_ns == 100
+    assert row.success is True
+
+
+def test_merge_completion_unknown_item(bb):
+    """Merging completion for a non-existent row is a no-op, not an error."""
+    intent_id = bb.post_intent(_goal_spec(_intent_id("i")))
+    _ = intent_id
+    assert bb.merge_completion_direct(
+        "nonexistent-uuid", "a" * 64, "b" * 64, True, completed_at_ns=1,
+    ) is False
+
+
 def test_complete_work_item_sets_fields(bb):
     intent_id = bb.post_intent(_goal_spec(_intent_id("d")))
     w = _work_item(intent_id)

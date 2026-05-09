@@ -168,16 +168,306 @@ What ICP does **not** give you:
   above 0.99 to share a Hamming-radius-2 neighborhood. Tests sample
   from a tighter ball than the prose suggests.
 
+## Phase 2: LAN federation
+
+Phase 2 turns Gyza from a single-host coordinator into a small LAN
+cluster. Two laptops on the same WiFi run `gyza` independently. They
+discover each other via mDNS, authenticate with QUIC + their compositor
+keypairs, agree on a Raft-replicated work-item log, and exchange
+artifacts by content hash over HTTP. An ICP chain produced on one
+machine is verifiable on the other.
+
+```
+Machine A (192.168.1.5)            Machine B (192.168.1.6)
+┌─────────────────────────┐        ┌─────────────────────────┐
+│  Leaves OS              │        │  Leaves OS              │
+│  Compositor CK_A        │        │  Compositor CK_B        │
+│  ┌───────────────────┐  │        │  ┌───────────────────┐  │
+│  │ AgentRunner       │  │        │  │ AgentRunner       │  │
+│  │ (coordinator)     │  │        │  │ (executor)        │  │
+│  └─────────┬─────────┘  │        │  └─────────┬─────────┘  │
+│            │            │        │            │            │
+│  ┌─────────▼─────────┐  │ Raft   │  ┌─────────▼─────────┐  │
+│  │ NetworkBlackboard │◄─┼────────┼─►│ NetworkBlackboard │  │
+│  │ (writes via Raft) │  │ QUIC   │  │ (writes via Raft) │  │
+│  │ (reads via SQLite)│  │ :8749  │  │ (reads via SQLite)│  │
+│  └───────────────────┘  │        │  └───────────────────┘  │
+│  ┌───────────────────┐  │artifact│  ┌───────────────────┐  │
+│  │ Artifact server   │◄─┼────────┼─►│ Artifact server   │  │
+│  │ (FastAPI :7750)   │  │  HTTP  │  │ (FastAPI :7750)   │  │
+│  └───────────────────┘  │ :7750  │  └───────────────────┘  │
+│  ┌───────────────────┐  │mDNS    │  ┌───────────────────┐  │
+│  │ TrustRegistry     │  │_gyza._ │  │ TrustRegistry     │  │
+│  │ (CK_A pinned)     │  │udp     │  │ (CK_A pinned)     │  │
+│  │ (CK_B pinned)     │  │        │  │ (CK_B pinned)     │  │
+│  └───────────────────┘  │        │  └───────────────────┘  │
+└─────────────────────────┘        └─────────────────────────┘
+            │                                  │
+            └────────────── ICP chain ─────────┘
+                Hop 1: Agent_A signed under CK_A
+                Hop 2: Agent_B signed under CK_B
+                verify_chain_multi_compositor() → VALID ✓
+```
+
+### What's new
+
+- **Authenticated QUIC transport** (`gyza/network/transport.py`).
+  Connections are mutually authenticated by an Ed25519
+  challenge-response over the QUIC stream — the compositor keypair
+  that signs ICP envelopes is the same one that authenticates the
+  link. No PKI. Self-signed TLS certs are scaffolding only.
+- **mDNS discovery** (`gyza/network/discovery.py`). Zero-config peer
+  finding via `_gyza._udp.local.`. TXT record carries the compositor
+  pubkey, QUIC port, attestation tier, and a freshness timestamp.
+  Falls back to `manual_peers` from `~/.gyza/config.json` when the
+  network blocks multicast.
+- **Raft-replicated blackboard** (`gyza/network/raft.py` +
+  `network_blackboard.py`). Built on `pysyncobj`. Three operations
+  go through Raft (post intent, post work item, claim, complete);
+  every read stays local — Raft applies committed entries to local
+  SQLite synchronously, so reads are read-your-writes consistent.
+- **Content-addressed artifact exchange** (`artifact_store.py`,
+  `artifact_server.py`, `artifact_client.py`). FastAPI server on
+  :7750 serves bytes by BLAKE3 hash; clients verify the hash on
+  download and try the next peer if a server lies.
+- **Cross-machine ICP verification** (`trust_registry.py` +
+  `icp.verify_chain_multi_compositor`). A chain that spans two
+  compositors is valid iff both compositors are pinned in the local
+  trust registry, every manifest signature checks out under its
+  declared compositor, every envelope signature checks out under
+  its agent's pubkey, and every input/output artifact is in the
+  local artifact store.
+
+### Two-machine quick start
+
+On both machines:
+
+```bash
+python -m gyza.cli init      # generate compositor key, mkdir ~/.gyza
+```
+
+Then on Machine A:
+
+```bash
+python demo/two_machine_demo.py --role coordinator
+```
+
+…and on Machine B (within ~30 seconds — coordinator waits for the
+executor to join):
+
+```bash
+python demo/two_machine_demo.py --role executor
+```
+
+The coordinator posts two work items with a lineage dependency, the
+executor claims both, signs ICP envelopes, and stores artifacts.
+The coordinator reconstructs the chain, runs
+`verify_chain_multi_compositor`, and prints a per-hop report
+ending in `CHAIN INTEGRITY: VALID ✓`.
+
+### Single-machine simulation
+
+If you don't have a second laptop handy:
+
+```bash
+python -m gyza.cli demo lan
+```
+
+This launches the coordinator and executor as two subprocesses on
+localhost with separate Raft and QUIC ports. Output is identical
+to the two-machine version.
+
+### Phase-2 CLI commands
+
+```bash
+gyza demo lan                 # Phase-2 single-machine demo
+gyza status                   # blackboard + artifact-store stats
+gyza network peers            # list LAN peers from local cache
+gyza network join HOST:PORT   # one-shot dial to verify reachability
+gyza trust list               # pinned compositors
+gyza trust revoke PUBKEY      # revoke a compositor's trust
+```
+
+### Troubleshooting
+
+- **mDNS shows nothing.** Some networks (corporate WiFi, captive
+  portals, certain VPNs) block multicast. Add the peer manually:
+  ```json
+  {
+    "manual_peers": ["192.168.1.5:7749", "192.168.1.6:7749"]
+  }
+  ```
+  in `~/.gyza/config.json`. Discovery dials these every 5–30 s.
+- **Connection refused.** Check `quic_port` (default 7749),
+  `artifact_port` (7750), `raft_port` (8749) are open in the local
+  firewall. They should be open only to the LAN, never to the
+  public internet.
+- **Cluster never forms.** The first node prints "no peers found,
+  running solo on LAN" if it doesn't see anyone within 15 s. If
+  both nodes started but neither saw the other, it's almost always
+  mDNS — try the manual_peers route.
+
+### Security notes for Phase 2
+
+- The TrustRegistry is what protects you from an attacker who
+  guesses the right mDNS response. Just because a packet says
+  "I am compositor X" doesn't mean it is. The QUIC handshake's
+  challenge-response proves the peer holds X's private key; the
+  registry pins X *after* that proof, and ICP verification refuses
+  any envelope whose compositor isn't pinned.
+- Revoking a compositor (`gyza trust revoke`) doesn't tear down
+  existing connections — it only marks future chain verifications
+  as failing. Drop the connection separately if needed.
+- Raft journals are in-memory by default. A node restart loses its
+  in-flight log, but it catches up via AppendEntries from any
+  surviving peer. Don't run a single-node "cluster" expecting
+  durability.
+
+## Phase 3: Global Federation
+
+Phase 3 lifts coordination from "one LAN, Raft-consistent" to "any two
+nodes anywhere, eventually consistent via gossipsub + bilateral ledger
+settlement." A long-running Go daemon (`gyza-netd`) carries everything
+that needs production-grade libp2p — DHT discovery, NAT traversal
+(DCUtR + circuit relay), gossipsub, signed-message routing — and
+exposes it to Python over a Unix-socket gRPC channel. The Python
+process keeps owning blackboard, runner, ICP signing, and ledger; the
+data plane never round-trips through Python.
+
+```
+                    Internet (any topology)
+                            │
+  ┌─── Node A (Tokyo) ──────┼────── Node B (Paris) ────┐
+  │ ┌─────────┐  ┌─────┐    │      ┌─────┐  ┌────────┐ │
+  │ │gyza-netd│──┤Raft │    │      │Raft │──┤gyza-netd│ │
+  │ │(Go,DHT, │  │LAN  │    │      │LAN  │  │(Go, DHT, │ │
+  │ │libp2p)  │  └──┬──┘    │      └──┬──┘  │libp2p)  │ │
+  │ └────┬────┘     │       │         │     └────┬────┘ │
+  │      │ gRPC over Unix sock         gRPC over Unix sock
+  │ ┌────┴───────────────┐    ┌──────────────┴────┐ │
+  │ │ Python (Phase 1+2) │    │ Python (Phase 1+2)│ │
+  │ │  blackboard, runner│    │  blackboard,runner│ │
+  │ │  ICP, ledger       │    │  ICP, ledger      │ │
+  │ └────────────────────┘    └───────────────────┘ │
+  └────────────────────────────────────────────────┘
+
+  Cross-node primitives:
+    • Kademlia DHT      — agents advertise / discover by spec embedding
+    • DCUtR + relay     — connect through NAT without manual config
+    • gossipsub         — per-project blackboard delta sync (CRDT merge)
+    • MessageService    — point-to-point libp2p stream for ledger frames
+    • bilateral ledger  — earner-signed → payer-cosigned credit entries
+    • free-rider filter — local scoring deprioritizes habitual debtors
+    • capability cert   — Tier-3 attestation co-signed by 2 of 3 Tier-3 peers
+```
+
+### Quick start (single machine, two daemons)
+
+```bash
+# Build the Go daemon (Go 1.22+).
+make -C netd build
+
+# Initialize ~/.gyza if you haven't already.
+gyza init
+
+# Start gyza-netd in the foreground.
+gyza global start
+
+# In another shell, run the integration simulation. Two daemons,
+# two GlobalCluster instances, mock executor, full bilateral
+# settlement. Should print "BILATERAL ✓" within ~10s.
+python demo/single_machine_global.py
+```
+
+### Quick start (two machines)
+
+The cross-machine flow is identical — both sides need to build
+`gyza-netd` and run `gyza init`. Then on each side:
+
+```bash
+gyza global start
+```
+
+The Python orchestration that drives discovery / project formation
+is exposed as a class (`gyza.network.global_cluster.GlobalCluster`)
+rather than a CLI flow; see `demo/single_machine_global.py` for the
+canonical wiring.
+
+### CLI surface
+
+```bash
+gyza global status            # netd identity, DHT peers, connections
+gyza global find "<query>"    # search the DHT for matching agents
+gyza global project new <id>  # join (or create) a project's gossip topic
+gyza credits balance          # net credits earned/spent
+gyza credits statement        # ledger entries
+gyza credits peers            # per-peer balance + free-rider score
+```
+
+### Troubleshooting
+
+- **`gyza-netd` won't build.** Ensure Go 1.22 or newer (`go version`).
+  The libp2p stack pins `go.mod` versions; `go mod tidy` should be a
+  no-op on a clean checkout.
+- **No DHT peers found.** With no bootstrap peers configured, two
+  daemons on the same LAN find each other via the daemon's mDNS
+  service. Cross-network operation needs `netd_bootstrap_peers` set
+  in `~/.gyza/config.json` (the daemon's own bootstrap defaults to
+  IPFS public bootstrap nodes for development convenience).
+- **NAT traversal fails (cross-network).** DCUtR works for ~60% of
+  NAT types. For the remainder, set `enable_relay = true` in config
+  to opt into the circuit-relay fallback. Relay introduces ~50ms of
+  added latency but achieves 100% connectivity.
+- **`gyza global attest` reports "not yet implemented".** The proof-
+  of-capability orchestration ships in Session 7's API but not in
+  this CLI revision. Run the eval suite via `python -m
+  gyza.capability_eval` and use the daemon's CapabilityService gRPC
+  surface directly until the CLI grows the wiring.
+- **Settlement never happens after a remote agent finishes work.**
+  Verify both sides have the daemon running and connected
+  (`gyza global status`), and that both have joined the project
+  topic. The `LedgerSettlementService` requires a libp2p stream to
+  the payer; without a routable peer ID for the coordinator's
+  compositor pubkey, the executor's `submit_earned` is a no-op
+  (logged at INFO level).
+
+### What "works" looks like
+
+```
+$ python demo/single_machine_global.py
+[demo] tmp dir: /home/xan/.gyza/demo-phase3-global
+[demo] booting two daemons...
+[demo] coordinator peer_id: 12D3KooW...
+[demo] executor    peer_id: 12D3KooW...
+[demo] coordinator → executor connected
+[demo] gossip mesh formed for project
+[demo] executor runner started
+[demo] coordinator posted intent + work_item
+[demo] executor completed the work item
+
+╔══════════════════════════════════════════════════════════════╗
+║ GYZA PHASE 3 — SINGLE-MACHINE FEDERATION SIMULATION          ║
+╠══════════════════════════════════════════════════════════════╣
+║ Cross-cluster gossip:    VALID ✓                            ║
+║ Bilateral settlement:    BILATERAL ✓                        ║
+╠══════════════════════════════════════════════════════════════╣
+║ ECONOMY                                                      ║
+║   coordinator's view of executor:    -0.5000 credits         ║
+║   executor's view of coordinator:    +0.5000 credits         ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+Two strangers' nodes form a project, exchange work, and settle
+credits — without any shared infrastructure beyond the DHT
+bootstrap nodes. That's the Phase 3 promise.
+
 ## Roadmap
 
-- **Phase 2 — LAN Raft.** Replace single-host SQLite with a Raft-
-  replicated work-item log across a small cluster. Cross-agent
-  envelope stitching becomes automatic via a chain indexer that
-  walks parent_envelope_hash links across agents. Capability
-  manifests get distributed via a gossip layer.
-- **Phase 3 — Global DHT.** Long-lived agents discover and join
-  task neighborhoods through a Kademlia-style overlay. Compositor
-  trust roots federate; revocation lists become CRDTs.
+- **Phase 4 — self-organization.** Demand-driven spawning of fine-tuned
+  child agents. Versioned identity (manifest rotation without losing
+  reputation history). Scoped revocation lists distributed via gossip.
+  Worth starting only once Phase 3 has 20+ live nodes generating
+  organic demand data.
 - **Phase 1.5 — operational polish.** Background reward refresh.
   Scheduled TTL vacuum. Persistent envelope log so chain
   reconstruction outlives any one runner. Real Anthropic executor
@@ -187,21 +477,51 @@ What ICP does **not** give you:
 
 ```
 gyza/                package root
-├── schema.py        WorkItem / Artifact / HLC dataclasses
-├── blackboard.py    SQLite WAL store + atomic claim + TTL filter
-├── reward.py        Exponential reward inflation
-├── icp.py           ICPEnvelope, sign / verify / chain helpers
-├── identity.py      LocalCompositor, AgentIdentity, manifests, revocation
-├── memory.py        EpisodicMemory (LanceDB primary, SQLite fallback)
-├── demand.py        LSHIndex + DemandOracle (background polling)
-├── drift.py         Specialization drift + persisted tracker
-├── runner.py        AgentRunner + mock/anthropic executors
-├── config.py        GyzaConfig (~/.gyza/config.json)
-└── cli.py           init / demo / status
+├── schema.py            WorkItem / Artifact / HLC dataclasses
+├── blackboard.py        SQLite WAL store + atomic claim + TTL filter
+├── reward.py            Exponential reward inflation
+├── icp.py               ICPEnvelope; single- and multi-compositor verify
+├── identity.py          LocalCompositor, AgentIdentity, manifests, revocation
+├── memory.py            EpisodicMemory (LanceDB primary, SQLite fallback)
+├── demand.py            LSHIndex + DemandOracle (background polling)
+├── drift.py             Specialization drift + persisted tracker
+├── runner.py            AgentRunner + mock/anthropic executors
+├── config.py            GyzaConfig (~/.gyza/config.json)
+├── cli.py               init / demo / status / network / trust
+└── network/             Phase-2 networking
+    ├── transport.py         QUIC + Ed25519 challenge-response auth
+    ├── discovery.py         mDNS + manual-peer fallback
+    ├── raft.py              pysyncobj-backed replicated state machine
+    ├── network_blackboard.py NetworkBlackboard + wait_for_sync
+    ├── cluster.py           cluster lifecycle (form/join/leave)
+    ├── artifact_store.py    content-addressed filesystem store
+    ├── artifact_server.py   FastAPI server, BLAKE3-keyed
+    ├── artifact_client.py   verifying client with peer fallback
+    └── trust_registry.py    pinned compositors + cached manifests
 
 demo/                end-to-end demos
-├── two_agent_pipeline.py
-└── injection_demo.py
+├── two_agent_pipeline.py        Phase-1 local two-agent demo
+├── injection_demo.py            tampering breaks chain
+├── two_machine_demo.py          Phase-2 cross-machine demo
+├── single_machine_phase2.py     Phase-2 demo, two subprocesses
+└── single_machine_global.py     Phase-3 demo: two netd daemons + gossip + settlement
+
+netd/                Phase-3 Go daemon (libp2p, DHT, NAT, gossip)
+├── cmd/gyza-netd/main.go        entry point (flags, signals, cleanup)
+└── internal/
+    ├── identity/                load Ed25519 keypair → libp2p PrivKey
+    ├── host/                    libp2p host w/ QUIC + Noise + yamux
+    ├── dht/                     Kademlia DHT + Python-compatible LSH
+    ├── discovery/               mDNS LAN auto-discovery
+    ├── nat/                     DCUtR hole-punching + relay opt-in
+    ├── gossip/                  gossipsub + signed delta verification
+    ├── message/                 /gyza/message/1.0.0 stream protocol
+    ├── capability/              proof-of-capability challenge protocol
+    └── grpc/                    gRPC services + proto definitions
+
+gyza/economy/        Phase-3 compute-credit economy
+├── ledger.py                    bilateral SQLite ledger, BLAKE3 + Ed25519
+└── settlement.py                earner_signed ⇄ payer_cosigned protocol
 
 tests/               pytest, all passing
 ```
@@ -212,8 +532,17 @@ tests/               pytest, all passing
 ~/dev/marshal/.os/bin/python -m pytest tests/ -v
 ```
 
-64 tests covering the data layer, ICP cryptography, identity
-issuance, episodic memory (with LanceDB unavailability path), demand
-oracle / LSH locality / specialization convergence, the runner's
-race / completion / executor-failure semantics, TTL filtering,
-config loading, and CLI argument parsing.
+250 tests covering: the data layer; ICP cryptography (single- and
+cross-compositor); identity issuance; episodic memory (with LanceDB
+unavailability path); demand oracle / LSH locality / specialization
+convergence; the runner's race / completion / executor-failure
+semantics; TTL filtering; config loading; CLI argument parsing;
+QUIC transport with mutual authentication; mDNS discovery and
+peer persistence; Raft consensus (leader election, exactly-once
+claim under contention, log catch-up, leader failover); the
+NetworkBlackboard's cross-node visibility guarantees; artifact
+store + server + client; cross-machine ICP verification; and
+Phase-2 hardening (network-partition catch-up, concurrent artifact
+fetch, Raft NotReady retry, manual_peers fallback, artifact store
+size limit). Heavy networking tests are marked `integration`;
+skip them with `GYZA_SKIP_INTEGRATION=1` (see `pytest.ini`).

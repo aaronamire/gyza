@@ -8,11 +8,20 @@ HLC implements the Kulkarni 2014 hybrid logical clock (Algorithm 1 from
 "Logical Physical Clocks", Kulkarni et al. 2014). Physical component is
 millisecond wall time; counter breaks ties when wall time hasn't advanced
 since the last event.
+
+Thread safety: the original HLC implementation was correct for a
+single-thread caller but exhibited a TOCTOU race when shared across
+threads. Two concurrent ``now()`` calls could read the same ``l_old``,
+write the same ``self.l``, and increment ``self.c`` past each other,
+producing two events with the SAME ``(l, c)`` tuple — violating the
+uniqueness invariant the HLC is supposed to guarantee. Phase 3
+Session 8.5 made the mutation atomic via an internal lock.
 """
 from __future__ import annotations
 
+import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -80,36 +89,66 @@ def _pt_ms() -> int:
 @dataclass
 class HLC:
     """
-    Kulkarni 2014 hybrid logical clock.
+    Kulkarni 2014 hybrid logical clock — thread-safe.
 
     `l` is millisecond wall time captured at the last event; `c` is the
     counter that disambiguates events sharing the same `l`. Both move
     monotonically forward — never reset on backwards wall-clock jumps.
+
+    The internal lock makes ``now()`` and ``recv()`` atomic with
+    respect to each other so multiple concurrent claim-issuing
+    threads sharing one HLC produce monotonically distinct tuples.
+    Critical for Phase 3: when ``NetworkBlackboard`` is gossip-attached,
+    every local claim AND every remote-claim merge must observe and
+    advance the SAME HLC instance, otherwise local claims can produce
+    HLC tuples lex-smaller than concurrent remote claims and break
+    cross-cluster total order.
+
+    The lock is created in ``__post_init__`` because ``threading.Lock``
+    is not directly representable as a dataclass field type. It is
+    deliberately marked ``compare=False repr=False init=False`` (via
+    ``field(...)``) so dataclass-generated ``__eq__`` and ``__repr__``
+    behave as if the lock weren't there — two HLCs are equal iff their
+    (node_id, l, c) tuples are equal.
     """
     node_id: str
     l: int = 0
     c: int = 0
+    _lock: "threading.Lock" = field(
+        default_factory=threading.Lock,
+        compare=False,
+        repr=False,
+    )
 
     def now(self) -> tuple[int, int, str]:
-        pt = _pt_ms()
-        l_old = self.l
-        self.l = max(l_old, pt)
-        if self.l == l_old:
-            self.c += 1
-        else:
-            self.c = 0
-        return (self.l, self.c, self.node_id)
+        with self._lock:
+            pt = _pt_ms()
+            l_old = self.l
+            self.l = max(l_old, pt)
+            if self.l == l_old:
+                self.c += 1
+            else:
+                self.c = 0
+            return (self.l, self.c, self.node_id)
 
     def recv(self, l: int, c: int, node: str) -> None:
-        pt = _pt_ms()
-        l_old = self.l
-        c_old = self.c
-        self.l = max(l_old, l, pt)
-        if self.l == l_old and self.l == l:
-            self.c = max(c_old, c) + 1
-        elif self.l == l_old:
-            self.c = c_old + 1
-        elif self.l == l:
-            self.c = c + 1
-        else:
-            self.c = 0
+        with self._lock:
+            pt = _pt_ms()
+            l_old = self.l
+            c_old = self.c
+            self.l = max(l_old, l, pt)
+            if self.l == l_old and self.l == l:
+                self.c = max(c_old, c) + 1
+            elif self.l == l_old:
+                self.c = c_old + 1
+            elif self.l == l:
+                self.c = c + 1
+            else:
+                self.c = 0
+
+    def snapshot(self) -> tuple[int, int, str]:
+        """Read the current (l, c, node_id) without advancing. Useful
+        for diagnostics and for tests that want to assert ratchet
+        progress without injecting an event."""
+        with self._lock:
+            return (self.l, self.c, self.node_id)

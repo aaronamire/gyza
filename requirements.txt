@@ -15,3 +15,11 @@ aioquic
 pytest-asyncio
 zeroconf
 pysyncobj
+
+# Phase 3 — global federation. The Go daemon is built separately
+# (see netd/); these are the Python-side gRPC + observability deps.
+grpcio
+grpcio-tools
+protobuf
+prometheus_client
+structlog

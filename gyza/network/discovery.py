@@ -144,17 +144,22 @@ class GyzaDiscovery:
         transport: GyzaTransport,
         auto_connect: bool = True,
         announce_interval_s: float = 60.0,
+        manual_peers: list[str] | None = None,
     ):
         self.identity = identity
         self._transport = transport
         self._auto_connect = auto_connect
         self._announce_interval_s = announce_interval_s
+        # Static fallback list for networks where mDNS multicast is blocked
+        # (corporate WiFi, some VPNs). Format: ["ip:port", ...].
+        self._manual_peers: list[str] = list(manual_peers or [])
 
         self._service_name = f"gyza-{identity.pubkey_hex[:16]}.{SERVICE_TYPE}"
         self._zc: AsyncZeroconf | None = None
         self._service_info: AsyncServiceInfo | None = None
         self._browser: AsyncServiceBrowser | None = None
         self._reannounce_task: asyncio.Task | None = None
+        self._manual_dial_task: asyncio.Task | None = None
         self._known: dict[str, DiscoveredPeer] = {}
         self._connect_lock = asyncio.Lock()
         self._loop: asyncio.AbstractEventLoop | None = None
@@ -174,6 +179,8 @@ class GyzaDiscovery:
             self._zc.zeroconf, SERVICE_TYPE, listener=listener,
         )
         self._reannounce_task = asyncio.create_task(self._reannounce_loop())
+        if self._manual_peers and self._auto_connect:
+            self._manual_dial_task = asyncio.create_task(self._manual_dial_loop())
         LOG.info(
             "[discovery] announcing on LAN as %s...", self.identity.pubkey_hex[:8],
         )
@@ -186,6 +193,14 @@ class GyzaDiscovery:
             except (asyncio.CancelledError, Exception):
                 pass
             self._reannounce_task = None
+
+        if self._manual_dial_task is not None:
+            self._manual_dial_task.cancel()
+            try:
+                await self._manual_dial_task
+            except (asyncio.CancelledError, Exception):
+                pass
+            self._manual_dial_task = None
 
         if self._browser is not None:
             try:
@@ -333,6 +348,38 @@ class GyzaDiscovery:
             if pubkey[:16] == prefix:
                 peer.last_seen_ns = 0  # force-evict from live_peers
                 LOG.info("[discovery] peer %s... left the network", pubkey[:8])
+                return
+
+    async def _manual_dial_loop(self) -> None:
+        """Dial each manually-configured peer until either the transport
+        reports it connected or the discovery shuts down.
+
+        We don't know the peer's pubkey ahead of time — only its
+        addr — so we can't dedupe via `transport.is_connected(pubkey)`.
+        Instead we ask connect() each round; the transport's auth
+        handshake returns the existing PeerConnection if there's already
+        one for that addr's compositor. Retries every 5 s for the first
+        minute, then every 30 s.
+        """
+        attempts = 0
+        while True:
+            attempts += 1
+            for spec in self._manual_peers:
+                try:
+                    host, port_s = spec.rsplit(":", 1)
+                    port = int(port_s)
+                except (ValueError, AttributeError):
+                    LOG.warning("[discovery] bad manual peer spec %r", spec)
+                    continue
+                try:
+                    await self._transport.connect((host, port), timeout_s=5.0)
+                except Exception as e:  # noqa: BLE001
+                    LOG.debug(
+                        "[discovery] manual dial %s:%d failed: %s", host, port, e,
+                    )
+            try:
+                await asyncio.sleep(5.0 if attempts < 12 else 30.0)
+            except asyncio.CancelledError:
                 return
 
     async def _reannounce_loop(self) -> None:

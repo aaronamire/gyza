@@ -210,9 +210,15 @@ def test_runner_completes_multiple_items(tmp_path, bb, compositor):
     runner, ident, mem, spec = _make_runner(
         tmp_path, bb, compositor, target_emb, "solo",
     )
+    # After the first completion an episode exists, so the next item's
+    # build_enriched_prompt → retrieve_similar will trigger SentenceTransformer
+    # cold-load (~17s on first use). Warm it on the test thread so the
+    # runner's deadline only times the runner work itself.
+    from gyza import memory as _memmod
+    _memmod._embed(["warmup"])
     runner.start()
 
-    deadline = time.monotonic() + 15.0
+    deadline = time.monotonic() + 30.0
     while time.monotonic() < deadline:
         items = bb.get_by_lineage(intent_id)
         if all(i.completed_at_ns is not None for i in items):

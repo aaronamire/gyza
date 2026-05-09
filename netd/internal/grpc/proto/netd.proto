@@ -1,0 +1,470 @@
+syntax = "proto3";
+package netd;
+option go_package = "gyza/netd/internal/grpc/proto";
+
+// =============================================================================
+// NodeService — local node identity & status
+// =============================================================================
+service NodeService {
+  rpc GetNodeInfo(Empty) returns (NodeInfo);
+  rpc GetStatus(Empty) returns (NodeStatus);
+}
+
+message NodeInfo {
+  string peer_id = 1;            // libp2p PeerID (base58)
+  string compositor_pubkey = 2;  // Ed25519 pubkey hex
+  repeated string listen_addrs = 3;  // multiaddrs
+  string gyza_version = 4;
+}
+
+message NodeStatus {
+  int32 connected_peers = 1;
+  int32 dht_routing_table_size = 2;
+  bool nat_traversal_available = 3;
+  string observed_addr = 4;      // our external IP as seen by peers
+  int64 uptime_seconds = 5;
+}
+
+// =============================================================================
+// DiscoveryService — find agents by capability
+// =============================================================================
+service DiscoveryService {
+  rpc PublishAgent(AgentAdvertisement) returns (PublishResult);
+  rpc FindAgents(AgentQuery) returns (stream AgentAdvertisement);
+  rpc UnpublishAgent(UnpublishRequest) returns (Empty);
+}
+
+message AgentAdvertisement {
+  string agent_pubkey = 1;
+  string compositor_pubkey = 2;
+  string capability_manifest_hash = 3;
+  bytes  specialization_embedding = 4;  // float32[384] little-endian
+  int64  lsh_bucket = 5;                // uint64 packed as int64 (big-endian bit order)
+  int32  attestation_tier = 6;
+  double reputation_score = 7;
+  int64  compute_credit_balance = 8;
+  int64  last_seen = 9;
+  int32  ttl_seconds = 10;
+  string gyza_version = 11;
+  // Multiaddrs at which this advertisement's compositor can be reached.
+  repeated string multiaddrs = 12;
+}
+
+message AgentQuery {
+  bytes  query_embedding = 1;  // float32[384] little-endian
+  int32  k = 2;
+  int32  min_tier = 3;
+  double min_reputation = 4;
+}
+
+message PublishResult {
+  bool success = 1;
+  string dht_key = 2;
+  string error = 3;
+}
+
+message UnpublishRequest {
+  string agent_pubkey = 1;
+  string compositor_pubkey = 2;
+  string signature = 3;  // sign over agent_pubkey ∥ timestamp
+}
+
+// =============================================================================
+// PeerService — direct peer connections
+// =============================================================================
+service PeerService {
+  rpc Connect(ConnectRequest) returns (ConnectResult);
+  rpc Disconnect(DisconnectRequest) returns (Empty);
+  rpc ListPeers(Empty) returns (PeerList);
+  rpc GetPeerInfo(PeerInfoRequest) returns (PeerInfo);
+}
+
+message ConnectRequest {
+  string multiaddr = 1;        // "/ip4/1.2.3.4/udp/7749/quic-v1"
+  string expected_pubkey = 2;  // optional: verify identity
+}
+
+message ConnectResult {
+  bool success = 1;
+  string peer_id = 2;
+  string verified_pubkey = 3;
+  string error = 4;
+}
+
+message PeerInfo {
+  string peer_id = 1;
+  string compositor_pubkey = 2;
+  string multiaddr = 3;
+  int32  attestation_tier = 4;
+  int64  connected_at = 5;
+  int64  last_seen = 6;
+  int64  messages_sent = 7;
+  int64  messages_received = 8;
+}
+
+message PeerList {
+  repeated PeerInfo peers = 1;
+}
+
+message DisconnectRequest { string peer_id = 1; }
+message PeerInfoRequest   { string peer_id = 1; }
+
+// =============================================================================
+// MessageService — send arbitrary messages to peers
+// =============================================================================
+service MessageService {
+  rpc Send(SendRequest) returns (SendResult);
+  rpc Broadcast(BroadcastRequest) returns (BroadcastResult);
+  rpc Subscribe(SubscribeRequest) returns (stream IncomingMessage);
+}
+
+message SendRequest {
+  string peer_id = 1;
+  string message_type = 2;
+  bytes  payload = 3;
+}
+
+message BroadcastRequest {
+  string message_type = 1;
+  bytes  payload = 2;
+  repeated string exclude_peer_ids = 3;
+}
+
+message IncomingMessage {
+  string sender_peer_id = 1;
+  string sender_pubkey = 2;
+  string message_type = 3;
+  bytes  payload = 4;
+  int64  timestamp_ns = 5;
+}
+
+message SendResult      { bool success = 1; string error = 2; }
+message BroadcastResult { int32 delivered_count = 1; }
+message SubscribeRequest { repeated string message_types = 1; }
+
+// =============================================================================
+// DHTService — direct DHT operations
+// =============================================================================
+service DHTService {
+  rpc Put(DHTRecord) returns (DHTResult);
+  rpc Get(DHTKey) returns (DHTRecord);
+  rpc Delete(DHTKey) returns (DHTResult);
+}
+
+message DHTRecord { string key = 1; bytes value = 2; int64 ttl_seconds = 3; }
+message DHTKey    { string key = 1; }
+message DHTResult { bool success = 1; string error = 2; }
+
+message Empty {}
+
+// =============================================================================
+// GossipService — cross-cluster blackboard delta sync via libp2p
+// gossipsub. Each project has its own topic
+// /gyza/project/{project_id}/blackboard. Deltas are signed at two
+// layers: libp2p pubsub envelope (StrictSignatureVerification) and
+// an app-layer Ed25519 signature over BLAKE3(delta_with_sig_zeroed).
+//
+// SubscribeDeltas is server-streaming; the daemon pushes deltas to
+// every subscriber as they arrive on the project's topic. Multiple
+// Python clients on one daemon can subscribe simultaneously without
+// stepping on each other — the daemon fans out internally.
+// =============================================================================
+service GossipService {
+  rpc JoinProject(JoinProjectRequest) returns (JoinProjectResult);
+  rpc LeaveProject(LeaveProjectRequest) returns (Empty);
+  rpc PublishDelta(PublishDeltaRequest) returns (PublishDeltaResult);
+  rpc SubscribeDeltas(SubscribeDeltasRequest) returns (stream BlackboardDelta);
+  rpc ListProjects(Empty) returns (ProjectList);
+}
+
+message JoinProjectRequest {
+  string project_id = 1;
+}
+
+message JoinProjectResult {
+  bool   success = 1;
+  string topic = 2;
+  int32  mesh_peers = 3;
+  string error = 4;
+}
+
+message LeaveProjectRequest {
+  string project_id = 1;
+}
+
+message PublishDeltaRequest {
+  // The daemon owns sender_compositor_pubkey, sender_seq, timestamp_ns,
+  // and app_signature — they're populated server-side from the loaded
+  // identity and the per-project sequence counter. Caller fills in the
+  // payload (new_intents, new_items, claim_updates, completions) and
+  // the project_id.
+  BlackboardDelta delta = 1;
+}
+
+message PublishDeltaResult {
+  bool   success = 1;
+  string error = 2;
+  // sender_seq stamped onto the published delta; lets the caller correlate
+  // its publish with what subscribers will see.
+  int64  sender_seq = 3;
+}
+
+message SubscribeDeltasRequest {
+  // Optional whitelist; if empty, the subscriber receives deltas for
+  // every project the daemon is currently joined to.
+  repeated string project_ids = 1;
+}
+
+message ProjectList {
+  repeated string project_ids = 1;
+}
+
+// BlackboardDelta is the unit of cross-cluster sync. A single delta
+// can carry multiple new intents, new work items, claim updates, and
+// completions atomically (all applied or all rejected on signature
+// failure).
+//
+// IMPORTANT: receiver must apply new_intents BEFORE new_items so the
+// FK from work_items.lineage_root → human_intents.intent_id is
+// satisfied. Within a delta, intent and work-item additions are
+// effectively a single transaction.
+message BlackboardDelta {
+  string project_id = 1;
+  string sender_compositor_pubkey = 2;  // Ed25519 hex
+  int64  sender_seq = 3;                // monotonic per (sender, project)
+  int64  timestamp_ns = 4;              // wall clock at publish
+
+  repeated IntentRecord     new_intents     = 5;
+  repeated WorkItemRecord   new_items       = 6;
+  repeated ClaimUpdate      claim_updates   = 7;
+  repeated CompletionRecord completions     = 8;
+
+  // Ed25519 signature by the sender's compositor key over
+  // BLAKE3(serialize(delta_with_app_signature_field_zeroed)).
+  // Zero-length on outgoing PublishDeltaRequest — daemon fills in.
+  bytes  app_signature = 9;
+}
+
+message IntentRecord {
+  string intent_id = 1;
+  string goal_spec_json = 2;
+  int64  created_at_ns = 3;
+}
+
+message WorkItemRecord {
+  string id = 1;
+  string lineage_root = 2;
+  string parent_id = 3;     // empty string == NULL
+  string description = 4;
+  bytes  desc_embedding = 5;  // float32[384] little-endian
+  double reward = 6;
+  int64  reward_updated_ns = 7;
+  int32  required_tier = 8;
+  string input_hashes_json = 9;  // JSON array of hashes
+  string output_spec_json = 10;
+  bool   streaming_ok = 11;
+  int64  created_at_ns = 12;
+  int64  ttl_ns = 13;
+}
+
+message ClaimUpdate {
+  string work_item_id = 1;
+  string agent_pubkey = 2;
+  string compositor_pubkey = 3;
+  int64  hlc_l = 4;
+  int64  hlc_c = 5;
+  string hlc_node = 6;
+}
+
+message CompletionRecord {
+  string work_item_id = 1;
+  string output_hash = 2;
+  string icp_envelope_hash = 3;
+  bool   success = 4;
+  int64  completed_at_ns = 5;
+  string completed_by_compositor_pubkey = 6;
+}
+
+// =============================================================================
+// CapabilityService — proof-of-capability sybil resistance.
+//
+// A new node that wants Tier-3 DHT visibility must demonstrate it can
+// actually execute agent tasks. It collects a signed AttestationCert
+// from ≥2 of 3 existing Tier-3 validators by:
+//
+//   1. Each validator issues a Challenge (random task IDs from the
+//      canonical eval suite, signed nonce, expiry).
+//   2. The applicant executes the tasks locally and returns
+//      ChallengeResponse with per-task ICP envelopes (proof of
+//      execution by the claimed agent).
+//   3. Each validator verifies the response and co-signs an
+//      AttestationBody.
+//   4. The applicant assembles AttestationCert from ≥2 cosignatures
+//      and publishes it to the DHT at /gyza/attestations/{pubkey}.
+//
+// Other nodes that see Tier-3 advertisements check the cert via
+// VerifyAttestation before trusting routing/work-claim signals from
+// the advertiser.
+//
+// All sign/verify steps use proto.MarshalOptions{Deterministic: true}
+// over the *Body message so cross-runtime reproduction is exact.
+// =============================================================================
+service CapabilityService {
+  rpc IssueChallenge(IssueChallengeRequest) returns (Challenge);
+  rpc VerifyResponse(VerifyResponseRequest) returns (VerifyResponseResult);
+  rpc PublishAttestation(AttestationCert) returns (PublishAttestationResult);
+  rpc FetchAttestation(FetchAttestationRequest) returns (AttestationCert);
+  rpc VerifyAttestation(AttestationCert) returns (VerifyAttestationResult);
+}
+
+// ChallengeBody is the part the validator signs. Wrapping it inside
+// Challenge keeps signature handling unambiguous: the canonical bytes
+// for signing are the deterministic-protobuf marshal of `body`.
+message ChallengeBody {
+  string challenger_pubkey = 1;          // Ed25519 hex of issuer
+  string applicant_pubkey  = 2;          // Ed25519 hex of intended applicant
+  repeated string task_ids = 3;          // referencing the canonical eval suite
+  bytes  nonce             = 4;          // 32 random bytes — replay protection
+  int64  issued_at_ns      = 5;
+  int64  expires_at_ns     = 6;          // typically issued_at + 5 min
+}
+
+message Challenge {
+  ChallengeBody body                = 1;
+  bytes         challenger_signature = 2; // Ed25519 over Marshal(body)
+}
+
+// ResponseBody likewise — the applicant signs the body, which carries
+// the per-task results.
+message ResponseBody {
+  string applicant_pubkey  = 1;
+  string challenger_pubkey = 2;          // echoed for binding
+  bytes  nonce             = 3;          // echoed from Challenge
+  repeated TaskResult task_results = 4;
+  int64  completed_at_ns   = 5;
+}
+
+message ChallengeResponse {
+  ResponseBody body                = 1;
+  bytes        applicant_signature = 2;  // Ed25519 over Marshal(body)
+}
+
+// TaskResult carries the ICP envelope as the bytes Python actually
+// signed (canonical JSON minus the signature field) plus the
+// signature and signing pubkey. Go verifies via:
+//
+//	ed25519.Verify(decode(icp_agent_pubkey_hex), blake3(icp_payload_bytes),
+//	               decode(icp_signature_hex))
+//
+// without needing to parse JSON or replicate Python's canonical-JSON
+// rules. Cross-language verification stays a single ed25519 + blake3
+// call away.
+message TaskResult {
+  string task_id              = 1;
+  bytes  output_json          = 2;       // task-specific output payload
+  bytes  icp_payload_bytes    = 3;       // exactly what Python signed
+  string icp_signature_hex    = 4;
+  string icp_agent_pubkey_hex = 5;
+  int64  duration_ms          = 6;
+}
+
+// AttestationBody is the canonical, per-applicant record validators
+// sign. Each cosignature in AttestationCert is over deterministic
+// Marshal(AttestationBody).
+message AttestationBody {
+  string applicant_pubkey = 1;           // hex
+  int64  issued_at_ns     = 2;
+  int64  expires_at_ns    = 3;           // typically issued + 30 days
+  int32  tier_granted     = 4;           // = 3
+  repeated string challenge_task_ids = 5;
+}
+
+message CoSignature {
+  string validator_pubkey = 1;           // Ed25519 hex
+  bytes  signature        = 2;           // Ed25519 over Marshal(body)
+  int64  signed_at_ns     = 3;
+}
+
+message AttestationCert {
+  AttestationBody body                = 1;
+  repeated CoSignature co_signatures  = 2;
+}
+
+message IssueChallengeRequest {
+  string applicant_pubkey  = 1;
+  // Optional task_id override — if empty the daemon picks a random
+  // subset from its canonical eval suite. The override exists so the
+  // unit test path can use deterministic task IDs without depending
+  // on RNG seeding.
+  repeated string task_ids = 2;
+  // Optional explicit expiry override; default 5 min.
+  int64  ttl_seconds       = 3;
+}
+
+message VerifyResponseRequest {
+  Challenge          challenge = 1;
+  ChallengeResponse  response  = 2;
+}
+
+message VerifyResponseResult {
+  bool        success       = 1;
+  string      error         = 2;
+  CoSignature co_signature  = 3;          // present iff success
+}
+
+message PublishAttestationResult {
+  bool   success = 1;
+  string dht_key = 2;
+  string error   = 3;
+}
+
+message FetchAttestationRequest { string applicant_pubkey = 1; }
+
+message VerifyAttestationResult {
+  bool   valid          = 1;
+  int32  cosig_count    = 2;
+  string reason         = 3;              // failure detail; empty on valid
+}
+
+// =============================================================================
+// AgentBucket — internal record format stored in the DHT under
+// /gyza/agents/{bucket_hex}. A single bucket holds every advertisement
+// whose LSH bucket id equals the key. Concurrent publishers to the
+// same bucket race; the validator picks the most recently updated
+// bucket (LWW on bucket-level), so each publisher's read-modify-write
+// cycle wants to be short. See internal/dht for details.
+// =============================================================================
+message AgentBucket {
+  uint64 lsh_bucket = 1;
+  repeated AgentAdvertisement advertisements = 2;
+  int64  last_updated_ns = 3;
+}
+
+// =============================================================================
+// RelayList — internal record format stored in the DHT under
+// /gyza/relays. Lists peers that opt-in to providing libp2p circuit-relay
+// service for NATed nodes. Same LWW-by-last_updated_ns semantics as
+// AgentBucket: each relay re-publishes the merged list periodically,
+// the validator picks the freshest version.
+// =============================================================================
+message RelayList {
+  repeated RelayEntry entries = 1;
+  int64 last_updated_ns = 2;
+}
+
+message RelayEntry {
+  // libp2p PeerID (base58). Stable across relay restarts because it's
+  // derived from the relay's compositor key.
+  string peer_id = 1;
+  // Multiaddrs the relay is reachable at (e.g. /ip4/.../udp/.../quic-v1).
+  // Excludes /p2p-circuit suffixes — relays cannot themselves be reached
+  // through circuit, by definition.
+  repeated string multiaddrs = 2;
+  // ns since epoch — when this relay last re-advertised. Stale entries
+  // (last_seen + ttl < now) are dropped on read.
+  int64 last_seen = 3;
+  // Ed25519 hex pubkey of the operator's compositor — lets a client
+  // cross-check that a discovered relay is run by a known compositor
+  // and skip ones from compositors with poor reputation.
+  string compositor_pubkey = 4;
+}

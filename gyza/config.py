@@ -31,12 +31,33 @@ class GyzaConfig:
     drift_rate: float = 0.03
     lsh_planes: int = 64
     inflation_halflife_s: float = 30.0
+    # Phase-2 networking.
+    quic_port: int = 7749
+    artifact_port: int = 7750
+    raft_port: int = 8749
+    manual_peers: list[str] = field(default_factory=list)
+    max_artifact_store_gb: float = 10.0
+    # Phase-3 networking — gyza-netd lifecycle and global participation.
+    netd_socket_path: str = "~/.gyza/netd.sock"
+    netd_binary_path: str = "~/dev/gyza/netd/bin/gyza-netd"
+    netd_listen_port: int = 7749
+    netd_bootstrap_peers: list[str] = field(default_factory=list)
+    netd_ledger_db_path: str = "~/.gyza/ledger.db"
+    enable_relay: bool = False
+    attestation_tier: int = 1
+    # Above this debt level, the runner refuses additional remote work for
+    # the offending peer until reconciliation/settlement clears the gap.
+    # Pure local guidance — peers compute their own thresholds.
+    max_compute_debt_credits: float = 100.0
 
     def resolved_paths(self) -> dict[str, str]:
         return {
             "blackboard_db_path": _resolve(self.blackboard_db_path),
             "memory_db_path": _resolve(self.memory_db_path),
             "compositor_key_path": _resolve(self.compositor_key_path),
+            "netd_socket_path": _resolve(self.netd_socket_path),
+            "netd_binary_path": _resolve(self.netd_binary_path),
+            "netd_ledger_db_path": _resolve(self.netd_ledger_db_path),
         }
 
 

@@ -25,16 +25,50 @@ import blake3
 LOG = logging.getLogger("gyza.artifact_store")
 
 
+class ArtifactStoreFull(Exception):
+    """Raised by ArtifactStore.store() when adding `data` would push the
+    on-disk total past `max_bytes`. Callers should treat this like ENOSPC:
+    the artifact never lands and the error must surface (not be swallowed
+    inside a best-effort write path), or downstream chain verification
+    will fail with a missing-input."""
+
+
 class ArtifactStore:
-    def __init__(self, base_path: str = "~/.gyza/artifacts"):
+    def __init__(
+        self,
+        base_path: str = "~/.gyza/artifacts",
+        max_bytes: int | None = None,
+    ):
         self.base_path = Path(os.path.expanduser(base_path))
         self.base_path.mkdir(parents=True, exist_ok=True)
+        self.max_bytes = max_bytes  # None = unlimited
+        self._warned_at_80pct = False
 
     def store(self, data: bytes) -> str:
         h = blake3.blake3(data).hexdigest()
         path = self._path(h)
         if path.exists():
             return h
+        # Capacity check — only on bytes that would actually land. We
+        # already filter out duplicates above so an idempotent store of
+        # a known artifact can't push us over budget.
+        if self.max_bytes is not None:
+            current = self.total_size_bytes()
+            projected = current + len(data)
+            if projected > self.max_bytes:
+                raise ArtifactStoreFull(
+                    f"artifact store full: {current}+{len(data)} > "
+                    f"{self.max_bytes} bytes ({self.base_path})"
+                )
+            if (
+                not self._warned_at_80pct
+                and projected >= int(self.max_bytes * 0.8)
+            ):
+                LOG.warning(
+                    "[artifact_store] %s at 80%% capacity (%d/%d bytes)",
+                    self.base_path, projected, self.max_bytes,
+                )
+                self._warned_at_80pct = True
         path.parent.mkdir(parents=True, exist_ok=True)
         # Tmp name carries the PID so two processes writing the same
         # content at once don't trip over each other's tmp file.
@@ -92,4 +126,4 @@ class ArtifactStore:
         return self.base_path / hash_hex[:2] / hash_hex
 
 
-__all__ = ["ArtifactStore"]
+__all__ = ["ArtifactStore", "ArtifactStoreFull"]

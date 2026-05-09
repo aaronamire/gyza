@@ -174,6 +174,18 @@ class LocalCompositor:
     def pubkey_hex(self) -> str:
         return self._comp_pk_bytes.hex()
 
+    def sign(self, data: bytes) -> str:
+        """
+        Sign arbitrary bytes with the compositor's Ed25519 private key.
+        Returns the 64-byte signature as a hex string.
+
+        Public surface for callers like the compute-credit ledger that
+        need to bind cryptographic statements to the local node's
+        compositor identity. ICP envelope signing has its own dedicated
+        path (`get_icp_signer`); this one is for everything else.
+        """
+        return self._comp_sk.sign(data).hex()
+
     def _compute_model_hash(self, model_path: str) -> str:
         p = _resolve(model_path)
         if p.is_file():
