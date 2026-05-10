@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"gyza/netd/internal/capability"
+	"gyza/netd/internal/capability_stream"
 	"gyza/netd/internal/dht"
 	"gyza/netd/internal/discovery"
 	"gyza/netd/internal/gossip"
@@ -211,6 +212,30 @@ func main() {
 	// surface backed by the compositor identity; no init cost.
 	capMgr := capability.NewChallengeManager(id.PubKeyHex, id)
 	logger.Info("[capability] challenge manager ready")
+
+	// Capability stream protocol — registers
+	// /gyza/capability-challenge/1.0.0 so peers can drive the
+	// proof-of-capability flow over libp2p. The validator side runs
+	// automatically (handler issues challenges to dialing applicants);
+	// the applicant side is invoked via Manager.RequestAttestation when
+	// the orchestrator picks this node as one to ask. ``TaskIDs`` here
+	// is the canonical eval suite v1; mismatch with the applicant's
+	// supported set surfaces as an "unknown task" rejection in
+	// VerifyResponse.
+	capStreamMgr, err := capability_stream.NewManager(h, capability_stream.Config{
+		CapabilityManager: capMgr,
+		TaskIDs: []string{
+			"count_py_files", "list_extensions", "first_line_of_data",
+			"filename_lengths", "sum_numbers", "echo_nonce",
+		},
+		Logf: logger.Info,
+	})
+	if err != nil {
+		logger.Fatal("[capability_stream] init: %v", err)
+	}
+	defer func() { _ = capStreamMgr.Close() }()
+	logger.Info("[capability_stream] stream protocol %s registered",
+		capability_stream.ProtocolID)
 
 	// Point-to-point message manager. Registers a libp2p stream
 	// handler at /gyza/message/1.0.0 immediately; subscriber fan-out

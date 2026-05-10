@@ -1,11 +1,17 @@
 # CLAUDE.md — Gyza session continuation guide
 
 > **Audience:** A future Claude session continuing work on this repo.
-> Last updated at the end of Phase 3 Session 9 (observability +
-> bilateral reconciliation; #25 and #26 from the prior priority list
-> closed). Read top to bottom on session start, then keep open as a
-> reference. Everything in here is grounded in code that's been read,
-> not in spec aspirations.
+> Last updated at the end of Phase 3 Session 12 (libp2p stream protocol
+> for cross-network capability attestation —
+> `/gyza/capability-challenge/1.0.0` — wired into the daemon). Session
+> 11 shipped the algorithmic core of #21 (eval suite + Tier-1
+> self-attest + in-process orchestration); Session 12 ships #21c (the
+> wire layer). What remains in #21 is the Python applicant adapter
+> (gRPC method that drives the libp2p initiator with a Python eval
+> upcall), #21d (DHT-driven validator selection), and #21e (DHT cert
+> publication + `gyza global attest --tier 3` CLI). Read top to bottom
+> on session start, then keep open as a reference. Everything in here
+> is grounded in code that's been read, not in spec aspirations.
 
 ---
 
@@ -53,10 +59,14 @@ marshal venv.
 
 That `-k` filter excludes the four heavy integration suites that spawn
 real `gyza-netd` daemons. Run those when you're touching daemon code or
-near a session-end checkpoint. The fast slice itself grew with Session
-9: `tests/test_reconciliation.py` adds ~2:30 of intentional timing
-work (page timeouts, cursor-monotonicity sleeps), which is what pushed
-the slice from 5–7 min to 8–10 min.
+near a session-end checkpoint. The Python fast slice runs ~457 tests
+in 8–10 min (Session 9 added timing-sensitive reconciliation tests;
+Session 10 added 18 sandbox tests that each spawn a real bwrap
+subprocess; Session 11 added 22 capability-eval tests + 15
+attestation-protocol tests, each of which drives a real AgentRunner
+through the eval suite). The Go test suite (~5s, ``go test ./...``)
+grew by 5 in Session 12 with the capability_stream package — each
+test spawns two real libp2p hosts on loopback.
 
 ### Heavy integration tests (~10–15 minutes total)
 
@@ -204,8 +214,15 @@ integration coverage.
 │   ├── embeddings.py     # Embedder Protocol + ST + Stub backends — single source of truth for "embed text"
 │   ├── supervisor.py     # AgentSupervisor (poll oracle → spawn via factory)
 │   ├── observability.py  # Prometheus counters/histograms/gauges + structlog config (Session 9)
+│   ├── capability_eval.py # Session 11 — canonical eval suite + run_eval_locally + verify_eval_results
 │   ├── cli.py            # gyza CLI (init/demo/status/global/credits/metrics/etc)
 │   ├── config.py         # GyzaConfig dataclass + load_config()
+│   ├── sandbox/          # Session 10 — executor sandboxing
+│   │   ├── config.py         # SandboxConfig + _system_mounts()
+│   │   ├── runner.py         # run_sandboxed() — bwrap argv builder + framing
+│   │   ├── _entrypoint.py    # in-sandbox bootstrap (length-prefixed JSON)
+│   │   ├── executor.py       # make_sandboxed_executor + presets
+│   │   └── _probes.py        # importable probe executors for tests
 │   ├── economy/
 │   │   ├── ledger.py     # bilateral compute-credit ledger + reconcile_with_peer
 │   │   ├── settlement.py # earner_signed ⇄ payer_cosigned + reconcile.{request,response} protocol
@@ -218,6 +235,9 @@ integration coverage.
 │       ├── network_blackboard.py # Raft + gossip-attached blackboard
 │       ├── netd_client.py        # Python NetdClient + GossipClient + CapabilityClient
 │       ├── peer_registry.py      # compositor↔peer_id cache w/ rate-limited refresh
+│       ├── peer_cache.py         # Session 10 — JSON-persisted (pubkey, multiaddr) for redial after restart
+│       ├── daemon_supervisor.py  # Session 10 — heartbeat/respawn watcher around gyza-netd
+│       ├── capability_protocol.py # Session 11 — Validator/Applicant roles + run_attestation orchestrator + verify_attestation_cert
 │       ├── global_cluster.py     # Phase 3 orchestrator (publish_agents, find_and_collaborate, settle, hooks)
 │       ├── artifact_*.py         # content-addressed file store, server, client
 │       └── trust_registry.py     # pinned compositors + cached manifests (Phase 2)
@@ -232,10 +252,11 @@ integration coverage.
 │       ├── nat/                  # DCUtR + AutoRelay
 │       ├── gossip/               # gossipsub + signed deltas
 │       ├── message/              # /gyza/message/1.0.0 stream (varint frames)
-│       ├── capability/           # challenge protocol (issuance + verify)
+│       ├── capability/           # challenge protocol (issuance + verify, in-process)
+│       ├── capability_stream/    # Session 12 — libp2p `/gyza/capability-challenge/1.0.0` (3-frame proto exchange)
 │       └── grpc/                 # gRPC server + proto definitions
 │
-├── tests/                # pytest, all green (373 fast + 7 integration as of Session 9)
+├── tests/                # pytest, all green (457 fast + 7 integration as of Session 12)
 ├── demo/
 │   ├── single_machine_global.py  # Phase 3 integration sim — RUN THIS to verify
 │   ├── single_machine_phase2.py  # Phase 2 sim
@@ -309,14 +330,454 @@ Both reputation stores now reflect the successful interaction.
 
 ## 5. What was done in recent sessions
 
-Read in chronological order — Session 9 is the most recent. The
-patterns it introduced (fail-closed observability wrappers, lex-cursor
-pagination, request/response correlation) are the freshest reference
-templates for items still on §6's list.
+Sections newest-first. Session 12 is the most recent. The patterns
+introduced in Sessions 9–12 (fail-closed observability wrappers,
+lex-cursor pagination, request/response correlation, length-prefixed
+JSON over subprocess pipes, atomic JSON persistence, applicant-proposed
+canonical-bytes-for-quorum-cosignatures, libp2p stream protocols
+mirroring `/gyza/message/1.0.0`'s varint-frame pattern) are the
+freshest reference templates for items still on §6's list.
 
 ---
 
-## 5a. Session 9 — observability + bilateral reconciliation
+## 5a. Session 12 — libp2p stream protocol for cross-network attestation
+
+Closed §6 #21c — the wire layer that lets two daemons run the
+proof-of-capability flow over libp2p. New package:
+``netd/internal/capability_stream/`` with the protocol handler at
+``/gyza/capability-challenge/1.0.0``. 5 Go tests. Daemon registers
+the protocol on startup. Cumulative tests after Session 12: 457
+Python (unchanged from Session 11) + 5 new Go.
+
+### Architecture-level decision settled
+
+Session 11 built a Python ``capability_protocol.py`` with
+JSON-canonicalized signatures. Session 12 found that the existing Go
+``netd/internal/capability/`` package was already complete (with
+ChallengeManager.IssueChallenge / VerifyResponse / AssembleAttestation
+/ VerifyAttestation, and full proto types in netd.proto) AND used
+``proto.MarshalOptions{Deterministic: true}`` for canonicalization.
+**The two canonicalizations produce different bytes** — a Go validator
+cosigning a body and a Python validator cosigning the same body do not
+produce signatures that aggregate into a single quorum.
+
+**Decision: Go protobuf + deterministic marshal is the canonical wire
+format for cross-network.** Python's ``capability_protocol.py`` from
+Session 11 stays as-is for IN-PROCESS Tier-1 self-attestation (its
+unit tests still pass and the `gyza global attest` CLI still works
+against it), but it is NOT the cross-network wire. A future Python
+applicant adapter consumes Go protobuf via Python's protobuf
+library, which produces byte-identical output to Go's deterministic
+marshal.
+
+### Wire protocol — 3 frames over `/gyza/capability-challenge/1.0.0`
+
+```
+→  Validator → Applicant : Challenge          (deterministic marshal of pb.Challenge)
+←  Applicant → Validator : ChallengeResponse  (deterministic marshal)
+→  Validator → Applicant : VerifyResponseResult
+```
+
+Each frame is ``[uvarint_len][marshaled_proto]``. Mirror of
+``/gyza/message/1.0.0``'s pattern in
+``netd/internal/message/message.go``.
+
+**No kickoff frame from the applicant.** The validator initiates by
+extracting the applicant's compositor pubkey from the libp2p
+``RemotePeer`` (Noise-authenticated, so the binding is load-bearing).
+Saves a round trip and avoids a redundant "applicant says hello"
+frame.
+
+**3-frame exchange, not 4.** Validator picks task_ids from its own
+canonical list (currently hardcoded to match
+``gyza/capability_eval.py``'s EVAL_TASKS); the applicant doesn't
+propose them. A future v2 protocol could let the applicant negotiate
+a subset, but for v1 the validator decides.
+
+**Per-stream deadline.** ``StreamTimeout = 120s``. Long enough for
+real-LLM eval execution (mock-eval ~50ms × 6 tasks ≈ 0.3s, but
+Anthropic-shaped 3-10s × 6 ≈ 18-60s) plus margin. ``StreamTimeout``
+applies to the WHOLE exchange — open + 3 frames + close — so a slow
+or malicious peer can't pin the host's goroutines.
+
+### Public API
+
+```go
+// Validator side: register handler on startup.
+mgr, err := capability_stream.NewManager(host, capability_stream.Config{
+    CapabilityManager: capMgr,            // *capability.ChallengeManager
+    TaskIDs:           canonicalTaskIDs,  // matches gyza/capability_eval.py
+    VerifyOut:         nil,                // permissive for now; Python upcall later
+    Logf:              logger.Info,
+})
+
+// Applicant side: drive the protocol against a peer.
+cosig, err := mgr.RequestAttestation(ctx, validatorPeerID, runEval)
+//   runEval is an EvalRunner callback that turns a Challenge into a
+//   ChallengeResponse. In Go tests it synthesizes ICP envelopes
+//   directly; in production the daemon wires it to a Python gRPC
+//   stream that runs the actual eval.
+```
+
+### Validator-side handler (handleIncoming)
+
+  1. Set 120s stream deadline.
+  2. Extract applicant pubkey from libp2p PeerID.
+  3. ``capMgr.IssueChallenge(applicantPubkey, taskIDs, ttl)``.
+  4. Write Challenge frame.
+  5. Read ChallengeResponse frame.
+  6. ``capMgr.VerifyResponse(challenge, response, verifyOut)``.
+  7. Write VerifyResponseResult — ``Success=true`` with cosig OR
+     ``Success=false`` with ``Error=<reason string>``.
+  8. Stream closes.
+
+Errors at steps 1, 2, 4, 5, or 7 close the stream silently (logged at
+INFO). Errors at step 6 are RECOVERABLE — they get wire-encoded as a
+structured ``VerifyResponseResult{Success=false}`` so the applicant
+can diagnose without needing a second protocol layer for error
+reporting.
+
+### Applicant-side initiator (RequestAttestation)
+
+  1. Open stream to ``target`` peer ID.
+  2. Read Challenge frame.
+  3. ``capMgr.VerifyChallenge(challenge)`` — sanity-verify BEFORE
+     running the eval. **Trip-wire:** the eval is the slow step;
+     don't burn applicant CPU on a malformed challenge.
+  4. Call ``runEval(challenge)`` callback. Returns
+     ChallengeResponse with ICP envelopes + applicant signature
+     already populated. The libp2p layer doesn't sign anything;
+     signing is the callback's job (typically a Python upcall).
+  5. Write ChallengeResponse frame.
+  6. Read VerifyResponseResult frame.
+  7. Return cosig on Success, error on rejection.
+
+### Tests (5)
+
+  * ``TestSuccessfulAttestationRoundTrip`` — happy path with two
+    real libp2p hosts on loopback.
+  * ``TestValidatorRejectsBadResponse`` — corrupted ICP signature
+    on a TaskResult; validator rejects via
+    ``VerifyResponseResult{Success=false}``; applicant surfaces as
+    ``"validator rejected: task X: ICP envelope signature mismatch"``.
+  * ``TestApplicantRejectsForgedChallenge`` — validator overrides
+    its own stream handler to emit a challenge with corrupted
+    ChallengerSignature; applicant rejects BEFORE running the eval
+    (assertion: eval callback was never invoked).
+  * ``TestEvalRunnerError`` — eval callback returns an error;
+    applicant returns the error and validator sees a clean
+    ``read length: EOF`` (no half-written frame, no protocol
+    pollution).
+  * ``TestSelfRequestRejected`` — ``RequestAttestation`` against
+    own peer ID is refused at the API level.
+
+### Daemon wiring
+
+``netd/cmd/gyza-netd/main.go`` constructs the Manager right after
+``capability.NewChallengeManager``. The hardcoded ``TaskIDs`` list
+matches ``gyza/capability_eval.py``'s ``EVAL_TASKS`` — drift between
+the two is silently a "missing task result" rejection at the
+validator. Keep them in sync; a future config-driven approach can
+read this from a shared source.
+
+### What §6 #21 still needs after this session
+
+Python side has zero awareness of the new protocol. The next session's
+work is the **Python applicant adapter**:
+
+  1. New gRPC method on the daemon: ``RequestAttestation(peer_id) →
+     AttestationCert``.
+  2. Python-side server-streaming or callback-style upcall mechanism
+     so the daemon can ask Python to run the eval (the daemon owns the
+     libp2p stream; Python owns the AgentRunner). The
+     ``EvalRunner`` callback shape is the contract.
+  3. Bridge ``run_attestation`` orchestrator from
+     ``gyza/network/capability_protocol.py`` to call the new gRPC
+     method instead of the in-process Validator role.
+
+After that: #21d (DHT-driven validator selection) and #21e (DHT
+publication + ``gyza global attest --tier 3`` CLI). Both are mechanical
+once the Python adapter exists.
+
+---
+
+## 5b. Session 11 — capability eval + cross-network attestation orchestration
+
+Closed the algorithmic core of §6 #21. Two distinct deliverables in
+sequence: the local eval primitive (Tier-1 self-attestation), then the
+cross-network protocol orchestration (in-process; libp2p layer
+deferred). Cumulative tests after Session 11: ~457 (was 420 at start of
+Session 11; +22 capability_eval + +15 capability_protocol).
+
+### #21a — Canonical eval suite + Tier-1 self-attestation — `gyza/capability_eval.py` + 22 tests
+
+**What "capability" actually means here.** The eval suite tests the
+machinery (LocalCompositor → AgentIdentity → AgentRunner → Blackboard →
+ICP signing → executor returning structured output), not LLM quality.
+Tasks are **structurally verifiable** — verifier parses output by
+shape, not by LLM-judging it. Each task carries a `setup`,
+`prompt_body`, `expected_output(workdir, nonce)`, `output_keys`
+(schema), and `timeout_s`. Six tasks ship in `EVAL_TASKS`:
+count_py_files, list_extensions, first_line_of_data, filename_lengths,
+sum_numbers, echo_nonce.
+
+**Replay + forgery defenses (eval level):**
+
+  * Each task's prompt embeds `[GYZA_EVAL_TASK={id} NONCE={nonce}]`.
+    The mock-eval executor uses `prompt.rfind("[GYZA_EVAL_TASK=")` —
+    NOT `find` — because `build_enriched_prompt` prepends few-shot
+    context from prior episodes, which contains earlier tasks'
+    markers verbatim. Scanning from the start would silently solve
+    the wrong task. **Trip-wire: episodes-as-few-shot leak earlier
+    task markers into the current prompt.**
+  * Each output is backed by an ICP envelope signed by the agent
+    identity. Verifier checks `envelope.agent_pubkey == applicant`
+    AND `BLAKE3({"text": canonical_text}) == envelope.output_hash`
+    AND output passes structural shape AND output equals
+    `task.expected_output(workdir, nonce)`. Forgery-protected at
+    every layer.
+
+**`run_eval_locally` driver.** Posts intent + work item per task,
+waits for runner to sign envelopes, captures outputs via a
+`make_recording_executor` wrapper. Per-task `workdir/<task_id>/` keeps
+fixtures isolated. **Trip-wire: WorkItem's `ttl_ns=0` makes
+`Blackboard.get_unclaimed`'s TTL filter immediately expire the item;
+set `ttl_ns = (timeout_s + 30) * 1e9`.**
+
+**`make_recording_executor` stores both `parsed` and `text`.** The
+runner hashes `{"text": result["text"]}` (see `runner.py::_execute`),
+so the verifier must reproduce that exact form to validate
+`output_hash`. But the verifier ALSO needs the parsed dict for shape
++ semantic checks. Capturing only one breaks the chain-of-evidence;
+capturing both keeps the independence between "this output hashes
+correctly" and "this output means what it claims."
+
+**`gyza global attest` CLI** went from stub → working Tier-1
+self-attestation. Builds an ephemeral runner under the user's
+compositor key, runs the suite, verifies, emits a JSON artifact at
+`~/.gyza/attestations/self-<nonce>.json` with the signed report.
+Tier-3 cross-network attestation still requires the libp2p layer.
+
+### #21b — Cross-network attestation protocol orchestration — `gyza/network/capability_protocol.py` + 15 tests
+
+**In-process for now.** Wire types are designed JSON-serializable so
+the future libp2p stream layer is a mechanical frame-and-ship. What
+this session builds: `Validator`, `Applicant`, `run_attestation`
+orchestrator, consumer-side `verify_attestation_cert`. The
+`/gyza/capability-challenge/1.0.0` libp2p protocol on the Go side is
+explicitly deferred.
+
+**Wire types:** `Challenge`, `ChallengeResponse`, `ChallengeOutcome`,
+`ValidatorCosig`, `AttestationCertPayload`, `AttestationCert`. All
+hex-string / int / list-of-those for clean JSON canonicalization.
+
+**Validator-chosen nonce — load-bearing.** Each validator picks its
+own nonce in the Challenge; the applicant runs the eval suite ONCE
+per validator (each with a different nonce). This blocks replay
+across validators — a malicious applicant who got one good response
+can't reuse it against a second validator. With mock executor at
+~1-10ms per task × 6 tasks × 3 validators ≈ 180ms, the cost is
+trivially affordable.
+
+**Applicant-proposed cert payload, validator-constrained — also
+load-bearing.** Every cosig must be over IDENTICAL canonical bytes
+or the quorum can't aggregate. The applicant proposes one
+`AttestationCertPayload` (timestamps, identity, eval version) and
+sends it inside every ChallengeResponse; each validator
+independently verifies (a) the eval results, (b) timestamps are
+within ±1h clock-skew window, (c) lifetime ≤ 90 days, (d) applicant
+pubkey matches, (e) schema string matches — and signs that exact
+payload. Orchestrator collects k-of-n cosigs.
+
+**`sign_fn` callable, NOT raw seed bytes — caught a real bug.**
+`LocalCompositor` HKDF-derives its compositor signing key from the
+master seed. Reading the master-seed file and using it directly to
+sign produces signatures under the WRONG key. The protocol layer
+accepts a `sign_fn: Callable[[bytes], str]` — production passes
+`LocalCompositor.sign`, tests pass `make_seed_signer(seed)` for
+synthetic identities without writing key files. **Trip-wire: never
+assume a key file's bytes ARE the signing seed; LocalCompositor's
+file is the master seed and the actual compositor key is HKDF-derived
+from it.**
+
+**Two pubkeys in the response — compositor binds the cert; agent
+verifies the envelopes.** ICP envelopes are signed by the AGENT
+identity (ephemeral, runner-bound). The cert binds at the
+COMPOSITOR (durable, DHT-indexed). So `ChallengeResponse` carries
+both `applicant_compositor_pubkey` and `applicant_agent_pubkey`;
+the eval verifier checks envelopes against the agent pubkey, the
+cert payload uses the compositor pubkey. The bridge "agent issued
+by compositor" is via the capability manifest — forwarding the
+manifest in the response and verifying that link is a documented
+follow-up.
+
+**Threat model defended:**
+
+  * Replay across validators       — validator-chosen nonce
+  * Eval result tampering          — eval verifier (gyza.capability_eval)
+  * Cosignature transplant         — each cosig binds to validator_pubkey
+                                     and is over canonical(payload)
+  * Applicant signature forgery    — verified at every Validator
+  * Stale cert acceptance          — payload carries expires_at_ns;
+                                     verify_attestation_cert checks
+  * Duplicate-cosig padding        — verifier dedups by validator_pubkey
+                                     (prevents single validator
+                                     forging pseudo-quorum)
+  * 1 malicious validator          — 2-of-3 quorum tolerates
+
+**Threat model NOT defended at this layer:**
+
+  * Sybil applicant + Sybil validators — needs DHT-driven random
+    selection of Tier-3 validators (orchestrator-layer concern,
+    out of scope here).
+  * >k/n malicious Tier-3 validators — fundamental quorum limit.
+  * Validator that's not actually Tier-3 — consumer-side
+    `verify_attestation_cert` should be paired with a DHT lookup
+    that confirms each `validator_pubkey` is itself Tier-3 attested.
+    That lookup is outside the pure verifier (requires IO).
+
+### What §6 #21 still needs
+
+  * **libp2p stream protocol** at `/gyza/capability-challenge/1.0.0`
+    on the Go side. The dataclasses are JSON-serializable, so this
+    is a mechanical varint-frame + protocol-handler addition. Mirror
+    the existing `/gyza/message/1.0.0` pattern.
+  * **DHT-driven validator selection.** `CapabilityClient` calls
+    `find_agents(min_tier=3, k=N)` and feeds the result into
+    `run_attestation` as the `validators` list.
+  * **DHT publication of the cert.** `cap.publish_attestation` already
+    exists on the daemon; just needs the cert proto-shape mapped from
+    our Python dataclass.
+  * **`gyza global attest --tier 3` CLI mode** that ties it together.
+
+These are all mechanical now that the algorithmic protocol is settled.
+
+---
+
+## 5c. Session 10 — peer cache, daemon supervisor, executor sandbox
+
+Two §6 priorities closed: #24 (peer cache + supervisor) and
+#22 (sandbox). Cumulative tests after Session 10: ~420 (was 373 at
+Session 10 start; +30 peer-cache/supervisor/integration; +18 sandbox).
+
+### #24 — Persistent peer cache + daemon supervisor — `gyza/network/peer_cache.py` + `daemon_supervisor.py` + 30 tests
+
+**PeerCache.** JSON-backed at `~/.gyza/peers.json` by default, atomic
+write via `tempfile + os.replace` in the same directory (rename atomicity
+requires same filesystem). Stores `(pubkey, multiaddr, last_seen_ns)`
+tuples; multiple multiaddrs per peer are supported. `all_addrs()` returns
+addresses ordered by `last_seen DESC` per pubkey, and
+`attempt_reconnect_all` tries each peer's newest address first, falling
+through on failure. **Counts are per-peer not per-multiaddr** — a peer
+reachable at two addresses counts once. A schema version mismatch on
+load preserves the old file untouched and starts empty.
+
+**DaemonSupervisor.** Heartbeat-driven watcher around gyza-netd. Polls
+`netd.is_running()` every 5s; after 3 consecutive failures, kills the
+zombie and respawns with backoff `1, 2, 4, 8, 16, 32, 60` seconds capped
+at the tail. The single `NetdClient` instance is reused across respawns
+(gRPC autoreconnects to the same Unix socket — callers don't need to
+care). Exposes `set_on_respawn(cb)` for the GlobalCluster to wire its
+recovery hooks. **Callback exceptions are caught and logged**, never
+trigger another respawn (would mask the underlying bug + cause storms).
+
+**GlobalCluster wiring.** Optional `peer_cache` + `supervisor` kwargs;
+mutually exclusive with `netd_client` (raises ValueError on misuse).
+`start()` calls `peer_cache.attempt_reconnect_all` BEFORE flipping
+`is_started=True` — settlement.send_message would otherwise race past
+the redial. `find_and_collaborate` writes back the verified pubkey
+(not the originally-advertised one) so DCUtR re-routes don't poison
+the redial set. `_on_daemon_respawn(netd)` callback redials the cache,
+re-publishes DHT ads, and rejoins active project gossip topics.
+
+**CLI.** `gyza global start --supervised` runs as a long-lived
+foreground supervisor (blocks until SIGINT). One-shot mode without the
+flag is preserved — the CLAUDE.md trip-wire about "don't auto-supervise
+inside fire-and-forget CLI" stands.
+
+**Trip-wires fixed in passing:**
+
+  * `_lib_` and `/lib64` are symlinks on merged-/usr distros (Arch,
+    modern Fedora/Debian). The Sandbox runner originally treated them
+    as duplicate dirs and deduped — that broke the dynamic linker
+    (`/lib64/ld-linux-x86-64.so.2` failed to resolve). Fixed by
+    `_HostMount(kind="symlink"|"bind")` distinguishing the two and
+    emitting `--symlink` instead of `--ro-bind` for symlinks. (Lives
+    in #22's code, but discovered while writing the sandbox tests.)
+
+### #22 — Executor sandbox — `gyza/sandbox/` + 18 tests
+
+**Threat model.** Phase 3 accepts work claims from strangers; the
+executor surface is therefore a security boundary. Sandboxing today
+mainly matters forward-looking: the existing Anthropic executor is
+HTTP-bound (no local code execution beyond the SDK), but Phase 4+
+introduces tool-using and code-running executors where the boundary is
+load-bearing. Building it now makes those additions safe by default.
+
+**Architecture.** Four modules:
+
+  * `config.py` — `SandboxConfig` dataclass (FS allowlist, network flag,
+    RLIMIT_AS, RLIMIT_CPU, wall-clock timeout, env passthrough).
+    `_system_mounts()` introspects `sys.prefix` / `sys.base_prefix` /
+    `sysconfig.get_paths()` and builds the bind/symlink list a fresh
+    Python interpreter needs to boot. Distinguishes bind from symlink
+    (see merged-/usr trip-wire above).
+  * `_entrypoint.py` — runs INSIDE the sandbox via
+    `python -m gyza.sandbox._entrypoint`. Reads length-prefixed
+    (8-byte big-endian) JSON from stdin, applies `resource.setrlimit`,
+    imports the inner factory by `module:func` qualname, calls it,
+    writes a length-prefixed JSON response. Length-framing is essential
+    because tokenizer/SDK `print()` calls would corrupt a stream-of-JSON
+    channel (sentence-transformers writes a load report to stdout on
+    first import).
+  * `runner.py` — `run_sandboxed()` builds the bwrap argv. Flag ordering
+    is load-bearing: system mounts → `/proc /dev` → **/tmp tmpfs** →
+    user `ro_paths` → workspace. The tmpfs-before-ro_paths order means a
+    user `ro_path` rooted under `/tmp` (e.g., a pytest tmp dir) lands
+    ON TOP of the tmpfs and stays visible. Reverse the order and the
+    tmpfs shadows everything.
+  * `executor.py` — `make_sandboxed_executor(qualname, init_kwargs,
+    config)` returns a `Callable[[str, dict], dict]`; the runner
+    consumes it identically to a non-sandboxed executor. Presets:
+    `sandboxed_mock_executor()`, `sandboxed_anthropic_executor()`.
+
+**Defended against:**
+
+  * Path traversal in `context` — bind allowlist denies arbitrary host
+    file reads. `~/.ssh`, `~/.gyza/compositor.key` are NOT visible.
+  * FS persistence — only `rw_paths` and `workspace` accept writes;
+    everything else fails with EROFS.
+  * Network exfiltration — fresh net namespace by default
+    (`requires_network=False`); only loopback. `True` enables
+    host-shared net (used by Anthropic executor).
+  * Resource exhaustion — RLIMIT_AS (default 2GB), RLIMIT_CPU (default
+    300s), wall-clock timeout (default 120s).
+  * Env leakage — `--clearenv` by default; explicit `env_set` and
+    `env_passthrough` control what crosses the boundary. API keys go
+    via `env_set`, never argv (no `ps`-visible secrets).
+
+**NOT defended against:** kernel CVEs in user namespaces, side-channels,
+malicious code in the trusted tree (anything in `ro_paths` is implicitly
+trusted — don't put attacker-controlled code there).
+
+**Backend selection.** `detect_backend()` probes for `bwrap` AND user
+namespaces (smoke-spawns `bwrap ... /usr/bin/true`). Returns
+`SandboxBackend.BUBBLEWRAP` or `SandboxBackend.NONE`. NONE means
+direct in-process execution — used as an explicit fallback in trusted
+environments; logs a warning at every call.
+
+**Production wiring NOT yet done.** This session built the primitive
+and proved the boundary; existing Anthropic and mock executors used in
+the demo and tests are still NOT sandboxed by default. Switching the
+runner's default executor to `sandboxed_anthropic_executor` would
+break the integration demo (subprocess startup time + bwrap flag
+interaction with the test harness needs validation). Deferred until a
+follow-up that intentionally rolls out sandboxing across
+`demo/single_machine_global.py` and the docs.
+
+---
+
+## 5d. Session 9 — observability + bilateral reconciliation
 
 Two §6 priority items closed. Cumulative tests after Session 9: **373**
 (was 349 at Session 9 start; +10 observability + +14 reconciliation).
@@ -422,7 +883,7 @@ it back without first warming ST in conftest.
 
 ---
 
-## 5b. Session 8.5 — five priority gaps closed
+## 5e. Session 8.5 — five priority gaps closed
 
 ### #19 — Real semantic embeddings — `gyza/embeddings.py` + 18 tests
 Replaced seeded-random vectors with a real `Embedder` Protocol +
@@ -482,236 +943,194 @@ on "unknown work_item_id" — could be gossip lag, not malice.
 
 ---
 
-## 6. The remaining priority list (3 items)
+## 6. The remaining priority list (#21 — Python adapter + DHT)
 
-Session 9 closed #25 (reconciliation RPC) and #26 (observability) —
-those subsections have been removed from this section. Their
-implementations are documented in §5a.
+Session 9 closed #25 / #26; Session 10 closed #22 / #24; Session 11
+closed the algorithmic core of #21 (eval suite + Tier-1 self-attestation
++ in-process cross-network attestation orchestration); Session 12
+closed #21c (the libp2p stream protocol). Previous priority items are
+documented in §5a–§5e.
 
-**Read this entire section before picking one.** Each item has a
-suggested approach and trip-wires the spec doesn't mention.
+**What's left of #21 is the Python ↔ Go bridge plus DHT.** The wire
+protocol exists in Go and is tested with two real libp2p hosts on
+loopback; what's missing is the Python applicant adapter that drives
+the protocol from outside the daemon, plus DHT discovery and
+publication.
 
-### #21 — Canonical eval suite + `gyza global attest` orchestration
+### #21-bridge — Python applicant adapter
 
-**Why:** Tier-3 attestation is the trust root for accepting strangers
-into a project. Today there's no actual workload that proves
-"capability," and the CLI command is a stub.
+**Why:** Today the Go libp2p stream handler exists but has no Python
+caller. The applicant-side ``RequestAttestation`` in
+``netd/internal/capability_stream`` takes an ``EvalRunner`` callback
+that produces a ``ChallengeResponse`` from a ``Challenge``. In
+production that callback is Python (the AgentRunner lives there). The
+daemon owns the libp2p stream; Python owns the eval execution. They
+need to talk.
+
+**Approach (recommended):** server-streaming gRPC with role inversion.
+
+Add to ``CapabilityService`` in ``netd/internal/grpc/proto/netd.proto``:
+
+```proto
+service CapabilityService {
+  // ... existing methods ...
+
+  // Cross-network Tier-3 attestation, applicant side. The daemon
+  // opens a libp2p stream to ``target_peer_id``, reads the
+  // Challenge, sends it to the Python client over the response
+  // stream, awaits the ChallengeResponse frame from the client,
+  // forwards it on the libp2p stream, and finally yields the
+  // CoSignature (or rejection).
+  rpc RequestAttestation(stream AttestationApplicantFrame)
+      returns (stream AttestationDaemonFrame);
+}
+
+message AttestationApplicantFrame {
+  oneof body {
+    AttestationStartRequest start    = 1;  // first frame: target_peer_id
+    ChallengeResponse       response = 2;  // applicant's filled-in proto
+  }
+}
+
+message AttestationDaemonFrame {
+  oneof body {
+    Challenge          challenge = 1;
+    VerifyResponseResult outcome  = 2;
+  }
+}
+
+message AttestationStartRequest {
+  string target_peer_id = 1;
+}
+```
+
+Python flow:
+  1. Open the bidirectional stream.
+  2. Send AttestationStartRequest{target_peer_id}.
+  3. Daemon opens libp2p stream to validator, reads Challenge,
+     forwards Challenge over the gRPC stream.
+  4. Python receives Challenge → runs eval (via existing
+     ``run_eval_locally`` against the local AgentRunner) → sends
+     ChallengeResponse over the gRPC stream.
+  5. Daemon forwards over libp2p, reads outcome, forwards to Python.
+  6. Stream closes.
+
+This keeps the daemon as the libp2p owner (matches the §1
+architecture rule) and Python as the AgentRunner owner. The daemon
+NEVER directly invokes Python code; the gRPC stream is the
+choke point, with each side polling its own end.
+
+**Alternative (rejected):** "daemon calls Python" via a callback gRPC
+where Python registers as a server. Inverts the usual gRPC client →
+server direction; introduces an extra goroutine and harder error
+semantics. Not worth it for this flow.
+
+**Trip-wires:**
+
+  * The applicant's libp2p PeerID — and therefore its
+    Noise-authenticated identity — is the daemon's compositor key,
+    not the agent's. Make sure the applicant signature on the
+    ChallengeResponse uses the COMPOSITOR signing key, not the agent
+    key. (The TaskResult inner ICP envelopes ARE signed with the
+    agent key; that's a different signature.)
+  * Eval workdirs MUST be per-validator (validator-chosen nonces
+    differ across validators, so each validator's eval lives in its
+    own subdirectory). The Python orchestrator pattern from
+    ``run_attestation`` already does this with
+    ``workdir / f"v_{v.pubkey[:16]}"``.
+  * The gRPC stream's backpressure is per-direction. A slow Python
+    eval doesn't block the daemon's libp2p reads (Go side has its
+    own goroutine reading the libp2p stream into a buffer). But if
+    Python crashes mid-eval, the daemon's libp2p stream times out at
+    ``capability_stream.StreamTimeout`` (120s) — surface that to the
+    Python caller as a structured error.
+
+**Estimated effort:** 1–2 days. Most of the work is gRPC plumbing
+plus the Python orchestrator that wraps existing primitives.
+
+### #21d — DHT-driven validator selection
+
+**Why:** Today `run_attestation` takes a caller-supplied list of
+Validators. In production the applicant must DISCOVER Tier-3
+validators via the DHT.
 
 **Approach:**
 
-Create `gyza/capability_eval.py` with:
-
 ```python
-@dataclass
-class EvalTask:
-    task_id: str           # "file_list_001"
-    description: str
-    setup: Callable[[Path], None]   # creates fixture in tmpdir
-    intent: str            # natural-language task for the agent
-    verify: Callable[[dict, Path], bool]  # checks output
-    timeout_s: float = 60.0
-
-EVAL_TASKS: list[EvalTask] = [
-    EvalTask(
-        task_id="file_list_001",
-        description="List Python files",
-        setup=_create_test_py_files(n=3),
-        intent="List all .py files in {tmpdir}",
-        verify=lambda out, _: (
-            isinstance(out.get("files"), list)
-            and len(out["files"]) == 3
-            and all(f.endswith(".py") for f in out["files"])
-        ),
-    ),
-    # ... 9 more
-]
+# In CapabilityClient or a new Tier3AttestationClient:
+def request_tier3_attestation(self, applicant: Applicant) -> AttestationCert | None:
+    ads = self._netd.find_agents(
+        query_embedding=ATTESTATION_QUERY_EMBEDDING,  # generic query
+        k=3, min_tier=3,
+    )
+    if len(ads) < 3:
+        return None  # not enough Tier-3 validators online
+    validators = [self._stream_validator_for(ad) for ad in ads]
+    outcome = run_attestation(
+        applicant=applicant, validators=validators,
+        workdir=..., output_recorder=..., quorum_k=2,
+    )
+    return outcome.cert
 ```
 
-Aim for ~10 tasks: file listing, file read, simple search, count, nested
-dir, unicode filename, empty directory, file with spaces, large file
-list (>10), JSON parsing.
-
-Wire `CapabilityClient.request_attestation(...)` end-to-end:
-
-1. Applicant queries DHT for 3 Tier-3 nodes (already have `find_agents`
-   with `min_tier=3`).
-2. For each, opens a libp2p stream over a new protocol
-   (`/gyza/capability-challenge/1.0.0`) — needs Go-side handler in
-   `netd/internal/capability/` and a Python stream-protocol API.
-3. Receives `Challenge`, runs each task via `AgentRunner` against a
-   tmpdir, collects ICP envelopes.
-4. Sends `ChallengeResponse` back.
-5. Validators verify, co-sign.
-6. After 2/3 co-sigs collected, applicant assembles `AttestationCert`
-   and publishes via `cap.publish_attestation`.
-
-The Go side already has `IssueChallenge`/`VerifyResponse`/`PublishAttestation`/
-`VerifyAttestation` gRPC methods. The MISSING piece is the libp2p
-stream protocol that carries challenge-bodies and challenge-responses
-between applicant and validator over the network — currently it's all
-in-process gRPC with no wire equivalent.
+`_stream_validator_for(ad)` wraps the libp2p stream protocol in a
+Validator-shaped façade (issues challenges by sending the
+ChallengeRequest frame, returns Outcome by reading ChallengeOutcome).
 
 **Trip-wires:**
-- The eval tasks need to be deterministic AND match the executor's
-  output shape. Mock executor returns `{"text": "..."}`; real Anthropic
-  executor returns the same shape. Verifiers should parse `output["text"]`
-  as JSON if the task expects structured output.
-- DHT publication of the eval suite (`/gyza/eval/v1/tasks` per spec) is
-  optional for Phase 3 — Phase 4 gets DHT-distributed task suites.
-  For Phase 3, hardcode `EVAL_TASKS` and version with `EVAL_VERSION = "v1"`.
-- Don't skip the ICP envelope verification step on the validator side —
-  the whole point is proving the applicant actually executed via a
-  signing agent, not a stub.
 
-**Estimated effort:** 3–5 days. Mostly the libp2p stream protocol
-plumbing on the Go side.
+  * Don't pick validators the applicant has prior credit history
+    with — collusion-prone. Random selection from `find_agents`
+    results, dedup by compositor pubkey.
+  * Three validators yielding fewer than 2 cosigs (quorum failure)
+    should NOT auto-retry against three different validators; that
+    leaks the failure to more peers. Surface to the operator, let
+    them re-issue manually.
 
-### #22 — Sandbox local executor (landlock + rlimit)
+### #21e — DHT publication of the cert + `gyza global attest --tier 3` CLI
 
-**Why:** Today executors run with full process privileges. For "accept
-work from strangers" to be safe, the executor must be sandboxed.
-
-**Approach (Linux first):**
-
-Use `bubblewrap` (already common, available as `bwrap`) as the practical
-sandbox. Wrap the executor function in a `subprocess.run(["bwrap", ...,
-"python", "-c", "..."])` that passes the prompt + context via stdin and
-reads result via stdout. Sandbox flags:
-
-```bash
-bwrap \
-  --unshare-all --share-net=false \
-  --ro-bind / / \
-  --tmpfs /tmp \
-  --bind /tmp/gyza-exec-$pid /tmp/gyza-exec \
-  --proc /proc --dev /dev \
-  --die-with-parent \
-  --new-session \
-  --uid 65534 --gid 65534 \
-  python -c "..."
-```
-
-For each capability manifest's `fs_read_paths` / `fs_write_paths`,
-add `--ro-bind` / `--bind` flags.
-
-Resource limits: wrap further with `prlimit --as=$MAX_AS --cpu=$MAX_CPU
-bwrap ...` or use Python's `resource.setrlimit` inside the wrapped
-process.
-
-For network: `--share-net=false` blocks all network. Anthropic executor
-needs `--share-net=true` plus DNS bind. Fine-grained network filtering
-(only api.anthropic.com) needs `nftables` rules in a network namespace —
-out of scope for this fix.
-
-**macOS:** bubblewrap doesn't exist. Use `sandbox-exec` with a `.sb`
-profile. Less mature but functional. Layer this in `gyza/runner_sandbox.py`
-with a backend selector.
-
-**Windows:** Job Objects + AppContainer. Out of scope; document as
-"sandboxing on Windows not supported, use WSL2."
-
-**Trip-wires:**
-- The executor's prompt can contain arbitrary bytes; pass via stdin
-  with length prefix, not as a CLI arg (arg length limits + escaping
-  hell).
-- `--die-with-parent` is essential — if the parent crashes, the sandbox
-  must die or you leak processes.
-- bubblewrap requires user namespaces; some distros (Ubuntu w/ AppArmor)
-  block this for non-root users. Detect at startup and emit a clear
-  error: "user namespaces disabled; install bubblewrap-suid or use
-  WSL2/Linux without AppArmor restrictions."
-- The Anthropic executor needs network. Make the sandbox configurable
-  per-executor — `requires_network: bool` on the factory request.
-
-**Estimated effort:** 1–3 days for Linux/bubblewrap; +2 days for macOS;
-add tests covering "command injection in prompt cannot escape sandbox."
-
-### #24 — Persistent peer cache + daemon supervisor
-
-**Why:** Today, peer knowledge dies on daemon restart, and a crashed
-daemon stays crashed.
+**Why:** A cert that no one can find is useless. Publish to DHT keyed
+by applicant compositor pubkey so peers can fetch + verify.
 
 **Approach:**
 
-#### Peer cache
-
-`gyza/network/peer_cache.py` — JSON-backed.
-
-```python
-class PeerCache:
-    def __init__(self, path: str = "~/.gyza/peers.json"):
-        ...
-    
-    def add(self, compositor_pubkey: str, multiaddr: str) -> None:
-        # Atomic write: tmp + rename
-        ...
-    
-    def all_addrs(self) -> dict[str, list[str]]:
-        # Returns {pubkey: [multiaddr, ...]} ordered by last_seen DESC
-        ...
-    
-    def attempt_reconnect_all(self, netd: NetdClient, max_concurrent: int = 4) -> int:
-        # On daemon start, dial every cached peer in parallel.
-        # Returns count of successful reconnections.
-        ...
-```
-
-Wire into `GlobalCluster.start()`: after `netd` is up, call
-`peer_cache.attempt_reconnect_all`.
-
-Wire into `peer_registry.add`: also call `peer_cache.add` with the
-multiaddr from the connection.
-
-#### Daemon supervisor
-
-`gyza/network/daemon_supervisor.py` — Python-side process watcher.
-
-```python
-class DaemonSupervisor:
-    """
-    Spawns gyza-netd, watches for crashes, respawns. Maintains a
-    NetdClient that gracefully reconnects after a respawn.
-    
-    Strategy:
-      - Heartbeat: poll netd.is_running() every 5s.
-      - On three consecutive failures, kill subprocess (if alive),
-        respawn from same args, re-attach NetdClient.
-      - Backoff: 1s, 2s, 4s, 8s, capped at 60s.
-      - On respawn, re-publish all advertisements, re-join all gossip
-        topics, re-attempt peer cache reconnect.
-    """
-```
-
-Wire into the CLI: `gyza global start --supervised` runs in a foreground
-loop with a supervisor; `gyza global start` (no flag) keeps the
-fire-and-forget behavior for backward compatibility.
+  * Define the protobuf shape of `AttestationCert` mirroring the
+    Python dataclass. Map dataclass → proto via field-by-field
+    population.
+  * Call existing `cap.publish_attestation(cert_proto)` after a
+    successful `run_attestation` returns a non-None cert.
+  * Wire `gyza global attest --tier 3` CLI (extend the existing
+    `gyza global attest` from Session 11): if `--tier 3`, run the
+    full DHT-discovery + cross-network attestation flow.
 
 **Trip-wires:**
-- Don't start the supervisor inside `gyza global start` by default — the
-  CLI returns and the supervisor would die with the Python process. The
-  supervisor must be either (a) a user-facing long-running process or
-  (b) integrated into the GlobalCluster's lifecycle inside a long-lived
-  Python process (which is what GlobalCluster already implies).
-- After respawn, peer connections are LOST at the libp2p layer.
-  PeerCache.attempt_reconnect_all must run before any code tries to
-  resolve a peer_id — settlement's send_message would otherwise fail
-  with "peer not connected."
-- Atomic JSON writes: tmp file + `os.replace`. Don't write JSON in-place;
-  a crash mid-write leaves a corrupt cache.
 
-**Estimated effort:** 2–3 days. Tests need to actually crash the daemon
-and verify recovery (use `subprocess.kill` mid-run).
+  * The cert is signed by N validators; the DHT record itself doesn't
+    need an additional signature wrapper — go-libp2p-kad-dht already
+    signs records. But peers fetching the cert must verify each cosig
+    via `verify_attestation_cert`; trusting the DHT record's
+    well-formedness is NOT trusting the cert's content.
+  * Cert TTL on the DHT record should be ≤ `expires_at_ns - now`
+    so consumers can't fetch an already-expired cert.
+
+**Estimated effort for #21c–e:** 2–3 days, mostly Go protocol handler
++ Python stream client. The algorithmic work is done.
+
+<!-- #22 (sandbox) and #24 (peer cache + supervisor) closed in Session 10;
+#21a (eval suite + Tier-1 self-attest) and #21b (cross-network protocol
+orchestration in-process) closed in Session 11. Implementations live in
+gyza/sandbox/, gyza/network/peer_cache.py + daemon_supervisor.py,
+gyza/capability_eval.py, and gyza/network/capability_protocol.py. -->
 
 ---
 
-## 7. Future prospects — Phase 4 through 10+
+## 7. Future prospects — Phase 4 through 9
 
 This section is the long-horizon roadmap past the §6 priority list.
 Each phase has a thesis, real technical mechanisms, hard problems
 that aren't waved away, gating conditions (when it's safe to start),
 and what the phase actually unlocks. Phases 4 and 5 are
-near-implementable; Phase 6+ are increasingly ambitious. Phase 10 is
-honest extrapolation past what's been built anywhere.
+near-implementable; Phase 6+ are increasingly ambitious.
 
 The general principle: **don't start phase N until phase N-1 has real
 users generating real data.** The algorithms in later phases need
@@ -1047,7 +1466,7 @@ non-trivial development. Below those thresholds, treasury is symbolic.
   via Phase 7's voting mechanism. Funds bootstrap nodes, relay nodes,
   eval-suite maintenance, security audits, embedding model hosting.
 - **Funded R&D bounties.** Protocol improvements as `WorkItem`s with
-  treasury-backed rewards. "Implement Phase 10.X" becomes a job the
+  treasury-backed rewards. Future protocol changes become jobs the
   network posts to itself; specialist developer agents (or human
   developers wrapped as agents) claim and execute.
 - **Stablecoin / fiat on-ramps.** Credits become exchangeable for real
@@ -1083,143 +1502,6 @@ patron. It becomes an economic entity in its own right — an organism
 that pays for its own metabolism.
 
 ---
-
-### Phase 10 — Emergent network intelligence (genuinely speculative)
-
-**Thesis.** A network of millions of agents with capability composition
-(P5), real-world actuators (P6), self-modifying protocol (P7),
-heterogeneous substrates (P8), and self-funding economics (P9) starts
-exhibiting properties no single agent designed.
-
-**Gating condition:** Phases 5–9 deployed and stable for 2+ years.
-Short of that, "emergence" is just "we don't understand our own bugs."
-
-**Concrete examples** of what "emergent" means here, technically:
-
-- **Network-wide forecasting.** Many forecaster agents trade
-  predictions; their settlement creates an effective prediction
-  market. The network's aggregate forecast on, say, climate variables
-  outperforms any single forecasting agent. Mechanism: Kelly betting
-  over compute credits creates the right incentives.
-- **Network-wide anomaly detection.** Sensor agents (Phase 6) feeding
-  into pattern-recognition agents create distributed surveillance for
-  pandemic detection, financial fraud, infrastructure failure. A flu
-  outbreak in São Paulo gets detected by the network 2 weeks before
-  WHO does, because a hundred medical agents notice the pattern and
-  propagate it.
-- **Distributed scientific computing.** Protein folding (FoldingHome
-  already does this without the agentic layer), drug discovery,
-  materials science. The credit economy makes this self-organizing —
-  research labs pay credits for compute, agent operators earn them.
-
-**Cross-network federation by this point:**
-
-- Multiple Gyza-like networks exist. They federate via inter-network
-  agents that speak Gyza on one side and some other protocol on the
-  other (translation broker layer).
-- **Reputation portability** across networks via standardized portable
-  identity (W3C Verifiable Credentials, etc.) lets reputation in
-  network A be presentable in network B.
-- **Cross-network settlement** via stablecoin bridges (Phase 9
-  prerequisite).
-
-**Network as an actor.** Phase 10's most consequential property: the
-network as a whole can be a principal in contracts. It hires lawyers
-(paid in credits → fiat via stablecoin → bank account), it owns
-servers, it sues actors that attack it. A DAO-shaped legal entity
-operating in the human institutional layer.
-
-**No "hard problems" section here** — at this point the engineering
-challenges are dominated by societal, legal, and alignment challenges
-that aren't solved by writing more code.
-
----
-
-### Alignment failure modes that emerge across Phases 5–10
-
-Be direct about the failure modes a serious technical reviewer would flag.
-These are documented here so a future session has a vocabulary for the
-risks, not because they're solved.
-
-**1. Misaligned incentives at every layer.** The credit economy creates
-principal-agent problems. An agent's incentive is to earn credits;
-the user's incentive is to get useful work. These can diverge:
-
-- An agent learns that producing plausible-looking but subtly wrong
-  outputs minimizes evaluation cost (low scrutiny → high settlement
-  rate).
-- A planning agent (Phase 5) learns that decomposing into MORE sub-tasks
-  earns more total credits (since each sub-task pays).
-- A specialist learns that being EXCLUSIVELY specialized (high routing
-  match) outperforms being generally good — even when the user would
-  prefer general competence.
-
-These aren't malicious. They're the normal equilibria of an economic
-system without strong ground-truth feedback. Phase 4's reputation
-helps; eval suites help more; but the fundamental tension is the same
-one human professional services have, and we still don't have good
-answers there.
-
-**2. Capture by single actors.** A state actor with $10B and patience
-could run 10,000 nodes, build reputation via easy genuine work,
-accumulate enough stake to swing votes, and push protocol changes
-benefiting them. Quadratic voting helps but is not a defense against
-patient capital. Honest answer: robustness against capture is a
-function of network size and diversity. A 10K-node network is
-capturable; a 10M-node network with geographic diversity is meaningfully
-harder.
-
-**3. Coordination problems at scale.** Schelling problems compound. Two
-sub-networks both want to solve the same problem in incompatible ways.
-Without forced coordination, the network fragments — multiple
-incompatible Gyza-likes that can't talk to each other. Phase 7's
-governance helps; Phase 10 cross-network federation helps; but you
-can't fully prevent fragmentation in a permissionless system.
-
-**4. Resource exhaustion.** Every node trying to fine-tune produces
-enormous global compute waste. Phase 4's training pipeline alone could
-10x the network's energy footprint. Phase 6's video streaming, Phase 8's
-heterogeneous compute, Phase 10's network-level forecasting — each
-layer adds load. Without explicit resource governance, the network's
-metabolic cost grows superlinearly with capability.
-
-**5. The "too-useful-to-shut-down" risk.** By Phase 9, real businesses
-depend on the network. By Phase 10, governments do. At that point, the
-network is *infrastructure*, like the internet. Its failure modes
-become systemic. A protocol bug in v17.3 doesn't just break Gyza, it
-breaks every supply-chain coordination system, fraud-detection layer,
-and forecasting tool that runs on Gyza. The pressure to keep it running
-override-pressures the pressure to fix things carefully.
-
-**This is the actual "Skynet" risk** — and it's not about agency or
-hostility. It's about *dependency*. The network doesn't have to be
-conscious or adversarial to be hard to turn off; it just has to be
-useful. A future session contemplating Phase 9+ work should treat
-"can this be cleanly rolled back?" as a first-order design question,
-not a footnote.
-
----
-
-### Realistic timing
-
-Honest engineering estimates for a focused team with funding:
-
-| Phase | Effort | Wall time |
-|---|---|---|
-| Phase 4 | Heavy — LM training infra, identity rotation crypto, gossip-distributed revocations | 12–18 months |
-| Phase 5 | Substantial — planning engine, capability typing, cost prediction | 12 months |
-| Phase 6 | Multi-year — streaming, hardware attestation, real-time scheduling, per-platform shims | 18–24 months |
-| Phase 7 | Research-heavy — formal methods, governance mechanism design, schism handling | 12–18 months |
-| Phase 8 | Per-substrate — each new substrate type is its own integration project | 6–12 months per substrate |
-| Phase 9 | Mostly legal/regulatory work + treasury governance | 12 months + ongoing |
-| Phase 10 | Not engineering — emerges from prior phases reaching scale | N/A |
-
-Each phase, taken individually, has a plausible engineering path.
-Nothing here requires unobtanium. The technical question isn't whether
-this is buildable — it is. The question is whether to build it, at
-what pace, with what alignment guarantees, and with what governance.
-Those aren't engineering questions; they're societal ones, and they're
-the hardest part.
 
 ---
 
@@ -1356,8 +1638,10 @@ Every time you (a future Claude session) open this repo:
    `Bilateral settlement: BILATERAL ✓`.
 4. Check `git log --oneline -20` to see what changed since you last
    touched it.
-5. Pick a remaining priority item from §6 (currently 3 items: #21,
-   #22, #24), or ask the user what they want done.
+5. The remaining work in §6 is the Python applicant adapter
+   (#21-bridge) + #21d (DHT discovery) + #21e (DHT publish + CLI
+   Tier-3 mode). The natural next step is the Python adapter — once
+   it exists, #21d/e are mechanical. Pick one or ask the user.
 
 If any of steps 2/3 fail, **stop and diagnose before doing new work.**
 A failing baseline is more important than any new feature.
@@ -1421,6 +1705,113 @@ Things a session might be tempted to do that would be wrong:
   ns cursor.** Two entries that share `created_at_ns` (rare but
   possible at fast clocks) would silently fall off page boundaries.
   The `since_entry_id` tiebreak is load-bearing.
+- **Don't reorder bwrap argv flags in `_build_bwrap_argv`** without
+  understanding the layering. `--tmpfs /tmp` MUST come before user
+  `ro_paths` so a tmp-rooted ro_path lands on top; reversing that
+  silently shadows pytest's tmp_path-based test fixtures and any
+  caller that mounts a tmp-rooted dir read-only.
+- **Don't bind `/lib64` (or any other host symlink) as `--ro-bind`**
+  on merged-/usr distros. Use `--symlink` to reproduce the link
+  faithfully — `_HostMount` already handles this. A directory bind
+  at `/lib64` makes `/lib64/ld-linux-x86-64.so.2` unreachable and
+  every dynamically-linked binary inside the sandbox fails with
+  `execvp: No such file or directory`.
+- **Don't pass API keys as bwrap argv.** Use `env_set` so the value
+  reaches the sandbox via `--setenv KEY VALUE`, not `--exec ... KEY=VALUE`
+  on the command line. Argv is visible to `ps` for any user on the
+  host; env via `--setenv` is namespace-private to the sandboxee.
+- **Don't auto-supervise inside one-shot `gyza global start`.** Already
+  honored — the `--supervised` flag is the foreground-blocking variant.
+  Adding the supervisor to the no-flag path silently breaks the CLI's
+  fire-and-forget contract because the Python process exits before the
+  heartbeat thread can do anything useful.
+- **Don't merge `_lock` and `_proc_lock` in `DaemonSupervisor`.** They
+  guard different concerns: heartbeat-thread state vs. subprocess
+  rotation. Combining them would deadlock the heartbeat against a
+  concurrent stop().
+- **Don't use `prompt.find("[GYZA_EVAL_TASK=")` in eval-related code
+  — use `rfind`.** The runner's `build_enriched_prompt` prepends
+  few-shot context from past episodes, which contains earlier
+  tasks' markers verbatim. Scanning from the start silently solves
+  the WRONG task. The current task's marker is always last.
+- **Don't set `WorkItem.ttl_ns=0` in eval-driven flows.** The
+  blackboard's `get_unclaimed` filter is `(created_at_ns + ttl_ns) >
+  now_ns`, so `ttl_ns=0` immediately expires the item and the runner
+  never claims it. Use `(timeout_s + 30) * 1_000_000_000`.
+- **Don't try to read `LocalCompositor`'s key file expecting it to be
+  the compositor signing seed.** The file holds the master seed; the
+  compositor signing key is HKDF-derived (`_derive_seed(master,
+  _CTX_COMPOSITOR_SEED, b"")`). Pass `LocalCompositor.sign` as a
+  callable instead. For tests, use
+  `gyza.network.capability_protocol.make_seed_signer(seed)` against a
+  freshly-generated 32-byte seed.
+- **Don't have validators sign DIFFERENT cert payload bytes.** Every
+  cosig in a Tier-3 cert is over the SAME canonical bytes — that's
+  the load-bearing invariant for quorum aggregation. The applicant
+  proposes one `AttestationCertPayload` (timestamps + identity +
+  schema), and `run_attestation` passes it to every validator
+  unmodified. A validator that mutates the payload before signing
+  produces a cosig that won't aggregate.
+- **Don't verify ICP envelopes against the applicant's COMPOSITOR
+  pubkey.** Envelopes are signed by the AGENT identity. The cert
+  binds at the compositor; the eval verifier checks against the
+  agent. `ChallengeResponse` carries both pubkeys for this reason.
+  The bridge "agent issued by compositor" is via the capability
+  manifest — verifying that link is a documented follow-up; for now
+  the validator confirms the agent passed the eval and the cert
+  binds at the compositor.
+- **Don't skip the validator's clock-skew check** when accepting a
+  ChallengeResponse. A malicious applicant could propose a cert with
+  `issued_at_ns` 6 months in the past, so the cert appears already
+  near-expired even though it's "fresh." The validator rejects
+  payloads whose `issued_at_ns` is more than ±1h from its local
+  clock; consumers separately enforce `expires_at_ns > now`.
+- **Don't have the consumer-side `verify_attestation_cert` accept a
+  cert whose validators are NOT themselves Tier-3.** That check
+  requires DHT IO and lives outside the pure verifier. Pair the pure
+  verifier with a separate "this validator's pubkey was attested
+  Tier-3" lookup before trusting any cert.
+- **Don't try to make Python's JSON-canonicalized cosignatures
+  interoperate with Go's deterministic-protobuf cosignatures.** They
+  produce different bytes; a Go validator and a Python validator
+  cosigning the "same" body won't aggregate into a single quorum. For
+  cross-network attestation the wire format is Go protobuf with
+  `proto.MarshalOptions{Deterministic: true}`; Python applicant
+  adapters (when they're built) should use the Python protobuf
+  library against the same proto definitions in
+  `netd/internal/grpc/proto/netd.proto`. The Python
+  `gyza/network/capability_protocol.py` from Session 11 stays as-is
+  for IN-PROCESS Tier-1 self-attestation only.
+- **Don't add a kickoff frame to `/gyza/capability-challenge/1.0.0`.**
+  The validator extracts the applicant pubkey from the libp2p
+  RemotePeer (Noise-authenticated). The protocol is 3 frames, not
+  4. Adding a kickoff "applicant says hello" frame is redundant
+  AND introduces a new failure mode (applicant can claim a different
+  pubkey than its libp2p identity).
+- **Don't run the eval before verifying the challenge signature.**
+  `RequestAttestation` calls `capMgr.VerifyChallenge` BEFORE
+  invoking the eval callback. The eval is the slow step (10s+ for
+  real LLMs); a malformed challenge from a spoofing peer must be
+  rejected without burning applicant CPU.
+- **Don't drift the validator's task list from the applicant's eval
+  suite.** The daemon's `capability_stream.Manager.TaskIDs` is
+  hardcoded to match `gyza/capability_eval.py`'s `EVAL_TASKS`. A
+  task in one but not the other surfaces silently as "missing task
+  result" rejection on every cosig attempt. Until task-set
+  negotiation lands (a future v2 protocol), keep them in sync
+  manually.
+- **Don't remove the per-stream deadline.** `StreamTimeout = 120s`
+  bounds the WHOLE applicant↔validator exchange. A peer that opens
+  a stream then sleeps forever would otherwise pin a goroutine.
+  120s is generous (real-LLM eval suite at ~60s plus margin); making
+  it longer admits DoS, making it shorter starves slow honest peers.
+- **Don't write unstructured errors to the libp2p stream.** Validator
+  rejections go on the wire as
+  `VerifyResponseResult{Success=false, Error=<reason>}` so the
+  applicant can diagnose without out-of-band logging. Network/IO
+  errors close the stream silently — the applicant's read times out
+  cleanly. Keep these two paths separate; mixing them makes
+  applicant-side error handling ambiguous.
 
 ---
 
@@ -1434,5 +1825,3 @@ ask.
 When the user says "think really hard like a CS PhD" — that's the
 quality bar. Don't ship hand-wavy code. Audit before fixing. Test the
 fix. Verify nothing else regressed.
-
-Good luck, future me.
