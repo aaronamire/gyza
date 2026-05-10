@@ -47,12 +47,14 @@ from gyza.config import GyzaConfig
 from gyza.economy.ledger import ComputeLedger
 from gyza.economy.settlement import LedgerSettlementService
 from gyza.identity import LocalCompositor
+from gyza.network.daemon_supervisor import DaemonSupervisor
 from gyza.network.netd_client import (
     AgentAdvertisement,
     GossipClient,
     NetdClient,
 )
 from gyza.network.network_blackboard import NetworkBlackboard
+from gyza.network.peer_cache import PeerCache
 from gyza.network.peer_registry import PeerRegistry
 
 
@@ -159,6 +161,20 @@ class GlobalCluster:
         # on each call to publish_agents — agents that come and go
         # (per-task spawns) need this rather than a static list.
         agents_provider: Callable[[], list[AgentDescriptor]] | None = None,
+        # Optional persistent peer cache. When supplied, start() attempts
+        # to redial every cached (compositor_pubkey, multiaddr) pair
+        # before the first peer-resolution request can race past it,
+        # and successful connect_peer calls in find_and_collaborate write
+        # back to the cache. Tests pass None to skip filesystem state.
+        peer_cache: PeerCache | None = None,
+        # Optional daemon supervisor. When supplied, GlobalCluster owns
+        # neither the subprocess nor the NetdClient — both come from
+        # the supervisor — and the supervisor's on_respawn callback is
+        # wired to re-publish DHT advertisements, re-attempt cached
+        # peer reconnects, and re-join active project gossip topics
+        # whenever the daemon is restarted under us.
+        # Mutually exclusive with ``netd_client``.
+        supervisor: DaemonSupervisor | None = None,
     ):
         self._compositor = compositor
         self._config = config
@@ -174,8 +190,16 @@ class GlobalCluster:
         )
 
         # Daemon lifecycle.
+        if supervisor is not None and netd_client is not None:
+            raise ValueError(
+                "GlobalCluster: supervisor and netd_client are mutually "
+                "exclusive — pick one"
+            )
+        self._supervisor = supervisor
         self._netd_proc = None
-        self._netd_owns_process = netd_client is None and gossip_client is None
+        self._netd_owns_process = (
+            netd_client is None and gossip_client is None and supervisor is None
+        )
         self._netd: NetdClient | None = netd_client
         self._gossip: GossipClient | None = gossip_client
 
@@ -185,6 +209,7 @@ class GlobalCluster:
 
         self._agents_provider = agents_provider or (lambda: [])
         self._capability_client_factory = capability_client_factory
+        self._peer_cache = peer_cache
         self._projects: dict[str, ProjectMembership] = {}
         self._started = False
         # Background DHT re-publish loop. Started by start(); stopped
@@ -205,6 +230,13 @@ class GlobalCluster:
         """
         if self._started:
             return
+
+        # If a supervisor was supplied, it owns the spawn and the
+        # NetdClient; we just borrow them.
+        if self._supervisor is not None:
+            self._supervisor.set_on_respawn(self._on_daemon_respawn)
+            self._supervisor.start()
+            self._netd = self._supervisor.client
 
         # If clients weren't injected, spawn the daemon and connect.
         if self._netd is None:
@@ -256,6 +288,21 @@ class GlobalCluster:
                 info.compositor_pubkey[:16],
                 self._compositor.pubkey_hex[:16],
             )
+
+        # Persistent peer cache reconnects BEFORE we mark started=True
+        # — anyone calling settlement.send_message must see a
+        # peer_id-resolvable correspondent the moment they think the
+        # cluster is up. Failures inside the sweep are non-fatal
+        # (returns count of redialed peers), so we never block startup
+        # behind an offline peer that happens to be in the cache.
+        if self._peer_cache is not None:
+            try:
+                redialed = self._peer_cache.attempt_reconnect_all(self._netd)
+                LOG.info(
+                    "[global] peer cache: redialed %d peer(s)", redialed,
+                )
+            except Exception as e:  # noqa: BLE001
+                LOG.warning("[global] peer cache reconnect threw: %s", e)
 
         self._started = True
         LOG.info(
@@ -311,16 +358,66 @@ class GlobalCluster:
 
         if self._gossip is not None:
             self._gossip.close()
-        if self._netd is not None and self._netd_owns_process:
-            self._netd.close()
-        if self._netd_proc is not None:
-            self._netd_proc.terminate()
-            try:
-                self._netd_proc.wait(timeout=5.0)
-            except Exception:  # noqa: BLE001
-                self._netd_proc.kill()
+        if self._supervisor is not None:
+            # Supervisor owns the subprocess AND its NetdClient; tearing
+            # both down lives in stop(). Don't double-close self._netd
+            # below — that's the supervisor's client.
+            self._supervisor.stop()
+        else:
+            if self._netd is not None and self._netd_owns_process:
+                self._netd.close()
+            if self._netd_proc is not None:
+                self._netd_proc.terminate()
+                try:
+                    self._netd_proc.wait(timeout=5.0)
+                except Exception:  # noqa: BLE001
+                    self._netd_proc.kill()
         self._started = False
         LOG.info("[global] stopped")
+
+    def _on_daemon_respawn(self, netd: NetdClient) -> None:
+        """
+        Supervisor callback fired after each successful gyza-netd
+        respawn. Runs in the supervisor's heartbeat thread, so we keep
+        the work bounded:
+
+          1. Redial the persistent peer cache — settlement and project
+             gossip both fail silently against a peer the daemon doesn't
+             know about, so this matters BEFORE anyone tries to use the
+             freshly restarted daemon.
+          2. Re-publish DHT advertisements — the daemon's DHT routing
+             table reset on respawn, so cached records elsewhere will
+             still find us only if we re-publish promptly.
+          3. Re-join the gossip topic for every active project. Without
+             this, deltas from peers continue to flow into pubsub but
+             land on a dead subscription.
+
+        Each step is wrapped in its own try/except: we want partial
+        recovery to ship rather than aborting on the first hiccup.
+        Note: ``publish_agents`` is async; we synthesize a one-shot
+        event loop because the heartbeat thread has none.
+        """
+        LOG.info("[global] daemon respawned; running recovery hooks")
+        if self._peer_cache is not None:
+            try:
+                self._peer_cache.attempt_reconnect_all(netd)
+            except Exception as e:  # noqa: BLE001
+                LOG.warning("[global] post-respawn reconnect failed: %s", e)
+
+        try:
+            asyncio.run(self.publish_agents())
+        except Exception as e:  # noqa: BLE001
+            LOG.warning("[global] post-respawn publish_agents failed: %s", e)
+
+        if self._gossip is not None:
+            for project_id in list(self._projects.keys()):
+                try:
+                    self._gossip.join_project(project_id)
+                except Exception as e:  # noqa: BLE001
+                    LOG.warning(
+                        "[global] post-respawn rejoin %s failed: %s",
+                        project_id[:16], e,
+                    )
 
     @property
     def is_started(self) -> bool:
@@ -524,6 +621,12 @@ class GlobalCluster:
             # the wire-level identity check beats our advertised assumption.
             verified = result.verified_pubkey or pubkey
             self.peer_registry.add(verified, result.peer_id)
+            if self._peer_cache is not None:
+                # We pin the cache to verified, not the originally
+                # advertised pubkey, so a multiaddr that DCUtR rerouted
+                # to a different (still-Noise-authenticated) peer
+                # doesn't poison our future redial set.
+                self._peer_cache.add(verified, multiaddr)
             connected.append(verified)
 
         # 3. Attestation cross-check.

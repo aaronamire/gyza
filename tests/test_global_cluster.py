@@ -740,6 +740,158 @@ def test_start_idempotent(cluster):
     assert not gc.is_started
 
 
+# ======================================================================
+# Persistent peer cache integration (Phase 3 priority #24)
+# ======================================================================
+
+def test_start_invokes_peer_cache_reconnect(tmp_path):
+    """
+    GlobalCluster.start() must redial every cached peer BEFORE the
+    cluster transitions to is_started=True. Anyone reading
+    settlement.send_message timing can otherwise race past the
+    reconnect and silently drop their first message at a peer the
+    daemon hasn't dialed yet.
+    """
+    from gyza.network.peer_cache import PeerCache
+
+    comp = _compositor(tmp_path, "self")
+    cfg = GyzaConfig(
+        compositor_key_path=str(tmp_path / "self.key"),
+        netd_socket_path=str(tmp_path / "netd.sock"),
+        netd_ledger_db_path=str(tmp_path / "ledger.db"),
+        blackboard_db_path=str(tmp_path / "bb.db"),
+    )
+    bb = NetworkBlackboard(str(tmp_path / "bb.db"))
+    netd = _FakeNetd(our_pubkey=comp.pubkey_hex)
+    gossip = _FakeGossip()
+    cap = _FakeCapability()
+    ledger = ComputeLedger(comp, str(tmp_path / "ledger.db"))
+
+    cache = PeerCache(path=str(tmp_path / "peers.json"))
+    cache.add("pk_alpha", "/ip4/1.1.1.1/udp/7749/quic-v1/p2p/aaa")
+    cache.add("pk_beta", "/ip4/2.2.2.2/udp/7749/quic-v1/p2p/bbb")
+
+    gc = GlobalCluster(
+        compositor=comp,
+        config=cfg,
+        blackboard=bb,
+        ledger=ledger,
+        netd_client=netd,
+        gossip_client=gossip,
+        capability_client_factory=lambda: cap,
+        peer_cache=cache,
+    )
+    _start(gc)
+    try:
+        # Both cached peers were dialed — verifies attempt_reconnect_all
+        # ran during start() and not lazily later.
+        dialed = {pk for _, pk in netd.connected}
+        assert dialed == {"pk_alpha", "pk_beta"}
+    finally:
+        _run(gc.stop())
+
+
+def test_find_and_collaborate_writes_back_to_peer_cache(tmp_path):
+    """
+    Every successful connect_peer in find_and_collaborate must persist
+    the (verified_pubkey, multiaddr) pair so a future restart can
+    redial without waiting for a fresh DHT roundtrip.
+    """
+    from gyza.network.peer_cache import PeerCache
+
+    comp = _compositor(tmp_path, "self")
+    cfg = GyzaConfig(
+        compositor_key_path=str(tmp_path / "self.key"),
+        netd_socket_path=str(tmp_path / "netd.sock"),
+        netd_ledger_db_path=str(tmp_path / "ledger.db"),
+        blackboard_db_path=str(tmp_path / "bb.db"),
+    )
+    bb = NetworkBlackboard(str(tmp_path / "bb.db"))
+    netd = _FakeNetd(our_pubkey=comp.pubkey_hex)
+    gossip = _FakeGossip()
+    cap = _FakeCapability(verify_results={"pk_remote": (True, 2, "")})
+    cap.certs["pk_remote"] = _FakeAttestationCert(
+        applicant_pubkey="pk_remote", tier_granted=2, raw_proto=object(),
+    )
+    ledger = ComputeLedger(comp, str(tmp_path / "ledger.db"))
+
+    spec = _spec(7)
+    remote_addr = "/ip4/3.3.3.3/udp/7749/quic-v1/p2p/12D3KooW_remote"
+    netd.find_responses[spec.astype("<f4").tobytes()] = [
+        AgentAdvertisement(
+            agent_pubkey="agent_remote",
+            compositor_pubkey="pk_remote",
+            capability_manifest_hash="m" * 64,
+            specialization_embedding=spec,
+            lsh_bucket=0,
+            attestation_tier=2,
+            reputation_score=0.9,
+            compute_credit_balance=10,
+            last_seen=time.time_ns(),
+            ttl_seconds=3600,
+            multiaddrs=[remote_addr],
+        ),
+    ]
+
+    cache = PeerCache(path=str(tmp_path / "peers.json"))
+    gc = GlobalCluster(
+        compositor=comp,
+        config=cfg,
+        blackboard=bb,
+        ledger=ledger,
+        netd_client=netd,
+        gossip_client=gossip,
+        capability_client_factory=lambda: cap,
+        peer_cache=cache,
+    )
+    _start(gc)
+    try:
+        peers = _run(gc.find_and_collaborate(
+            project_id="proj-test",
+            required_specializations=[spec],
+            min_tier=1,
+        ))
+        assert peers == ["pk_remote"]
+        # Verify the cache holds the verified pubkey + the multiaddr we
+        # advertised. Persisting under the verified pubkey (not the
+        # pre-Noise advertised one) is the documented invariant.
+        snapshot = cache.all_addrs()
+        assert snapshot == {"pk_remote": [remote_addr]}
+    finally:
+        _run(gc.stop())
+
+
+def test_supervisor_and_netd_client_are_mutually_exclusive(tmp_path):
+    """
+    Constructor enforces at most one daemon-source: supervisor OR
+    netd_client. Passing both is a configuration error that would
+    otherwise produce two diverging NetdClients sharing one socket.
+    """
+    from gyza.network.daemon_supervisor import DaemonSupervisor
+
+    comp = _compositor(tmp_path, "self")
+    cfg = GyzaConfig(
+        compositor_key_path=str(tmp_path / "self.key"),
+        netd_socket_path=str(tmp_path / "netd.sock"),
+        netd_ledger_db_path=str(tmp_path / "ledger.db"),
+        blackboard_db_path=str(tmp_path / "bb.db"),
+    )
+    bb = NetworkBlackboard(str(tmp_path / "bb.db"))
+    netd = _FakeNetd(our_pubkey=comp.pubkey_hex)
+    sup = DaemonSupervisor(
+        socket_path=str(tmp_path / "netd.sock"),
+        binary_path="/nonexistent",
+    )
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        GlobalCluster(
+            compositor=comp,
+            config=cfg,
+            blackboard=bb,
+            netd_client=netd,
+            supervisor=sup,
+        )
+
+
 # Pyright noise — keep imports in scope.
 _ = LedgerEntry
 _ = sys

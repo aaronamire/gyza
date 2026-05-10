@@ -17,6 +17,14 @@ given item.
 Executors are pluggable. The runner doesn't care whether the model
 actually runs locally, hits a cloud API, or is mocked — it just needs
 a callable with the (prompt, context) → result_dict contract.
+
+For Phase 3 onward, when accepting work claims from strangers, wrap
+the executor in ``gyza.sandbox.make_sandboxed_executor`` (or one of
+the convenience presets ``sandboxed_mock_executor`` /
+``sandboxed_anthropic_executor``). The runner's contract is unchanged
+— same callable signature — but the work happens inside a bubblewrap
+subprocess with explicit FS / network / resource constraints. See
+``gyza/sandbox/runner.py`` for the threat model.
 """
 from __future__ import annotations
 

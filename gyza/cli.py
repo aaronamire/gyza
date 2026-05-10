@@ -449,6 +449,43 @@ def cmd_global_start(args: argparse.Namespace) -> int:
             )
     cfg = load_config()
     socket = _resolve(cfg.netd_socket_path)
+
+    # --supervised: long-running foreground supervisor. We block here
+    # so the supervisor's heartbeat thread has a host process to live
+    # in (CLAUDE.md §11 trip-wire — fire-and-forget supervisors die
+    # with the CLI return).
+    if getattr(args, "supervised", False):
+        from gyza.network.daemon_supervisor import DaemonSupervisor
+
+        sup = DaemonSupervisor(
+            socket_path=str(socket),
+            binary_path=cfg.netd_binary_path,
+            listen_port=cfg.netd_listen_port,
+            key_path=cfg.compositor_key_path,
+            bootstrap=cfg.netd_bootstrap_peers,
+            log_level="info",
+        )
+        sup.start()
+        print(f"netd supervised (pid {sup.current_proc().pid if sup.current_proc() else '?'})")
+        print(f"  socket:        {socket}")
+        print(f"  press Ctrl-C to stop")
+
+        import signal
+        import threading
+        stop_evt = threading.Event()
+
+        def _on_signal(signum, _frame):
+            print(f"\nreceived signal {signum}; stopping supervisor")
+            stop_evt.set()
+
+        signal.signal(signal.SIGINT, _on_signal)
+        signal.signal(signal.SIGTERM, _on_signal)
+        try:
+            stop_evt.wait()
+        finally:
+            sup.stop()
+        return 0
+
     probe = NetdClient(str(socket))
     if probe.is_running():
         info = probe.get_node_info()
@@ -848,6 +885,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_gstart.add_argument(
         "--metrics-port", type=int, default=9100,
         help="port for the metrics server (default: 9100)",
+    )
+    p_gstart.add_argument(
+        "--supervised", action="store_true",
+        help=(
+            "run as a long-lived foreground supervisor: spawn gyza-netd, "
+            "watch for crashes, respawn with backoff. Blocks until SIGINT. "
+            "Without this flag, the command is one-shot (default)."
+        ),
     )
     globsub.add_parser("status", help="show netd identity, DHT peers, connections")
     p_find = globsub.add_parser("find", help="search the DHT for agents")
