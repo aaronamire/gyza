@@ -1,17 +1,23 @@
 # CLAUDE.md — Gyza session continuation guide
 
 > **Audience:** A future Claude session continuing work on this repo.
-> Last updated at the end of Phase 3 Session 12 (libp2p stream protocol
-> for cross-network capability attestation —
-> `/gyza/capability-challenge/1.0.0` — wired into the daemon). Session
-> 11 shipped the algorithmic core of #21 (eval suite + Tier-1
-> self-attest + in-process orchestration); Session 12 ships #21c (the
-> wire layer). What remains in #21 is the Python applicant adapter
-> (gRPC method that drives the libp2p initiator with a Python eval
-> upcall), #21d (DHT-driven validator selection), and #21e (DHT cert
-> publication + `gyza global attest --tier 3` CLI). Read top to bottom
-> on session start, then keep open as a reference. Everything in here
-> is grounded in code that's been read, not in spec aspirations.
+> Last updated at the end of Phase 3 Session 14 (Tier-3 quorum
+> attestation + DHT publication — closes the §6 #21 priority cluster
+> end-to-end). Session 11 shipped the algorithmic core (eval suite +
+> Tier-1 self-attest + in-process orchestration); Session 12 shipped
+> #21c (libp2p wire protocol); Session 13 shipped #21-bridge (Python
+> applicant adapter via bidi gRPC); Session 14 closed #21d (DHT-driven
+> validator discovery + k-of-n orchestrator) and #21e (DHT cert
+> publication + `gyza global attest --tier 3` CLI). Session 14 also
+> fixed a load-bearing canonicalization gap: the Go validator's
+> per-call `AttestationBody` couldn't aggregate across validators;
+> the applicant now proposes one body that every validator signs.
+> What's next on the punch list is **#21f — verify-on-fetch** in
+> `find_agents`, so consumers actually demand the cert at routing
+> time rather than trusting the self-reported `attestation_tier`
+> field. Read top to bottom on session start, then keep open as a
+> reference. Everything in here is grounded in code that's been
+> read, not in spec aspirations.
 
 ---
 
@@ -59,14 +65,16 @@ marshal venv.
 
 That `-k` filter excludes the four heavy integration suites that spawn
 real `gyza-netd` daemons. Run those when you're touching daemon code or
-near a session-end checkpoint. The Python fast slice runs ~457 tests
+near a session-end checkpoint. The Python fast slice runs ~461 tests
 in 8–10 min (Session 9 added timing-sensitive reconciliation tests;
 Session 10 added 18 sandbox tests that each spawn a real bwrap
 subprocess; Session 11 added 22 capability-eval tests + 15
 attestation-protocol tests, each of which drives a real AgentRunner
-through the eval suite). The Go test suite (~5s, ``go test ./...``)
-grew by 5 in Session 12 with the capability_stream package — each
-test spawns two real libp2p hosts on loopback.
+through the eval suite; Sessions 13–14 added 4 attestation-bridge
+integration tests that spawn 2–4 real `gyza-netd` daemons each).
+The Go test suite (~5s, ``go test ./...``) grew by 5 in Session 12
+with the capability_stream package, then by 2 more in Session 14
+(multi-validator aggregation proof + 7-subtest plausibility matrix).
 
 ### Heavy integration tests (~10–15 minutes total)
 
@@ -172,10 +180,30 @@ prints elapsed times but the variance is dominated by this. A single
 run on a freshly-started Python interpreter takes ~25s; the cache lives
 in `~/.cache/huggingface/`.
 
-### `gyza global attest` returns "not yet implemented"
+### `gyza global attest --tier 3` says "daemon not running"
 
-Intentional placeholder. Wired in CLI but the cross-network
-attestation orchestration hasn't been built (it's task #21 in this doc).
+Expected when no daemon is up. The Tier-3 path needs the local
+`gyza-netd` process for the libp2p outbound stream and the DHT
+publish hop. Tier-1 (`--tier 1`, default) does NOT need the daemon
+— it just runs the eval suite locally and writes a signed JSON
+artifact.
+
+### `gyza global attest --tier 3` succeeds but the cert won't verify
+### at consumers without the cert being fetchable
+
+Today the daemon publishes the cert under
+`/gyza/attestations/{compositor_pubkey}` with whatever default DHT
+TTL `dht.PublishAttestation` uses — NOT bounded by the cert's own
+`expires_at_ns`. A consumer that fetches a near-expiry record and
+verifies it can see "verified now" but the cert expires moments
+later. CLAUDE.md §6 #21f flags this for follow-up; mitigated in
+practice because `VerifyAttestation` re-checks `expires_at_ns`.
+
+### `AgentAdvertisement.attestation_tier` is self-reported
+
+Sybil nodes can advertise `tier=3` without owning a cert. Routing
+filters that respect `min_tier=3` are accepting the lie today.
+This is the headline #21f gap — see §6.
 
 ### `DefaultBootstrapPeers = []string{}` in `netd/internal/host/host.go`
 
@@ -237,7 +265,8 @@ integration coverage.
 │       ├── peer_registry.py      # compositor↔peer_id cache w/ rate-limited refresh
 │       ├── peer_cache.py         # Session 10 — JSON-persisted (pubkey, multiaddr) for redial after restart
 │       ├── daemon_supervisor.py  # Session 10 — heartbeat/respawn watcher around gyza-netd
-│       ├── capability_protocol.py # Session 11 — Validator/Applicant roles + run_attestation orchestrator + verify_attestation_cert
+│       ├── capability_protocol.py # Session 11 — Validator/Applicant roles + run_attestation orchestrator + verify_attestation_cert (in-process Tier-1 only)
+│       ├── attestation_adapter.py # Session 13/14 — Python applicant adapter for cross-network Tier-3 (applicant_eval_session, request_tier3_attestation)
 │       ├── global_cluster.py     # Phase 3 orchestrator (publish_agents, find_and_collaborate, settle, hooks)
 │       ├── artifact_*.py         # content-addressed file store, server, client
 │       └── trust_registry.py     # pinned compositors + cached manifests (Phase 2)
@@ -256,7 +285,7 @@ integration coverage.
 │       ├── capability_stream/    # Session 12 — libp2p `/gyza/capability-challenge/1.0.0` (3-frame proto exchange)
 │       └── grpc/                 # gRPC server + proto definitions
 │
-├── tests/                # pytest, all green (457 fast + 7 integration as of Session 12)
+├── tests/                # pytest, all green (461 fast + 7 integration as of Session 14)
 ├── demo/
 │   ├── single_machine_global.py  # Phase 3 integration sim — RUN THIS to verify
 │   ├── single_machine_phase2.py  # Phase 2 sim
@@ -324,6 +353,81 @@ complete_work_item ────► gossip ─► merge_completion_direct
                                                        
 Both ledgers now hold byte-identical settled entries.
 Both reputation stores now reflect the successful interaction.
+```
+
+### Critical data flow: a complete Tier-3 attestation (Sessions 11–14)
+
+```
+Applicant Python                  Applicant gyza-netd            Validator gyza-netd
+────────────────                  ────────────────────           ───────────────────
+gyza global attest --tier 3
+       │
+       ▼
+LocalCompositor + applicant_eval_session
+  ─► constructs proposed_attestation_body  (SAME body for every validator)
+  ─► spawns ephemeral AgentRunner under compositor key
+       │
+       ▼
+request_tier3_attestation(quorum_k=2, candidate_n=3)
+  ─► find_agents(min_tier=3, k=12)         (or explicit_validator_peer_ids)
+  ─► dedup by compositor_pubkey, exclude self
+  ─► for each candidate peer_id:
+       │
+       ▼
+cap.request_attestation(peer_id, eval_callback)
+       │  bidi gRPC stream to local daemon
+       ▼
+                              CapabilityServer.RequestAttestation
+                                ─► validates AttestationStartRequest
+                                ─► capStream.RequestAttestation(peer_id)
+                                          │ libp2p /gyza/capability-challenge/1.0.0
+                                          ▼
+                                                                handleIncoming
+                                                                ─► extract applicant pubkey
+                                                                   from libp2p RemotePeer
+                                                                ─► capMgr.IssueChallenge
+                                                                ─► writeFrame(Challenge)
+                              ◄──────────────────────────────── (Challenge proto on wire)
+                              ─► forward Challenge over gRPC
+       ◄────────────────────── (Challenge frame on bidi stream)
+eval_callback(challenge):
+  ─► verify validator's signature
+  ─► run_eval_locally on shared runner
+       (NEW workdir per challenge, validator-chosen nonce)
+  ─► build TaskResult per task
+       (icp_payload_bytes = _payload_bytes(env), agent-signed)
+  ─► build ResponseBody, sign with COMPOSITOR key (deterministic)
+  ─► attach proposed_attestation_body (same for ALL validators!)
+       │
+       ▼
+       (ChallengeResponse frame on bidi stream)        ─────────►
+                              ─► forward over libp2p
+                                                                 readFrame(ChallengeResponse)
+                                                                 capMgr.VerifyResponse
+                                                                 ─► verify ApplicantSignature
+                                                                 ─► verifyTaskResult per task
+                                                                    (ICP envelope crypto check)
+                                                                 ─► verifyProposedAttestationBody
+                                                                    (6 plausibility checks)
+                                                                 ─► sign(canonicalMarshal(body))
+                                                                 ◄──── CoSignature on wire
+                              ◄──────────────────────────────── (VerifyResponseResult)
+                              ─► emit Outcome to gRPC stream
+       ◄────────────────────── (Outcome frame: success + cosig)
+
+       (orchestrator dedups by validator_pubkey, accumulates cosigs;
+        early-exit once len(cosigs) >= quorum_k)
+
+  ─► assemble AttestationCert(body=proposed_body, co_signatures=[...])
+  ─► cap.verify_attestation(cert)            (cross-language self-verify)
+  ─► cap.publish_attestation(cert)
+                              ─► dht.PublishAttestation
+                                ─► record at /gyza/attestations/{compositor_pubkey}
+  ─► write JSON cert artifact ~/.gyza/attestations/cert-<pubkey16>.json
+
+Tier-3 cert is now in the DHT and any peer can fetch + verify.
+(But — see §6 #21f — find_agents doesn't yet REQUIRE this; the
+attestation_tier field on advertisements is still self-reported.)
 ```
 
 ---
@@ -761,6 +865,9 @@ Python (2 new in `tests/test_attestation_bridge.py`):
     related to bridge work.
 
 ### What's left of #21 after this session
+
+(Both items below were closed in Session 14 — see §5-pre-2. Original
+Session 13 outlook preserved for historical context.)
 
   * **#21d — DHT-driven validator selection.** `CapabilityClient`
     needs a `request_tier3_attestation(applicant) → AttestationCert | None`
@@ -1555,73 +1662,57 @@ semantics. Not worth it for this flow.
 **Estimated effort:** 1–2 days. Most of the work is gRPC plumbing
 plus the Python orchestrator that wraps existing primitives.
 
-### #21d — DHT-driven validator selection
+### #21d — DHT-driven validator selection (CLOSED — Session 14)
 
-**Why:** Today `run_attestation` takes a caller-supplied list of
-Validators. In production the applicant must DISCOVER Tier-3
-validators via the DHT.
+See §5-pre-2 for the full session narrative. Summary: implemented
+``request_tier3_attestation`` in ``gyza/network/attestation_adapter.py``.
+Discovers Tier-3 validators via ``netd.find_agents(min_tier=3)`` with
+a fresh random query embedding (uniform-ish bucket distribution),
+deduplicates by ``compositor_pubkey``, excludes self, extracts peer
+IDs from the first multiaddr's ``/p2p/<id>`` segment. Drives
+``request_attestation`` against each candidate sharing one
+``applicant_eval_session`` (so all cosigs sign the SAME body —
+load-bearing for quorum aggregation; see Phase A in §5-pre-2). Per-
+validator failures are SOFT; orchestrator continues until quorum_k
+cosigs collected or pool exhausted. Early-exit on quorum bounds eval
+cost in the common case. Validator-pubkey dedup matches Go's
+``VerifyAttestation`` so a single Tier-3 node can't pad a cert.
+Returns ``Tier3AttestationResult`` with cert (None on failure),
+all collected cosigs, contacted peer list, per-peer errors.
 
-**Approach:**
+Supports ``explicit_validator_peer_ids`` for test/operator override
+of the discovery step. The Phase B test
+(``test_tier3_attestation_quorum_three_validators``) uses this to
+spawn 4 daemons, mesh-connect, and assert quorum is met against an
+explicit peer list (~13s warm).
 
-```python
-# In CapabilityClient or a new Tier3AttestationClient:
-def request_tier3_attestation(self, applicant: Applicant) -> AttestationCert | None:
-    ads = self._netd.find_agents(
-        query_embedding=ATTESTATION_QUERY_EMBEDDING,  # generic query
-        k=3, min_tier=3,
-    )
-    if len(ads) < 3:
-        return None  # not enough Tier-3 validators online
-    validators = [self._stream_validator_for(ad) for ad in ads]
-    outcome = run_attestation(
-        applicant=applicant, validators=validators,
-        workdir=..., output_recorder=..., quorum_k=2,
-    )
-    return outcome.cert
-```
+**Open trip-wire:** the orchestrator does NOT skip validators the
+applicant has prior credit history with. Collusion-prone in a
+mature economy; benign for Phase 3. Document as a Phase 4
+follow-up if/when reputation becomes load-bearing for routing.
 
-`_stream_validator_for(ad)` wraps the libp2p stream protocol in a
-Validator-shaped façade (issues challenges by sending the
-ChallengeRequest frame, returns Outcome by reading ChallengeOutcome).
+### #21e — DHT publication of the cert + `gyza global attest --tier 3` CLI (CLOSED — Session 14)
 
-**Trip-wires:**
+See §5-pre-2 for the full session narrative. Summary: extended
+``cmd_global_attest`` with ``--tier {1,3}`` flag (default 1
+preserves Session 11's local-only mode). ``--tier 3`` mode probes
+the daemon, calls ``request_tier3_attestation``, prints per-peer
+outcome, calls ``cap.publish_attestation(cert)``, writes a JSON
+cert artifact to ``~/.gyza/attestations/cert-<pubkey16>.json``.
+Supports ``--peer`` (repeatable, explicit validator peer IDs),
+``--quorum-k``, ``--candidate-n``.
 
-  * Don't pick validators the applicant has prior credit history
-    with — collusion-prone. Random selection from `find_agents`
-    results, dedup by compositor pubkey.
-  * Three validators yielding fewer than 2 cosigs (quorum failure)
-    should NOT auto-retry against three different validators; that
-    leaks the failure to more peers. Surface to the operator, let
-    them re-issue manually.
+End-to-end test ``test_tier3_attestation_publish_and_fetch`` runs
+4 daemons through the full attest → publish → fetch → verify
+round-trip in ~12s warm.
 
-### #21e — DHT publication of the cert + `gyza global attest --tier 3` CLI
-
-**Why:** A cert that no one can find is useless. Publish to DHT keyed
-by applicant compositor pubkey so peers can fetch + verify.
-
-**Approach:**
-
-  * Define the protobuf shape of `AttestationCert` mirroring the
-    Python dataclass. Map dataclass → proto via field-by-field
-    population.
-  * Call existing `cap.publish_attestation(cert_proto)` after a
-    successful `run_attestation` returns a non-None cert.
-  * Wire `gyza global attest --tier 3` CLI (extend the existing
-    `gyza global attest` from Session 11): if `--tier 3`, run the
-    full DHT-discovery + cross-network attestation flow.
-
-**Trip-wires:**
-
-  * The cert is signed by N validators; the DHT record itself doesn't
-    need an additional signature wrapper — go-libp2p-kad-dht already
-    signs records. But peers fetching the cert must verify each cosig
-    via `verify_attestation_cert`; trusting the DHT record's
-    well-formedness is NOT trusting the cert's content.
-  * Cert TTL on the DHT record should be ≤ `expires_at_ns - now`
-    so consumers can't fetch an already-expired cert.
-
-**Estimated effort for #21c–e:** 2–3 days, mostly Go protocol handler
-+ Python stream client. The algorithmic work is done.
+**Open trip-wire:** the daemon's ``PublishAttestation`` doesn't
+bound the DHT record's TTL by ``cert.expires_at_ns - now``. A
+near-expiry cert can be fetched and "verified" moments before
+``VerifyAttestation`` would reject it for staleness. Mitigated in
+practice by ``VerifyAttestation``'s freshness check, but worth
+fixing as part of #21f when verify-on-fetch lands on the routing
+hot path.
 
 <!-- #22 (sandbox) and #24 (peer cache + supervisor) closed in Session 10;
 #21a (eval suite + Tier-1 self-attest) and #21b (cross-network protocol
@@ -2163,6 +2254,13 @@ had a 20s deadline that's tight on cold ST load). If you hit a
 similar timing flake in the fast slice, run the test in isolation —
 if it passes there in 30s+ but fails in the suite at 20s, the
 deadline is the bug, not the code under test. Bump and document.
+
+A note on `TestSenderSeqDedupRejects` (gossip): timing-flaky under
+load. Session 13 saw it fail once intermittently; passes 3-of-3 in
+isolation. Verified pre-existing (not introduced by recent work). If
+you hit it, retry in isolation before assuming your change is at
+fault. The test asserts gossipsub mesh formation timing which is
+sensitive to CPU contention from other tests running in parallel.
 
 ---
 
