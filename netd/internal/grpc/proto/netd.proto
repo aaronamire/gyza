@@ -397,6 +397,26 @@ message ResponseBody {
 message ChallengeResponse {
   ResponseBody body                = 1;
   bytes        applicant_signature = 2;  // Ed25519 over Marshal(body)
+
+  // proposed_attestation_body is the applicant's proposal for the
+  // canonical bytes that EVERY validator should sign. Without it,
+  // each validator generates its own AttestationBody with its own
+  // wall-clock IssuedAtNs, producing cosignatures over different
+  // bytes that cannot aggregate into a quorum-verifiable cert.
+  //
+  // Validators that receive a proposed body MUST verify plausibility
+  // before signing:
+  //   * applicant_pubkey matches the challenge's applicant_pubkey
+  //   * tier_granted == IssuedTier (= 3)
+  //   * |now - issued_at_ns| <= MaxClockSkew  (≈ 1h)
+  //   * expires_at_ns - issued_at_ns <= MaxAttestationTTL  (≈ 90d)
+  //   * expires_at_ns > now
+  //   * challenge_task_ids equals THIS challenge's task_ids set
+  //
+  // If proposed_attestation_body is absent (legacy callers), the
+  // validator falls back to authoring its own body — useful for the
+  // single-validator unit-test path that doesn't need quorum.
+  AttestationBody proposed_attestation_body = 3;
 }
 
 // TaskResult carries the ICP envelope as the bytes Python actually

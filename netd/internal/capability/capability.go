@@ -65,6 +65,21 @@ const DefaultChallengeTTL = 5 * time.Minute
 // re-attest. 30 days mirrors the spec.
 const DefaultAttestationTTL = 30 * 24 * time.Hour
 
+// MaxAttestationTTL caps how far in the future an applicant-proposed
+// AttestationBody's expires_at_ns may land. 90 days matches CLAUDE.md
+// §5b's stated invariant for Session 11's in-process flow; longer
+// would let an applicant mint a near-perpetual cert from a single
+// successful eval, breaking the "re-attest periodically" property
+// that the network depends on for capability freshness.
+const MaxAttestationTTL = 90 * 24 * time.Hour
+
+// MaxAttestationClockSkew bounds how far an applicant-proposed
+// IssuedAtNs may differ from the validator's local clock. Generous
+// enough to tolerate poorly-synced nodes (NTP-less laptops, embedded
+// devices), tight enough that an attacker can't mint a long-past
+// cert that's "fresh" from the validator's POV.
+const MaxAttestationClockSkew = 1 * time.Hour
+
 // NonceSize is the byte length of the per-Challenge nonce. 32 bytes
 // = 256 bits of unpredictability, which is overkill for replay
 // detection but cheap.
@@ -319,13 +334,34 @@ func (m *ChallengeManager) VerifyResponse(
 	}
 
 	// All gates passed — issue a CoSignature on the AttestationBody.
+	//
+	// Body source: prefer the applicant-proposed body when present.
+	// Without that, multiple validators called from one applicant
+	// produce DIFFERENT bodies (different IssuedAtNs) and their
+	// cosigs cannot aggregate into a quorum-verifiable cert. The
+	// applicant-proposed path lets one body span the quorum;
+	// validators verify plausibility before signing.
+	//
+	// Backward-compat: if proposed_attestation_body is absent (legacy
+	// callers, single-validator unit tests), the validator authors
+	// its own body — single-cosig outcome only useful for testing.
 	now := m.now()
-	attestBody := &pb.AttestationBody{
-		ApplicantPubkey:    body.ApplicantPubkey,
-		IssuedAtNs:         now.UnixNano(),
-		ExpiresAtNs:        now.Add(DefaultAttestationTTL).UnixNano(),
-		TierGranted:        IssuedTier,
-		ChallengeTaskIds:   append([]string{}, cb.TaskIds...),
+	var attestBody *pb.AttestationBody
+	if response.ProposedAttestationBody != nil {
+		if err := verifyProposedAttestationBody(
+			response.ProposedAttestationBody, cb, now,
+		); err != nil {
+			return nil, fmt.Errorf("proposed attestation body: %w", err)
+		}
+		attestBody = response.ProposedAttestationBody
+	} else {
+		attestBody = &pb.AttestationBody{
+			ApplicantPubkey:    body.ApplicantPubkey,
+			IssuedAtNs:         now.UnixNano(),
+			ExpiresAtNs:        now.Add(DefaultAttestationTTL).UnixNano(),
+			TierGranted:        IssuedTier,
+			ChallengeTaskIds:   append([]string{}, cb.TaskIds...),
+		}
 	}
 	abBytes, err := canonicalMarshal(attestBody)
 	if err != nil {
@@ -337,6 +373,81 @@ func (m *ChallengeManager) VerifyResponse(
 		Signature:       sig,
 		SignedAtNs:      now.UnixNano(),
 	}, nil
+}
+
+// verifyProposedAttestationBody runs the plausibility checks a
+// validator MUST apply to an applicant-supplied AttestationBody
+// before signing it. Each check defends against a distinct attack:
+//
+//   * applicant_pubkey mismatch — applicant tries to bind the cert
+//     to a different identity than the one challenged.
+//   * tier_granted != IssuedTier — applicant tries to mint a
+//     non-Tier-3 cert via this protocol.
+//   * clock-skew window — applicant tries to mint a cert
+//     timestamped in the distant past or future to evade freshness
+//     checks at the consumer.
+//   * lifetime > MaxAttestationTTL — applicant tries to mint a
+//     ~perpetual cert from one successful eval.
+//   * already-expired — applicant tries to mint a DOA cert (less
+//     of a real attack, more of a "why are we doing this" guard).
+//   * task_ids mismatch — applicant tries to claim eval validation
+//     against a task set this validator didn't actually challenge
+//     on, getting a cosig that misrepresents what was verified.
+func verifyProposedAttestationBody(
+	body *pb.AttestationBody,
+	challenge *pb.ChallengeBody,
+	now time.Time,
+) error {
+	if body.ApplicantPubkey != challenge.ApplicantPubkey {
+		return errors.New("applicant_pubkey mismatch")
+	}
+	if body.TierGranted != IssuedTier {
+		return fmt.Errorf("tier_granted %d != %d", body.TierGranted, IssuedTier)
+	}
+	nowNs := now.UnixNano()
+	skewNs := body.IssuedAtNs - nowNs
+	if skewNs < 0 {
+		skewNs = -skewNs
+	}
+	if skewNs > int64(MaxAttestationClockSkew) {
+		return fmt.Errorf(
+			"issued_at clock skew %s > max %s",
+			time.Duration(skewNs), MaxAttestationClockSkew,
+		)
+	}
+	if body.ExpiresAtNs <= body.IssuedAtNs {
+		return errors.New("expires_at_ns must be after issued_at_ns")
+	}
+	lifetime := body.ExpiresAtNs - body.IssuedAtNs
+	if lifetime > int64(MaxAttestationTTL) {
+		return fmt.Errorf(
+			"lifetime %s > max %s",
+			time.Duration(lifetime), MaxAttestationTTL,
+		)
+	}
+	if body.ExpiresAtNs <= nowNs {
+		return errors.New("expires_at_ns is already past")
+	}
+	if !sameTaskIDs(body.ChallengeTaskIds, challenge.TaskIds) {
+		return errors.New("challenge_task_ids mismatch")
+	}
+	return nil
+}
+
+// sameTaskIDs returns true iff a and b are the same multiset of
+// strings. Order matters here because the task list is a sequence
+// in the canonical eval suite — comparing by sorted unique would
+// silently accept duplicates the canonical list never has.
+func sameTaskIDs(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // verifyTaskResult runs the cross-language ICP-envelope check. Returns

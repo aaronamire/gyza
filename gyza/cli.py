@@ -595,32 +595,42 @@ def cmd_global_find(args: argparse.Namespace) -> int:
 
 def cmd_global_attest(args: argparse.Namespace) -> int:
     """
-    Run the canonical eval suite locally and emit a Tier-1
-    self-signed attestation artifact.
+    Run the canonical eval suite and emit an attestation artifact.
 
-    What this command does:
+    Two modes:
 
-      1. Builds an ephemeral AgentRunner backed by the user's
-         compositor key + an executor specialized to solve the eval
-         suite (mock-eval; no LLM required for Tier 1).
-      2. Drives the suite via ``run_eval_locally`` — every task
-         posts an intent + work item, the runner claims, executes,
-         and signs an ICP envelope.
-      3. Verifies the bundle via ``verify_eval_results`` — the same
-         pure verifier a remote Tier-3 validator will run.
-      4. On pass: writes a JSON attestation artifact to disk
-         (``~/.gyza/attestations/self-<nonce>.json`` by default).
+      ``--tier 1`` (default) — local self-attestation.
 
-    What this command does NOT yet do (deferred until the
-    ``/gyza/capability-challenge/1.0.0`` libp2p protocol lands):
+        1. Builds an ephemeral AgentRunner under the user's compositor.
+        2. Drives the suite via ``run_eval_locally``.
+        3. Verifies via ``verify_eval_results``.
+        4. On pass: writes ``~/.gyza/attestations/self-<nonce>.json``
+           signed by the compositor key.
 
-      * Talk to remote validators
-      * Collect 2-of-3 co-signatures
-      * Publish to the DHT
+      ``--tier 3`` — cross-network quorum attestation.
+
+        1. Probes the daemon (must be running) for its peer ID.
+        2. Either uses ``--peer`` (one or more explicit validator
+           peer IDs) or, with no ``--peer``, calls
+           ``find_agents(min_tier=3, k=candidate_n)`` for DHT
+           discovery.
+        3. Drives ``request_tier3_attestation`` against each
+           candidate; collects ≥``--quorum-k`` cosignatures over
+           one applicant-proposed AttestationBody.
+        4. Self-verifies the assembled cert via the daemon's
+           CapabilityService.VerifyAttestation.
+        5. Publishes the cert to the DHT under
+           ``/gyza/attestations/{compositor_pubkey}`` via
+           ``CapabilityService.PublishAttestation``.
+        6. Writes a JSON-serialized cert to
+           ``~/.gyza/attestations/cert-<nonce>.json`` for inspection.
 
     Exit codes: 0 on attestation pass, 1 on attestation failure
-    (some task did not verify), 2 on environment / setup errors.
+    (some task did not verify, or quorum not met), 2 on environment
+    / setup errors (no compositor key, daemon not running, etc.).
     """
+    if getattr(args, "tier", 1) == 3:
+        return _cmd_global_attest_tier3(args)
     import json as _json
     import secrets
     import tempfile
@@ -781,11 +791,177 @@ def cmd_global_attest(args: argparse.Namespace) -> int:
     print(f"attestation PASSED — Tier {payload['tier']}")
     print(f"artifact: {artifact_path}")
     print()
-    print("note: cross-network (Tier 3) attestation requires the")
-    print("/gyza/capability-challenge/1.0.0 libp2p protocol, which")
-    print("is not yet implemented. This artifact is locally-signed")
-    print("and serves as proof of working machinery only.")
+    print("note: this is a Tier-1 self-attestation. Run with")
+    print("`--tier 3` to collect a quorum-signed cert from peer")
+    print("validators and publish it to the DHT.")
     return 0
+
+
+def _cmd_global_attest_tier3(args: argparse.Namespace) -> int:
+    """
+    Cross-network Tier-3 attestation. See ``cmd_global_attest`` for the
+    full mode contract; this function implements the ``--tier 3`` branch.
+
+    Failure modes (each maps to a distinct exit code):
+
+      2 — env: no compositor key, daemon socket unreachable, or no
+          validators discovered (and none provided via --peer).
+      1 — quorum not met: contacted validators all rejected, or fewer
+          than --quorum-k accepted within their per-validator timeout.
+      0 — success: cert assembled, self-verified, and published to DHT.
+    """
+    import json as _json
+    from pathlib import Path as _Path
+
+    from gyza.identity import LocalCompositor
+    from gyza.network.attestation_adapter import (
+        Tier3AttestationError,
+        request_tier3_attestation,
+    )
+    from gyza.network.netd_client import CapabilityClient, NetdClient
+
+    cfg = load_config()
+    key_path = _resolve(cfg.compositor_key_path)
+    if not _Path(key_path).exists():
+        print(
+            f"compositor key not found at {key_path}; run `gyza init` first",
+            file=sys.stderr,
+        )
+        return 2
+
+    socket_path = str(_resolve(cfg.netd_socket_path))
+    probe = NetdClient(socket_path)
+    if not probe.is_running():
+        print(
+            f"daemon not running at {socket_path}; "
+            f"run `gyza global start` first",
+            file=sys.stderr,
+        )
+        probe.close()
+        return 2
+
+    compositor = LocalCompositor(str(key_path))
+    info = probe.get_node_info()
+    print(f"applicant compositor: {compositor.pubkey_hex[:32]}...")
+    print(f"applicant peer_id:    {info.peer_id}")
+    if args.peer:
+        print(f"validators (--peer):  {len(args.peer)} explicit")
+    else:
+        print(f"validators (DHT):     up to {args.candidate_n} discovered")
+    print(f"quorum:               {args.quorum_k} cosignatures")
+    print()
+
+    explicit = args.peer if args.peer else None
+    try:
+        with NetdClient(socket_path) as nc, CapabilityClient(socket_path) as cap:
+            result = request_tier3_attestation(
+                cap=cap,
+                netd=nc,
+                compositor=compositor,
+                quorum_k=args.quorum_k,
+                candidate_n=args.candidate_n,
+                explicit_validator_peer_ids=explicit,
+                self_verify=True,
+            )
+    except Tier3AttestationError as e:
+        print(f"tier-3 attestation failed: {e}", file=sys.stderr)
+        probe.close()
+        return 2
+    finally:
+        probe.close()
+
+    print(f"contacted {len(result.contacted_peer_ids)} validator(s)")
+    for pid in result.contacted_peer_ids:
+        marker = "✓" if any(c.validator_pubkey == _peer_to_pubkey_hint(pid)
+                             for c in result.cosignatures) else "?"
+        err = result.per_peer_errors.get(pid, "")
+        if err:
+            print(f"  ✗  {pid[:24]}...  {err}")
+        else:
+            print(f"  ✓  {pid[:24]}...  cosig accepted")
+    print()
+
+    if result.cert is None:
+        print(
+            f"quorum not met: {len(result.cosignatures)} of "
+            f"{args.quorum_k} cosigs collected",
+            file=sys.stderr,
+        )
+        if "_self_verify" in result.per_peer_errors:
+            print(
+                f"  self-verify: {result.per_peer_errors['_self_verify']}",
+                file=sys.stderr,
+            )
+        return 1
+
+    print(
+        f"quorum met: {len(result.cert.co_signatures)} cosignatures over "
+        f"applicant body"
+    )
+    print(f"  tier:         {result.cert.body.tier_granted}")
+    print(f"  issued:       {result.cert.body.issued_at_ns} (ns)")
+    print(f"  expires:      {result.cert.body.expires_at_ns} (ns)")
+    print()
+
+    # Publish to DHT.
+    try:
+        with CapabilityClient(socket_path) as cap:
+            dht_key = cap.publish_attestation(result.cert)
+    except Exception as e:  # noqa: BLE001
+        print(
+            f"cert assembled but publish failed: {e}",
+            file=sys.stderr,
+        )
+        # Still write the artifact so the operator has it.
+        _write_tier3_artifact(result.cert, compositor.pubkey_hex)
+        return 1
+
+    print(f"published to DHT: {dht_key}")
+    artifact_path = _write_tier3_artifact(result.cert, compositor.pubkey_hex)
+    print(f"artifact:         {artifact_path}")
+    print()
+    print(f"Tier-3 attestation PASSED")
+    return 0
+
+
+def _peer_to_pubkey_hint(_peer_id: str) -> str:
+    """
+    Placeholder for peer_id → compositor_pubkey resolution. The
+    libp2p PeerID encodes the Ed25519 pubkey but converting requires
+    libp2p-style multibase decoding. For the CLI's progress display
+    we don't actually need this — used as a sentinel that always
+    fails the `any(... == ...)` comparison so the per-peer marker
+    falls back to "?".
+    """
+    return ""
+
+
+def _write_tier3_artifact(cert, compositor_pubkey_hex: str):
+    """Write a JSON-serialized cert (proto fields) to disk for inspection."""
+    import json as _json
+    from pathlib import Path as _Path
+
+    artifact_dir = _Path(_resolve("~/.gyza/attestations"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    artifact_path = artifact_dir / f"cert-{compositor_pubkey_hex[:16]}.json"
+    payload = {
+        "schema": "gyza.attestation.cert/v1",
+        "tier": cert.body.tier_granted,
+        "applicant_pubkey": cert.body.applicant_pubkey,
+        "issued_at_ns": cert.body.issued_at_ns,
+        "expires_at_ns": cert.body.expires_at_ns,
+        "challenge_task_ids": list(cert.body.challenge_task_ids),
+        "co_signatures": [
+            {
+                "validator_pubkey": c.validator_pubkey,
+                "signature": c.signature.hex(),
+                "signed_at_ns": c.signed_at_ns,
+            }
+            for c in cert.co_signatures
+        ],
+    }
+    artifact_path.write_text(_json.dumps(payload, indent=2))
+    return artifact_path
 
 
 def cmd_metrics_start(args: argparse.Namespace) -> int:
@@ -1079,9 +1255,37 @@ def build_parser() -> argparse.ArgumentParser:
     p_find.add_argument(
         "--min-tier", type=int, default=0, help="minimum attestation tier",
     )
-    globsub.add_parser(
+    p_attest = globsub.add_parser(
         "attest",
-        help="run the canonical eval suite + emit a Tier-1 self-attestation",
+        help="run the canonical eval suite + emit an attestation artifact",
+    )
+    p_attest.add_argument(
+        "--tier", type=int, choices=(1, 3), default=1,
+        help=(
+            "attestation tier. 1 = local self-attestation (default, "
+            "no daemon needed). 3 = cross-network quorum attestation "
+            "(requires running daemon + reachable Tier-3 validators)."
+        ),
+    )
+    p_attest.add_argument(
+        "--peer", action="append", default=[],
+        help=(
+            "(--tier 3 only) explicit validator peer ID. May be repeated. "
+            "Skips DHT discovery; uses these peers in order. The applicant "
+            "must already be libp2p-connected to each (use `gyza global "
+            "connect` if needed)."
+        ),
+    )
+    p_attest.add_argument(
+        "--quorum-k", type=int, default=2,
+        help="(--tier 3 only) cosignatures needed for quorum (default 2)",
+    )
+    p_attest.add_argument(
+        "--candidate-n", type=int, default=3,
+        help=(
+            "(--tier 3 only) max validators to contact via DHT discovery "
+            "(ignored when --peer is provided; default 3)"
+        ),
     )
     p_proj = globsub.add_parser("project", help="project lifecycle")
     projsub = p_proj.add_subparsers(dest="project_cmd", required=True)

@@ -52,9 +52,12 @@ LOG = logging.getLogger("gyza.attestation_adapter")
 
 __all__ = [
     "EvalCallbackError",
+    "Tier3AttestationError",
+    "Tier3AttestationResult",
     "applicant_eval_session",
     "make_eval_callback",
     "build_response_for_challenge",
+    "request_tier3_attestation",
 ]
 
 
@@ -66,6 +69,41 @@ class EvalCallbackError(RuntimeError):
     the validator side reports as a clean stream close. Callers see
     the original exception via the gRPC stream's error path.
     """
+
+
+class Tier3AttestationError(RuntimeError):
+    """
+    Raised when the Tier-3 orchestration as a whole cannot succeed —
+    insufficient validators discovered, quorum not met after polling
+    every candidate, or self-verification of the assembled cert
+    failed. Distinct from per-validator rejection (which is a soft
+    failure that the orchestrator handles internally).
+    """
+
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Tier3AttestationResult:
+    """
+    Outcome of a ``request_tier3_attestation`` call. Always inspectable;
+    ``cert`` is non-None on success.
+
+    ``cert``               — the assembled, self-verified
+                              AttestationCert proto. None on quorum
+                              failure.
+    ``cosignatures``       — every cosig collected (incl. those
+                              beyond the quorum threshold).
+    ``contacted_peer_ids`` — peer IDs the orchestrator drove
+                              `request_attestation` against, in order.
+    ``per_peer_errors``    — peer_id → error string for validators
+                              that rejected or were unreachable.
+    """
+    cert: pb.AttestationCert | None
+    cosignatures: list[pb.CoSignature]
+    contacted_peer_ids: list[str]
+    per_peer_errors: dict[str, str]
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +118,9 @@ def applicant_eval_session(
     tasks: list[EvalTask] = EVAL_TASKS,
     executor_factory: Callable[[], Callable[[str, dict], dict]] = make_mock_eval_executor,
     overall_timeout_s: float = 120.0,
+    proposed_attestation_body: pb.AttestationBody | None = None,
+    expected_validator_task_ids: list[str] | None = None,
+    attestation_lifetime_s: float = 30 * 24 * 3600,
 ) -> Iterator[Callable[[pb.Challenge], pb.ChallengeResponse]]:
     """
     Context manager that owns an ephemeral AgentRunner under
@@ -88,14 +129,35 @@ def applicant_eval_session(
     is stopped, the temp directory removed.
 
     Reusing the same runner across multiple Challenge frames is the
-    intended pattern: a future Tier-3 orchestrator that contacts 3
-    validators in sequence pays the runner-bootstrap cost once,
-    not three times. Each Challenge is run in its own per-call
-    workdir (under ``scratch_dir/eval_<nonce>/``), so cross-task and
-    cross-call isolation is preserved.
+    intended pattern: the Tier-3 orchestrator (#21d) contacts N
+    validators in sequence and pays the runner-bootstrap cost once.
+    Each Challenge is run in its own per-call workdir (under
+    ``scratch_dir/eval_<nonce>/``), so cross-task and cross-call
+    isolation is preserved.
 
     ``scratch_dir`` defaults to a fresh tempdir. Callers who need to
     inspect the on-disk state (debugging) can pass an explicit path.
+
+    ``proposed_attestation_body`` — load-bearing for #21d quorum
+    aggregation. Every validator must sign IDENTICAL canonical bytes
+    or their cosignatures cannot aggregate into a quorum-verifiable
+    cert. The applicant authors ONE body and includes it (unmodified)
+    in every ChallengeResponse. If None, the session generates a
+    fresh body keyed to the applicant's compositor pubkey, with
+    timestamps from `time.time_ns()` and a `tier_granted` of 3.
+    For multi-validator orchestration ALL validators MUST be called
+    against the SAME session (so they all see the same body).
+
+    ``expected_validator_task_ids`` — locks the body's
+    ``challenge_task_ids`` to a specific task list. Required when a
+    proposed body is being constructed (the validator's plausibility
+    check rejects bodies whose task_ids don't match the validator's
+    challenge). Defaults to the canonical EVAL_TASKS ids — matches
+    what every gyza-netd daemon currently issues.
+
+    ``attestation_lifetime_s`` — bounds how long the cert stays
+    valid. Default 30 days; capped at 90 days by the validator's
+    plausibility check (capability.MaxAttestationTTL).
     """
     # Lazy imports — these pull in heavy ML deps (numpy is fine,
     # but EpisodicMemory ➜ LanceDB ➜ pyarrow loads big native libs).
@@ -157,6 +219,21 @@ def applicant_eval_session(
     )
     runner.start()
 
+    # Build the proposed AttestationBody once. Every validator that
+    # accepts a Challenge issued during this session MUST sign these
+    # exact bytes, so they aggregate into a quorum-verifiable cert.
+    if proposed_attestation_body is None:
+        if expected_validator_task_ids is None:
+            expected_validator_task_ids = [t.task_id for t in tasks]
+        now_ns = time.time_ns()
+        proposed_attestation_body = pb.AttestationBody(
+            applicant_pubkey=compositor.pubkey_hex,
+            issued_at_ns=now_ns,
+            expires_at_ns=now_ns + int(attestation_lifetime_s * 1_000_000_000),
+            tier_granted=3,
+            challenge_task_ids=list(expected_validator_task_ids),
+        )
+
     try:
         cb = make_eval_callback(
             compositor=compositor,
@@ -167,6 +244,7 @@ def applicant_eval_session(
             scratch_dir=scratch_dir,
             tasks=tasks,
             overall_timeout_s=overall_timeout_s,
+            proposed_attestation_body=proposed_attestation_body,
         )
         yield cb
     finally:
@@ -189,6 +267,7 @@ def make_eval_callback(
     scratch_dir: Path,
     tasks: list[EvalTask] = EVAL_TASKS,
     overall_timeout_s: float = 120.0,
+    proposed_attestation_body: pb.AttestationBody | None = None,
 ) -> Callable[[pb.Challenge], pb.ChallengeResponse]:
     """
     Build a callable that turns a daemon-delivered Challenge into a
@@ -214,6 +293,7 @@ def make_eval_callback(
             scratch_dir=scratch_dir,
             tasks_by_id=tasks_by_id,
             overall_timeout_s=overall_timeout_s,
+            proposed_attestation_body=proposed_attestation_body,
         )
 
     return _callback
@@ -230,6 +310,7 @@ def build_response_for_challenge(
     scratch_dir: Path,
     tasks_by_id: dict[str, EvalTask],
     overall_timeout_s: float = 120.0,
+    proposed_attestation_body: pb.AttestationBody | None = None,
 ) -> pb.ChallengeResponse:
     """
     The hot path. Takes a validator's Challenge proto and returns a
@@ -361,7 +442,253 @@ def build_response_for_challenge(
             f"compositor.sign produced non-hex signature: {e}"
         ) from e
 
-    return pb.ChallengeResponse(
+    response = pb.ChallengeResponse(
         body=body,
         applicant_signature=sig_bytes,
     )
+    if proposed_attestation_body is not None:
+        # Field-by-field copy so the caller's instance isn't mutated by
+        # protobuf's reference assignment. The validator's plausibility
+        # check rejects bodies whose challenge_task_ids don't match
+        # THIS challenge's task_ids, so callers driving multi-validator
+        # quorum MUST ensure every validator they contact uses the
+        # same canonical task list (gyza-netd's main.go currently
+        # hardcodes this; a future negotiation protocol could relax it).
+        response.proposed_attestation_body.CopyFrom(proposed_attestation_body)
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Tier-3 orchestrator — discover validators, drive quorum attestation
+# ---------------------------------------------------------------------------
+
+def request_tier3_attestation(
+    *,
+    cap,  # CapabilityClient
+    netd,  # NetdClient
+    compositor: LocalCompositor,
+    quorum_k: int = 2,
+    candidate_n: int = 3,
+    explicit_validator_peer_ids: list[str] | None = None,
+    discovery_query_embedding=None,
+    eval_overall_timeout_s: float = 120.0,
+    per_validator_timeout_s: float = 130.0,
+    attestation_lifetime_s: float = 30 * 24 * 3600,
+    self_verify: bool = True,
+) -> Tier3AttestationResult:
+    """
+    Drive Tier-3 attestation against ≥``quorum_k`` of ≤``candidate_n``
+    validators, returning a self-verified ``AttestationCert`` proto on
+    success.
+
+    Validator selection: if ``explicit_validator_peer_ids`` is supplied
+    the orchestrator uses exactly those peers in order (skips DHT). This
+    is the test path AND the operator-override path. Otherwise the
+    orchestrator calls ``netd.find_agents(min_tier=3, k=candidate_n)``
+    against ``discovery_query_embedding`` (or a fresh random vector if
+    None), deduplicates by ``compositor_pubkey``, and resolves each
+    advertisement's first multiaddr to a peer_id by parsing the
+    trailing ``/p2p/<id>`` segment.
+
+    Per-validator failures are SOFT — they're recorded in
+    ``per_peer_errors`` and the orchestrator continues to the next
+    candidate until either ``quorum_k`` cosigs are collected or the
+    candidate pool is exhausted. A complete pool exhaustion below
+    quorum returns ``cert=None``; callers then surface to the operator.
+
+    Cert assembly: every collected cosignature signs the SAME
+    ``AttestationBody`` proposed by ``applicant_eval_session``. The
+    quorum is k DISTINCT validator pubkeys (validator-pubkey
+    deduplication happens here AND inside ``capability.VerifyAttestation``,
+    so a single Tier-3 node can't pad a cert by signing multiple times).
+
+    On success: builds an ``AttestationCert`` proto, optionally calls
+    ``cap.verify_attestation`` for cross-language self-verification
+    (defaults to True; pass False to skip the network round-trip in
+    contexts where the daemon is the same one that's about to publish).
+    """
+    if quorum_k < 1:
+        raise ValueError(f"quorum_k must be ≥ 1, got {quorum_k}")
+    if candidate_n < quorum_k:
+        raise ValueError(
+            f"candidate_n ({candidate_n}) < quorum_k ({quorum_k})"
+        )
+
+    # Step 1: resolve the candidate peer ID list.
+    if explicit_validator_peer_ids is not None:
+        candidate_peer_ids = list(explicit_validator_peer_ids)
+        LOG.info(
+            "[tier3] using %d explicit validator peer ids",
+            len(candidate_peer_ids),
+        )
+    else:
+        candidate_peer_ids = _discover_tier3_validators(
+            netd=netd,
+            n=candidate_n,
+            query_embedding=discovery_query_embedding,
+            self_compositor_pubkey=compositor.pubkey_hex,
+        )
+        if len(candidate_peer_ids) < quorum_k:
+            raise Tier3AttestationError(
+                f"DHT yielded {len(candidate_peer_ids)} Tier-3 validators, "
+                f"need ≥{quorum_k} for quorum"
+            )
+
+    # Step 2: construct the proposed AttestationBody — every validator
+    # MUST sign these exact bytes for cosignatures to aggregate. Using
+    # gyza-netd's hardcoded canonical task list (kept in sync with
+    # gyza/capability_eval.py's EVAL_TASKS).
+    now_ns = time.time_ns()
+    proposed_body = pb.AttestationBody(
+        applicant_pubkey=compositor.pubkey_hex,
+        issued_at_ns=now_ns,
+        expires_at_ns=now_ns + int(attestation_lifetime_s * 1_000_000_000),
+        tier_granted=3,
+        challenge_task_ids=[t.task_id for t in EVAL_TASKS],
+    )
+
+    # Step 3: open one applicant session, drive each validator.
+    cosigs: list[pb.CoSignature] = []
+    seen_validator_pubkeys: set[str] = set()
+    contacted: list[str] = []
+    errors: dict[str, str] = {}
+
+    with applicant_eval_session(
+        compositor,
+        proposed_attestation_body=proposed_body,
+        overall_timeout_s=eval_overall_timeout_s,
+    ) as eval_cb:
+        for peer_id in candidate_peer_ids:
+            if len(cosigs) >= quorum_k:
+                break  # quorum already met
+            contacted.append(peer_id)
+            try:
+                success, cosig, err = cap.request_attestation(
+                    target_peer_id=peer_id,
+                    eval_callback=eval_cb,
+                    timeout_s=per_validator_timeout_s,
+                )
+            except Exception as e:  # noqa: BLE001 — soft per-peer failure
+                errors[peer_id] = f"transport: {e}"
+                LOG.warning("[tier3] peer %s transport error: %s", peer_id[:16], e)
+                continue
+            if not success:
+                errors[peer_id] = err or "unspecified"
+                LOG.info("[tier3] peer %s rejected: %s", peer_id[:16], err)
+                continue
+            if cosig is None:
+                errors[peer_id] = "success without cosig"
+                continue
+            if cosig.validator_pubkey in seen_validator_pubkeys:
+                # Distinct peer_ids resolving to the same compositor.
+                # The Go-side VerifyAttestation also dedups on this,
+                # but rejecting up front keeps `cosigs` valid for
+                # AssembleAttestation.
+                errors[peer_id] = "duplicate validator pubkey"
+                continue
+            seen_validator_pubkeys.add(cosig.validator_pubkey)
+            cosigs.append(cosig)
+            LOG.info(
+                "[tier3] cosig %d/%d from validator %s",
+                len(cosigs), quorum_k, cosig.validator_pubkey[:16],
+            )
+
+    if len(cosigs) < quorum_k:
+        return Tier3AttestationResult(
+            cert=None,
+            cosignatures=cosigs,
+            contacted_peer_ids=contacted,
+            per_peer_errors=errors,
+        )
+
+    # Step 4: assemble the cert. The body is the same proposed_body
+    # every validator signed; the proto carries it once and the cosigs
+    # alongside. We don't call Go's AssembleAttestation here (it'd
+    # require another RPC); the proto construction is trivial. The
+    # self-verify step below catches any aggregation bug.
+    cert = pb.AttestationCert(body=proposed_body, co_signatures=cosigs)
+
+    if self_verify:
+        valid, cosig_count, reason = cap.verify_attestation(cert)
+        if not valid:
+            return Tier3AttestationResult(
+                cert=None,
+                cosignatures=cosigs,
+                contacted_peer_ids=contacted,
+                per_peer_errors={
+                    **errors,
+                    "_self_verify": (
+                        f"assembled cert failed self-verify: {reason} "
+                        f"(cosig_count={cosig_count})"
+                    ),
+                },
+            )
+
+    return Tier3AttestationResult(
+        cert=cert,
+        cosignatures=cosigs,
+        contacted_peer_ids=contacted,
+        per_peer_errors=errors,
+    )
+
+
+def _discover_tier3_validators(
+    *,
+    netd,  # NetdClient
+    n: int,
+    query_embedding,
+    self_compositor_pubkey: str,
+) -> list[str]:
+    """
+    Query the DHT for up to ``n`` Tier-3 validator advertisements,
+    dedup by compositor pubkey, exclude self, and return their
+    peer IDs (extracted from the trailing ``/p2p/<id>`` of each
+    advertisement's first multiaddr).
+    """
+    if query_embedding is None:
+        # Random unit vector — uniform-ish bucket distribution.
+        # Different invocations get different validator subsets,
+        # which is the property we want (no bias by compositor key).
+        rng = np.random.default_rng()
+        query_embedding = rng.standard_normal(384).astype(np.float32)
+        query_embedding /= max(np.linalg.norm(query_embedding), 1e-9)
+
+    ads = netd.find_agents(
+        query_embedding=query_embedding,
+        k=n * 4,  # over-fetch — some will dedup or fail to resolve
+        min_tier=3,
+    )
+    seen_compositor: set[str] = set()
+    peer_ids: list[str] = []
+    for ad in ads:
+        if ad.compositor_pubkey == self_compositor_pubkey:
+            continue  # don't attest to ourselves
+        if ad.compositor_pubkey in seen_compositor:
+            continue
+        peer_id = _extract_peer_id_from_multiaddr(ad.multiaddrs)
+        if peer_id is None:
+            LOG.warning(
+                "[tier3] advertisement for %s had no /p2p/ multiaddr",
+                ad.compositor_pubkey[:16],
+            )
+            continue
+        seen_compositor.add(ad.compositor_pubkey)
+        peer_ids.append(peer_id)
+        if len(peer_ids) >= n:
+            break
+    return peer_ids
+
+
+def _extract_peer_id_from_multiaddr(multiaddrs: list[str]) -> str | None:
+    """Return the peer ID from the first multiaddr containing /p2p/."""
+    for ma in multiaddrs:
+        idx = ma.find("/p2p/")
+        if idx < 0:
+            continue
+        rest = ma[idx + len("/p2p/"):]
+        # Everything up to the next "/" is the peer ID.
+        slash = rest.find("/")
+        if slash < 0:
+            return rest
+        return rest[:slash]
+    return None

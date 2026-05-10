@@ -330,14 +330,222 @@ Both reputation stores now reflect the successful interaction.
 
 ## 5. What was done in recent sessions
 
-Sections newest-first. Session 13 is the most recent. The patterns
-introduced in Sessions 9–13 (fail-closed observability wrappers,
+Sections newest-first. Session 14 is the most recent. The patterns
+introduced in Sessions 9–14 (fail-closed observability wrappers,
 lex-cursor pagination, request/response correlation, length-prefixed
 JSON over subprocess pipes, atomic JSON persistence, applicant-proposed
 canonical-bytes-for-quorum-cosignatures, libp2p stream protocols
 mirroring `/gyza/message/1.0.0`'s varint-frame pattern, queue-driven
-bidi-streaming gRPC for ferry-style protocol bridges) are the freshest
-reference templates for items still on §6's list.
+bidi-streaming gRPC for ferry-style protocol bridges, k-of-n
+quorum aggregation with applicant-authored canonical body) are the
+freshest reference templates for items still on §6's list.
+
+---
+
+## 5-pre-2. Session 14 — Tier-3 quorum attestation + DHT publication (#21d + #21e)
+
+Closed the §6 #21 priority cluster. Session 13 shipped the per-validator
+bridge; this session builds the multi-validator orchestrator and the
+DHT publication path on top, plus a load-bearing fix for canonical
+bytes that the Go validator's existing design didn't satisfy.
+
+End-to-end happy path: `gyza global attest --tier 3` (or the
+programmatic `request_tier3_attestation`) discovers Tier-3 validators
+via DHT (or accepts explicit peer IDs), drives the cross-network eval
+flow against each, collects ≥k cosignatures over ONE applicant-proposed
+`AttestationBody`, assembles an `AttestationCert`, self-verifies via
+the daemon's `VerifyAttestation`, publishes to the DHT under
+`/gyza/attestations/{compositor_pubkey}`, and writes a JSON cert
+artifact to `~/.gyza/attestations/cert-<pubkey16>.json`. The 4-daemon
+integration test of record runs the full attest+publish+fetch+verify
+in ~12s warm.
+
+Cumulative tests after Session 14: 461 Python (was 459 at start of
+Session 14; +2 attestation-bridge integration). Go suite gained 2
+new tests in `internal/capability/capability_test.go` (multi-validator
+aggregation; plausibility-check matrix with 7 subtests).
+
+### The load-bearing canonicalization fix (Phase A)
+
+**Problem.** The Go validator's `VerifyResponse` authored its own
+`AttestationBody` per call — `IssuedAtNs: now.UnixNano()` is wall-
+clock, validator-local. Two validators called from the same applicant
+within milliseconds of each other produce DIFFERENT body bytes
+(different `IssuedAtNs`, different `ExpiresAtNs`). Their cosignatures
+sign different messages, so they CANNOT aggregate into a quorum-
+verifiable cert. `AssembleAttestation`'s docstring claimed validators
+"echo back identical bodies" but the code didn't.
+
+CLAUDE.md §5b explicitly described the correct design (Session 11
+Python in-process flow): **applicant proposes the body, validators
+verify plausibility and sign it.** The Go side never implemented
+that path. The unit test `TestAttestationCert` worked only because
+it manually constructed ONE body and had every signer sign that
+shared bytes — a synthetic setup that the network path doesn't
+match.
+
+**Fix.** Added `AttestationBody proposed_attestation_body = 3;` to
+`ChallengeResponse` (additive; backward-compatible). Go validator
+prefers the applicant-proposed body when present, falls back to
+authoring its own when absent. `verifyProposedAttestationBody`
+plausibility checks defend against six distinct misuse vectors:
+
+  * `applicant_pubkey` mismatch (binding to a different identity)
+  * `tier_granted != 3` (minting a non-Tier-3 cert via this protocol)
+  * issued_at clock skew > 1h (past/future-dated cert evading
+    freshness)
+  * lifetime > 90d (`MaxAttestationTTL` constant; ~perpetual cert
+    from one eval)
+  * already-expired (DOA cert; defensive)
+  * `challenge_task_ids` mismatch with THIS validator's challenge
+    (cosig misrepresenting what was verified)
+
+Backward-compat path: existing `TestAttestationCert` and Session 13's
+single-validator `TestRequestAttestationHappyPath` still pass without
+changes. They just don't get the aggregation guarantee.
+
+Python side: `applicant_eval_session` now constructs a body once at
+session entry (or accepts one via `proposed_attestation_body=` kwarg)
+and includes it (via `CopyFrom` to avoid reference aliasing) in
+EVERY `ChallengeResponse` it emits. Multi-validator orchestrators
+that share one session are guaranteed quorum-aggregatable cosigs.
+
+### Phase B — `request_tier3_attestation` orchestrator
+
+**Lives in:** `gyza/network/attestation_adapter.py`. Takes a
+`CapabilityClient` and `NetdClient`, the applicant `LocalCompositor`,
+quorum/candidate parameters, and either explicit validator peer IDs
+or a DHT-discovery mode.
+
+**Validator selection.** With `explicit_validator_peer_ids` set, uses
+exactly those peers in order (test/operator-override path). Without
+it, calls `netd.find_agents(min_tier=3, k=candidate_n*4)` against a
+fresh random query embedding (uniform-ish bucket distribution),
+deduplicates by `compositor_pubkey`, excludes self, extracts each
+ad's first multiaddr's trailing `/p2p/<id>` segment as the peer ID.
+
+**Drive loop.** Opens ONE `applicant_eval_session` (so all validators
+sign the same proposed body), then iterates the candidate list
+calling `cap.request_attestation` per peer. Per-validator failures
+are SOFT — recorded in `per_peer_errors`, orchestrator continues to
+next candidate until quorum met or pool exhausted. Quorum dedup is
+on `validator_pubkey` (a single Tier-3 node responding from two peer
+IDs counts once — matches the Go `VerifyAttestation`'s own dedup).
+
+**Early exit.** Once `len(cosigs) >= quorum_k`, the loop breaks
+without contacting remaining candidates. Bounds eval cost in the
+common case (quorum met on first attempts). The Phase B test asserts
+this: contacts ≥2 ≤3 validators, never all 3 unless one rejected.
+
+**Cert assembly.** Builds the proto directly:
+`AttestationCert(body=proposed_body, co_signatures=cosigs)`. No
+round-trip to Go's `AssembleAttestation` — proto construction is
+trivial and `self_verify=True` (default) calls
+`cap.verify_attestation` which is the cross-language ground truth.
+
+### Phase C — DHT publication + CLI
+
+**`gyza global attest --tier 3`.** Extends Session 11's existing
+`gyza global attest` (which now defaults to `--tier 1`). Ties
+together discovery → orchestration → DHT publish:
+
+  1. Probe daemon (must be running; exit 2 if not).
+  2. Build `LocalCompositor`, get applicant peer ID.
+  3. Print pre-attestation summary (compositor pubkey, peer ID,
+     validator selection mode, quorum threshold).
+  4. Call `request_tier3_attestation` with `explicit_validator_peer_ids`
+     when `--peer` is supplied (one or more).
+  5. Print per-peer outcome.
+  6. Quorum failure → exit 1; orchestration error → exit 2.
+  7. Quorum success → call `cap.publish_attestation(cert)`.
+  8. Write JSON cert artifact to `~/.gyza/attestations/cert-<pubkey16>.json`.
+  9. Exit 0.
+
+Publication is a single gRPC call to the daemon (proto cert in,
+DHT key out). The daemon's existing `PublishAttestation` self-
+verifies the cert before publishing, so a malformed cert never
+reaches the DHT.
+
+**Note on TTL bounding.** CLAUDE.md §6 #21e mentions that the DHT
+record's TTL should be `min(default_dht_ttl, expires_at_ns - now)`
+so consumers can't fetch already-expired certs. Currently the
+daemon's `PublishAttestation` doesn't enforce this — the DHT TTL
+is whatever `dht.PublishAttestation` defaults to. Mark as a
+follow-up; consumers can fetch a near-expired cert and verify will
+catch the staleness (`VerifyAttestation` checks `now >= expires_at_ns`).
+
+### Tests
+
+Go (2 new in `capability_test.go`):
+
+  * `TestProposedAttestationBodyAggregatesAcrossValidators` —
+    proves the bug AND the fix in one test. First half: two
+    validators called separately produce divergent bodies, and the
+    happy path attempting `AssembleAttestation` against either
+    body fails (asserts `err != nil` — that's the bug we're
+    fixing). Second half: same two validators, but applicant
+    supplies a shared `proposed_attestation_body`; cosigs aggregate
+    and `AssembleAttestation` + `VerifyAttestation` both succeed.
+  * `TestProposedAttestationBodyPlausibilityChecks` — 7 subtests,
+    one per defended-against attack vector
+    (applicant_pubkey_mismatch, wrong_tier, issued_at_far_past,
+    issued_at_far_future, lifetime_too_long, expires_before_issued,
+    task_ids_mismatch). Each builds an otherwise-valid response
+    with one field tampered, asserts `VerifyResponse` rejects with
+    a recognizable error substring.
+
+Python (2 new in `tests/test_attestation_bridge.py`):
+
+  * `test_tier3_attestation_quorum_three_validators` — 1 applicant
+    + 3 validator daemons, mesh-connected, applicant drives
+    `request_tier3_attestation` with explicit peer IDs and
+    `quorum_k=2, candidate_n=3`. Asserts: exactly 2 cosigs (early-
+    exit on quorum), distinct validator pubkeys, contacted ≤3,
+    body fields match expected applicant identity. ~13s warm.
+  * `test_tier3_attestation_publish_and_fetch` — same 4-daemon
+    setup, drives full orchestrator → publish → fetch → verify
+    round-trip. Asserts the cert survives proto serialization
+    through DHT storage AND remains valid under `VerifyAttestation`.
+    ~12s warm.
+
+### Trip-wires this session surfaced
+
+  * **`AssembleAttestation` docstring was aspirational.** Said
+    "validators echo back identical bodies." They didn't. Fix is
+    in place but the comment lingers for a few lines — left as-is
+    so the historical context is searchable. The corrected behavior
+    is in `verifyProposedAttestationBody` and the Phase A test.
+  * **Plausibility test had a subtle ordering bug.** Capturing
+    `now := time.Now()` at the test top, then issuing a challenge
+    LATER (which uses its own `time.Now`), produced
+    `completed_at_ns < issued_at_ns` because the response used the
+    stale `now`. The `IssueChallenge`-ordering check fired BEFORE
+    plausibility, so all subtests reported "response completed
+    before challenge issued" instead of the expected error. Fix:
+    use `time.Now()` inside the per-subtest loop, AFTER
+    `IssueChallenge`. Same trap will bite anyone writing
+    capability tests — be explicit about timestamp ordering.
+  * **`fetch_attestation` returns Python dataclass, not raw proto.**
+    Easy to forget when round-tripping to `verify_attestation`.
+    The dataclass has `raw_proto` for exactly this; use it. Don't
+    rebuild a proto from the dataclass fields by hand — that's how
+    `signature: bytes` becomes `signature: str` and verification
+    silently fails.
+  * **DHT publish doesn't bound the record's TTL by the cert's
+    `expires_at_ns`.** Consumers fetching a near-expired record
+    pay one round trip to get a cert that won't verify. Acceptable
+    at Phase 3 scale (consumers re-verify anyway), but document
+    as a sharp edge.
+
+### What's left of #21
+
+**Nothing structural.** The protocol is end-to-end functional:
+applicant runs eval, validators cosign over shared body, applicant
+publishes to DHT, consumers fetch and verify. The "verify-on-fetch
+in `find_agents`" gap I flagged at the end of Session 13 is now
+the obvious next priority — without it, the cert ceremony exists
+but consumers don't actually demand it. That's a separate session
+(see §6 #21f below).
 
 ---
 
@@ -1173,21 +1381,75 @@ on "unknown work_item_id" — could be gossip lag, not malice.
 
 ---
 
-## 6. The remaining priority list (#21 — DHT discovery + DHT publish)
+## 6. The remaining priority list (#21f — verify-on-fetch in routing)
 
 Session 9 closed #25 / #26; Session 10 closed #22 / #24; Session 11
 closed the algorithmic core of #21 (eval suite + Tier-1 self-attestation
 + in-process cross-network attestation orchestration); Session 12
 closed #21c (the libp2p stream protocol); Session 13 closed
-#21-bridge (the Python applicant adapter). Previous priority items
-are documented in §5a–§5e and §5-pre.
+#21-bridge (the Python applicant adapter); Session 14 closed
+#21d (DHT-driven validator selection + orchestrator) and #21e (DHT
+cert publication + `gyza global attest --tier 3` CLI). Previous
+priority items are documented in §5a–§5e, §5-pre, and §5-pre-2.
 
-**What's left of #21 is DHT discovery + DHT publication.** The full
-in-process and cross-process Python ↔ Go ↔ libp2p ↔ Go ↔ Python
-attestation flow works end-to-end as of Session 13. The remaining
-pieces are: orchestrating the discovery of Tier-3 validators via the
-DHT, and publishing the assembled cert to the DHT so consumers can
-fetch it.
+**What's left is #21f — verify-on-fetch.** The attestation protocol
+is end-to-end functional: any node can earn a Tier-3 cert and publish
+it. But `AgentAdvertisement.attestation_tier` is still just a
+self-reported integer in the DHT — anyone can advertise `tier=3`
+without having an actual cert. Until consumers fetch and verify the
+referenced cert at routing time, the cert ceremony is cosmetic.
+
+### #21f — verify-on-fetch in `find_agents`
+
+**Why:** The cert exists at `/gyza/attestations/{compositor_pubkey}`
+but `find_agents` returns advertisements whose `attestation_tier`
+field is purely advisory. A Sybil node can advertise `tier=3` and
+appear as a Tier-3 validator until callers do an extra round trip
+to fetch + verify the cert. Routing code that respects `min_tier=3`
+filters today are accepting the LIE, not the proof.
+
+**Approach:**
+
+In `gyza-netd`'s `DiscoveryService.FindAgents`, after fetching
+candidate advertisements:
+
+  1. For each ad with `attestation_tier >= 3`, fetch the
+     corresponding cert from the DHT (or local cache).
+  2. Verify the cert via `capability.VerifyAttestation` (already
+     exists; pure function, no I/O).
+  3. If verification fails (or cert missing), DROP the ad — don't
+     return it. Optional: include in the response stream with the
+     tier field downgraded to 0 + a `verification_failure` reason
+     so caller can log.
+  4. Cache verification results with a TTL << cert expiry to amortize
+     the per-fetch cost on a hot routing path.
+
+**Consumer-side fallback:** Even with daemon-side filtering, a
+strict consumer can re-verify before trusting the result — the cert
+is included in the advertisement (or fetchable). Daemon-side
+filtering is the common case; consumer re-verify is for the high-
+trust path.
+
+**Trip-wires:**
+
+  * **Don't block FindAgents on cert fetches.** Hot path. Use a
+    bounded background goroutine pool with timeouts; if a cert
+    can't be fetched within ~50ms, treat the ad as unverified and
+    drop. A consumer that wants to wait can re-query.
+  * **Cache the validator-pubkey set for cosig verification.**
+    Each cosig requires `ed25519.Verify` against the validator's
+    pubkey AND a Tier-3-attested check on THAT validator. The
+    second check is recursive — a Tier-3 ad's cert is signed by
+    Tier-3 validators, whose Tier-3 status is itself attested by
+    other Tier-3 validators, etc. Bottom out at a manually-trusted
+    bootstrap set OR a cycle-detection threshold.
+  * **DHT TTL bounding.** Phase C didn't enforce that the published
+    DHT record's TTL is bounded by `cert.expires_at_ns - now`.
+    Verify-on-fetch should treat a cert near expiry as already
+    invalid (e.g., reject if `now > expires_at_ns - 1h`) so a
+    consumer's verify result is stable for at least a routing
+    horizon. Otherwise a cert that "verified" 1ms before expiry
+    is still in the routing table for the rest of the request.
 
 ### #21-bridge — Python applicant adapter (CLOSED — Session 13)
 
@@ -1883,13 +2145,14 @@ Every time you (a future Claude session) open this repo:
    `Bilateral settlement: BILATERAL ✓`.
 4. Check `git log --oneline -20` to see what changed since you last
    touched it.
-5. The remaining work in §6 is #21d (DHT discovery) + #21e (DHT
-   publish + CLI Tier-3 mode). #21-bridge closed in Session 13 —
-   the Python applicant adapter works end-to-end. The natural next
-   step is #21d (composing existing primitives: ``find_agents`` to
-   discover Tier-3 validators, `request_attestation` against each,
-   aggregate cosignatures into an `AttestationCert`). Pick one or
-   ask the user.
+5. The remaining work in §6 is #21f (verify-on-fetch in routing) —
+   making `AgentAdvertisement.attestation_tier` mean something at
+   the discovery layer rather than being a self-reported integer.
+   #21 itself closed end-to-end in Session 14: any node can earn
+   a Tier-3 cert and publish it to the DHT, and consumers can
+   fetch + verify with `cap.fetch_attestation` + `cap.verify_attestation`.
+   The verify-on-fetch session integrates that into routing's hot
+   path so trust is enforced not advisory.
 
 If any of steps 2/3 fail, **stop and diagnose before doing new work.**
 A failing baseline is more important than any new feature.
@@ -2103,6 +2366,49 @@ Things a session might be tempted to do that would be wrong:
   the repo root. Don't silently "fix" the Makefile to hardcode
   marshal — different dev environments resolve `python`
   differently. A proper fix parametrizes via `$(PYTHON)`.
+- **Don't author `AttestationBody` validator-side in code that
+  needs quorum aggregation.** Session 14 fixed the gap: the body
+  MUST be applicant-proposed and identical across every validator
+  contacted in one orchestration run. The Go validator's `VerifyResponse`
+  retains a self-authoring fallback for the legacy single-cosig
+  path (test fixtures, `IssueChallenge` unit-test workflows), but
+  any code that calls `request_attestation` against multiple
+  validators MUST go through `applicant_eval_session` (or pass
+  `proposed_attestation_body` explicitly) so all cosigs sign
+  identical bytes. Authoring per-validator bodies guarantees the
+  cosignatures will not aggregate, and `AssembleAttestation` /
+  `VerifyAttestation` will reject the resulting cert with
+  "assembled cert fails self-verify."
+- **Don't drop the validator's plausibility checks on a proposed
+  body.** `verifyProposedAttestationBody` defends against six
+  attack vectors (applicant_pubkey mismatch, wrong tier, clock
+  skew >1h, lifetime >90d, expired, task_ids mismatch). Removing
+  any one lets a malicious applicant mint a cert with weakened
+  semantics — e.g., `tier_granted = 5` (a tier that doesn't exist),
+  or `expires_at_ns` 10 years out (effectively perpetual on a
+  single eval). The plausibility-check matrix test enforces this;
+  if you change a check, update the test.
+- **Don't capture `time.Now()` once and use it for both challenge
+  AND response in capability tests.** The challenge issues at one
+  instant; the response's `completed_at_ns` must be ≥ challenge's
+  `issued_at_ns`. Stale `now` produces a "response completed
+  before challenge issued" error that masks the actual
+  plausibility-check failure you're trying to test. Same trap that
+  bit Phase A's plausibility test development.
+- **Don't rebuild a proto cert from a Python `AttestationCert`
+  dataclass for verification.** `AttestationCert.from_proto`
+  populates `raw_proto` precisely so callers can pass the original
+  proto back to `cap.verify_attestation` without losing fidelity.
+  Manual rebuild silently corrupts byte-typed fields (`signature:
+  bytes` → `signature: str`-via-hex), and verification then fails
+  cryptographically with no clue why.
+- **Don't trust `AgentAdvertisement.attestation_tier` without
+  verifying the corresponding cert.** The field is self-reported —
+  a Sybil node can advertise tier=3 without owning a cert. Routing
+  filters that respect `min_tier=3` are accepting the LIE today
+  (#21f, see §6). Until verify-on-fetch lands, code that depends
+  on Tier-3 trust SHOULD do its own `cap.fetch_attestation` +
+  `cap.verify_attestation` round trip.
 
 ---
 

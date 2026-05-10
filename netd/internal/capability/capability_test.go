@@ -350,3 +350,213 @@ func TestAttestationCert(t *testing.T) {
 		t.Error("VerifyAttestation accepted a tampered body")
 	}
 }
+
+// TestProposedAttestationBodyAggregatesAcrossValidators — load-bearing
+// for #21d. Two validators called separately produce DIFFERENT bodies
+// (different IssuedAtNs) without an applicant-proposed body, and
+// their cosignatures cannot aggregate. With the applicant-proposed
+// body path, both validators sign identical canonical bytes and the
+// quorum verifies cleanly.
+func TestProposedAttestationBodyAggregatesAcrossValidators(t *testing.T) {
+	applicant := newSigner(t)
+	v1 := newSigner(t)
+	v2 := newSigner(t)
+
+	mgrV1 := capability.NewChallengeManager(v1.PubkeyHex(), v1)
+	mgrV2 := capability.NewChallengeManager(v2.PubkeyHex(), v2)
+
+	taskIDs := []string{"alpha", "beta"}
+
+	// Without proposed body: each validator authors its own. Force
+	// observable timestamp drift by sleeping between the two issues.
+	c1, err := mgrV1.IssueChallenge(applicant.PubkeyHex(), taskIDs, 0)
+	if err != nil {
+		t.Fatalf("v1 IssueChallenge: %v", err)
+	}
+	r1 := makeApplicantResponse(t, c1, applicant, time.Now())
+
+	c2, err := mgrV2.IssueChallenge(applicant.PubkeyHex(), taskIDs, 0)
+	if err != nil {
+		t.Fatalf("v2 IssueChallenge: %v", err)
+	}
+	r2 := makeApplicantResponse(t, c2, applicant, time.Now())
+
+	// First, the WITHOUT-proposal path: confirm cosigs don't aggregate.
+	cosig1NoProposal, err := mgrV1.VerifyResponse(c1, r1, nil)
+	if err != nil {
+		t.Fatalf("v1 VerifyResponse no-proposal: %v", err)
+	}
+	cosig2NoProposal, err := mgrV2.VerifyResponse(c2, r2, nil)
+	if err != nil {
+		t.Fatalf("v2 VerifyResponse no-proposal: %v", err)
+	}
+	// Both validators authored their OWN body. Pick v1's-shaped body
+	// for AssembleAttestation; v2's cosig won't verify against it.
+	v1Body := &pb.AttestationBody{
+		ApplicantPubkey:  applicant.PubkeyHex(),
+		IssuedAtNs:       cosig1NoProposal.SignedAtNs,
+		ExpiresAtNs:      cosig1NoProposal.SignedAtNs + int64(capability.DefaultAttestationTTL),
+		TierGranted:      capability.IssuedTier,
+		ChallengeTaskIds: taskIDs,
+	}
+	if _, err := capability.AssembleAttestation(v1Body, []*pb.CoSignature{
+		cosig1NoProposal, cosig2NoProposal,
+	}); err == nil {
+		t.Fatal(
+			"AssembleAttestation accepted divergent-body cosigs — that's the " +
+				"bug this fix addresses; the test that proves it should fail " +
+				"means the fix isn't applied",
+		)
+	}
+
+	// Now: the WITH-proposal path. Applicant authors one body and
+	// includes it in BOTH responses.
+	now := time.Now()
+	proposedBody := &pb.AttestationBody{
+		ApplicantPubkey:  applicant.PubkeyHex(),
+		IssuedAtNs:       now.UnixNano(),
+		ExpiresAtNs:      now.Add(30 * 24 * time.Hour).UnixNano(),
+		TierGranted:      capability.IssuedTier,
+		ChallengeTaskIds: taskIDs,
+	}
+	r1WithBody := makeApplicantResponse(t, c1, applicant, now)
+	r1WithBody.ProposedAttestationBody = proposedBody
+	r2WithBody := makeApplicantResponse(t, c2, applicant, now)
+	r2WithBody.ProposedAttestationBody = proposedBody
+
+	cosig1, err := mgrV1.VerifyResponse(c1, r1WithBody, nil)
+	if err != nil {
+		t.Fatalf("v1 VerifyResponse with-proposal: %v", err)
+	}
+	cosig2, err := mgrV2.VerifyResponse(c2, r2WithBody, nil)
+	if err != nil {
+		t.Fatalf("v2 VerifyResponse with-proposal: %v", err)
+	}
+	cert, err := capability.AssembleAttestation(
+		proposedBody, []*pb.CoSignature{cosig1, cosig2},
+	)
+	if err != nil {
+		t.Fatalf("AssembleAttestation with shared proposed body: %v", err)
+	}
+	if n, err := capability.VerifyAttestation(cert, time.Now); err != nil {
+		t.Errorf("VerifyAttestation 2-of-2 with proposed body: %v (n=%d)", err, n)
+	}
+}
+
+// TestProposedAttestationBodyPlausibilityChecks — every plausibility
+// rule is enforced. One subtest per check; each builds an otherwise-
+// valid response with one field tampered to violate the rule, then
+// asserts VerifyResponse rejects with a recognizable error message.
+func TestProposedAttestationBodyPlausibilityChecks(t *testing.T) {
+	applicant := newSigner(t)
+	imposter := newSigner(t)
+	v := newSigner(t)
+	mgr := capability.NewChallengeManager(v.PubkeyHex(), v)
+	taskIDs := []string{"alpha", "beta"}
+	now := time.Now()
+
+	makeValidProposal := func() *pb.AttestationBody {
+		return &pb.AttestationBody{
+			ApplicantPubkey:  applicant.PubkeyHex(),
+			IssuedAtNs:       now.UnixNano(),
+			ExpiresAtNs:      now.Add(30 * 24 * time.Hour).UnixNano(),
+			TierGranted:      capability.IssuedTier,
+			ChallengeTaskIds: taskIDs,
+		}
+	}
+
+	cases := []struct {
+		name      string
+		mutate    func(*pb.AttestationBody)
+		errSubstr string
+	}{
+		{
+			name: "applicant_pubkey_mismatch",
+			mutate: func(b *pb.AttestationBody) {
+				b.ApplicantPubkey = imposter.PubkeyHex()
+			},
+			errSubstr: "applicant_pubkey mismatch",
+		},
+		{
+			name:      "wrong_tier",
+			mutate:    func(b *pb.AttestationBody) { b.TierGranted = 2 },
+			errSubstr: "tier_granted",
+		},
+		{
+			name: "issued_at_far_past",
+			mutate: func(b *pb.AttestationBody) {
+				b.IssuedAtNs = now.Add(-2 * time.Hour).UnixNano()
+			},
+			errSubstr: "clock skew",
+		},
+		{
+			name: "issued_at_far_future",
+			mutate: func(b *pb.AttestationBody) {
+				b.IssuedAtNs = now.Add(2 * time.Hour).UnixNano()
+				b.ExpiresAtNs = b.IssuedAtNs + int64(30*24*time.Hour)
+			},
+			errSubstr: "clock skew",
+		},
+		{
+			name: "lifetime_too_long",
+			mutate: func(b *pb.AttestationBody) {
+				b.ExpiresAtNs = b.IssuedAtNs + int64(180*24*time.Hour)
+			},
+			errSubstr: "lifetime",
+		},
+		{
+			name: "expires_before_issued",
+			mutate: func(b *pb.AttestationBody) {
+				b.ExpiresAtNs = b.IssuedAtNs - 1
+			},
+			errSubstr: "expires_at_ns must be after",
+		},
+		{
+			name: "task_ids_mismatch",
+			mutate: func(b *pb.AttestationBody) {
+				b.ChallengeTaskIds = []string{"alpha", "different"}
+			},
+			errSubstr: "challenge_task_ids mismatch",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			c, err := mgr.IssueChallenge(applicant.PubkeyHex(), taskIDs, 0)
+			if err != nil {
+				t.Fatalf("IssueChallenge: %v", err)
+			}
+			// Build the response AFTER the challenge issues — otherwise
+			// completed_at_ns lands before issued_at_ns and an earlier
+			// check rejects before plausibility runs.
+			r := makeApplicantResponse(t, c, applicant, time.Now())
+			body := makeValidProposal()
+			tc.mutate(body)
+			r.ProposedAttestationBody = body
+
+			_, err = mgr.VerifyResponse(c, r, nil)
+			if err == nil {
+				t.Fatalf("VerifyResponse accepted bad proposal (%s)", tc.name)
+			}
+			if !contains(err.Error(), tc.errSubstr) {
+				t.Errorf(
+					"error %q does not contain %q",
+					err.Error(), tc.errSubstr,
+				)
+			}
+		})
+	}
+}
+
+func contains(s, sub string) bool {
+	return len(sub) == 0 || (len(s) >= len(sub) && indexOf(s, sub) >= 0)
+}
+
+func indexOf(s, sub string) int {
+	for i := 0; i+len(sub) <= len(s); i++ {
+		if s[i:i+len(sub)] == sub {
+			return i
+		}
+	}
+	return -1
+}

@@ -129,6 +129,187 @@ def test_request_attestation_two_daemons_end_to_end(netd_binary, tmp_path):
             _kill(p)
 
 
+def test_tier3_attestation_quorum_three_validators(netd_binary, tmp_path):
+    """
+    #21d acceptance test. One applicant + three validator daemons on
+    loopback. Applicant connects to all validators, then drives
+    request_tier3_attestation against an explicit list of validator
+    peer IDs (DHT discovery is a separate test). Expects:
+
+      - quorum_k=2 cosignatures collected across the validator pool
+      - all cosignatures sign the SAME proposed AttestationBody
+        (Phase A's load-bearing invariant)
+      - assembled AttestationCert self-verifies via cap.verify_attestation
+
+    Cosigs from a third validator beyond the quorum are NOT collected
+    (orchestrator stops once quorum_k is reached) — verifies the
+    early-exit optimization that bounds eval cost in the common case.
+    """
+    from gyza.identity import LocalCompositor
+    from gyza.network.attestation_adapter import request_tier3_attestation
+    from gyza.network.netd_client import CapabilityClient, NetdClient
+
+    applicant_proc, applicant_sock, applicant_key = _boot_daemon(
+        "applicant", tmp_path, netd_binary
+    )
+    v_procs = []
+    v_socks = []
+    for i in range(3):
+        proc, sock, _ = _boot_daemon(f"v{i}", tmp_path, netd_binary)
+        v_procs.append(proc)
+        v_socks.append(sock)
+
+    try:
+        applicant_compositor = LocalCompositor(str(applicant_key))
+
+        # Applicant must be libp2p-connected to every validator before
+        # request_attestation tries to open a stream. Collect each
+        # validator's loopback multiaddr + peer_id, then dial.
+        validator_peer_ids: list[str] = []
+        with NetdClient(str(applicant_sock)) as ac:
+            for vsock in v_socks:
+                with NetdClient(str(vsock)) as vc:
+                    info = vc.get_node_info()
+                loopback = next(
+                    m for m in info.listen_addrs
+                    if m.startswith("/ip4/127.0.0.1/")
+                )
+                connect = ac.connect_peer(f"{loopback}/p2p/{info.peer_id}")
+                assert connect.success, connect.error
+                validator_peer_ids.append(info.peer_id)
+
+            with CapabilityClient(str(applicant_sock)) as cap:
+                result = request_tier3_attestation(
+                    cap=cap,
+                    netd=ac,
+                    compositor=applicant_compositor,
+                    quorum_k=2,
+                    candidate_n=3,
+                    explicit_validator_peer_ids=validator_peer_ids,
+                    self_verify=True,
+                )
+
+        # Quorum met → cert non-None and signed by 2 of 3.
+        assert result.cert is not None, (
+            f"no cert assembled; per-peer errors: {result.per_peer_errors}"
+        )
+        assert len(result.cosignatures) == 2, (
+            f"expected exactly 2 cosigs (quorum), got {len(result.cosignatures)}"
+        )
+        # Quorum exit short-circuited the third validator. The
+        # orchestrator may have contacted 2 (early-success path, both
+        # accepted on first try) or up to 3 (one rejected, retried).
+        assert 2 <= len(result.contacted_peer_ids) <= 3
+        # All contacted peers were drawn from the validator pool.
+        for pid in result.contacted_peer_ids:
+            assert pid in validator_peer_ids, (
+                f"contacted unknown peer {pid!r}"
+            )
+        # Cosigs are over distinct validators (no validator-pubkey
+        # duplication that would let one Tier-3 node mint a cert).
+        validator_pks = [c.validator_pubkey for c in result.cosignatures]
+        assert len(set(validator_pks)) == len(validator_pks), (
+            f"duplicate validator cosigs: {validator_pks}"
+        )
+        # The cert's body is the applicant-proposed body — applicant
+        # pubkey matches and tier_granted == 3.
+        assert result.cert.body.applicant_pubkey == applicant_compositor.pubkey_hex
+        assert result.cert.body.tier_granted == 3
+        assert result.cert.body.expires_at_ns > result.cert.body.issued_at_ns
+    finally:
+        for p in (applicant_proc, *v_procs):
+            _kill(p)
+
+
+def test_tier3_attestation_publish_and_fetch(netd_binary, tmp_path):
+    """
+    #21e acceptance test. Builds on Phase B's quorum flow with the
+    full publish-and-fetch round-trip:
+
+      1. Boot 4 daemons (1 applicant + 3 validators), connect mesh.
+      2. Drive request_tier3_attestation with explicit peer IDs.
+      3. Publish the resulting cert via cap.publish_attestation.
+      4. Fetch the cert back from the DHT via cap.fetch_attestation.
+      5. Verify the fetched cert via cap.verify_attestation.
+
+    Proves the cert survives the protobuf round-trip through DHT
+    storage AND remains valid under VerifyAttestation. This is the
+    end-to-end happy path the production CLI ``gyza global attest
+    --tier 3`` exercises.
+    """
+    from gyza.identity import LocalCompositor
+    from gyza.network.attestation_adapter import request_tier3_attestation
+    from gyza.network.netd_client import CapabilityClient, NetdClient
+
+    applicant_proc, applicant_sock, applicant_key = _boot_daemon(
+        "applicant", tmp_path, netd_binary
+    )
+    v_procs = []
+    v_socks = []
+    for i in range(3):
+        proc, sock, _ = _boot_daemon(f"v{i}", tmp_path, netd_binary)
+        v_procs.append(proc)
+        v_socks.append(sock)
+
+    try:
+        applicant_compositor = LocalCompositor(str(applicant_key))
+        validator_peer_ids: list[str] = []
+        with NetdClient(str(applicant_sock)) as ac:
+            for vsock in v_socks:
+                with NetdClient(str(vsock)) as vc:
+                    info = vc.get_node_info()
+                loopback = next(
+                    m for m in info.listen_addrs
+                    if m.startswith("/ip4/127.0.0.1/")
+                )
+                connect = ac.connect_peer(f"{loopback}/p2p/{info.peer_id}")
+                assert connect.success, connect.error
+                validator_peer_ids.append(info.peer_id)
+
+            with CapabilityClient(str(applicant_sock)) as cap:
+                result = request_tier3_attestation(
+                    cap=cap,
+                    netd=ac,
+                    compositor=applicant_compositor,
+                    quorum_k=2,
+                    candidate_n=3,
+                    explicit_validator_peer_ids=validator_peer_ids,
+                    self_verify=True,
+                )
+                assert result.cert is not None, (
+                    f"orchestration failed: {result.per_peer_errors}"
+                )
+
+                # Publish to DHT via the daemon.
+                dht_key = cap.publish_attestation(result.cert)
+                assert dht_key.startswith("/gyza/attestations/"), (
+                    f"unexpected DHT key shape: {dht_key!r}"
+                )
+
+                # Fetch back. Single-daemon DHT cache answers locally.
+                # CapabilityClient.fetch_attestation returns a Python
+                # AttestationCert dataclass (flattened body fields +
+                # raw_proto for round-trip).
+                fetched = cap.fetch_attestation(applicant_compositor.pubkey_hex)
+                assert fetched is not None, "fetch returned None"
+                assert fetched.applicant_pubkey == applicant_compositor.pubkey_hex
+                assert fetched.tier_granted == 3
+                assert len(fetched.co_signatures) == len(result.cert.co_signatures)
+                fetched_pks = sorted(c.validator_pubkey for c in fetched.co_signatures)
+                orig_pks = sorted(c.validator_pubkey for c in result.cert.co_signatures)
+                assert fetched_pks == orig_pks
+
+                # verify_attestation needs a proto. Use the dataclass's
+                # raw_proto carry-through.
+                assert fetched.raw_proto is not None
+                valid, n, reason = cap.verify_attestation(fetched.raw_proto)
+                assert valid, f"fetched cert failed verify: {reason} (n={n})"
+                assert n == len(result.cert.co_signatures)
+    finally:
+        for p in (applicant_proc, *v_procs):
+            _kill(p)
+
+
 def test_request_attestation_invalid_target_peer_id(netd_binary, tmp_path):
     """
     Bridge rejects malformed peer IDs synchronously (before opening a
