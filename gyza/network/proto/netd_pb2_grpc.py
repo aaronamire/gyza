@@ -1198,6 +1198,11 @@ class CapabilityServiceStub(object):
                 request_serializer=netd__pb2.AttestationCert.SerializeToString,
                 response_deserializer=netd__pb2.VerifyAttestationResult.FromString,
                 _registered_method=True)
+        self.RequestAttestation = channel.stream_stream(
+                '/netd.CapabilityService/RequestAttestation',
+                request_serializer=netd__pb2.AttestationApplicantFrame.SerializeToString,
+                response_deserializer=netd__pb2.AttestationDaemonFrame.FromString,
+                _registered_method=True)
 
 
 class CapabilityServiceServicer(object):
@@ -1257,6 +1262,29 @@ class CapabilityServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RequestAttestation(self, request_iterator, context):
+        """RequestAttestation drives the cross-network attestation flow from
+        the applicant side. The Python caller owns AgentRunner state; the
+        daemon owns the libp2p stream to the validator. They meet in the
+        middle on this bidirectional gRPC stream.
+
+        Wire sequence:
+        Python → AttestationApplicantFrame{start{target_peer_id}}
+        Daemon opens libp2p stream to target, reads Challenge, then:
+        Daemon → AttestationDaemonFrame{challenge}     (or {outcome} on early failure)
+        Python runs the eval suite locally, builds the ChallengeResponse:
+        Python → AttestationApplicantFrame{response}
+        Daemon forwards over libp2p, reads VerifyResponseResult, then:
+        Daemon → AttestationDaemonFrame{outcome}
+        Stream closes.
+
+        Errors at any step are surfaced as a final outcome frame with
+        success=false, so Python's error-handling path is uniform.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_CapabilityServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -1284,6 +1312,11 @@ def add_CapabilityServiceServicer_to_server(servicer, server):
                     servicer.VerifyAttestation,
                     request_deserializer=netd__pb2.AttestationCert.FromString,
                     response_serializer=netd__pb2.VerifyAttestationResult.SerializeToString,
+            ),
+            'RequestAttestation': grpc.stream_stream_rpc_method_handler(
+                    servicer.RequestAttestation,
+                    request_deserializer=netd__pb2.AttestationApplicantFrame.FromString,
+                    response_serializer=netd__pb2.AttestationDaemonFrame.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -1445,6 +1478,33 @@ class CapabilityService(object):
             '/netd.CapabilityService/VerifyAttestation',
             netd__pb2.AttestationCert.SerializeToString,
             netd__pb2.VerifyAttestationResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RequestAttestation(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/netd.CapabilityService/RequestAttestation',
+            netd__pb2.AttestationApplicantFrame.SerializeToString,
+            netd__pb2.AttestationDaemonFrame.FromString,
             options,
             channel_credentials,
             insecure,

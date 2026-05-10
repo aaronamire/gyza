@@ -257,7 +257,7 @@ func main() {
 		}
 	}
 
-	server := grpcsrv.NewNetdServer(id, h, gdht, natMgr, gossipMgr, capMgr, msgMgr)
+	server := grpcsrv.NewNetdServer(id, h, gdht, natMgr, gossipMgr, capMgr, capStreamMgr, msgMgr)
 	srv, err := grpcsrv.StartGRPCServer(*socketPath, server, func(format string, args ...any) {
 		logger.Info(format, args...)
 	})

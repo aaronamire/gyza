@@ -1246,6 +1246,7 @@ const (
 	CapabilityService_PublishAttestation_FullMethodName = "/netd.CapabilityService/PublishAttestation"
 	CapabilityService_FetchAttestation_FullMethodName   = "/netd.CapabilityService/FetchAttestation"
 	CapabilityService_VerifyAttestation_FullMethodName  = "/netd.CapabilityService/VerifyAttestation"
+	CapabilityService_RequestAttestation_FullMethodName = "/netd.CapabilityService/RequestAttestation"
 )
 
 // CapabilityServiceClient is the client API for CapabilityService service.
@@ -1282,6 +1283,25 @@ type CapabilityServiceClient interface {
 	PublishAttestation(ctx context.Context, in *AttestationCert, opts ...grpc.CallOption) (*PublishAttestationResult, error)
 	FetchAttestation(ctx context.Context, in *FetchAttestationRequest, opts ...grpc.CallOption) (*AttestationCert, error)
 	VerifyAttestation(ctx context.Context, in *AttestationCert, opts ...grpc.CallOption) (*VerifyAttestationResult, error)
+	// RequestAttestation drives the cross-network attestation flow from
+	// the applicant side. The Python caller owns AgentRunner state; the
+	// daemon owns the libp2p stream to the validator. They meet in the
+	// middle on this bidirectional gRPC stream.
+	//
+	// Wire sequence:
+	//
+	//	Python → AttestationApplicantFrame{start{target_peer_id}}
+	//	Daemon opens libp2p stream to target, reads Challenge, then:
+	//	Daemon → AttestationDaemonFrame{challenge}     (or {outcome} on early failure)
+	//	Python runs the eval suite locally, builds the ChallengeResponse:
+	//	Python → AttestationApplicantFrame{response}
+	//	Daemon forwards over libp2p, reads VerifyResponseResult, then:
+	//	Daemon → AttestationDaemonFrame{outcome}
+	//	Stream closes.
+	//
+	// Errors at any step are surfaced as a final outcome frame with
+	// success=false, so Python's error-handling path is uniform.
+	RequestAttestation(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AttestationApplicantFrame, AttestationDaemonFrame], error)
 }
 
 type capabilityServiceClient struct {
@@ -1342,6 +1362,19 @@ func (c *capabilityServiceClient) VerifyAttestation(ctx context.Context, in *Att
 	return out, nil
 }
 
+func (c *capabilityServiceClient) RequestAttestation(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AttestationApplicantFrame, AttestationDaemonFrame], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CapabilityService_ServiceDesc.Streams[0], CapabilityService_RequestAttestation_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[AttestationApplicantFrame, AttestationDaemonFrame]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CapabilityService_RequestAttestationClient = grpc.BidiStreamingClient[AttestationApplicantFrame, AttestationDaemonFrame]
+
 // CapabilityServiceServer is the server API for CapabilityService service.
 // All implementations must embed UnimplementedCapabilityServiceServer
 // for forward compatibility.
@@ -1376,6 +1409,25 @@ type CapabilityServiceServer interface {
 	PublishAttestation(context.Context, *AttestationCert) (*PublishAttestationResult, error)
 	FetchAttestation(context.Context, *FetchAttestationRequest) (*AttestationCert, error)
 	VerifyAttestation(context.Context, *AttestationCert) (*VerifyAttestationResult, error)
+	// RequestAttestation drives the cross-network attestation flow from
+	// the applicant side. The Python caller owns AgentRunner state; the
+	// daemon owns the libp2p stream to the validator. They meet in the
+	// middle on this bidirectional gRPC stream.
+	//
+	// Wire sequence:
+	//
+	//	Python → AttestationApplicantFrame{start{target_peer_id}}
+	//	Daemon opens libp2p stream to target, reads Challenge, then:
+	//	Daemon → AttestationDaemonFrame{challenge}     (or {outcome} on early failure)
+	//	Python runs the eval suite locally, builds the ChallengeResponse:
+	//	Python → AttestationApplicantFrame{response}
+	//	Daemon forwards over libp2p, reads VerifyResponseResult, then:
+	//	Daemon → AttestationDaemonFrame{outcome}
+	//	Stream closes.
+	//
+	// Errors at any step are surfaced as a final outcome frame with
+	// success=false, so Python's error-handling path is uniform.
+	RequestAttestation(grpc.BidiStreamingServer[AttestationApplicantFrame, AttestationDaemonFrame]) error
 	mustEmbedUnimplementedCapabilityServiceServer()
 }
 
@@ -1400,6 +1452,9 @@ func (UnimplementedCapabilityServiceServer) FetchAttestation(context.Context, *F
 }
 func (UnimplementedCapabilityServiceServer) VerifyAttestation(context.Context, *AttestationCert) (*VerifyAttestationResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyAttestation not implemented")
+}
+func (UnimplementedCapabilityServiceServer) RequestAttestation(grpc.BidiStreamingServer[AttestationApplicantFrame, AttestationDaemonFrame]) error {
+	return status.Errorf(codes.Unimplemented, "method RequestAttestation not implemented")
 }
 func (UnimplementedCapabilityServiceServer) mustEmbedUnimplementedCapabilityServiceServer() {}
 func (UnimplementedCapabilityServiceServer) testEmbeddedByValue()                           {}
@@ -1512,6 +1567,13 @@ func _CapabilityService_VerifyAttestation_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CapabilityService_RequestAttestation_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CapabilityServiceServer).RequestAttestation(&grpc.GenericServerStream[AttestationApplicantFrame, AttestationDaemonFrame]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CapabilityService_RequestAttestationServer = grpc.BidiStreamingServer[AttestationApplicantFrame, AttestationDaemonFrame]
+
 // CapabilityService_ServiceDesc is the grpc.ServiceDesc for CapabilityService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1540,6 +1602,13 @@ var CapabilityService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CapabilityService_VerifyAttestation_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RequestAttestation",
+			Handler:       _CapabilityService_RequestAttestation_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "netd.proto",
 }

@@ -29,6 +29,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"gyza/netd/internal/capability"
+	"gyza/netd/internal/capability_stream"
 	"gyza/netd/internal/dht"
 	"gyza/netd/internal/gossip"
 	"gyza/netd/internal/identity"
@@ -77,14 +78,17 @@ type NetdServer struct {
 	natMgr     *nat.Manager
 	gossip     *gossip.Manager
 	capability *capability.ChallengeManager
+	capStream  *capability_stream.Manager
 	msg        *message.Manager
 	startNs    int64
 }
 
 // NewNetdServer constructs the shared server state. host, gdht, natMgr,
-// gossipMgr, and capMgr may be nil — the server still answers
-// GetNodeInfo with whatever identity info is available, so unit tests
-// can exercise the serve/stop path without libp2p in the loop.
+// gossipMgr, capMgr, and capStreamMgr may be nil — the server still
+// answers GetNodeInfo with whatever identity info is available, so unit
+// tests can exercise the serve/stop path without libp2p in the loop.
+// Methods that depend on a particular sub-manager return Unavailable
+// when it's nil (RequestAttestation needs capStreamMgr, for instance).
 func NewNetdServer(
 	id *identity.Identity,
 	h libp2phost.Host,
@@ -92,6 +96,7 @@ func NewNetdServer(
 	natMgr *nat.Manager,
 	gossipMgr *gossip.Manager,
 	capMgr *capability.ChallengeManager,
+	capStreamMgr *capability_stream.Manager,
 	msgMgr *message.Manager,
 ) *NetdServer {
 	return &NetdServer{
@@ -101,6 +106,7 @@ func NewNetdServer(
 		natMgr:     natMgr,
 		gossip:     gossipMgr,
 		capability: capMgr,
+		capStream:  capStreamMgr,
 		msg:        msgMgr,
 		startNs:    time.Now().UnixNano(),
 	}
@@ -614,6 +620,106 @@ func (s *NetdServer) VerifyAttestation(_ context.Context, cert *pb.AttestationCe
 // the canonical eval suite published to the DHT.
 func defaultEvalTaskIDs() []string {
 	return []string{"file_list_001", "file_read_001", "search_001"}
+}
+
+// RequestAttestation drives the cross-network attestation flow on
+// behalf of a Python applicant. The Python side opens the bidi stream,
+// names a target peer, and supplies the eval response when prompted;
+// the daemon owns the libp2p stream to the validator and ferries
+// frames between the two protocols.
+//
+// Failure handling: every error path that has already sent the
+// Challenge to Python is surfaced as a final Outcome frame with
+// success=false, so Python's read loop has a uniform shape regardless
+// of where in the protocol the failure happened. Errors BEFORE the
+// Challenge could be sent (bad start frame, unreachable peer, libp2p
+// open failure) also surface as a leading Outcome frame — Python's
+// read loop accepts an outcome at any point and returns immediately.
+//
+// Concurrency note: ``runEval`` runs synchronously inside
+// capStream.RequestAttestation, which itself blocks on Python's
+// stream.Recv. The applicant-side libp2p stream's 120s SetDeadline
+// caps total wall-clock; if Python is wedged we'll surface the
+// resulting libp2p timeout as a wire-level Outcome, never leak a
+// goroutine.
+func (s *NetdServer) RequestAttestation(stream pb.CapabilityService_RequestAttestationServer) error {
+	if s.capStream == nil {
+		return status.Error(codes.Unavailable, "capability_stream not initialized")
+	}
+
+	// 1. Read the first frame; it MUST be a start.
+	first, err := stream.Recv()
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "read start frame: %v", err)
+	}
+	startReq := first.GetStart()
+	if startReq == nil {
+		return status.Error(codes.InvalidArgument,
+			"first frame must be AttestationStartRequest")
+	}
+	if startReq.TargetPeerId == "" {
+		return status.Error(codes.InvalidArgument, "target_peer_id required")
+	}
+	target, err := peer.Decode(startReq.TargetPeerId)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument,
+			"invalid target_peer_id %q: %v", startReq.TargetPeerId, err)
+	}
+
+	// 2. Build the EvalRunner closure that ferries Challenge → Python
+	// and ChallengeResponse ← Python over the gRPC stream.
+	//
+	// Invariant: this closure MUST NOT be invoked more than once per
+	// RequestAttestation call (capability_stream calls it exactly once
+	// per attestation). If the contract changed, this code would
+	// double-Send the same frame body and break the stream — the
+	// closure is intentionally not idempotent because the protocol
+	// isn't either.
+	runEval := func(challenge *pb.Challenge) (*pb.ChallengeResponse, error) {
+		if sendErr := stream.Send(&pb.AttestationDaemonFrame{
+			Body: &pb.AttestationDaemonFrame_Challenge{Challenge: challenge},
+		}); sendErr != nil {
+			return nil, fmt.Errorf("forward challenge to python: %w", sendErr)
+		}
+		frame, recvErr := stream.Recv()
+		if recvErr != nil {
+			return nil, fmt.Errorf("recv response from python: %w", recvErr)
+		}
+		resp := frame.GetResponse()
+		if resp == nil {
+			return nil, errors.New("expected ChallengeResponse frame from python")
+		}
+		return resp, nil
+	}
+
+	// 3. Drive the libp2p protocol. Pass through the gRPC stream's
+	// context — that ties the libp2p attempt to the gRPC call's
+	// lifetime so a Python-side cancel propagates to the libp2p
+	// dial/read.
+	cosig, err := s.capStream.RequestAttestation(stream.Context(), target, runEval)
+
+	// 4. Send the final Outcome regardless of outcome — Python expects
+	// exactly one Outcome frame to terminate its read loop. On error,
+	// success=false; on success, the cosignature.
+	var outcome *pb.VerifyResponseResult
+	if err != nil {
+		outcome = &pb.VerifyResponseResult{Success: false, Error: err.Error()}
+	} else {
+		outcome = &pb.VerifyResponseResult{Success: true, CoSignature: cosig}
+	}
+	if sendErr := stream.Send(&pb.AttestationDaemonFrame{
+		Body: &pb.AttestationDaemonFrame_Outcome{Outcome: outcome},
+	}); sendErr != nil {
+		// Python is gone; the gRPC layer logs this. Returning the
+		// underlying attestation error (if any) keeps the gRPC status
+		// faithful.
+		if err != nil {
+			return status.Errorf(codes.Unavailable,
+				"attestation failed (%v) and outcome send failed: %v", err, sendErr)
+		}
+		return status.Errorf(codes.Unavailable, "send outcome: %v", sendErr)
+	}
+	return nil
 }
 
 // =============================================================================

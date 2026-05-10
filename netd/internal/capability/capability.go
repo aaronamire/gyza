@@ -268,8 +268,20 @@ func (m *ChallengeManager) VerifyResponse(
 	}
 
 	// Task results: every task_id from the challenge must have a
-	// matching TaskResult, and ICP envelopes must verify against the
-	// applicant pubkey.
+	// matching TaskResult, and each ICP envelope's embedded signature
+	// must verify under its declared agent pubkey.
+	//
+	// Note on agent vs applicant identity: gyza separates the
+	// COMPOSITOR (durable, libp2p PeerID, signs the response body) from
+	// the AGENT (ephemeral, runner-bound, signs ICP envelopes). The
+	// validator does NOT require ``IcpAgentPubkeyHex == applicantPubkey``
+	// — that's a flat-key model the in-process Go test path happens to
+	// use, but the cross-network protocol's design intent (per
+	// CLAUDE.md §11) is "agent issued by compositor", verified via the
+	// capability manifest in a follow-up. For now: confirm the agent
+	// did sign these bytes (cryptographic proof of compute), and trust
+	// that the response's compositor-bound signature ties the bundle
+	// to the applicant.
 	resultByID := make(map[string]*pb.TaskResult, len(body.TaskResults))
 	for _, r := range body.TaskResults {
 		resultByID[r.TaskId] = r
@@ -279,7 +291,7 @@ func (m *ChallengeManager) VerifyResponse(
 		if !ok {
 			return nil, fmt.Errorf("missing task result %s", tid)
 		}
-		if err := verifyTaskResult(r, body.ApplicantPubkey); err != nil {
+		if err := verifyTaskResult(r); err != nil {
 			return nil, fmt.Errorf("task %s: %w", tid, err)
 		}
 		if verifyOutput != nil {
@@ -329,15 +341,14 @@ func (m *ChallengeManager) VerifyResponse(
 
 // verifyTaskResult runs the cross-language ICP-envelope check. Returns
 // nil iff the embedded signature verifies under the claimed agent
-// pubkey AND that pubkey matches the applicant. We don't try to
-// understand the JSON content — the eval suite's own verify function
-// (passed via TaskOutputVerifier) handles task-specific output checks.
-func verifyTaskResult(r *pb.TaskResult, applicantPubkey string) error {
+// pubkey. Does NOT verify "agent issued by applicant compositor" —
+// that lives at the manifest layer and is a documented follow-up
+// (CLAUDE.md §11). We don't try to understand the JSON content —
+// the eval suite's own verify function (passed via TaskOutputVerifier)
+// handles task-specific output checks.
+func verifyTaskResult(r *pb.TaskResult) error {
 	if r == nil {
 		return errors.New("nil task result")
-	}
-	if r.IcpAgentPubkeyHex != applicantPubkey {
-		return errors.New("ICP agent pubkey does not match applicant")
 	}
 	pub, err := decodePubkey(r.IcpAgentPubkeyHex)
 	if err != nil {

@@ -315,6 +315,56 @@ service CapabilityService {
   rpc PublishAttestation(AttestationCert) returns (PublishAttestationResult);
   rpc FetchAttestation(FetchAttestationRequest) returns (AttestationCert);
   rpc VerifyAttestation(AttestationCert) returns (VerifyAttestationResult);
+
+  // RequestAttestation drives the cross-network attestation flow from
+  // the applicant side. The Python caller owns AgentRunner state; the
+  // daemon owns the libp2p stream to the validator. They meet in the
+  // middle on this bidirectional gRPC stream.
+  //
+  // Wire sequence:
+  //   Python → AttestationApplicantFrame{start{target_peer_id}}
+  //   Daemon opens libp2p stream to target, reads Challenge, then:
+  //   Daemon → AttestationDaemonFrame{challenge}     (or {outcome} on early failure)
+  //   Python runs the eval suite locally, builds the ChallengeResponse:
+  //   Python → AttestationApplicantFrame{response}
+  //   Daemon forwards over libp2p, reads VerifyResponseResult, then:
+  //   Daemon → AttestationDaemonFrame{outcome}
+  //   Stream closes.
+  //
+  // Errors at any step are surfaced as a final outcome frame with
+  // success=false, so Python's error-handling path is uniform.
+  rpc RequestAttestation(stream AttestationApplicantFrame)
+      returns (stream AttestationDaemonFrame);
+}
+
+// AttestationApplicantFrame carries Python → Daemon traffic on the
+// RequestAttestation stream. The first frame MUST be a start; the
+// second frame MUST be a response. Any other ordering is a protocol
+// violation and the daemon closes the stream with InvalidArgument.
+message AttestationApplicantFrame {
+  oneof body {
+    AttestationStartRequest start    = 1;
+    ChallengeResponse       response = 2;
+  }
+}
+
+// AttestationDaemonFrame carries Daemon → Python traffic. Either the
+// daemon successfully relayed a Challenge (so Python should run the
+// eval and reply), OR the daemon hit an error before Python could do
+// anything actionable (in which case the very first frame is an
+// outcome with success=false and Python returns immediately).
+message AttestationDaemonFrame {
+  oneof body {
+    Challenge            challenge = 1;
+    VerifyResponseResult outcome   = 2;
+  }
+}
+
+// AttestationStartRequest is the Python caller's first (and only
+// metadata) frame on the stream. The daemon validates target_peer_id
+// is a well-formed peer.ID before opening the libp2p stream.
+message AttestationStartRequest {
+  string target_peer_id = 1;
 }
 
 // ChallengeBody is the part the validator signs. Wrapping it inside

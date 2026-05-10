@@ -330,13 +330,243 @@ Both reputation stores now reflect the successful interaction.
 
 ## 5. What was done in recent sessions
 
-Sections newest-first. Session 12 is the most recent. The patterns
-introduced in Sessions 9–12 (fail-closed observability wrappers,
+Sections newest-first. Session 13 is the most recent. The patterns
+introduced in Sessions 9–13 (fail-closed observability wrappers,
 lex-cursor pagination, request/response correlation, length-prefixed
 JSON over subprocess pipes, atomic JSON persistence, applicant-proposed
 canonical-bytes-for-quorum-cosignatures, libp2p stream protocols
-mirroring `/gyza/message/1.0.0`'s varint-frame pattern) are the
-freshest reference templates for items still on §6's list.
+mirroring `/gyza/message/1.0.0`'s varint-frame pattern, queue-driven
+bidi-streaming gRPC for ferry-style protocol bridges) are the freshest
+reference templates for items still on §6's list.
+
+---
+
+## 5-pre. Session 13 — Python applicant adapter for cross-network attestation (#21-bridge)
+
+Closed the Python ↔ Go bridge for Tier-3 attestation. Session 12
+shipped the libp2p wire protocol with no Python caller; this session
+wires Python applicants into it via a bidirectional gRPC stream on
+`CapabilityService.RequestAttestation`. The end-to-end test of record
+spawns two `gyza-netd` daemons on loopback, runs the canonical eval
+suite from one through the other's libp2p capability-challenge
+handler, and returns a real `CoSignature` in ~6s plus ~30s of
+sentence-transformers cold load.
+
+Cumulative tests after Session 13: 459 Python (was 457 at start of
+Session 13; +2 attestation-bridge integration). Go suite gained no
+new tests beyond Session 12's 5 — the bridge's correctness is
+exercised by 4 new Go unit tests in `internal/grpc/server_test.go`
+(happy path with two real libp2p hosts, plus three error paths) and
+the Python integration test.
+
+### Architectural choice settled
+
+**Python-initiated bidirectional streaming gRPC.** Python opens
+`RequestAttestation`, sends an `AttestationStartRequest{target_peer_id}`
+first frame, then enters a read loop. The daemon ferries Challenge
+from the libp2p side over the gRPC stream, awaits Python's
+ChallengeResponse, ferries it back over libp2p, reads
+VerifyResponseResult from the validator, and emits a final outcome
+frame to Python. The wire shape mirrors the libp2p frames almost
+1:1 — three frames each direction, with the same `Challenge` /
+`ChallengeResponse` / `VerifyResponseResult` proto types reused
+unchanged so the bytes the applicant signs are exactly the bytes
+the validator verifies.
+
+**Why not "daemon dials Python".** Considered and rejected (CLAUDE.md
+§6 already flagged this as harder semantics). Inverting the gRPC
+client/server direction would require Python to expose a server
+endpoint, force the daemon to discover it, multiplex callbacks across
+multiple registered Python clients, and stall the daemon's libp2p
+read goroutine on a slow synchronous callback. Python-initiated
+bidi keeps the four invariants right: per-stream isolation,
+HTTP/2 backpressure (Python's slow eval doesn't pin the daemon's
+libp2p read), trivial multi-tenant routing (whoever opened the
+stream owns the response), and graceful failure surfaces (gRPC
+cancel → daemon's libp2p timeout → outcome frame).
+
+### Wire protocol — bidirectional gRPC stream
+
+```
+→  Python → Daemon : AttestationApplicantFrame{start{target_peer_id}}
+                    Daemon opens libp2p stream to target.
+                    Daemon reads Challenge from libp2p.
+←  Daemon → Python : AttestationDaemonFrame{challenge}
+                    Python runs the eval suite locally.
+→  Python → Daemon : AttestationApplicantFrame{response}
+                    Daemon writes ChallengeResponse on libp2p.
+                    Daemon reads VerifyResponseResult from libp2p.
+←  Daemon → Python : AttestationDaemonFrame{outcome}
+                    Stream closes.
+```
+
+**No second-stage error path.** Every error — bad first frame, bad
+peer ID, libp2p open failure, validator rejection, eval timeout —
+surfaces as a single Outcome frame with `success=false` and a
+descriptive `error` string. Python's read loop has one shape:
+loop, on Challenge run eval and send response, on Outcome return.
+Daemon-side gRPC errors (e.g., `Unavailable` when capStream isn't
+initialized) propagate as `grpc.RpcError` to the Python caller —
+those are infrastructure failures, not protocol failures.
+
+### Python API
+
+```python
+from gyza.network.attestation_adapter import applicant_eval_session
+from gyza.network.netd_client import CapabilityClient
+
+with applicant_eval_session(compositor) as eval_cb:
+    with CapabilityClient(socket_path) as cap:
+        success, cosig, err = cap.request_attestation(
+            target_peer_id=validator_peer_id,
+            eval_callback=eval_cb,
+            timeout_s=120.0,
+        )
+```
+
+`applicant_eval_session` is a context manager that owns an ephemeral
+AgentRunner (memory + specialization + blackboard + executor). The
+yielded `eval_cb` accepts a `pb.Challenge` proto and returns a
+fully-signed `pb.ChallengeResponse` proto. The runner is reused
+across multiple calls within one session — a future Tier-3
+orchestrator that contacts 3 validators in sequence pays the
+runner-bootstrap cost once.
+
+### Go server bridge — `NetdServer.RequestAttestation`
+
+Lives in `netd/internal/grpc/server.go`. Builds an `EvalRunner`
+closure that ferries Challenge → Python via `stream.Send` and
+ChallengeResponse ← Python via `stream.Recv`, hands it to
+`s.capStream.RequestAttestation`, and emits the final Outcome
+frame. The closure is invoked exactly once per attestation (matches
+`capability_stream.Manager.RequestAttestation`'s contract); every
+error path that has already sent the Challenge surfaces as a
+structured Outcome rather than an abrupt stream cancel.
+
+Wired by adding `capStream *capability_stream.Manager` to the
+`NetdServer` struct and threading `capStreamMgr` through
+`NewNetdServer` in `cmd/gyza-netd/main.go`. Five `server_test.go`
+tests updated for the new constructor arity.
+
+### Validator-side relaxation — `verifyTaskResult` no longer demands `agent == applicant`
+
+**Material change to `netd/internal/capability/capability.go`.** The
+in-process Go test helpers used a flat key model where the agent
+key and the applicant key are the same Ed25519 key. Real Python
+applicants don't: ICP envelopes are signed by AGENT identities
+(HKDF-derived from the compositor seed via
+`LocalCompositor.issue_agent`), the response body is signed by the
+COMPOSITOR. The validator's `verifyTaskResult` previously rejected
+this with `"ICP agent pubkey does not match applicant"`.
+
+The relaxation: keep the cryptographic check (`ed25519.Verify` on
+the BLAKE3 digest of `IcpPayloadBytes`), drop the
+`agent == applicant` equality. Per CLAUDE.md §11, "agent issued by
+compositor" verification is documented as a follow-up via the
+capability manifest — for now, the validator confirms the agent
+signed real bytes (proof of compute), and the response-body
+signature ties the bundle to the applicant.
+
+Existing Go unit tests still pass — they happen to use `agent ==
+applicant` but no longer require it.
+
+### Python ↔ Go canonical bytes verification
+
+ICP envelope bytes-for-Go-verification are produced by
+`gyza.icp._payload_bytes(env)` — canonical JSON of the envelope dict
+sans signature, sorted keys, no whitespace, UTF-8. Go's
+`verifyTaskResult` does:
+
+```go
+ed25519.Verify(decode(IcpAgentPubkeyHex),
+               blake3(IcpPayloadBytes),
+               decode(IcpSignatureHex))
+```
+
+Python's `sign_envelope` does:
+
+```python
+sk.sign(blake3(_payload_bytes(env)))
+```
+
+The two match because `_payload_bytes` is canonical and the digest
+function is identical. The `attestation_adapter` builds
+`pb.TaskResult.IcpPayloadBytes = _payload_bytes(env)` — i.e., the
+exact bytes the agent BLAKE3-hashed.
+
+Response-body bytes use protobuf deterministic marshal on both
+sides. Python: `body.SerializeToString(deterministic=True)`. Go:
+`canonicalMarshal(body)` which is `proto.MarshalOptions{Deterministic: true}.Marshal(body)`.
+Same bytes, so the `ApplicantSignature` (Ed25519 over body bytes
+under the compositor key) verifies cleanly.
+
+### Tests
+
+Go (4 new in `internal/grpc/server_test.go`):
+  * `TestRequestAttestationHappyPath` — two real libp2p hosts on
+    loopback, full bidi flow including a forged-but-valid
+    ChallengeResponse, asserts `outcome.Success && cosig.ValidatorPubkey
+    == validatorSigner.PubkeyHex()`.
+  * `TestRequestAttestationFirstFrameMustBeStart` — Python sends a
+    response frame as the first frame; bridge surfaces
+    `InvalidArgument` with `"first frame must be …"` message.
+  * `TestRequestAttestationInvalidPeerID` — bridge validates
+    peer.Decode BEFORE opening any libp2p stream; surfaces
+    `InvalidArgument` with `"invalid target_peer_id"`.
+  * `TestRequestAttestationCapStreamUnavailable` — server constructed
+    with `capStreamMgr=nil` returns `Unavailable`.
+
+Python (2 new in `tests/test_attestation_bridge.py`):
+  * `test_request_attestation_two_daemons_end_to_end` — spawns
+    two real `gyza-netd` daemons, drives full attestation through
+    real libp2p + real eval suite + real cosignature. ~6s after
+    sentence-transformers warm; ~38s cold.
+  * `test_request_attestation_invalid_target_peer_id` — bridge
+    rejects malformed peer IDs as `grpc.RpcError`/`InvalidArgument`,
+    with the eval callback never invoked.
+
+### Trip-wires this session surfaced
+
+  * **`make proto-py` uses bare `python`.** The Makefile target
+    invokes `python -m grpc_tools.protoc`, which on systems where
+    the default `python` lacks `grpc_tools` (e.g., this dev env)
+    fails with `ModuleNotFoundError`. Workaround: invoke directly
+    with `~/dev/marshal/.os/bin/python -m grpc_tools.protoc ...`.
+    A future fix should parametrize the Makefile to use
+    `$(PYTHON)` with a sensible default.
+  * **`gyza/network/attestation_adapter.py` reaches into
+    `gyza.icp._payload_bytes`.** Intentional — the adapter MUST
+    produce byte-identical canonical bytes to what `sign_envelope`
+    signed. Reimplementing the canonicalization in the adapter
+    would create dual maintenance and silent drift if `_payload_bytes`
+    changes shape. Keep the import; the underscore prefix
+    documents that this is a private dependency we own.
+  * **The eval `recorder` dict is shared across calls within one
+    session.** It's keyed by work_item UUID, so cross-call
+    collisions are cryptographically impossible, but the dict
+    grows monotonically. The adapter `recorder.pop(env.action_id)`
+    after consuming each entry to bound memory across many
+    attestations in one session.
+  * **`TestSenderSeqDedupRejects` is timing-flaky under load.**
+    Verified pre-existing (passes 3x in a row when system is idle,
+    occasionally fails when pytest is concurrently running). Not
+    related to bridge work.
+
+### What's left of #21 after this session
+
+  * **#21d — DHT-driven validator selection.** `CapabilityClient`
+    needs a `request_tier3_attestation(applicant) → AttestationCert | None`
+    method that calls `find_agents(min_tier=3, k=N)` and orchestrates
+    `request_attestation` against the discovered validators in
+    parallel, collecting cosignatures into a quorum.
+  * **#21e — DHT cert publication + `gyza global attest --tier 3`
+    CLI.** Map the assembled cert to the protobuf
+    `AttestationCert` shape (already exists), call existing
+    `cap.publish_attestation`, and wire the CLI to drive
+    discovery → attestation → publication in one command.
+
+Both are mechanical now that the bridge exists. The algorithmic
+work is done.
 
 ---
 
@@ -943,23 +1173,38 @@ on "unknown work_item_id" — could be gossip lag, not malice.
 
 ---
 
-## 6. The remaining priority list (#21 — Python adapter + DHT)
+## 6. The remaining priority list (#21 — DHT discovery + DHT publish)
 
 Session 9 closed #25 / #26; Session 10 closed #22 / #24; Session 11
 closed the algorithmic core of #21 (eval suite + Tier-1 self-attestation
 + in-process cross-network attestation orchestration); Session 12
-closed #21c (the libp2p stream protocol). Previous priority items are
-documented in §5a–§5e.
+closed #21c (the libp2p stream protocol); Session 13 closed
+#21-bridge (the Python applicant adapter). Previous priority items
+are documented in §5a–§5e and §5-pre.
 
-**What's left of #21 is the Python ↔ Go bridge plus DHT.** The wire
-protocol exists in Go and is tested with two real libp2p hosts on
-loopback; what's missing is the Python applicant adapter that drives
-the protocol from outside the daemon, plus DHT discovery and
-publication.
+**What's left of #21 is DHT discovery + DHT publication.** The full
+in-process and cross-process Python ↔ Go ↔ libp2p ↔ Go ↔ Python
+attestation flow works end-to-end as of Session 13. The remaining
+pieces are: orchestrating the discovery of Tier-3 validators via the
+DHT, and publishing the assembled cert to the DHT so consumers can
+fetch it.
 
-### #21-bridge — Python applicant adapter
+### #21-bridge — Python applicant adapter (CLOSED — Session 13)
 
-**Why:** Today the Go libp2p stream handler exists but has no Python
+See §5-pre for the full session narrative. Summary: added
+``CapabilityService.RequestAttestation`` bidirectional streaming RPC,
+implemented the Go bridge in ``netd/internal/grpc/server.go`` that
+ferries Challenge/Response between gRPC and the libp2p stream, added
+``CapabilityClient.request_attestation`` in
+``gyza/network/netd_client.py``, and built the eval orchestrator
+``gyza/network/attestation_adapter.py``. Validator-side
+``verifyTaskResult`` was relaxed to no longer require
+``agent_pubkey == applicant_pubkey`` (CLAUDE.md §11 trip-wire — agent
+and compositor are deliberately different keys). The original
+implementation plan from earlier in this section follows for
+historical reference; details in §5-pre supersede.
+
+**Why (historical):** Today the Go libp2p stream handler exists but has no Python
 caller. The applicant-side ``RequestAttestation`` in
 ``netd/internal/capability_stream`` takes an ``EvalRunner`` callback
 that produces a ``ChallengeResponse`` from a ``Challenge``. In
@@ -1638,10 +1883,13 @@ Every time you (a future Claude session) open this repo:
    `Bilateral settlement: BILATERAL ✓`.
 4. Check `git log --oneline -20` to see what changed since you last
    touched it.
-5. The remaining work in §6 is the Python applicant adapter
-   (#21-bridge) + #21d (DHT discovery) + #21e (DHT publish + CLI
-   Tier-3 mode). The natural next step is the Python adapter — once
-   it exists, #21d/e are mechanical. Pick one or ask the user.
+5. The remaining work in §6 is #21d (DHT discovery) + #21e (DHT
+   publish + CLI Tier-3 mode). #21-bridge closed in Session 13 —
+   the Python applicant adapter works end-to-end. The natural next
+   step is #21d (composing existing primitives: ``find_agents`` to
+   discover Tier-3 validators, `request_attestation` against each,
+   aggregate cosignatures into an `AttestationCert`). Pick one or
+   ask the user.
 
 If any of steps 2/3 fail, **stop and diagnose before doing new work.**
 A failing baseline is more important than any new feature.
@@ -1812,6 +2060,49 @@ Things a session might be tempted to do that would be wrong:
   errors close the stream silently — the applicant's read times out
   cleanly. Keep these two paths separate; mixing them makes
   applicant-side error handling ambiguous.
+- **Don't restore the `IcpAgentPubkeyHex == ApplicantPubkey` check
+  in `verifyTaskResult`.** Session 13 deliberately removed it. ICP
+  envelopes are signed by AGENT keys (HKDF-derived from the
+  compositor seed); the response body is signed by the COMPOSITOR.
+  The agent ↔ compositor binding is the capability manifest's
+  responsibility (a documented follow-up). Re-adding the equality
+  check would break every cross-network attestation that uses real
+  Python applicants — the integration test
+  `test_request_attestation_two_daemons_end_to_end` would regress
+  immediately.
+- **Don't drop a Daemon → Python `Outcome` frame on any failure
+  path of `RequestAttestation`.** Python's read loop in
+  `CapabilityClient.request_attestation` has exactly one shape:
+  loop on Recv, on Challenge run eval and Send response, on
+  Outcome return. If the daemon hits an error AFTER sending a
+  Challenge but BEFORE sending an Outcome, Python deadlocks until
+  the gRPC timeout fires. The bridge's invariant is "every error
+  path emits exactly one Outcome frame, success or failure." Don't
+  add an early-return that bypasses the final `stream.Send(outcome)`.
+- **Don't try to make Python's eval recorder global.** It's a
+  per-`applicant_eval_session` dict, keyed by work_item UUID. The
+  adapter `recorder.pop(env.action_id)` after consuming each
+  envelope to bound memory. Sharing across sessions would require a
+  lock and would not help anything — sessions are already long-lived
+  enough that runner-bootstrap cost amortizes within one.
+- **Don't reach into `gyza.icp._payload_bytes` from outside the
+  attestation_adapter without thinking about it.** It's an
+  intentional underscore-prefixed dependency: the adapter MUST
+  produce byte-identical canonical bytes to what `sign_envelope`
+  signed, otherwise Go's `verifyTaskResult` rejects the envelope.
+  Reimplementing the canonicalization elsewhere creates dual
+  maintenance and silent drift if `_payload_bytes` ever changes.
+- **Don't change `make proto-py` to use `python` without changing
+  `make proto`.** The Makefile's `proto-py` target invokes bare
+  `python -m grpc_tools.protoc`, which on systems where the default
+  `python` lacks `grpc_tools` (e.g., this dev env's
+  `/usr/bin/python`) fails with `ModuleNotFoundError`. The
+  workaround is to invoke `~/dev/marshal/.os/bin/python -m
+  grpc_tools.protoc -I netd/internal/grpc/proto --python_out=...
+  --grpc_python_out=... netd/internal/grpc/proto/netd.proto` from
+  the repo root. Don't silently "fix" the Makefile to hardcode
+  marshal — different dev environments resolve `python`
+  differently. A proper fix parametrizes via `$(PYTHON)`.
 
 ---
 

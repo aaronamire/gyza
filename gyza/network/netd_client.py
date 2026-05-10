@@ -18,11 +18,12 @@ from __future__ import annotations
 
 import logging
 import os
+import queue
 import shutil
 import subprocess
 import time
 from dataclasses import dataclass, field
-from typing import Iterator, Optional
+from typing import Callable, Iterator, Optional
 
 import grpc
 import numpy as np
@@ -1010,6 +1011,104 @@ class CapabilityClient:
         stub = netd_pb2_grpc.CapabilityServiceStub(self._ensure())
         result = stub.VerifyAttestation(cert_proto)
         return result.valid, result.cosig_count, result.reason
+
+    def request_attestation(
+        self,
+        target_peer_id: str,
+        eval_callback: "Callable[[netd_pb2.Challenge], netd_pb2.ChallengeResponse]",
+        timeout_s: float = 130.0,
+    ) -> tuple[bool, "netd_pb2.CoSignature | None", str]:
+        """
+        Drive a Tier-3 cross-network attestation against ``target_peer_id``
+        through the daemon. The daemon owns the libp2p stream to the
+        validator; we own the eval execution. Frames pass through this
+        gRPC bidirectional stream.
+
+        ``eval_callback`` receives the validator's Challenge proto and
+        must return a fully-signed ChallengeResponse proto. The callback
+        is invoked exactly once per call, on whatever thread is running
+        the request. It is responsible for:
+
+          - signing each TaskResult's ICP envelope with an agent key
+            issued by the applicant compositor,
+          - signing the ResponseBody with the COMPOSITOR signing key
+            (``LocalCompositor.sign``) — the libp2p PeerID is bound to
+            the compositor key by Noise, so the validator verifies
+            ApplicantSignature against the compositor pubkey,
+          - serializing the body deterministically (proto marshal with
+            sort-by-tag, which the Python protobuf library does by
+            default for canonical serialization).
+
+        Returns ``(success, cosignature_or_None, error_message_or_empty)``.
+        ``timeout_s`` slightly exceeds the daemon's libp2p
+        ``StreamTimeout=120s`` so the gRPC layer doesn't preempt the
+        underlying flow's clean failure surface.
+
+        Raises ``grpc.RpcError`` on transport failures (daemon down,
+        socket dropped). Daemon-side protocol errors (bad target peer
+        id, capability_stream not initialized) also surface here as
+        RpcError — they're not encoded as outcome frames because they
+        occur before the bridge can ferry anything.
+        """
+        request_q: "queue.Queue[netd_pb2.AttestationApplicantFrame | None]" = queue.Queue()
+        request_q.put(netd_pb2.AttestationApplicantFrame(
+            start=netd_pb2.AttestationStartRequest(target_peer_id=target_peer_id),
+        ))
+
+        def _request_iterator():
+            while True:
+                # Block forever — the loop body will sentinel-terminate
+                # via None when we're done. There's no soft timeout here
+                # because the gRPC call's `timeout=` parameter bounds
+                # the WHOLE round trip from outside.
+                item = request_q.get()
+                if item is None:
+                    return
+                yield item
+
+        stub = netd_pb2_grpc.CapabilityServiceStub(self._ensure())
+        response_iter = stub.RequestAttestation(
+            _request_iterator(), timeout=timeout_s,
+        )
+
+        outcome: "netd_pb2.VerifyResponseResult | None" = None
+        try:
+            for frame in response_iter:
+                which = frame.WhichOneof("body")
+                if which == "challenge":
+                    # Validator chose tasks; we run them now.
+                    response = eval_callback(frame.challenge)
+                    if response is None:
+                        # eval_callback opted out — close the stream
+                        # cleanly. Daemon's libp2p stream will time
+                        # out and surface as a "read response" error
+                        # in the outcome. We never see it because we
+                        # break and tear down.
+                        raise RuntimeError(
+                            "eval_callback returned None — refusing to send"
+                        )
+                    request_q.put(netd_pb2.AttestationApplicantFrame(response=response))
+                elif which == "outcome":
+                    # Final frame. Daemon closes after this; the iter
+                    # raises StopIteration on the next pull, which the
+                    # for-loop catches.
+                    outcome = frame.outcome
+                else:
+                    # Unknown body — daemon side bug or version skew.
+                    # Treat as a structured failure.
+                    return False, None, f"unexpected daemon frame: {which!r}"
+        finally:
+            # Sentinel terminates the request iterator generator,
+            # letting the underlying gRPC half-close cleanly. If we're
+            # exiting via exception (eval_callback raised), the daemon
+            # gets stream-cancelled by gRPC's own machinery — clean.
+            request_q.put(None)
+
+        if outcome is None:
+            return False, None, "stream closed without outcome"
+        if outcome.success:
+            return True, outcome.co_signature, ""
+        return False, None, outcome.error
 
 
 __all__ = [
