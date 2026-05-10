@@ -595,19 +595,197 @@ def cmd_global_find(args: argparse.Namespace) -> int:
 
 def cmd_global_attest(args: argparse.Namespace) -> int:
     """
-    Trigger a proof-of-capability attestation flow. Phase 3 prototype:
-    contacts the daemon's CapabilityService to issue a self-attestation
-    over the canonical eval suite. Real cross-network attestation
-    (Session 5's "applicant talks to 3 validators") needs network
-    plumbing not yet wired in this CLI; fall back to local-only.
+    Run the canonical eval suite locally and emit a Tier-1
+    self-signed attestation artifact.
+
+    What this command does:
+
+      1. Builds an ephemeral AgentRunner backed by the user's
+         compositor key + an executor specialized to solve the eval
+         suite (mock-eval; no LLM required for Tier 1).
+      2. Drives the suite via ``run_eval_locally`` — every task
+         posts an intent + work item, the runner claims, executes,
+         and signs an ICP envelope.
+      3. Verifies the bundle via ``verify_eval_results`` — the same
+         pure verifier a remote Tier-3 validator will run.
+      4. On pass: writes a JSON attestation artifact to disk
+         (``~/.gyza/attestations/self-<nonce>.json`` by default).
+
+    What this command does NOT yet do (deferred until the
+    ``/gyza/capability-challenge/1.0.0`` libp2p protocol lands):
+
+      * Talk to remote validators
+      * Collect 2-of-3 co-signatures
+      * Publish to the DHT
+
+    Exit codes: 0 on attestation pass, 1 on attestation failure
+    (some task did not verify), 2 on environment / setup errors.
     """
-    print(
-        "gyza global attest is not yet implemented in this CLI revision.\n"
-        "Run the eval suite via `python -m gyza.capability_eval` "
-        "(Phase 3 Session 5) and use the daemon's CapabilityService "
-        "RPCs directly until this CLI grows the orchestration."
+    import json as _json
+    import secrets
+    import tempfile
+    from pathlib import Path as _Path
+
+    import numpy as _np
+
+    from gyza.blackboard import Blackboard
+    from gyza.capability_eval import (
+        EVAL_TASKS,
+        EVAL_VERSION,
+        make_mock_eval_executor,
+        make_recording_executor,
+        run_eval_locally,
+        verify_eval_results,
     )
-    return 2
+    from gyza.demand import LSHIndex
+    from gyza.drift import SpecializationTracker
+    from gyza.identity import AgentIdentity, LocalCompositor
+    from gyza.memory import EpisodicMemory
+    from gyza.runner import AgentRunner
+    from gyza.schema import EMBEDDING_DIM
+
+    cfg = load_config()
+    key_path = _resolve(cfg.compositor_key_path)
+    if not _Path(key_path).exists():
+        print(
+            f"compositor key not found at {key_path}; run `gyza init` first",
+            file=sys.stderr,
+        )
+        return 2
+
+    compositor = LocalCompositor(key_path)
+
+    # Ephemeral working tree — the agent's per-attestation state
+    # (memory, specialization, blackboard) is deliberately throwaway.
+    # The artifact we keep is the signed attestation, not the
+    # supporting databases.
+    with tempfile.TemporaryDirectory(prefix="gyza-attest-") as scratch:
+        scratch_path = _Path(scratch)
+        bb = Blackboard(str(scratch_path / "bb.db"))
+
+        # Issue an attest-only agent. Tier 1 — this is the floor
+        # tier, "I have keys and machinery." Higher tiers come from
+        # peer-reviewed cross-network attestation.
+        seed, manifest = compositor.issue_agent(
+            agent_type="capability-self-attest",
+            model_path="mock-eval",
+            fs_read_paths=[str(scratch_path)],
+            fs_write_paths=[str(scratch_path)],
+            attestation_tier=1,
+        )
+        ident = AgentIdentity(seed, manifest)
+
+        mem = EpisodicMemory(
+            agent_id=ident.agent_id,
+            db_path=str(scratch_path / "mem.db"),
+        )
+        rng = _np.random.default_rng(0)
+        seed_emb = rng.standard_normal(EMBEDDING_DIM).astype(_np.float32)
+        seed_emb /= max(_np.linalg.norm(seed_emb), 1e-9)
+        spec = SpecializationTracker(
+            agent_id=ident.agent_id,
+            initial_embedding=seed_emb,
+            db_path=str(scratch_path / "spec.db"),
+        )
+
+        recorder: dict[str, dict] = {}
+        executor = make_recording_executor(make_mock_eval_executor(), recorder)
+        runner = AgentRunner(
+            identity=ident,
+            blackboard=bb,
+            memory=mem,
+            specialization=spec,
+            lsh=LSHIndex(seed=7),
+            executor=executor,
+            min_reward_threshold=0.0,
+            min_similarity_threshold=-1.0,
+            poll_interval_s=0.05,
+        )
+        runner.start()
+
+        nonce = secrets.token_hex(16)
+        eval_workdir = scratch_path / "eval"
+        try:
+            print(f"running {len(EVAL_TASKS)} eval tasks (nonce={nonce[:8]}...)")
+            _, results = run_eval_locally(
+                runner=runner,
+                blackboard=bb,
+                applicant_pubkey=ident.pubkey_hex,
+                workdir=eval_workdir,
+                nonce=nonce,
+                output_recorder=recorder,
+                overall_timeout_s=120.0,
+            )
+            report = verify_eval_results(
+                results=results,
+                applicant_pubkey=ident.pubkey_hex,
+                nonce=nonce,
+                workdir=eval_workdir,
+            )
+        finally:
+            runner.stop()
+
+    # Render the report regardless of pass/fail so the operator can
+    # debug failed tasks.
+    print()
+    print(f"eval_version: {report.eval_version}")
+    print(f"applicant:    {report.applicant_pubkey[:32]}...")
+    print(f"passed:       {report.passed_tasks} / {report.total_tasks}")
+    print()
+    for tid, msg in report.per_task.items():
+        marker = "✓" if msg == "ok" else "✗"
+        print(f"  {marker}  {tid:24s}  {msg}")
+    print()
+
+    if not report.passed:
+        print("attestation FAILED — at least one task did not verify",
+              file=sys.stderr)
+        return 1
+
+    # Build the artifact. We don't yet have the protobuf-shaped
+    # AttestationCert that the daemon's CapabilityService will want
+    # — that's wired in the cross-network protocol step. For now,
+    # emit a JSON envelope the operator can inspect and a future
+    # session can promote into the proto form.
+    artifact_dir = _Path(_resolve("~/.gyza/attestations"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    artifact_path = artifact_dir / f"self-{nonce[:16]}.json"
+
+    # The signed payload: the verifier's report plus the eval suite
+    # version. Signed by the compositor (the issuing identity), not
+    # the agent — the agent identity rotates per attestation but
+    # the compositor is the durable identity peers index against.
+    payload = {
+        "schema": "gyza.attestation.self/v1",
+        "tier": 1,
+        "eval_version": EVAL_VERSION,
+        "applicant_compositor_pubkey": compositor.pubkey_hex,
+        "applicant_agent_pubkey": report.applicant_pubkey,
+        "nonce": nonce,
+        "passed": report.passed,
+        "passed_tasks": report.passed_tasks,
+        "total_tasks": report.total_tasks,
+        "per_task": report.per_task,
+    }
+    payload_bytes = _json.dumps(
+        payload, sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
+    signature = compositor.sign(payload_bytes)
+
+    artifact = {
+        "payload": payload,
+        "signature": signature,
+        "signer_pubkey": compositor.pubkey_hex,
+    }
+    artifact_path.write_text(_json.dumps(artifact, indent=2))
+    print(f"attestation PASSED — Tier {payload['tier']}")
+    print(f"artifact: {artifact_path}")
+    print()
+    print("note: cross-network (Tier 3) attestation requires the")
+    print("/gyza/capability-challenge/1.0.0 libp2p protocol, which")
+    print("is not yet implemented. This artifact is locally-signed")
+    print("and serves as proof of working machinery only.")
+    return 0
 
 
 def cmd_metrics_start(args: argparse.Namespace) -> int:
@@ -901,7 +1079,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_find.add_argument(
         "--min-tier", type=int, default=0, help="minimum attestation tier",
     )
-    globsub.add_parser("attest", help="run proof-of-capability (placeholder)")
+    globsub.add_parser(
+        "attest",
+        help="run the canonical eval suite + emit a Tier-1 self-attestation",
+    )
     p_proj = globsub.add_parser("project", help="project lifecycle")
     projsub = p_proj.add_subparsers(dest="project_cmd", required=True)
     p_pnew = projsub.add_parser("new", help="join (or create) a project's gossip topic")
