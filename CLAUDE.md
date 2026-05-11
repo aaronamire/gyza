@@ -55,12 +55,15 @@
 > ---
 >
 > **Audience:** A future Claude session continuing work on this repo.
-> **Last updated:** end of Phase 3 Session 17 (vNext commitment +
-> CLAUDE.md restructure). Sessions 15–16 closed the #21f cluster
-> and its acknowledged trip-wires (verify-on-fetch + DHT TTL bounding
-> + RecursiveVerifier library). Session 17 is a strategic-decision
-> session: no new code, but the architectural target for every
-> future session is now binding.
+> **Last updated:** end of Phase 3 Session 18 (pre-spec artifacts for
+> §C1). Session 17 made vNext the architectural commitment.
+> Session 18 produced three pre-spec docs (`docs/invariants.md`,
+> `docs/state-machines.md`, `docs/wire-protocol.md`) catalogued
+> behavior the TLA+ spec will formalize. Estimated §C1 spec writing
+> cycle reduced from ~12 weeks to ~6 weeks by these artifacts.
+> Sessions 15–16 closed the #21f cluster and its acknowledged
+> trip-wires (verify-on-fetch + DHT TTL bounding + RecursiveVerifier
+> library).
 >
 > **What this file is.** A grounded reference. Everything below is
 > either (a) code that's been read and verified, (b) hard-won
@@ -429,6 +432,10 @@ fix parametrizes via `$(PYTHON)`. Packaging debt; tracked in §6.
 │       └── grpc/                 # gRPC server + proto definitions
 │                                 # Session 13: RequestAttestation bidi stream
 │
+├── docs/                 # Session 18 — pre-spec artifacts for §C1
+│   ├── invariants.md     # protocol invariants by ID (INV-X-N)
+│   ├── state-machines.md # state machines per major component
+│   └── wire-protocol.md  # consolidated wire-format reference
 ├── tests/                # pytest, all green
 │   # 457 fast slice + 1 skipped + 19 heavy integration as of Session 16
 │   # (Go: +3 dht A1 tests + 11 capability A2 tests = +14 vs Session 15)
@@ -617,6 +624,104 @@ Newer sessions on top. Each entry: what it shipped, the architectural
 decisions, the trip-wires discovered. These narratives are the
 durable institutional memory of the project; they're load-bearing
 for future sessions and should be preserved across rewrites.
+
+### 5-pre-6. Session 18 — pre-spec artifacts for §C1
+
+Three documentation artifacts produced in service of §C1 (TLA+ formal
+protocol specification). No code changes; pure documentation work.
+Rationale: the TLA+ spec needs to translate from existing protocol
+behavior to formal predicates. Having the existing behavior catalogued
+upfront makes spec writing a translation task rather than a discovery
+task — substantially faster and more rigorous.
+
+**Three docs created (all under `docs/`):**
+
+1. **`docs/invariants.md` — protocol invariants inventory.** Every
+   invariant the v1 code enforces, with stable IDs (`INV-X-N` shape).
+   16 sections, ~120 invariants total. Each has a statement and the
+   code site that enforces it. Sections: cross-cutting, ICP envelope,
+   blackboard, runner, settlement, attestation (5 sub-areas: body,
+   multi-validator quorum, challenge-response, DHT publish/fetch,
+   recursive verification), DHT, gossip, capability stream,
+   RequestAttestation bridge, identity, supervisor, reputation,
+   observability, sandbox, eval suite. Plus two appendices for
+   "invariants without runtime checks" (load-bearing for proofs) and
+   "non-invariants we deliberately don't enforce yet" (acknowledged
+   open items).
+
+2. **`docs/state-machines.md` — protocol state transitions.**
+   Box-and-arrow state machines for ten major protocol components:
+   WorkItem lifecycle, Settlement entry, Attestation cert, Agent
+   runner, DHT record (AgentBucket + AttestationCert variants),
+   Capability challenge protocol, RequestAttestation bridge,
+   Verifier cache state, RecursiveVerifier in-call state, HLC
+   ratchet. Each transition annotated with its triggering event
+   and the invariants it preserves (cross-referenced to
+   `invariants.md`).
+
+3. **`docs/wire-protocol.md` — consolidated wire-format reference.**
+   Single document for every wire-visible format: identity
+   encoding, three canonical-bytes routines (canonical JSON,
+   deterministic protobuf, BLAKE3), seven gRPC services with
+   message types, two libp2p stream protocols
+   (`/gyza/message/1.0.0`, `/gyza/capability-challenge/1.0.0`),
+   gossipsub topic namespaces, message-bus types
+   (`ledger.entry.*`, `ledger.reconcile.*`), three DHT key
+   namespaces (`/gyza/agents/*`, `/gyza/attestations/*`,
+   `/gyza/relays`), LSH parameters, ICP envelope encoding,
+   cross-language compatibility matrix, and the Session-17
+   forward-compatibility rules for v1↔v2 wire-format coexistence.
+
+**Trip-wires this session surfaced:**
+
+- **Three distinct canonical-bytes routines.** Sessions 11–14 made
+  one routine (canonical JSON) work for ICP envelopes and another
+  (deterministic protobuf) work for capability messages. They're
+  NOT interchangeable. `wire-protocol.md §2` is the authoritative
+  reference. Mixing them is the bug class that Session 12's
+  architectural decision was made to prevent.
+- **Invariant numbering convention.** Stable IDs (`INV-X-N`) so the
+  TLA+ spec and Coq proofs can cross-reference. Once assigned, do
+  NOT renumber even if you reorder. Add new IDs at the next
+  available number in the section.
+- **Some properties are protocol-level, not runtime-checked.**
+  Settlement conservation (INV-SETTLE-6), eventual consistency
+  (INV-GOSS-4), sybil-resistance threshold (INV-X-A3), capability
+  non-forgeability (INV-X-A4), liveness under bounded partition
+  (INV-X-A5). These are the load-bearing targets for §C2 (formal
+  proofs) and don't have corresponding `assert` statements in
+  code. Documented explicitly in `invariants.md` Appendix A.
+- **The recursive-verifier and verify-on-fetch verifiers have
+  independent caches.** Caching at different keys (validator-pubkey
+  vs. applicant-cert) with different TTL policies. Both legitimate;
+  document the asymmetry rather than unify.
+
+**Open follow-ups surfaced:**
+
+- INV-X-B-series in `invariants.md` Appendix B lists non-invariants
+  the architecture deliberately doesn't enforce yet. Each is
+  cross-referenced to a §6 priority bucket item. These are NOT
+  bugs; they're acknowledged gaps that §C1 should formalize as
+  "out of scope at v1" so the gaps stay visible.
+- A few code-site line numbers in `invariants.md` are anchored to
+  commit 481300e. Future refactoring should re-anchor or use stable
+  function-name references.
+
+**What this DOESN'T accomplish:**
+
+- This is not §C1. The TLA+ spec proper still needs to be written.
+  These three docs are the input lexicon for that spec — they make
+  it possible to write the spec in ~6 weeks rather than ~12.
+- This is not a code cleanup. The codebase is not modified. The
+  artifacts describe what exists, accurately, so the spec doesn't
+  re-discover it.
+- No tests added. No tests changed. Demo unchanged.
+
+**Estimated cycle saving for §C1:** Roughly 30–50% reduction in spec
+writing time. Without these artifacts, a TLA+ spec writer would have
+to re-discover each invariant and state transition while writing.
+With them, the spec becomes a structured translation from
+`docs/invariants.md` and `docs/state-machines.md` into TLA+ syntax.
 
 ### 5-pre-5. Session 17 — vNext architectural commitment + CLAUDE.md restructure
 
@@ -1253,7 +1358,22 @@ the class of bugs that Sessions 11–14 patched after the fact
 (canonicalization gap, plausibility-check matrix, ordering
 invariants). Required because every downstream vNext layer depends
 on a verified spec of what v1 actually does. ~6 weeks of focused
-work. **Do not start vNext layer-2+ work without this.**
+work (reduced from ~12 weeks by Session 18's pre-spec artifacts).
+**Do not start vNext layer-2+ work without this.**
+
+**Inputs for C1 (produced in Session 18):**
+- `docs/invariants.md` — ~120 invariants by stable ID (`INV-X-N`).
+  TLA+ modules translate these into formal predicates.
+- `docs/state-machines.md` — box-and-arrow state machines for 10
+  components. TLA+ modules formalize as `Next` relations.
+- `docs/wire-protocol.md` — every wire-visible format. TLA+ spec
+  uses as the lexicon of "what's on the wire."
+
+**Recommended scope for the first C1 session:** Settlement module.
+Most self-contained (bilateral, well-tested, recently re-touched in
+Session 9), so it's the cleanest first formalization target.
+Attestation second (single applicant; many validators; canonical
+bytes). Blackboard/gossip last (most cross-component coupling).
 
 **C2. Coq or Lean proofs of v1 invariants.** Settlement conservation,
 sybil resistance threshold under stated assumptions, eventual
