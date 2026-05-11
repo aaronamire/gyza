@@ -94,6 +94,9 @@ func main() {
 		relayAdvertiseInterval = flag.Duration(
 			"relay-advertise-interval", 30*time.Minute,
 			"how often to re-advertise this node's relay availability to /gyza/relays; only used when --enable-relay-service is set")
+		dhtMode = flag.String(
+			"dht-mode", "auto",
+			"Kademlia DHT mode: auto | server | client. ModeAuto starts as Client and promotes to Server when reachability is confirmed; on small/loopback meshes without AutoNAT signaling, promotion can take a while or never happen — integration tests should pass --dht-mode=server so PutValue replicates across peers without waiting on autonat.")
 		bootstrap   stringSliceFlag
 		staticRelay stringSliceFlag
 	)
@@ -177,11 +180,22 @@ func main() {
 
 	// Kademlia DHT with /gyza/1.0 protocol prefix — segregated from
 	// public IPFS, even when riding the same wire transport.
-	gdht, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeAuto)
+	var resolvedMode kaddht.ModeOpt
+	switch strings.ToLower(*dhtMode) {
+	case "server":
+		resolvedMode = kaddht.ModeServer
+	case "client":
+		resolvedMode = kaddht.ModeClient
+	case "auto", "":
+		resolvedMode = kaddht.ModeAuto
+	default:
+		logger.Fatal("[dht] unknown --dht-mode %q (want auto|server|client)", *dhtMode)
+	}
+	gdht, err := dht.NewGyzaDHT(ctx, h, resolvedMode)
 	if err != nil {
 		logger.Fatal("[dht] init: %v", err)
 	}
-	logger.Info("[dht] initialized (mode=auto, prefix=/gyza/1.0)")
+	logger.Info("[dht] initialized (mode=%s, prefix=/gyza/1.0)", *dhtMode)
 	natMgr.SetDHT(gdht)
 
 	// If the operator opted in to running a circuit relay, advertise

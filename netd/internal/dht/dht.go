@@ -29,6 +29,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"gyza/netd/internal/capability"
 	pb "gyza/netd/internal/grpc/proto"
 
 	"github.com/libp2p/go-libp2p/core/host"
@@ -208,6 +209,14 @@ type GyzaDHT struct {
 	kad  *kaddht.IpfsDHT
 	lsh  *LSHIndex
 
+	// verifier filters AgentAdvertisements in FindAgents when the
+	// caller asks for min_tier >= IssuedTier. nil means "no
+	// verification" — used by older tests; production paths set
+	// the default via NewGyzaDHT and tests can override with
+	// SetAttestationVerifier. See verifier.go for the contract.
+	verifierMu sync.RWMutex
+	verifier   AttestationVerifier
+
 	mu          sync.Mutex
 	local       map[string]*pb.AgentAdvertisement // agent_pubkey -> ad (own ads)
 	localBucket map[string]uint64                 // agent_pubkey -> last published bucket
@@ -255,13 +264,38 @@ func NewGyzaDHT(ctx context.Context, h host.Host, mode kaddht.ModeOpt) (*GyzaDHT
 		_ = err
 	}
 
-	return &GyzaDHT{
+	d := &GyzaDHT{
 		host:        h,
 		kad:         kad,
 		lsh:         idx,
 		local:       make(map[string]*pb.AgentAdvertisement),
 		localBucket: make(map[string]uint64),
-	}, nil
+	}
+	// Default verifier closes over d.FetchAttestation. We can't
+	// reference d before the struct exists; do it after construction
+	// so the closure captures the right pointer.
+	d.verifier = NewDHTAttestationVerifier(d.FetchAttestation, VerifierConfig{})
+	return d, nil
+}
+
+// SetAttestationVerifier overrides the cert-verification used by
+// FindAgents when min_tier >= IssuedTier. Passing nil disables
+// verification — useful for tests that exercise tier-integer filtering
+// without publishing real certs. Production callers should leave the
+// default constructed by NewGyzaDHT in place.
+func (d *GyzaDHT) SetAttestationVerifier(v AttestationVerifier) {
+	d.verifierMu.Lock()
+	d.verifier = v
+	d.verifierMu.Unlock()
+}
+
+// attestationVerifier returns the current verifier under read lock —
+// the FindAgents hot path uses this to avoid contending with rare
+// SetAttestationVerifier calls.
+func (d *GyzaDHT) attestationVerifier() AttestationVerifier {
+	d.verifierMu.RLock()
+	defer d.verifierMu.RUnlock()
+	return d.verifier
 }
 
 // Close releases the underlying DHT resources. Does not close the host
@@ -500,6 +534,32 @@ func (d *GyzaDHT) FindAgents(
 	sort.Slice(candidates, func(i, j int) bool {
 		return candidates[i].score > candidates[j].score
 	})
+
+	// Verify-on-fetch (#21f). When the caller demands min_tier >=
+	// IssuedTier, the AttestationTier integer alone is a self-reported
+	// claim — a Sybil node can advertise tier=3 without owning a cert.
+	// Filter candidates against the AttestationVerifier so only ads
+	// whose compositor has a fetchable, valid Tier-3 cert survive.
+	// The verifier handles caching, bounded concurrency, and per-fetch
+	// timeouts internally.
+	//
+	// We apply this AFTER scoring so the verifier sees candidates
+	// pre-sorted: if the verifier ever gets slow enough that we want
+	// to short-circuit after collecting k verified results, the
+	// highest-scoring ads are tried first. Today the verifier is
+	// cheap on cache hits so we just verify everything.
+	if minTier >= int32(capability.IssuedTier) {
+		if vfr := d.attestationVerifier(); vfr != nil {
+			verified := make([]scored, 0, len(candidates))
+			for _, c := range candidates {
+				if vfr.Verify(ctx, c.ad.CompositorPubkey) {
+					verified = append(verified, c)
+				}
+			}
+			candidates = verified
+		}
+	}
+
 	if len(candidates) > k {
 		candidates = candidates[:k]
 	}

@@ -1,23 +1,24 @@
 # CLAUDE.md — Gyza session continuation guide
 
 > **Audience:** A future Claude session continuing work on this repo.
-> Last updated at the end of Phase 3 Session 14 (Tier-3 quorum
-> attestation + DHT publication — closes the §6 #21 priority cluster
-> end-to-end). Session 11 shipped the algorithmic core (eval suite +
-> Tier-1 self-attest + in-process orchestration); Session 12 shipped
-> #21c (libp2p wire protocol); Session 13 shipped #21-bridge (Python
-> applicant adapter via bidi gRPC); Session 14 closed #21d (DHT-driven
-> validator discovery + k-of-n orchestrator) and #21e (DHT cert
-> publication + `gyza global attest --tier 3` CLI). Session 14 also
-> fixed a load-bearing canonicalization gap: the Go validator's
-> per-call `AttestationBody` couldn't aggregate across validators;
-> the applicant now proposes one body that every validator signs.
-> What's next on the punch list is **#21f — verify-on-fetch** in
-> `find_agents`, so consumers actually demand the cert at routing
-> time rather than trusting the self-reported `attestation_tier`
-> field. Read top to bottom on session start, then keep open as a
-> reference. Everything in here is grounded in code that's been
-> read, not in spec aspirations.
+> Last updated at the end of Phase 3 Session 15 (#21f — verify-on-fetch
+> in `find_agents`). #21 is now end-to-end enforceable at the routing
+> layer: queries for `min_tier=3` get back only ads whose compositor
+> has a fetchable, valid Tier-3 cert in the DHT. The full lineage —
+> Session 11 shipped the algorithmic core (eval suite + Tier-1
+> self-attest + in-process orchestration); Session 12 shipped #21c
+> (libp2p wire protocol); Session 13 shipped #21-bridge (Python
+> applicant adapter via bidi gRPC); Session 14 closed #21d
+> (DHT-driven validator discovery + k-of-n orchestrator) and #21e
+> (DHT cert publication + `gyza global attest --tier 3` CLI);
+> Session 15 closes #21f (verify-on-fetch in the discovery hot path
+> with TTL+single-flight cache, bounded concurrency, and a near-expiry
+> slack window). The `attestation_tier` field on an AgentAdvertisement
+> is no longer a self-reported claim — the daemon fetches the cert
+> under `/gyza/attestations/{compositor_pubkey}` at FindAgents time
+> and drops anything that can't be verified. Read top to bottom on
+> session start, then keep open as a reference. Everything in here
+> is grounded in code that's been read, not in spec aspirations.
 
 ---
 
@@ -188,22 +189,31 @@ publish hop. Tier-1 (`--tier 1`, default) does NOT need the daemon
 — it just runs the eval suite locally and writes a signed JSON
 artifact.
 
-### `gyza global attest --tier 3` succeeds but the cert won't verify
-### at consumers without the cert being fetchable
+### Daemon `PublishAttestation` doesn't bound DHT record TTL by `cert.expires_at_ns`
 
-Today the daemon publishes the cert under
+The daemon publishes the cert under
 `/gyza/attestations/{compositor_pubkey}` with whatever default DHT
 TTL `dht.PublishAttestation` uses — NOT bounded by the cert's own
-`expires_at_ns`. A consumer that fetches a near-expiry record and
-verifies it can see "verified now" but the cert expires moments
-later. CLAUDE.md §6 #21f flags this for follow-up; mitigated in
-practice because `VerifyAttestation` re-checks `expires_at_ns`.
+`expires_at_ns`. A near-expiry record can survive in the DHT past
+its own validity. Mitigated TWO ways: (a) `VerifyAttestation`
+re-checks `expires_at_ns`; (b) Session 15's verifier additionally
+enforces a 1h slack window so a cert that verifies now stays
+useful through the routing horizon. Worth fixing publish-side so
+DHT GC aligns with cert lifecycle — non-blocking #21-adjacent
+follow-up (see §6).
 
-### `AgentAdvertisement.attestation_tier` is self-reported
+### `AgentAdvertisement.attestation_tier` is verified at `find_agents` (Session 15)
 
-Sybil nodes can advertise `tier=3` without owning a cert. Routing
-filters that respect `min_tier=3` are accepting the lie today.
-This is the headline #21f gap — see §6.
+Session 15 closed #21f. `find_agents(min_tier=3)` now drops any ad
+whose `compositor_pubkey` lacks a fetchable, valid Tier-3 cert in
+the DHT. The integer field itself is still mutable on the wire (a
+Sybil can still PUBLISH tier=3) — but a consumer's
+`find_agents(min_tier=3)` won't return it. Callers that bypass
+`find_agents` (raw DHT reads, gossip-payload parsing, on-disk
+snapshots) inherit the old self-report weakness and must do their
+own `cap.fetch_attestation` + `cap.verify_attestation`. See §5-pre-3
+for the verifier's semantics (positive/negative cache, single-flight,
+near-expiry slack).
 
 ### `DefaultBootstrapPeers = []string{}` in `netd/internal/host/host.go`
 
@@ -277,6 +287,8 @@ integration coverage.
 │       ├── identity/             # Ed25519 seed → libp2p crypto.PrivKey
 │       ├── host/                 # libp2p host config (QUIC + Noise + yamux)
 │       ├── dht/                  # Kademlia DHT + Python-compatible LSH
+│       │                          # Session 15: verifier.go — verify-on-fetch
+│       │                          # AttestationVerifier wired into FindAgents
 │       ├── discovery/            # mDNS service
 │       ├── nat/                  # DCUtR + AutoRelay
 │       ├── gossip/               # gossipsub + signed deltas
@@ -285,7 +297,7 @@ integration coverage.
 │       ├── capability_stream/    # Session 12 — libp2p `/gyza/capability-challenge/1.0.0` (3-frame proto exchange)
 │       └── grpc/                 # gRPC server + proto definitions
 │
-├── tests/                # pytest, all green (461 fast + 7 integration as of Session 14)
+├── tests/                # pytest, all green (457 fast + 1 skipped + 19 heavy integration as of Session 15)
 ├── demo/
 │   ├── single_machine_global.py  # Phase 3 integration sim — RUN THIS to verify
 │   ├── single_machine_phase2.py  # Phase 2 sim
@@ -434,15 +446,265 @@ attestation_tier field on advertisements is still self-reported.)
 
 ## 5. What was done in recent sessions
 
-Sections newest-first. Session 14 is the most recent. The patterns
-introduced in Sessions 9–14 (fail-closed observability wrappers,
+Sections newest-first. Session 15 is the most recent. The patterns
+introduced in Sessions 9–15 (fail-closed observability wrappers,
 lex-cursor pagination, request/response correlation, length-prefixed
 JSON over subprocess pipes, atomic JSON persistence, applicant-proposed
 canonical-bytes-for-quorum-cosignatures, libp2p stream protocols
 mirroring `/gyza/message/1.0.0`'s varint-frame pattern, queue-driven
 bidi-streaming gRPC for ferry-style protocol bridges, k-of-n
-quorum aggregation with applicant-authored canonical body) are the
+quorum aggregation with applicant-authored canonical body,
+single-flight + TTL-cached verifier on the discovery hot path) are the
 freshest reference templates for items still on §6's list.
+
+---
+
+## 5-pre-3. Session 15 — Verify-on-fetch in `find_agents` (#21f)
+
+Closes #21. Sessions 11–14 made it possible to *earn* and *publish* a
+Tier-3 cert; until this session, consumers still trusted the
+self-reported `attestation_tier` field on incoming advertisements.
+Session 15 makes the daemon resolve `min_tier=3` queries against the
+underlying cert: every candidate ad's compositor_pubkey is run
+through an `AttestationVerifier` that fetches the cert from
+`/gyza/attestations/{pubkey}`, runs the existing
+`capability.VerifyAttestation`, and drops the ad if anything goes
+wrong (no cert, expired cert, near-expiry cert, validator-signature
+failure, fetch timeout).
+
+Cumulative tests after Session 15: 457 Python (fast slice; +1
+Python integration in `tests/test_verify_on_fetch.py` that lives
+outside the fast slice). Go suite gained 13 new tests:
+`internal/dht/verifier_test.go` adds 10 unit tests against the
+verifier in isolation; `internal/dht/dht_test.go` adds 3 FindAgents
+integration tests (TestFindAgentsRequires/Admits/LowTier...) and
+updates `TestFindFiltersByTier` to keep its integer-comparison
+semantic by installing an `alwaysTrueVerifier` stub.
+
+### The contract
+
+Today, an `AgentAdvertisement` carries `attestation_tier: int`. Any
+node can advertise `tier=3` for free. The relevant invariant in the
+gyza threat model says "Tier 3 means ≥`MinCoSignatures` (2)
+distinct Tier-3 validators cosigned an `AttestationCert` over the
+applicant's compositor pubkey, and that cert lives at the canonical
+DHT key". Session 15 enforces the link between the integer and the
+cert: at every `FindAgents(min_tier >= IssuedTier)` call, the
+daemon-side filter additionally requires the cert to be fetchable
+and valid. Queries with `min_tier < IssuedTier` (= 3) keep the
+old behavior — no verification, the integer remains advisory.
+
+### Architecture — what lives where
+
+  * `netd/internal/dht/verifier.go` (new) — the
+    `AttestationVerifier` interface plus the default
+    `DHTAttestationVerifier` implementation: TTL-cached, single-
+    flight per pubkey, semaphore-bounded concurrency, per-fetch
+    timeout. Pure logic; depends only on `pb` types and
+    `capability.VerifyAttestation`.
+  * `netd/internal/dht/dht.go` (modified) — `GyzaDHT` grows a
+    `verifier` field (interface-typed, RW-mutex-guarded so
+    `SetAttestationVerifier` doesn't contend with the FindAgents
+    hot path). `NewGyzaDHT` constructs the default verifier from
+    its own `FetchAttestation`. `FindAgents` calls
+    `verifier.Verify(ctx, ad.CompositorPubkey)` after scoring and
+    before top-k truncation, filtering the ranked-by-cosine list
+    in-place.
+  * `netd/cmd/gyza-netd/main.go` (modified) — adds
+    `--dht-mode auto|server|client` so integration tests can force
+    Server mode. ModeAuto starts as Client and only promotes to
+    Server when AutoNAT confirms reachability; on a loopback-only
+    test mesh that never happens, so PutValue from one daemon
+    doesn't reach another's local datastore. Production keeps the
+    default (auto) — the flag exists purely as a test seam.
+  * `gyza/network/netd_client.py` (modified) — `start_daemon`
+    grows a `dht_mode: str | None = None` keyword to forward the
+    daemon flag. The Python tier-3 verify-on-fetch integration
+    test passes `dht_mode="server"`.
+
+### Cache semantics (verifier.go)
+
+Cache is keyed by compositor_pubkey, NOT agent_pubkey. Multiple
+agents under one compositor share one cert lookup — matches the
+DHT key shape (`/gyza/attestations/{compositor_pubkey}`).
+
+| Outcome                            | Cached?       | TTL                                          |
+| ---------------------------------- | ------------- | -------------------------------------------- |
+| Valid cert                         | yes, positive | `min(posTTL=5m, cert.expires_at - slack - now)` |
+| Cert missing (NotFound)            | yes, negative | `negTTL = 30s`                                |
+| Cert verify fails (sig/expired)    | yes, negative | `negTTL = 30s`                                |
+| Cert in slack-window (near-expiry) | yes, negative | `negTTL = 30s`                                |
+| Fetch errored (DHT network)        | NO            | —                                             |
+| Fetch timed out (`fetchTimeout`)   | NO            | —                                             |
+| Empty pubkey input                 | NO            | — (rejected immediately, no fetch)            |
+
+The asymmetry on cache-or-not is load-bearing. A stable Sybil that
+keeps showing up in a bucket should NOT cost a DHT round trip per
+query — hence positive AND definitive-negative are cached. A
+transient DHT or timeout failure should NOT sticky-hide an honest
+Tier-3 ad — hence those are deliberately uncached.
+
+### Near-expiry slack window — the #21f trip-wire
+
+CLAUDE.md §6 already documented the trip-wire that prompted the
+slack window: a consumer that fetches a cert 1ms before expiry can
+verify it as "valid now" but the cert dies before the routing
+horizon. The verifier rejects (and negative-caches) any cert whose
+remaining lifetime is shorter than `expirySlack = 1h`. A cert that
+verifies under `capability.VerifyAttestation` but lies inside the
+slack window is treated identically to "missing cert": the
+advertisement gets dropped. Practically, an agent whose cert is
+about to expire becomes invisible to routing one hour early — long
+enough that re-attestation can complete without a routing gap.
+
+### Concurrency controls
+
+Three mechanisms compose:
+
+  * **Single-flight per pubkey.** A `map[string]*inflightCall` lets
+    concurrent FindAgents queries for the same Tier-3 compositor
+    share one DHT fetch. The waiting goroutines block on the
+    in-flight's `done` channel under the verifier's mutex (released
+    before the wait); after the fetcher returns, they re-read the
+    cache. A canceled ctx aborts the wait without poisoning the
+    in-flight registration.
+  * **Bounded global concurrency.** `sem chan struct{}` of size
+    `MaxInflight = 16` caps total concurrent fetches. A query
+    blocked on a full semaphore returns false-with-no-caching if
+    its ctx is canceled, so the caller can re-query later without
+    inheriting a negative cache from a transient overload.
+  * **Per-fetch deadline.** Inside the semaphore slot, the
+    fetcher's `context.WithTimeout(ctx, fetchTimeout)` caps the
+    DHT call at 250ms by default — enough for loopback /
+    same-cluster DHT and adequate for most cross-internet hops on
+    a warm routing table.
+
+### Tests
+
+Go (13 new):
+
+  * `verifier_test.go::TestVerifier_AcceptsValidCertCachesResult` —
+    happy path, second call hits the cache, fetcher called once.
+  * `TestVerifier_RejectsMissingCertCachesNegative` — Sybil case;
+    negative cached, two calls = one fetch.
+  * `TestVerifier_RejectsExpiredCert` — `capability.VerifyAttestation`
+    rejection surfaces as a negative cache entry.
+  * `TestVerifier_RejectsNearExpiryCert` — cert 10min from expiry
+    with slack=1h is rejected even though `VerifyAttestation` itself
+    would accept.
+  * `TestVerifier_FetchErrorNotCached` — simulated DHT error;
+    second call re-fetches (no sticky negative for transient
+    failures).
+  * `TestVerifier_SingleFlightDedupsConcurrent` — 8 goroutines
+    concurrent against same pubkey collapse to ≤2 fetches; all see
+    true.
+  * `TestVerifier_PerFetchTimeout` — fetcher delay > fetchTimeout
+    surfaces as a transient failure; not cached.
+  * `TestVerifier_PositiveCacheBoundedByCertExpiry` — fast-forwarded
+    clock proves the positive cache evicts at
+    `cert.expires_at - slack`, not at `now + posTTL`.
+  * `TestVerifier_EmptyPubkeyRejected` — no fetch, immediate false.
+  * `TestVerifier_BoundedConcurrency` — 4 fetches at 200ms with
+    MaxInflight=2 measure to ~400ms; proves the semaphore gates
+    fan-out.
+  * `dht_test.go::TestFindAgentsRequiresCertForTier3` — published
+    tier-3 ad WITHOUT publishing a cert is filtered from
+    min_tier=3 queries but appears in min_tier=1 queries (verifier
+    only fires at tier ≥ IssuedTier).
+  * `TestFindAgentsAdmitsTier3WithValidCert` — published tier-3 ad
+    + valid published cert appears in min_tier=3 query.
+  * `TestFindAgentsLowTierSkipsVerifier` — uses
+    `panickingVerifier` (fails the test on call) to prove
+    min_tier ∈ {0,1,2} never invokes the verifier.
+
+Python (1 new integration):
+
+  * `tests/test_verify_on_fetch.py::test_find_agents_verifies_tier3_cert`
+    — 3 real daemons on loopback (applicant + v1 + v2). Applicant
+    runs full Tier-3 attestation through v1+v2 (quorum_k=2),
+    publishes cert. Applicant publishes a tier-3 ad; v1 (which has
+    no published cert) publishes a Sybil tier-3 ad at the SAME
+    bucket. v2 queries `find_agents(min_tier=3)` and asserts the
+    applicant survives, v1 is dropped; tier-1 query returns both.
+    ~27s warm. Requires `dht_mode="server"` on every daemon — see
+    the trip-wires section below.
+
+### Trip-wires this session surfaced
+
+  * **`kaddht.ModeAuto` on loopback meshes stays in Client mode
+    forever.** AutoNAT needs a public peer to confirm reachability;
+    loopback never gets one. Client peers don't accept storage
+    requests from other peers' PutValue calls, so a cert published
+    on daemon A never reaches daemon B's local datastore — B's
+    fetch_attestation returns NotFound. Production is unaffected
+    (real peers reach each other AutoNAT-style), but every multi-
+    daemon integration test that exercises cross-daemon DHT must
+    pass `--dht-mode server` to the daemon. The Python
+    `start_daemon` exposes this as `dht_mode="server"`. Don't
+    forget — the failure mode is silent (returns "not found"
+    rather than erroring).
+  * **`AttestationVerifier` keys by compositor_pubkey, not
+    agent_pubkey.** Multiple agents share a compositor; cert
+    lookup is per-identity. If you reach into `verifier.Verify`
+    with `ad.AgentPubkey`, you'll get false negatives because no
+    cert lives at `/gyza/attestations/{agent_pubkey}` — they're
+    keyed under compositor. The wired call sites use
+    `ad.CompositorPubkey`; do not change that.
+  * **Transient failures must not cache.** I lost ~5 minutes on
+    the first verifier draft when I cached every false outcome.
+    A flaky DHT round (one slow validator, a peer disconnect)
+    would sticky-hide an honest Tier-3 ad for negTTL. The
+    asymmetry — cache positives and definitive negatives, never
+    transient failures — is the load-bearing semantic. The
+    `TestVerifier_FetchErrorNotCached` and `_PerFetchTimeout`
+    tests pin this.
+  * **The single-flight in-flight map must be drained even when
+    the fetch panics.** Deferred `delete(v.inflight, pubkey) +
+    close(call.done)` runs unconditionally. Without the defer, a
+    fetcher panic (e.g., a buggy `CertFetcher` injected in tests)
+    leaves the in-flight slot occupied forever, and every future
+    call for that pubkey waits on a `done` channel that never
+    closes. Tests with stub fetchers exercise this implicitly.
+  * **`TestFindFiltersByTier` was silently vacuously true post-
+    Session 15.** With the verifier active, all tier-3 ads get
+    dropped (no cert published), so the test's "no tier<3 in
+    results" assertion runs on an empty list and passes trivially.
+    Fix: install `alwaysTrueVerifier{}` at the top of the test
+    and add a positive assertion that the tier-3 ad DOES appear.
+    The test now proves what its name claims.
+  * **`SetAttestationVerifier(nil)` disables verification entirely.**
+    Intentional — tests with `panickingVerifier` rely on this not
+    to silently fall back to the default. Production code should
+    not pass nil; the daemon never does.
+
+### What's left
+
+#21 is closed end-to-end. Open trip-wires (#21f-adjacent):
+
+  * **DHT TTL bounding on `PublishAttestation`.** The daemon's
+    record-level TTL isn't bounded by `cert.expires_at_ns - now`,
+    so a near-expired cert can survive in the DHT longer than its
+    own validity. Mitigated by the verifier's slack window
+    (consumer-side), but worth fixing on the publish side so
+    record GC matches cert lifecycle. Mechanical follow-up.
+  * **Tier-3 status of validators is not recursively checked.** A
+    cosignature is accepted as long as the signing pubkey
+    cryptographically signs the body. We don't (yet) verify that
+    the validator itself is Tier-3 attested. This is what #21f's
+    "consumer-side fallback" CLAUDE.md note refers to — needs DHT
+    IO and lives outside the pure verifier. The current code
+    accepts cosigs from any peer that signed; in practice this
+    only matters once we have multi-hop Tier-3 promotion where
+    bootstrap validators issue certs that future validators rely
+    on. A bootstrap-set-pinned `trusted_tier3_validators` config,
+    plus optional recursive verification with cycle detection,
+    is the principled fix.
+  * **`--dht-mode` is a CLI flag, not a Python ergonomic.** The
+    `start_daemon(dht_mode="server")` keyword works but
+    integration tests need to remember to set it. A future fix
+    might let the Python daemon supervisor auto-detect "this is a
+    loopback test environment" and apply server mode — but for
+    now, "remember to pass it" is the contract.
 
 ---
 
@@ -1488,7 +1750,7 @@ on "unknown work_item_id" — could be gossip lag, not malice.
 
 ---
 
-## 6. The remaining priority list (#21f — verify-on-fetch in routing)
+## 6. Priority list — #21 fully closed; open follow-ups
 
 Session 9 closed #25 / #26; Session 10 closed #22 / #24; Session 11
 closed the algorithmic core of #21 (eval suite + Tier-1 self-attestation
@@ -1496,67 +1758,54 @@ closed the algorithmic core of #21 (eval suite + Tier-1 self-attestation
 closed #21c (the libp2p stream protocol); Session 13 closed
 #21-bridge (the Python applicant adapter); Session 14 closed
 #21d (DHT-driven validator selection + orchestrator) and #21e (DHT
-cert publication + `gyza global attest --tier 3` CLI). Previous
-priority items are documented in §5a–§5e, §5-pre, and §5-pre-2.
+cert publication + `gyza global attest --tier 3` CLI); **Session 15
+closed #21f (verify-on-fetch in `find_agents`)**. Previous priority
+items are documented in §5a–§5e, §5-pre, §5-pre-2, and §5-pre-3.
 
-**What's left is #21f — verify-on-fetch.** The attestation protocol
-is end-to-end functional: any node can earn a Tier-3 cert and publish
-it. But `AgentAdvertisement.attestation_tier` is still just a
-self-reported integer in the DHT — anyone can advertise `tier=3`
-without having an actual cert. Until consumers fetch and verify the
-referenced cert at routing time, the cert ceremony is cosmetic.
+**What's left after Session 15.** The #21 priority cluster is fully
+closed end-to-end. Two #21-adjacent open trip-wires are documented
+in §5-pre-3 ("What's left"):
 
-### #21f — verify-on-fetch in `find_agents`
+  * Daemon's `PublishAttestation` doesn't bound the DHT record's
+    TTL by `cert.expires_at_ns - now`. Mitigated by the
+    consumer-side slack window the verifier now enforces, but
+    fixing the publish side would let DHT GC align with cert
+    lifecycle.
+  * Validator Tier-3 status is not recursively verified during
+    `capability.VerifyAttestation`. We accept any pubkey that
+    cosigns the body. A future trusted-bootstrap-set config plus
+    optional recursive verification with cycle detection closes
+    that hole, but practically only matters once multi-hop
+    Tier-3 promotion exists.
 
-**Why:** The cert exists at `/gyza/attestations/{compositor_pubkey}`
-but `find_agents` returns advertisements whose `attestation_tier`
-field is purely advisory. A Sybil node can advertise `tier=3` and
-appear as a Tier-3 validator until callers do an extra round trip
-to fetch + verify the cert. Routing code that respects `min_tier=3`
-filters today are accepting the LIE, not the proof.
+Neither item is on the critical path for any current consumer.
+Phase 4 (the learning phase — see §7) is the next major direction.
 
-**Approach:**
+### #21f — verify-on-fetch in `find_agents` (CLOSED — Session 15)
 
-In `gyza-netd`'s `DiscoveryService.FindAgents`, after fetching
-candidate advertisements:
+See §5-pre-3 for the full session narrative. Summary: introduced
+`netd/internal/dht/verifier.go` with an `AttestationVerifier`
+interface and the default `DHTAttestationVerifier` (TTL-cached
+positive/negative results, single-flight per pubkey, semaphore-
+bounded concurrency, per-fetch timeout, near-expiry slack window).
+`GyzaDHT.FindAgents` invokes the verifier on every candidate ad
+when `min_tier >= IssuedTier`, dropping unverifiable ads from the
+returned set. Added `--dht-mode auto|server|client` to gyza-netd
+so multi-daemon integration tests can force Server mode
+(`ModeAuto` never promotes on loopback meshes — AutoNAT can't
+confirm reachability). 13 new Go tests + 1 Python integration
+test (`tests/test_verify_on_fetch.py`). The historical
+implementation-plan text from earlier in this section is
+preserved below for reference; the executed approach is
+documented in §5-pre-3 and supersedes it.
 
-  1. For each ad with `attestation_tier >= 3`, fetch the
-     corresponding cert from the DHT (or local cache).
-  2. Verify the cert via `capability.VerifyAttestation` (already
-     exists; pure function, no I/O).
-  3. If verification fails (or cert missing), DROP the ad — don't
-     return it. Optional: include in the response stream with the
-     tier field downgraded to 0 + a `verification_failure` reason
-     so caller can log.
-  4. Cache verification results with a TTL << cert expiry to amortize
-     the per-fetch cost on a hot routing path.
-
-**Consumer-side fallback:** Even with daemon-side filtering, a
-strict consumer can re-verify before trusting the result — the cert
-is included in the advertisement (or fetchable). Daemon-side
-filtering is the common case; consumer re-verify is for the high-
-trust path.
-
-**Trip-wires:**
-
-  * **Don't block FindAgents on cert fetches.** Hot path. Use a
-    bounded background goroutine pool with timeouts; if a cert
-    can't be fetched within ~50ms, treat the ad as unverified and
-    drop. A consumer that wants to wait can re-query.
-  * **Cache the validator-pubkey set for cosig verification.**
-    Each cosig requires `ed25519.Verify` against the validator's
-    pubkey AND a Tier-3-attested check on THAT validator. The
-    second check is recursive — a Tier-3 ad's cert is signed by
-    Tier-3 validators, whose Tier-3 status is itself attested by
-    other Tier-3 validators, etc. Bottom out at a manually-trusted
-    bootstrap set OR a cycle-detection threshold.
-  * **DHT TTL bounding.** Phase C didn't enforce that the published
-    DHT record's TTL is bounded by `cert.expires_at_ns - now`.
-    Verify-on-fetch should treat a cert near expiry as already
-    invalid (e.g., reject if `now > expires_at_ns - 1h`) so a
-    consumer's verify result is stable for at least a routing
-    horizon. Otherwise a cert that "verified" 1ms before expiry
-    is still in the routing table for the rest of the request.
+**Why (historical):** The cert exists at
+`/gyza/attestations/{compositor_pubkey}` but `find_agents` returns
+advertisements whose `attestation_tier` field is purely advisory.
+A Sybil node can advertise `tier=3` and appear as a Tier-3
+validator until callers do an extra round trip to fetch + verify
+the cert. Routing code that respects `min_tier=3` filters today
+are accepting the LIE, not the proof.
 
 ### #21-bridge — Python applicant adapter (CLOSED — Session 13)
 
@@ -2236,14 +2485,15 @@ Every time you (a future Claude session) open this repo:
    `Bilateral settlement: BILATERAL ✓`.
 4. Check `git log --oneline -20` to see what changed since you last
    touched it.
-5. The remaining work in §6 is #21f (verify-on-fetch in routing) —
-   making `AgentAdvertisement.attestation_tier` mean something at
-   the discovery layer rather than being a self-reported integer.
-   #21 itself closed end-to-end in Session 14: any node can earn
-   a Tier-3 cert and publish it to the DHT, and consumers can
-   fetch + verify with `cap.fetch_attestation` + `cap.verify_attestation`.
-   The verify-on-fetch session integrates that into routing's hot
-   path so trust is enforced not advisory.
+5. The #21 priority cluster is now closed end-to-end (Sessions
+   11–15). `find_agents(min_tier=3)` returns ONLY ads whose
+   compositor has a fetchable, valid Tier-3 cert; everything else
+   is dropped at the daemon. The two #21-adjacent open trip-wires
+   live in §6 / §5-pre-3 (DHT TTL bounding on `PublishAttestation`,
+   and recursive Tier-3 validation of validator pubkeys) — both
+   are non-blocking and out of scope for any current consumer.
+   The next major direction is Phase 4 (§7): the learning phase,
+   gated on 20+ live nodes producing organic completion data.
 
 If any of steps 2/3 fail, **stop and diagnose before doing new work.**
 A failing baseline is more important than any new feature.
@@ -2500,13 +2750,63 @@ Things a session might be tempted to do that would be wrong:
   Manual rebuild silently corrupts byte-typed fields (`signature:
   bytes` → `signature: str`-via-hex), and verification then fails
   cryptographically with no clue why.
-- **Don't trust `AgentAdvertisement.attestation_tier` without
-  verifying the corresponding cert.** The field is self-reported —
-  a Sybil node can advertise tier=3 without owning a cert. Routing
-  filters that respect `min_tier=3` are accepting the LIE today
-  (#21f, see §6). Until verify-on-fetch lands, code that depends
-  on Tier-3 trust SHOULD do its own `cap.fetch_attestation` +
-  `cap.verify_attestation` round trip.
+- **Don't trust `AgentAdvertisement.attestation_tier` from
+  third-party sources without verifying the cert** (e.g., ads
+  pulled from gossipsub or fed to local code that bypasses
+  `find_agents`). The daemon's `find_agents` enforces verify-on-
+  fetch as of Session 15, but the cert→trust link is the daemon's
+  responsibility AT THAT BOUNDARY; any code path that bypasses
+  `DiscoveryService.FindAgents` (direct DHT reads, raw gossip
+  payloads, snapshots from disk) inherits the old self-report
+  weakness and must do its own `cap.fetch_attestation` +
+  `cap.verify_attestation`.
+- **Don't bypass the verifier by passing `min_tier < IssuedTier`
+  to a query that needs Tier-3 trust.** The verifier ONLY fires
+  at `min_tier >= IssuedTier` (= 3); a query with `min_tier=1`
+  returns whatever ads the bucket holds, including tier-3
+  claimants without certs. Production code that wants "tier-3 or
+  better" MUST set `min_tier=3` — the integer test alone is what
+  triggers the cert check.
+- **Don't disable the default verifier by passing nil to
+  `SetAttestationVerifier`.** Disables the entire verify-on-fetch
+  path silently. Intended as a TEST seam (the `panickingVerifier`
+  pattern in `TestFindAgentsLowTierSkipsVerifier` exercises this
+  to prove the verifier isn't called). Production callers should
+  never invoke `SetAttestationVerifier(nil)`; the daemon never
+  does.
+- **Don't tune `expirySlack` below the routing horizon.** Default
+  is 1h. The slack window must exceed how long a routing decision
+  is acted on after `find_agents` returns; a smaller slack means
+  cert expiry can sneak inside a single request's lifetime. The
+  default is conservative for Phase 3 ad TTLs (~5 min); revisit
+  if request lifetimes ever grow toward an hour.
+- **Don't cache transient verifier failures.** The
+  `DHTAttestationVerifier` deliberately caches only positives and
+  definitive negatives (cert missing / cert invalid / cert in
+  slack window). Transient failures (fetch errored, fetch timed
+  out, semaphore-blocked) MUST NOT be cached — otherwise an
+  honest tier-3 ad gets sticky-hidden by a momentary network
+  hiccup. The asymmetry is load-bearing; the
+  `TestVerifier_FetchErrorNotCached` and
+  `TestVerifier_PerFetchTimeout` tests pin it.
+- **Don't key the verifier cache by `agent_pubkey`.** Cert lookup
+  is by COMPOSITOR pubkey (DHT key
+  `/gyza/attestations/{compositor_pubkey}`). Multiple agents
+  share one compositor and one cert; keying by agent forces
+  N redundant fetches per compositor and produces false negatives
+  because no cert lives at the agent's pubkey path. The wired
+  call site uses `ad.CompositorPubkey`; do not change it.
+- **Don't rely on `kaddht.ModeAuto` for cross-daemon DHT in
+  loopback integration tests.** ModeAuto stays in Client mode
+  until AutoNAT confirms reachability; loopback has no public
+  peer to confirm against. Client peers don't accept storage
+  pushes from other daemons' PutValue, so a cert published on
+  daemon A never reaches B's local datastore — and B's
+  `fetch_attestation` silently returns NotFound. Multi-daemon
+  integration tests MUST pass `--dht-mode server` to the daemon
+  (Python: `start_daemon(dht_mode="server")`). Production
+  callers should leave the default (auto) — the flag exists
+  purely as a test seam.
 
 ---
 

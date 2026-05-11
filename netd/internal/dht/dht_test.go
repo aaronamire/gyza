@@ -161,7 +161,11 @@ func TestPublishAndFindLocal(t *testing.T) {
 	}
 }
 
-// TestFindFiltersByTier — agents below min_tier are excluded.
+// TestFindFiltersByTier — agents below min_tier are excluded. This
+// test focuses on integer-comparison filtering; #21f's verify-on-fetch
+// is exercised by TestFindAgentsRequires/AdmitsTier3Cert. We install
+// an always-true verifier stub here so the tier-integer logic is the
+// only thing under test.
 func TestFindFiltersByTier(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -172,6 +176,7 @@ func TestFindFiltersByTier(t *testing.T) {
 		t.Fatalf("NewGyzaDHT: %v", err)
 	}
 	defer gd.Close()
+	gd.SetAttestationVerifier(alwaysTrueVerifier{})
 
 	low := makeAd(t, 1, 1, 0.5)
 	high := makeAd(t, 1, 3, 0.5) // same embedding seed → same bucket
@@ -187,12 +192,25 @@ func TestFindFiltersByTier(t *testing.T) {
 	if err != nil {
 		t.Fatalf("find: %v", err)
 	}
+	sawHigh := false
 	for _, r := range results {
 		if r.AttestationTier < 3 {
 			t.Errorf("got tier-%d agent in min_tier=3 query", r.AttestationTier)
 		}
+		if r.AgentPubkey == high.AgentPubkey {
+			sawHigh = true
+		}
+	}
+	if !sawHigh {
+		t.Errorf("tier-3 ad missing from min_tier=3 results with always-true verifier")
 	}
 }
+
+// alwaysTrueVerifier short-circuits AttestationVerifier for tests that
+// want to exercise tier-integer logic without publishing real certs.
+type alwaysTrueVerifier struct{}
+
+func (alwaysTrueVerifier) Verify(_ context.Context, _ string) bool { return true }
 
 // TestRepublishLoopBumpsLastSeen — start the republish loop with a
 // short interval, wait for two ticks, and verify the local ad's
@@ -423,6 +441,137 @@ func TestAttestationFetchMissing(t *testing.T) {
 	if cert != nil {
 		t.Errorf("expected nil cert for unattested pubkey, got %+v", cert)
 	}
+}
+
+// TestFindAgentsRequiresCertForTier3 — verify-on-fetch (#21f). An ad
+// advertised with attestation_tier=3 but with NO cert published in
+// the DHT must be dropped from min_tier=3 query results.
+func TestFindAgentsRequiresCertForTier3(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	h, closeH := buildHost(t)
+	defer closeH()
+	gd, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeServer)
+	if err != nil {
+		t.Fatalf("NewGyzaDHT: %v", err)
+	}
+	defer gd.Close()
+	// Use default verifier (DHT-backed). No cert published → ad
+	// must NOT survive verify-on-fetch.
+
+	sybil := makeAd(t, 7, 3, 0.5) // claims tier=3 without earning it
+	if _, err := gd.PublishAgent(ctx, sybil); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
+
+	q := fakeEmbedding(7)
+	results, err := gd.FindAgents(ctx, q, 10, 3, 0)
+	if err != nil {
+		t.Fatalf("find: %v", err)
+	}
+	for _, r := range results {
+		if r.AgentPubkey == sybil.AgentPubkey {
+			t.Errorf("sybil ad survived verify-on-fetch: returned at tier=%d", r.AttestationTier)
+		}
+	}
+	// And a tier-1 query (which skips verification) should still
+	// see the ad — proves the filter only fires at minTier >= 3.
+	resultsLow, err := gd.FindAgents(ctx, q, 10, 1, 0)
+	if err != nil {
+		t.Fatalf("find low: %v", err)
+	}
+	sawSybil := false
+	for _, r := range resultsLow {
+		if r.AgentPubkey == sybil.AgentPubkey {
+			sawSybil = true
+		}
+	}
+	if !sawSybil {
+		t.Errorf("ad missing from min_tier=1 results — verifier ran when it shouldn't have")
+	}
+}
+
+// TestFindAgentsAdmitsTier3WithValidCert — the other half of
+// verify-on-fetch. An ad with a real, publishable, verifiable cert
+// for its compositor_pubkey survives a min_tier=3 query.
+func TestFindAgentsAdmitsTier3WithValidCert(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	h, closeH := buildHost(t)
+	defer closeH()
+	gd, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeServer)
+	if err != nil {
+		t.Fatalf("NewGyzaDHT: %v", err)
+	}
+	defer gd.Close()
+
+	ad := makeAd(t, 11, 3, 0.5)
+	if _, err := gd.PublishAgent(ctx, ad); err != nil {
+		t.Fatalf("publish agent: %v", err)
+	}
+	// Build a cert whose ApplicantPubkey matches the ad's
+	// compositor_pubkey, then publish it to the DHT under the
+	// canonical /gyza/attestations/{pubkey} key.
+	cert := buildValidCert(t, ad.CompositorPubkey, time.Now(), 24*time.Hour)
+	if _, err := gd.PublishAttestation(ctx, cert); err != nil {
+		t.Fatalf("publish cert: %v", err)
+	}
+
+	q := fakeEmbedding(11)
+	results, err := gd.FindAgents(ctx, q, 10, 3, 0)
+	if err != nil {
+		t.Fatalf("find: %v", err)
+	}
+	found := false
+	for _, r := range results {
+		if r.AgentPubkey == ad.AgentPubkey {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("legitimate tier-3 ad missing from min_tier=3 results")
+	}
+}
+
+// TestFindAgentsLowTierSkipsVerifier — the verifier MUST NOT run on
+// min_tier < IssuedTier queries. Asserted via a verifier that panics
+// on Verify; if the filter is broken, the test fails fast.
+func TestFindAgentsLowTierSkipsVerifier(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	h, closeH := buildHost(t)
+	defer closeH()
+	gd, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeServer)
+	if err != nil {
+		t.Fatalf("NewGyzaDHT: %v", err)
+	}
+	defer gd.Close()
+	gd.SetAttestationVerifier(panickingVerifier{t: t})
+
+	ad := makeAd(t, 9, 1, 0.5)
+	if _, err := gd.PublishAgent(ctx, ad); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
+
+	q := fakeEmbedding(9)
+	if _, err := gd.FindAgents(ctx, q, 10, 0, 0); err != nil {
+		t.Fatalf("find min_tier=0: %v", err)
+	}
+	if _, err := gd.FindAgents(ctx, q, 10, 1, 0); err != nil {
+		t.Fatalf("find min_tier=1: %v", err)
+	}
+	if _, err := gd.FindAgents(ctx, q, 10, 2, 0); err != nil {
+		t.Fatalf("find min_tier=2: %v", err)
+	}
+	// If we reached here, panickingVerifier.Verify was never called.
+}
+
+// panickingVerifier fails the test if Verify is invoked.
+type panickingVerifier struct{ t *testing.T }
+
+func (p panickingVerifier) Verify(_ context.Context, pubkey string) bool {
+	p.t.Errorf("verifier should not have been called (pubkey=%q)", pubkey)
+	return false
 }
 
 // TestRepublishLoopDisabledWhenIntervalZero — interval ≤ 0 means

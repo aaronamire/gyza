@@ -462,6 +462,7 @@ class NetdClient:
         log_level: str = "info",
         startup_timeout_s: float = 5.0,
         stderr_to_stdout: bool = True,
+        dht_mode: str | None = None,
     ) -> subprocess.Popen:
         """
         Launch gyza-netd as a subprocess. Block until the socket file
@@ -495,6 +496,13 @@ class NetdClient:
         ]
         if bootstrap:
             argv += ["--bootstrap", ",".join(bootstrap)]
+        if dht_mode:
+            # auto | server | client. Server mode is the right default
+            # for integration tests where AutoNAT signaling can't promote
+            # a daemon from Client to Server (loopback meshes); production
+            # daemons should leave dht_mode=None so the default (auto)
+            # adapts to real reachability.
+            argv += ["--dht-mode", dht_mode]
 
         # Make sure a stale socket from a previous crashed daemon doesn't
         # masquerade as "ready". The daemon itself unlinks before bind,
