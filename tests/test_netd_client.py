@@ -591,7 +591,10 @@ def test_capability_attestation_dht_round_trip(netd_binary, daemon_setup):
         body = netd_pb2.AttestationBody(
             applicant_pubkey=applicant_pubkey,
             issued_at_ns=now_ns,
-            expires_at_ns=now_ns + 24 * 3600 * 1_000_000_000,  # 1 day
+            # Session 16 added a 24h minimum-remaining-lifetime floor
+            # on PublishAttestation. Use 48h so the test isn't on the
+            # boundary.
+            expires_at_ns=now_ns + 48 * 3600 * 1_000_000_000,
             tier_granted=3,
             challenge_task_ids=["t1", "t2", "t3"],
         )

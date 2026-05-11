@@ -74,6 +74,26 @@ func RelayDHTKey() string { return relayDHTKey }
 // /gyza/attestations/{applicant_pubkey_hex}.
 const attestationKeyPrefix = "/gyza/attestations/"
 
+// MinPublishAttestationLifetime is the minimum remaining cert lifetime
+// required at PublishAttestation time. A cert that would expire inside
+// this window is refused. Reasoning: the DHT-level record TTL is not
+// individually bounded by cert.expires_at_ns (libp2p kaddht doesn't
+// expose per-record TTLs cleanly), so a near-expired cert can sit in
+// the DHT past its own validity. The 24h floor combined with
+// (a) gyzaValidator dropping records past expiry on store/fetch and
+// (b) the consumer-side verifier's 1h slack window (Session 15)
+// gives a layered defense: publish refuses <24h-remaining; storage
+// drops at expiry; consumer drops at expiry−slack.
+const MinPublishAttestationLifetime = 24 * time.Hour
+
+// AttestationExpiryGrace is the clock-skew tolerance applied when the
+// gyzaValidator decides whether to reject an attestation record on
+// fetch/store. A cert whose expires_at_ns is more than this far in
+// the past is rejected; ones inside the grace window are accepted to
+// avoid spurious rejection from peer clock drift. NTP-quality clocks
+// run well within this; only severely-broken peers will fail it.
+const AttestationExpiryGrace = 5 * time.Minute
+
 // AttestationDHTKey returns the canonical DHT key for the cert of the
 // given applicant compositor pubkey (hex).
 func AttestationDHTKey(applicantPubkeyHex string) string {
@@ -111,6 +131,13 @@ func AgentDHTKey(bucket uint64) string {
 // break on byte-comparison so the choice is deterministic across nodes.
 type gyzaValidator struct{}
 
+// GyzaValidatorForTest returns a fresh record.Validator equivalent to
+// the one NewGyzaDHT wires into the /gyza/ namespace. Use ONLY in
+// tests that exercise per-record-type validation (e.g., the Session
+// 16 attestation-expiry rejection) without spinning up a full libp2p
+// host. Production callers should rely on NewGyzaDHT.
+func GyzaValidatorForTest() record.Validator { return gyzaValidator{} }
+
 func (gyzaValidator) Validate(key string, value []byte) error {
 	if len(value) > MaxBucketSize {
 		return fmt.Errorf("gyza dht record exceeds %d bytes (got %d)", MaxBucketSize, len(value))
@@ -131,12 +158,31 @@ func (gyzaValidator) Validate(key string, value []byte) error {
 		if err := proto.Unmarshal(value, &c); err != nil {
 			return fmt.Errorf("gyza dht record is not AttestationCert: %w", err)
 		}
-		// Cryptographic verification of the cert is intentionally NOT
-		// done here. The validator runs in every storing peer in the
-		// DHT — it's network-wide, not application-bound — and would
-		// need access to a list of legitimate Tier-3 validator keys
-		// to do strict checks. We accept any well-formed cert here
-		// and let application-level VerifyAttestation gate trust.
+		// Cryptographic verification of the cert (cosig signatures,
+		// quorum threshold, tier match) is intentionally NOT done
+		// here. The validator runs in every storing peer in the DHT —
+		// it's network-wide, not application-bound — and would need
+		// access to a list of legitimate Tier-3 validator keys to do
+		// strict checks. Application-level VerifyAttestation gates
+		// trust.
+		//
+		// Freshness IS checked here (Session 16, #21f follow-up). A
+		// cert past its expires_at_ns plus a clock-skew grace window
+		// is rejected at the DHT layer — peers refuse to store
+		// expired records and clients refuse to deserialize them on
+		// fetch. This bounds how long a stale cert survives in the
+		// DHT past its own validity, closing the publish-side gap
+		// the consumer-side slack window mitigates.
+		if c.Body != nil && c.Body.ExpiresAtNs > 0 {
+			nowNs := time.Now().UnixNano()
+			graceNs := int64(AttestationExpiryGrace)
+			if c.Body.ExpiresAtNs+graceNs < nowNs {
+				return fmt.Errorf(
+					"gyza dht: attestation cert expired (expires_at_ns=%d, now_ns=%d)",
+					c.Body.ExpiresAtNs, nowNs,
+				)
+			}
+		}
 		return nil
 	default:
 		var b pb.AgentBucket
@@ -778,6 +824,21 @@ func (d *GyzaDHT) PublishAttestation(
 	}
 	if cert.Body.ApplicantPubkey == "" {
 		return "", errors.New("applicant_pubkey required")
+	}
+	// Session 16 (#21f follow-up): refuse to publish a cert that
+	// would expire inside MinPublishAttestationLifetime. The DHT
+	// record TTL isn't individually bounded by the cert's
+	// expires_at_ns, so a near-expired cert published now would
+	// linger in the DHT past its own validity. A 24h floor here +
+	// validator-side rejection past expiry + consumer-side slack
+	// window forms a layered defense.
+	nowNs := time.Now().UnixNano()
+	remainingNs := cert.Body.ExpiresAtNs - nowNs
+	if remainingNs < int64(MinPublishAttestationLifetime) {
+		return "", fmt.Errorf(
+			"attestation cert remaining lifetime %s is below floor %s; refuse to publish",
+			time.Duration(remainingNs), MinPublishAttestationLifetime,
+		)
 	}
 	value, err := proto.Marshal(cert)
 	if err != nil {

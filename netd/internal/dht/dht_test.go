@@ -26,6 +26,8 @@ import (
 
 	"gyza/netd/internal/dht"
 	pb "gyza/netd/internal/grpc/proto"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // buildHost spins up a libp2p host on a random loopback QUIC port with
@@ -384,9 +386,12 @@ func TestAttestationPublishAndFetch(t *testing.T) {
 
 	applicantPubkey := "deadbeef" + strings.Repeat("00", 28)
 	body := &pb.AttestationBody{
-		ApplicantPubkey:  applicantPubkey,
-		IssuedAtNs:       time.Now().UnixNano(),
-		ExpiresAtNs:      time.Now().Add(24 * time.Hour).UnixNano(),
+		ApplicantPubkey: applicantPubkey,
+		IssuedAtNs:      time.Now().UnixNano(),
+		// Session 16: PublishAttestation requires
+		// >= MinPublishAttestationLifetime (24h) remaining. Use 48h
+		// so the test isn't sitting right on the boundary.
+		ExpiresAtNs:      time.Now().Add(48 * time.Hour).UnixNano(),
 		TierGranted:      3,
 		ChallengeTaskIds: []string{"t1", "t2"},
 	}
@@ -440,6 +445,120 @@ func TestAttestationFetchMissing(t *testing.T) {
 	}
 	if cert != nil {
 		t.Errorf("expected nil cert for unattested pubkey, got %+v", cert)
+	}
+}
+
+// TestPublishAttestationRejectsNearExpired — Session 16 (#21f
+// follow-up A1). PublishAttestation must refuse certs whose
+// remaining lifetime is below MinPublishAttestationLifetime (24h
+// default). This bounds how long a stale cert can sit in the DHT
+// past its own validity.
+func TestPublishAttestationRejectsNearExpired(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	h, closeH := buildHost(t)
+	defer closeH()
+	gd, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeServer)
+	if err != nil {
+		t.Fatalf("NewGyzaDHT: %v", err)
+	}
+	defer gd.Close()
+
+	pubkey := "feedface" + strings.Repeat("00", 28)
+
+	// 1h remaining lifetime — well below the 24h floor.
+	shortCert := buildValidCert(t, pubkey, time.Now(), 1*time.Hour)
+	if _, err := gd.PublishAttestation(ctx, shortCert); err == nil {
+		t.Errorf("PublishAttestation accepted a cert with 1h lifetime; want rejection")
+	}
+
+	// Exactly 23h59m remaining — also below floor.
+	edgeCert := buildValidCert(t, pubkey, time.Now(), 24*time.Hour-time.Minute)
+	if _, err := gd.PublishAttestation(ctx, edgeCert); err == nil {
+		t.Errorf("PublishAttestation accepted a cert at 23h59m; want rejection")
+	}
+
+	// 48h remaining — should publish cleanly.
+	longCert := buildValidCert(t, pubkey, time.Now(), 48*time.Hour)
+	if _, err := gd.PublishAttestation(ctx, longCert); err != nil {
+		t.Errorf("PublishAttestation rejected a healthy 48h cert: %v", err)
+	}
+}
+
+// TestPublishAttestationRejectsAlreadyExpired — defensive: a cert
+// that's already past its expires_at_ns must also be rejected at
+// publish time. The remaining-lifetime check covers this, but the
+// test guards against a future change that splits the conditions.
+func TestPublishAttestationRejectsAlreadyExpired(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	h, closeH := buildHost(t)
+	defer closeH()
+	gd, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeServer)
+	if err != nil {
+		t.Fatalf("NewGyzaDHT: %v", err)
+	}
+	defer gd.Close()
+
+	pubkey := "c0ffee99" + strings.Repeat("00", 28)
+	// issued 48h ago with 24h lifetime → expired 24h ago.
+	expiredCert := buildValidCert(t, pubkey, time.Now().Add(-48*time.Hour), 24*time.Hour)
+	if _, err := gd.PublishAttestation(ctx, expiredCert); err == nil {
+		t.Errorf("PublishAttestation accepted an already-expired cert; want rejection")
+	}
+}
+
+// TestValidatorRejectsExpiredAttestationRecord — gyzaValidator
+// rejects AttestationCert records whose expires_at_ns is more than
+// AttestationExpiryGrace in the past. This runs at both PutValue
+// (storage refusal) and GetValue (fetch-side rejection), so an
+// expired cert from a malicious or stale peer never makes it into
+// application code.
+func TestValidatorRejectsExpiredAttestationRecord(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	h, closeH := buildHost(t)
+	defer closeH()
+	gd, err := dht.NewGyzaDHT(ctx, h, kaddht.ModeServer)
+	if err != nil {
+		t.Fatalf("NewGyzaDHT: %v", err)
+	}
+	defer gd.Close()
+	_ = gd
+
+	// Construct the validator directly and feed it an expired-cert
+	// record. The test bypasses the PublishAttestation guard so we
+	// can prove the validator-level rejection independently.
+	pubkey := "deadbeef" + strings.Repeat("00", 28)
+	expiredCert := buildValidCert(t, pubkey, time.Now().Add(-48*time.Hour), 24*time.Hour)
+	bytes, err := proto.Marshal(expiredCert)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	v := dht.GyzaValidatorForTest()
+	if err := v.Validate(dht.AttestationDHTKey(pubkey), bytes); err == nil {
+		t.Errorf("validator accepted an expired AttestationCert; want rejection")
+	}
+
+	// A freshly-issued cert with full lifetime must pass.
+	freshCert := buildValidCert(t, pubkey, time.Now(), 24*time.Hour)
+	freshBytes, err := proto.Marshal(freshCert)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if err := v.Validate(dht.AttestationDHTKey(pubkey), freshBytes); err != nil {
+		t.Errorf("validator rejected a fresh cert: %v", err)
+	}
+
+	// A cert that expired 1 minute ago — inside AttestationExpiryGrace
+	// (5 minutes default) — must STILL pass. Clock-skew tolerance.
+	graceCert := buildValidCert(t, pubkey, time.Now().Add(-2*time.Hour), 2*time.Hour-time.Minute)
+	graceBytes, err := proto.Marshal(graceCert)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if err := v.Validate(dht.AttestationDHTKey(pubkey), graceBytes); err != nil {
+		t.Errorf("validator rejected a cert within grace window: %v", err)
 	}
 }
 
@@ -511,8 +630,10 @@ func TestFindAgentsAdmitsTier3WithValidCert(t *testing.T) {
 	}
 	// Build a cert whose ApplicantPubkey matches the ad's
 	// compositor_pubkey, then publish it to the DHT under the
-	// canonical /gyza/attestations/{pubkey} key.
-	cert := buildValidCert(t, ad.CompositorPubkey, time.Now(), 24*time.Hour)
+	// canonical /gyza/attestations/{pubkey} key. 48h lifetime is
+	// above PublishAttestation's MinPublishAttestationLifetime
+	// floor (24h, Session 16).
+	cert := buildValidCert(t, ad.CompositorPubkey, time.Now(), 48*time.Hour)
 	if _, err := gd.PublishAttestation(ctx, cert); err != nil {
 		t.Fatalf("publish cert: %v", err)
 	}
