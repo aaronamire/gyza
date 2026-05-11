@@ -1,27 +1,77 @@
 # CLAUDE.md — Gyza session continuation guide
 
+> ## ⚠ ARCHITECTURAL COMMITMENT — read this first
+>
+> **As of Session 17, the vNext architecture (§8) is the
+> committed architectural target.** Not a sketch, not one trajectory
+> among several — the architecture every future session is working
+> toward. The maximalist vision (§9) is what makes vNext a necessity:
+> every layer in §8 corresponds to something §9 demands that the
+> current Phase 3 architecture structurally cannot deliver.
+>
+> **What this means concretely for future sessions:**
+>
+> 1. **§C1 (TLA+ formal protocol specification of the current protocol)
+>    is the immediate top priority.** Every downstream vNext layer
+>    depends on a verified spec of what the current system actually
+>    does. Start there.
+> 2. **Phase 3 hardening continues; Phase 4–9 feature work pauses.**
+>    Bug fixes, security patches, packaging, CI continue on the v1
+>    substrate. New feature work (Phase 4 federated learning, Phase 5
+>    plan-composition, etc.) ships on the vNext substrate, not on
+>    v1. Otherwise we'd build features that get thrown away during
+>    the migration.
+> 3. **Wire formats from this point forward are designed
+>    forward-compatible.** Any new protobuf message, gRPC method, or
+>    DHT record type should be reviewed for v1↔v2 coexistence.
+> 4. **"Retrofit" is not the framing.** Items previously called
+>    "architectural retrofits" (§6 C5) are now "migration milestones."
+>    They will be built as vNext layers, not bolted onto v1.
+> 5. **Strategic decisions cited in §13 are partially settled by
+>    §8.** Multi-token economics, encrypted-by-default privacy,
+>    formal-spec discipline, Rust core — these are no longer open
+>    questions. Specifics within them (which PQ algorithm, which
+>    zk-proof system, exact token distribution mechanics) remain
+>    design surface within the commitment.
+>
+> **What this DOESN'T mean:**
+>
+> - Doesn't mean we ship vNext in one big-bang release. Migration
+>   is incremental over 18–36 months.
+> - Doesn't mean current Phase 3 work stops. Hardening continues
+>   (see §6 Bucket B).
+> - Doesn't mean every architectural detail in §8 is locked. Several
+>   layers have explicit "non-commitments within commitment" — see
+>   §8's `Design surface remaining` subsection.
+> - Doesn't mean §9 (maximalist vision) is what we promise users.
+>   §9 is internal-strategic, not external-marketing.
+>
+> **If you disagree with the commitment:** raise it with the user
+> explicitly at session start. Don't quietly build incompatible
+> features on the v1 substrate hoping the strategic call gets
+> reversed. The commitment is the user's call; flag concerns,
+> propose alternatives, but don't undermine via incrementalism.
+>
+> ---
+>
 > **Audience:** A future Claude session continuing work on this repo.
-> **Last updated:** end of Phase 3 Session 16 (closeout of #21f
-> follow-ups). Session 15 closed #21f end-to-end (verify-on-fetch in
-> `find_agents`). Session 16 closes the two acknowledged adjacent
-> trip-wires: (A1) `PublishAttestation` now refuses certs with
-> remaining lifetime &lt; 24h AND `gyzaValidator` rejects expired
-> AttestationCert records at both PutValue and GetValue;
-> (A2) `capability.RecursiveVerifier` adds Tier-3 recursive
-> verification with trusted bootstrap base case, cycle detection,
-> and depth bound — pure logic library, ready to wire into the
-> verify-on-fetch path when a bootstrap set is configured.
+> **Last updated:** end of Phase 3 Session 17 (vNext commitment +
+> CLAUDE.md restructure). Sessions 15–16 closed the #21f cluster
+> and its acknowledged trip-wires (verify-on-fetch + DHT TTL bounding
+> + RecursiveVerifier library). Session 17 is a strategic-decision
+> session: no new code, but the architectural target for every
+> future session is now binding.
 >
 > **What this file is.** A grounded reference. Everything below is
 > either (a) code that's been read and verified, (b) hard-won
 > trip-wires from real sessions, or (c) explicit strategic context
 > for choosing what to build next. There are no aspirational claims
-> presented as facts. Strategic / vision sections (§7–§13) are
-> marked as such.
+> presented as facts. Sections marked strategic (§7–§13) are now
+> framed in service of the vNext commitment, not as neutral options.
 >
-> **What this file is not.** A pitch. A roadmap committed to. A spec.
-> Treat the maximalist sections as one viable trajectory among several
-> the user may choose between.
+> **What this file is not.** A pitch. A user-facing spec. A
+> marketing document. The maximalist sections (§9, §10) describe
+> the internal strategic frame, not the external value proposition.
 >
 > **How to use it.** Read top to bottom on session start (§15 is the
 > exact ritual). Then keep it open as a reference. When you finish a
@@ -95,8 +145,18 @@ built if we were architecting for the long-horizon target today.
 Specific gaps catalogued in §7. The current architecture is a
 strong v1 with several structural commitments (bilateral-only
 settlement, LSH-only discovery, linear ICP chains, blackboard
-coordination, single-resource pricing) that will need retrofit or
-replacement at scale.
+coordination, single-resource pricing) that cannot be retrofitted
+to the long-horizon target — they have to be replaced.
+
+**The vNext commitment (Session 17).** The architecture in §8 is
+the committed substrate the long-horizon target requires. Migration
+from current → vNext is the binding roadmap. Phase 3 hardening
+continues; Phase 4–9 feature work happens on vNext, not on v1.
+TLA+ formal specification of the current protocol (§C1) is the
+immediate next session's work — every downstream vNext layer
+depends on it. See §8 for the binding execution plan, §6 for the
+reordered priority list, the header at the top of this file for
+the operational rules every session must follow.
 
 ---
 
@@ -557,6 +617,96 @@ Newer sessions on top. Each entry: what it shipped, the architectural
 decisions, the trip-wires discovered. These narratives are the
 durable institutional memory of the project; they're load-bearing
 for future sessions and should be preserved across rewrites.
+
+### 5-pre-5. Session 17 — vNext architectural commitment + CLAUDE.md restructure
+
+**Strategic-decision session. No new code shipped.** The architectural
+target for every future session is now binding: the vNext architecture
+(§8) is committed, not sketched. CLAUDE.md restructured to make the
+commitment unambiguous to future sessions.
+
+**Why this is a session, not just a doc edit.** The decision changes
+what every future session is allowed to build. Specifically:
+
+- Phase 4–9 feature work on the v1 substrate is now declined by
+  default (see §6 parallel-vs-sequential table).
+- §C1 (TLA+ spec of v1 protocol) is the immediate next session's
+  binding priority.
+- Wire-format choices from this point on are reviewed against v1↔v2
+  forward compatibility.
+- Strategic questions previously open (tokenomics, privacy default,
+  cryptographic primitives, Foundation entity) are partially
+  settled by the §8 commitment; specifics remain design surface.
+
+**What changed in CLAUDE.md:**
+
+1. **Top-of-file commitment header.** New "⚠ ARCHITECTURAL
+   COMMITMENT" block as the first thing future sessions read. Five
+   operational rules: C1 first, hardening continues / features
+   pause, wire formats forward-compatible, retrofit→migration
+   reframing, partial settlement of strategic decisions.
+2. **§1 vNext commitment paragraph.** Added at end. Cross-references
+   §8 execution plan and §6 reordered priorities.
+3. **§6 reordered.** Bucket C reframed as "vNext migration milestones
+   (THE binding roadmap)." C1–C12 indexed for cross-reference with
+   §8's execution plan. Parallel-vs-sequential decision table added
+   ("hardening continues; features pause").
+4. **§7 reframed.** From "neutral architectural critique" to
+   "diagnosis justifying the vNext commitment." New necessity-
+   argument framing.
+5. **§8 fully rewritten.** From "sketch" to "committed substrate."
+   Necessity argument with structural-commitment-to-§9-demand
+   mapping table. 14-layer architecture preserved. New subsections:
+   `Design surface remaining (non-commitments within commitment)`,
+   `Costs accepted`, `Binding execution plan` (Phases 0–5 with
+   month estimates), `Migration mechanics` (wire-format compat,
+   dual-stack, sunset criteria), `Parallel-vs-sequential decision`.
+6. **§10 reframed.** Phases 4–9 are now built on vNext substrate,
+   not v1.
+7. **§12 noted.** Decentralization portfolio applies to vNext
+   subsystems; v1-and-v2 subsystems keep positioning across
+   migration.
+8. **§13 partial settlement.** Tokenomics, privacy default,
+   cryptographic primitives, Foundation entity now committed at the
+   architectural level; specifics open.
+9. **§16 commitment-protection entries.** New don't-do block
+   protecting the commitment from incrementalism / quiet retrofit /
+   misframing.
+
+**Tradeoffs accepted (Session 17 surface area):**
+- 18–36 months to vNext production-shaped (binding execution plan
+  §8).
+- Python+Go velocity loss to Rust core.
+- TEE hardware requirements at high-trust tiers.
+- Multi-token regulatory complexity (vs. current's no-token
+  simplicity).
+- Three-layer settlement complexity (vs. bilateral-only).
+- Phase 4–9 v1 feature work paused for migration duration.
+
+**What was deliberately NOT changed:**
+- §2 (commands), §3 (trip-wires), §4 (architecture map), §5
+  sessions 8.5–16 narratives, §14 (conventions), §15 (ritual),
+  §11 (production infrastructure costs). All operational; survive
+  the commitment unchanged.
+- Sub-layer choices in §8 (specific PQ algorithm, zk-proof system,
+  differential-dataflow engine, voting mechanism, etc.) — these
+  are explicit non-commitments within the commitment.
+- §9 (maximalist vision). It IS the strategic frame justifying the
+  commitment; not weakened by the commitment becoming concrete.
+
+**Open user-owned decisions surfaced by the commitment:**
+- Foundation jurisdiction selection (Phase 1).
+- Wedge market choice (§13).
+- Cold-start strategy (subsidy / partnership / killer app).
+- Tokenomics distribution specifics (in collaboration with counsel).
+- Team / funding plan to support 18–36 month timeline.
+
+**Trip-wire surfaced this session:** session-narrative entries in §5
+are now load-bearing not just for "what code shipped" but also for
+"what strategic decisions are binding." Future strategic-decision
+sessions (e.g., a future "user decided to alter the commitment"
+session) need to also produce a §5 narrative entry so the doc-history
+trail stays grounded.
 
 ### 5-pre-4. Session 16 — #21f follow-ups (A1 + A2)
 
@@ -1088,46 +1238,111 @@ push; nightly heavy integration tests.
 **B4. Code signing.** Apple Developer ID, Windows code-signing
 cert. **Requires user purchase** (see §11).
 
-### Bucket C: structural directions (architectural)
+### Bucket C: vNext migration milestones (THE binding roadmap)
 
-**C1. Formal protocol specification (TLA+).** The single highest-
-leverage technical investment. Catches the class of bugs that
-Sessions 11–14 patched after the fact (canonicalization gap,
-plausibility check matrix, ordering invariants). Required artifact
-for credible v1 release. ~6 weeks of focused work.
+Under the vNext commitment, the items below are no longer "structural
+directions" the user might choose between — they are the migration
+milestones, ordered. Each is necessary; the order is the order of
+work.
 
-**C2. Formal proofs of safety/liveness (Coq or Lean).** Settlement
-conservation, sybil resistance threshold, eventual consistency
-under partition, capability non-forgeability. ~3 months after C1.
+**C1. Formal protocol specification of v1 (TLA+) — IMMEDIATE NEXT
+SESSION'S WORK.** Behavioral spec of the wire protocol AS IT EXISTS
+TODAY. All invariants named: settlement conservation, attestation
+validity, chain verification, gossip eventual consistency. Catches
+the class of bugs that Sessions 11–14 patched after the fact
+(canonicalization gap, plausibility-check matrix, ordering
+invariants). Required because every downstream vNext layer depends
+on a verified spec of what v1 actually does. ~6 weeks of focused
+work. **Do not start vNext layer-2+ work without this.**
 
-**C3. Phase 4 federated learning** (CLAUDE.md §10 / Phase 4). LoRA
-marketplaces + capability speciation. Gated on ≥20 live nodes
-producing organic completion data; that gating is real.
+**C2. Coq or Lean proofs of v1 invariants.** Settlement conservation,
+sybil resistance threshold under stated assumptions, eventual
+consistency under partition, capability non-forgeability. ~3 months
+after C1.
 
-**C4. Phase 5 plan-composition** (§10 / Phase 5). Required to move
-from atomic LLM tasks to multi-step workflows.
+**C3. Foundation entity + tokenomics design.** User-owned strategic
+decisions. Tokenomics design with adversarial simulation + regulatory
+counsel. Parallel to C1+C2 timing. See §13.
 
-**C5. Architectural retrofits (§7).** Multilateral clearing layer
-above bilateral settlement. Typed capability negotiation alongside
-LSH. Provider-record DHT (acknowledged Phase 4 plan). Merkle-DAG
-provenance over linear ICP chains. Multi-dimensional resource
-pricing. Hybrid post-quantum signatures.
+**C4. vNext substrate prototype (Rust core).** TLA+-derived Rust
+implementation of v1 protocol. Validates the spec is implementable,
+catches spec errors, produces the reference implementation for v2.
+Begins in Phase 0 month 3 of the §8 execution plan.
 
-Priority order depends on the user's strategic decisions about
-adoption pathway (§13). If aiming for production v1 on existing
-architecture: B-bucket items first. If aiming for the maximalist
-vision (§9): C1+C2 first, then incrementally retrofit.
+**C5. Hybrid post-quantum identity + threshold signatures.** Dilithium
+(or NIST winner) + Ed25519 dual-sign. FROST threshold as default.
+HD key derivation. Integration with W3C VC for attestations. ~1 month
+focused engineering once primitives stabilize.
+
+**C6. Typed capability framework + linear types.** Capabilities as
+typed values with compositional proofs. Linear types for non-
+duplicable credits. Per-domain tiered attestations (Tier-3-medical,
+Tier-3-code, etc.). Replaces v1's untyped LSH-string discovery.
+
+**C7. Distributed-log coordination + differential dataflow.**
+Replaces blackboard. Append-only logs partitioned by intent root +
+CRDT-merged subscribers + typed channels as coordination primitive.
+THE biggest architectural divergence from v1. Validate via
+side-project prototype before committing the full substrate.
+
+**C8. Three-layer settlement (L0 bilateral + L1 multilateral DAG +
+L2 BFT finality).** Multi-dimensional resource pricing. Smart-contract
+language. Integration with token economics.
+
+**C9. Encrypted-by-default privacy.** ECIES per recipient + onion
+routing for metadata + DP telemetry + anonymous credentials.
+
+**C10. Universal sandboxing + capability bounds enforcement.** TEE
+matrix + WASM-with-capabilities + bwrap-fallback. Approval-gates-as-
+types: `Pending<T>` requires human cosig to redeem.
+
+**C11. Substrate diversity.** Substrate-typed capabilities (LLM /
+classical / GPU / neuromorphic / quantum / sensor / actuator).
+Cross-substrate translation agents as market function. Mobile +
+browser + embedded + edge + satellite SDKs.
+
+**C12. Governance transition (Foundation → DAO).** Constitutional
+invariants. Quadratic voting with PoP. Time-locked changes. Foundation
+sunset per service.
+
+C1–C12 are the §8 execution plan, indexed for priority-list cross-
+reference. The §10 phases (4–9) ride on top of C4–C12 — they're
+features built on the vNext substrate, not retrofits to v1.
+
+### Parallel-vs-sequential resolution (Session 17 decision)
+
+While Phase 0 (C1+C2) runs, what happens to ongoing work? **Hardening
+continues; features pause.** Detailed rule:
+
+| Work type | On v1 during migration? | Why |
+|---|---|---|
+| Bug fixes, security patches | YES | Production users depend on v1 working |
+| §6 B-bucket (bootstrap, packaging, CI, code signing) | YES | Serves both v1 production AND v2 launch |
+| §6 A-bucket items that survive migration (A3, A4) | YES, case-by-case | A3 sandboxing is required regardless; A4 packaging fix is trivial; A5/A6 maybe defer to v2 |
+| Phase 4–9 feature work | PAUSE | Rests on architectural primitives v2 replaces; v1 implementations get thrown away |
+| New feature requests | DEFAULT REJECT, surface to user | Likely a Phase 4–9-shaped ask; v2 is the right substrate |
+| Critical regression discovered in v1 production | YES | Production stability has its own time horizon |
+
+Operational rule for future sessions: when asked to add a Phase 4+
+feature on v1, the answer is "this rides on vNext substrate; the
+immediate next step is C1 (TLA+ spec) work, not the feature." Surface
+the trade-off; don't quietly build v1 features that get thrown away.
 
 ---
 
-## 7. Honest architectural critique
+## 7. Architectural diagnosis — why vNext is necessary
 
-The current architecture is a strong v1 that makes coherent
-pragmatic choices. It is not the architecture that would be
-designed today knowing what we know now. Below is the candid CS-PhD
-assessment of where the structural commitments are suboptimal, what
-better alternatives exist, and which gaps are missing primitives
-rather than just suboptimal choices.
+**Under the Session 17 vNext commitment, this section reframes from
+"neutral critique" to "diagnosis justifying the commitment."** The
+content below is the technical case for why the current architecture
+cannot reach the §9 target. Every item is a structural commitment in
+the current codebase that has to be replaced (not retrofitted) to
+support what §9 demands.
+
+This is not an attack on the current architecture — it's a strong
+v1 that makes coherent pragmatic choices for Phase 3 scope. The
+diagnosis is that Phase 3 scope is not §9 scope, and the gap is
+structural, not incremental.
 
 ### Suboptimal-but-coherent choices
 
@@ -1274,17 +1489,71 @@ canonical closes design space that may be more productive.
 
 Current architecture: roughly 60% of what would be designed today
 from first principles knowing what we know. Strong v1, several
-structural commitments that will need retrofit or replacement at
-scale. The most consequential gap is the lack of formal foundation
-(§C1+C2). Everything else is in the noise compared to that.
+structural commitments that cannot be retrofitted to the §9 target.
+The most consequential gap is the lack of formal foundation
+(§C1+C2) — every downstream layer of vNext depends on a verified
+spec of what v1 actually does. Everything else is in the noise
+compared to that.
+
+**Implication for the commitment:** §C1 is the immediate next
+session's binding work. The diagnosis above is not a list of
+optional improvements — it's the necessity argument for vNext, and
+the vNext execution plan (§8 `Binding execution plan`) is the
+response.
 
 ---
 
-## 8. The vNext architecture sketch
+## 8. The vNext architecture — committed substrate
 
-What the architecture would look like designed from scratch today
-for the maximalist (§9) target. NOT a commitment — a sketch the user
-may evaluate against the cost of getting there.
+**Status: COMMITTED (Session 17 strategic decision).** This is the
+architectural target every future session works toward. Phase 3 code
+is the v1 substrate from which migration begins. §C1 (TLA+ spec of
+the current protocol) is the immediate next session's binding work.
+The migration plan at the end of this section is the operational
+roadmap for the next 18–36 months.
+
+This section is no longer presented as "one viable trajectory." It
+is the architecture. The maximalist vision (§9) is what makes it a
+necessity: every layer below corresponds to something §9 demands
+that the current Phase 3 architecture structurally cannot deliver.
+
+### Necessity argument — why this is committed, not preferred
+
+The current architecture has structural commitments that cannot be
+retrofitted to the §9 target:
+
+| Current architecture | What §9 demands | Why retrofit fails |
+|---|---|---|
+| Bilateral settlement only | N-party transactions, planetary-scale clearing | O(N²) state explosion; no multi-party finality |
+| LSH-cosine discovery | Typed capability composition for multimodal/robotics/sensors | 384-dim semantic vector can't express typed constraints |
+| Linear ICP chains | Multi-parent provenance, plan DAGs, streaming work | Linear chain breaks at fan-in / fan-out |
+| Blackboard coordination | 10⁶+ concurrent participants, causality-preserved | Hotspot at 10⁵, no native streaming, claim/complete races |
+| Single-resource pricing | Multi-modal workloads (compute + bandwidth + latency + carbon) | Scalar pricing throws away signal |
+| Plaintext-by-default | GDPR/regulatory deployment, jurisdictional sovereignty | Inverting the default later is expensive and error-prone |
+| Ed25519-only identity | Quantum-era survival, threshold sigs, ZK credentials | Wrong cryptographic primitive; migration is months per layer |
+| No formal spec | Provable safety at planetary scale | Implementation-defined protocol cannot be alternative-implemented or formally verified |
+| No capability bounds | Physical actuators, autonomous goals, "beneficial Skynet" | Safety properties can't be added post-hoc; must be type-system-enforced |
+| Python+Go split | Performance + safety + verifiability for billions of nodes | gRPC boundary performance cliff + dual maintenance + impedance mismatch |
+
+Each row is a structural commitment that has to change. The cost of
+the change is enormous (18–36 months, Rust rewrite, formal-methods
+discipline, regulatory work, hardware requirements). The cost of
+NOT changing is failure to reach §9 — current architecture caps out
+in the ~10⁴–10⁵ node range, can't safely actuate physical systems,
+can't survive quantum-era cryptography, can't deploy in regulated
+jurisdictions, can't be formally proven safe.
+
+**Committed: build the v2 substrate. Migrate v1 over.**
+
+---
+
+### The 14-layer architecture
+
+Each layer below is committed at the architectural level. Sub-layer
+implementation choices that remain open (specific zk-proof system,
+specific PQ algorithm, specific differential-dataflow engine, etc.)
+are catalogued in the `Design surface remaining` subsection below.
+Layers ordered roughly bottom-up.
 
 ### Layer 1: Formal foundation
 
@@ -1464,38 +1733,220 @@ channels backed by distributed logs.
 - **Browser via wasm-bindgen.**
 - **Reproducible builds.**
 
-### vNext caveats
+### Design surface remaining (non-commitments within the commitment)
 
-- Performance vs. provability tension. Prove load-bearing
-  invariants; test the rest.
-- Rust core slows iteration vs. Python.
-- TEE-everywhere forces hardware requirements.
-- Multi-dimensional pricing adds friction.
-- Three-layer settlement adds moving parts.
-- Token economics adds regulatory surface bilateral-credits dodges.
-- zk-STARK proving costs currently expensive.
-- Implementation is several person-decades.
+The architectural commitment locks the *shape* of each layer. Specific
+implementation choices below are deliberately open for the team
+building vNext to settle, based on the state of the underlying
+primitives at the time:
 
-### Migration path from current to vNext
+- **Specific post-quantum signature algorithm** (Layer 2). Hybrid
+  PQ+classical is committed; the PQ side waits for NIST PQC
+  standardization to settle (Dilithium vs. Falcon vs. SPHINCS+).
+- **Specific zk-proof system** (Layer 3, Layer 8). zk-STARK
+  commitment is the default (post-quantum, no trusted setup);
+  Groth16 / PLONK / Bulletproofs may win for specific high-frequency
+  proofs where verification time dominates.
+- **Specific differential-dataflow engine** (Layer 5). Log-based
+  event sourcing with CRDTs is committed; the specific execution
+  engine (Timely Dataflow, Materialize, custom) is implementation
+  detail.
+- **Learned routing** (Layer 4). Committed as a goal for vNext phase 2;
+  NOT a vNext day-1 requirement. ML-augmented routing is
+  research-frontier; vNext day-1 ships with rule-based multi-tier
+  discovery and adds learned routing once production data exists.
+- **Specific multi-token mechanics** (Layer 6). Multi-token economics
+  is committed; the exact distribution mechanics, vesting schedules,
+  bootstrap allocations, and PoP integration choice (Worldcoin /
+  BrightID / Idena / Civic / proof-of-humanity) are settled in the
+  tokenomics-design phase with regulatory counsel.
+- **UCBI (Universal Compute Basic Income)** (Layer 6). Architecturally
+  enabled but NOT a technical commitment. Whether to actually deploy
+  it is a political-economic choice the user makes during the
+  tokenomics-design phase. The architecture supports it; the
+  commitment is to have the mechanism, not necessarily to activate it.
+- **Specific TEE vendors** (Layer 8). Universal sandboxing is
+  committed; the supported TEE matrix (SGX, TDX, SEV-SNP, ARM
+  TrustZone, Apple Secure Enclave) evolves with hardware availability.
+- **Specific governance voting mechanism** (Layer 10). Constitutional
+  invariants + foundation-to-DAO sunset is committed; the specific
+  voting mechanism (pure quadratic, quadratic-with-conviction,
+  futarchy, holographic consensus) settles during governance design.
+- **Cross-AI-network federation** (gap acknowledged in §7's missing
+  primitives audit). Committed to be added in vNext phase 2; not
+  blocking the substrate rewrite.
 
-If committing to vNext, realistic order:
+These are explicit non-commitments. Future sessions should not treat
+them as locked — they're design surface within the broader commitment.
 
-1. **TLA+ spec of current protocol** (~6 weeks). Catches existing
-   bugs; creates formal foundation.
-2. **Coq/Lean proofs of load-bearing invariants** (~3 months).
-3. **Prototype typed-channel + differential-dataflow substrate** as
-   side project. Validate before committing.
-4. **Multi-dimensional resource pricing model** with incentive-
-   compatibility proofs (~2 months).
-5. **Token economics design** with multi-attack simulation + audit
-   (~3 months).
-6. **Hybrid post-quantum signatures** integrated (~1 month).
-7. **One killer app on the new substrate.** End-to-end validation.
-8. **Gradual migration:** wire formats forward-compatible; old
-   daemons participate in v1; new daemons additionally speak v2;
-   eventual v1 sunset.
+### Costs accepted
 
-Realistic timeline: 18–36 months to a vNext production-shaped.
+The commitment is made with eyes open. We are knowingly paying:
+
+- **18–36 months timeline** to production-shaped vNext. During this
+  period the network is not getting new Phase 4–9 features; it's
+  getting hardened and rewritten.
+- **Python+Go velocity loss.** Rust core is correct for production
+  but slower to iterate than Python. We accept this in exchange for
+  memory safety, formal verifiability, and elimination of the
+  gRPC-boundary performance cliff.
+- **TEE hardware requirements.** Universal sandboxing means some
+  consumer hardware (cheap Raspberry Pi, older mobile devices) can't
+  run high-trust executors. Those nodes participate at lower trust
+  tiers; the trade-off is explicit.
+- **Multi-token regulatory complexity.** The current architecture's
+  "no token" stance dodged securities law, money-transmitter rules,
+  tax treatment per jurisdiction. vNext triggers all of these. We
+  accept the regulatory overhead in exchange for the bootstrap
+  incentive engine that empirically every successful decentralized
+  network has required.
+- **Three-layer settlement complexity.** More moving parts than
+  bilateral-only. Justified by N-party transactions and planetary-
+  scale finality requirements.
+- **Reduced backward compatibility surface.** Wire formats are
+  forward-compatible across the migration, but several v1 abstractions
+  (blackboard, linear ICP, single-resource credits) do not have
+  v2 equivalents. v1 sunset is part of the plan.
+- **Several person-decades of total engineering investment.** This
+  is the kind of infrastructure that takes a team, not a person. The
+  user is responsible for funding / hiring; this CLAUDE.md is the
+  technical foundation that supports those decisions.
+
+If any of these costs become unbearable, the commitment is revisited
+with the user; future sessions don't quietly relax it.
+
+### Binding execution plan
+
+Phased over ~36 months. Phases overlap where possible. Calendar
+months are illustrative — actual pacing depends on team size and
+funding.
+
+**Phase 0: Formal foundation (months 0–6)**
+- TLA+ behavioral spec of CURRENT protocol (the v1 we're migrating
+  from). 6 weeks of focused work.
+- Coq or Lean proofs of load-bearing invariants of v1: settlement
+  conservation, sybil resistance bound, eventual consistency,
+  capability non-forgeability. ~3 months.
+- Reference Rust implementation derived from spec, conformance
+  test suite generated. ~3 months overlapping with proofs.
+- Architecture Decision Record log started.
+
+**Phase 1: Foundation entity + tokenomics design (months 3–9, parallel
+to Phase 0)**
+- Legal entity formed (jurisdiction: Switzerland / Singapore / Cayman /
+  Wyoming). User-owned decision.
+- Tokenomics design: multi-token (WORK/GOV/STABLE/CARBON), vesting
+  schedules, bootstrap allocations. Includes adversarial simulation.
+- Regulatory clearance: counsel in major target jurisdictions.
+- Initial trusted-validator bootstrap set published.
+
+**Phase 2: Substrate rewrite (months 6–24)**
+- Rust core: implements the TLA+ spec.
+- Hybrid PQ identity: Dilithium + Ed25519, FROST threshold.
+- Distributed-log coordination substrate replaces blackboard.
+- Three-layer settlement: bilateral L0 + multilateral L1 + BFT L2.
+- Typed capability framework: linear types for credits, typed values
+  for capabilities, compositional proofs.
+- Multi-dimensional resource pricing.
+- Wire-format compatibility shim: v2 daemons can talk to v1
+  daemons for a defined deprecation window.
+
+**Phase 3: Privacy + safety (months 12–30, overlapping Phase 2)**
+- Encrypted-by-default intents/artifacts/messages.
+- Onion routing for capability challenges.
+- ZK identity (anonymous credentials).
+- Approval gates as types: `Pending<T>` cosig-redeemable.
+- Capability bounds: cryptographic enforcement.
+- Immune system: red-team agents funded by treasury.
+- Sunset clauses on autonomous capabilities.
+- C2PA-style provenance for AI-generated outputs.
+
+**Phase 4: Substrate diversity + distribution (months 24–36)**
+- Substrate-typed capabilities (LLM/CPU/GPU/neuromorphic/quantum/
+  sensor/actuator).
+- Mobile SDKs (Swift/Kotlin via UniFFI).
+- Browser SDK (Rust→WASM via wasm-bindgen).
+- Multi-region validator distribution mandate.
+- Mesh networking primitives.
+
+**Phase 5: Governance transition (months 30–48, after v2 production)**
+- Foundation → DAO migration.
+- Quadratic voting with proof-of-personhood.
+- Time-locked protocol changes.
+- v1 sunset announcement; deprecation window starts.
+
+Milestones in this plan are binding. If a milestone slips, that's a
+session-level conversation with the user. The plan changes if needed;
+what doesn't change is the commitment to vNext as the target.
+
+### Migration mechanics
+
+Concrete protocol for taking the current Phase 3 codebase to vNext:
+
+1. **Wire-format compatibility.** v2 daemons MUST speak both protocols
+   during the migration window. Protobuf reserved-field discipline
+   from day one; additive changes only on v1; v2's new abstractions
+   are additive on the wire.
+2. **Dual-stack operation.** During migration, the network is bilingual.
+   v1 daemons serve v1 clients; v2 daemons serve both v1 and v2
+   clients. v2 clients fall back to v1 for v1-only peers. Translation
+   shims live in the v2 daemon's interop layer.
+3. **Cert / identity bridging.** v1 Ed25519 identities continue to
+   work as the classical component of v2's hybrid PQ. No re-keying
+   required for existing users.
+4. **Settlement bridging.** v1 bilateral ledgers continue to function
+   as v2's L0. New multilateral L1 + BFT L2 are additive. Users who
+   never need L1/L2 see no behavior change.
+5. **Sunset criteria.** v1 sunset is announced when (a) v2 has 10×
+   the active node count of v1, (b) the multilateral clearing layer
+   has processed 90 days of production traffic without invariant
+   violation, (c) the formal-spec conformance test suite passes
+   against all reference implementations. Until those conditions
+   are met, v1 stays operational.
+6. **Test-of-record migration.** `demo/single_machine_global.py`
+   continues to run against v1 for the duration. A new
+   `demo/single_machine_vnext.py` is added when v2 reaches feature
+   parity for the integration-test path; eventual replacement is
+   announced once parity is proven.
+
+### Parallel-vs-sequential decision
+
+A real question this commitment forces: while the team builds vNext,
+what happens to ongoing Phase 3 work?
+
+**Decision (Session 17): hardening continues; features pause.**
+
+- **Continues on v1** (Phase 3 / current codebase):
+  - Bug fixes, security patches, performance optimizations
+  - §6 Bucket B items: bootstrap nodes, packaging, CI, code signing
+  - §6 Bucket A items: A3 sandbox wiring, A4 makefile fix, A5
+    verifier integration, A6 cert republish loop — *if* they
+    survive the migration (most do, A3 sandbox wiring especially)
+  - Critical regressions discovered in production v1 deployments
+  - Documentation, demos, examples for the existing system
+
+- **Pauses on v1** (waits for vNext substrate):
+  - Phase 4 (federated learning / LoRA marketplaces)
+  - Phase 5 (plan composition)
+  - Phase 6 (multi-modal / embodied)
+  - Phase 7 (governance) — implemented on vNext directly
+  - Phase 8 (substrate diversity) — implemented on vNext directly
+  - Phase 9 (treasury / economic singularity) — designed in
+    tokenomics phase, implemented on vNext
+
+- **Rationale.** Phase 4–9 features rest on architectural primitives
+  that vNext replaces. Building Phase 4 LoRA marketplaces on top of
+  the current LSH/blackboard substrate produces code that gets
+  thrown away during migration. Building Phase 4 LoRA marketplaces
+  on top of vNext produces code that's part of the v2 release.
+  Hardening v1 (B-bucket) is different — that work serves the
+  current production users and the migration window, not the
+  long-term feature set.
+
+**Operational rule for future sessions:** when asked to add a Phase
+4+ feature, the answer is "this rides on vNext; the immediate next
+step is §C1 (TLA+ spec) work, not the feature." Surface the
+trade-off to the user; don't quietly build the feature on v1.
 
 ---
 
@@ -1658,10 +2109,19 @@ In rough order:
 
 ---
 
-## 10. Future phases — 4 through 9
+## 10. Future phases — 4 through 9 (built on vNext substrate)
 
-Roadmap originally articulated in earlier CLAUDE.md revisions.
-Updated with vNext (§8) considerations.
+**Under the Session 17 vNext commitment, Phases 4–9 are not features
+added to v1.** They are features built on the v2 substrate once §C7
+(coordination), §C8 (settlement), §C9 (privacy), §C10 (capabilities),
+§C11 (substrate diversity) have shipped. Each phase below is therefore
+described as "what this looks like on the vNext substrate" — the
+mechanics differ substantively from what an equivalent feature on v1
+would look like.
+
+The phase numbering is preserved for continuity with prior sessions
+and external roadmap discussions, but the implementation home is
+v2, not v1.
 
 ### Phase 4 — Learning phase
 
@@ -1773,7 +2233,12 @@ These are not coding tasks. They're owner moves.
 ## 12. Decentralization portfolio
 
 Decentralization is a tool, not a virtue. Per subsystem, the right
-position on the spectrum:
+position on the spectrum. Under the Session 17 vNext commitment, the
+positioning below applies to vNext subsystems (some of which don't
+exist in v1 — multilateral L1 settlement, learned routing, federated
+reputation oracles, anonymous credentials are all v2). Items that
+exist in BOTH v1 and v2 (bilateral settlement, identity, gossip,
+execution) keep the same positioning across the migration.
 
 ### Centralize (or strongly federate)
 
@@ -1840,6 +2305,25 @@ for protocols that grew big.
 ---
 
 ## 13. Strategic positioning
+
+**Under the Session 17 vNext commitment, several strategic questions
+this section previously listed as "open" are now settled:**
+
+- **Tokenomics:** committed to multi-token (GYZA-WORK / GYZA-GOV /
+  GYZA-STABLE / GYZA-CARBON). Specifics of distribution mechanics,
+  vesting, bootstrap allocations remain design surface (§8 `Design
+  surface remaining`).
+- **Foundation entity:** required by Phase 1 of the execution plan.
+  Jurisdiction selection is the open variable.
+- **Privacy posture:** encrypted-by-default committed. Specifics
+  (which ZK system, which mixnet integration) are design surface.
+- **Cryptographic primitives:** hybrid PQ + threshold + ZK
+  identity. Specific PQ algorithm waits for NIST.
+
+What remains genuinely open in this section: wedge market selection,
+cold-start strategy (subsidies vs. partnership vs. killer app),
+adoption pathway specifics. Those are still user-owned strategic
+calls.
 
 ### The cold-start problem
 
@@ -2214,15 +2698,47 @@ Each entry is a real trip-wire from past sessions.
   other's certs are a Sybil pattern. The `seen` path-tracking set
   rejects them. Test: `TestRecursive_CycleRejected`.
 
-### Don't break long-term direction
+### Don't break the vNext commitment (Session 17)
 
-- **Don't aggressively rewrite for vNext without confirming with
-  user.** §8 is a sketch, not a commitment. User owns the strategic
-  decision about migration cost vs. retrofit.
+- **Don't treat §8 as optional or as one of several paths.** As of
+  Session 17 it is the committed architecture. Future sessions
+  proceed under the commitment; if you disagree, surface it
+  explicitly at session start.
+- **Don't build Phase 4–9 features on the v1 substrate.** They ride
+  on vNext (§C7–§C12). Surface the trade-off when asked; don't
+  quietly ship v1 code that gets thrown away during migration.
+- **Don't start vNext layer-2+ work before §C1 (TLA+ spec of v1) is
+  done.** Every downstream layer depends on a verified spec of what
+  v1 actually does. Skipping the spec is the same mistake the
+  current architecture made (implementation-defined protocol).
+- **Don't introduce wire-format-breaking changes without v1↔v2
+  compatibility plan.** New protobuf messages, gRPC methods, DHT
+  record types must be reviewed against the migration mechanics
+  (§8 `Migration mechanics`). Reserved-field discipline is
+  non-negotiable.
+- **Don't relax the commitment via incrementalism.** "Just this one
+  Phase 4 feature on v1" is the pattern that undoes the commitment.
+  When tempted, re-read §6's parallel-vs-sequential table.
 - **Don't ship "the maximalist version" features without the
   corresponding safety primitives.** Capability bounds, approval
   gates, sunset clauses, immune system are not optional. They're
-  load-bearing.
+  load-bearing for the "beneficial Skynet" property. §C9, §C10 are
+  preconditions for Phase 6 (embodied / actuator work).
+- **Don't lock in specifics that §8 lists as design surface remaining.**
+  Specific PQ algorithm, specific zk-proof system, specific
+  differential-dataflow engine, UCBI activation, specific voting
+  mechanism are intentionally open within the commitment. Future
+  sessions can debate them; don't quietly settle them via
+  implementation choice.
+- **Don't conflate the operational v1 codebase with the vNext target
+  in code-writing sessions.** When working on v1 hardening, write
+  v1 code with v1 conventions. When working on vNext layers, the
+  conventions / language / formal-verification discipline differ.
+  The two stacks coexist during migration; don't muddle them.
+- **Don't skip the Session 5 narrative entry on strategic-decision
+  sessions.** Strategic decisions that bind future sessions need a
+  §5 entry, not just an edit elsewhere. Otherwise the doc-history
+  trail breaks.
 
 ---
 
