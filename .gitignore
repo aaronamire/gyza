@@ -21,3 +21,6 @@ htmlcov/
 
 # Phase-3 Go daemon build output.
 netd/bin/
+
+# TLA+ TLC scratch state (per-run state queue + checkpoints)
+spec/states/

@@ -55,15 +55,15 @@
 > ---
 >
 > **Audience:** A future Claude session continuing work on this repo.
-> **Last updated:** end of Phase 3 Session 18 (pre-spec artifacts for
-> §C1). Session 17 made vNext the architectural commitment.
-> Session 18 produced three pre-spec docs (`docs/invariants.md`,
-> `docs/state-machines.md`, `docs/wire-protocol.md`) catalogued
-> behavior the TLA+ spec will formalize. Estimated §C1 spec writing
-> cycle reduced from ~12 weeks to ~6 weeks by these artifacts.
-> Sessions 15–16 closed the #21f cluster and its acknowledged
-> trip-wires (verify-on-fetch + DHT TTL bounding + RecursiveVerifier
-> library).
+> **Last updated:** end of Phase 3 Session 19 (first §C1 sub-spec:
+> Settlement.tla). Session 17 made vNext the architectural commitment.
+> Session 18 produced pre-spec artifacts (`docs/invariants.md`,
+> `docs/state-machines.md`, `docs/wire-protocol.md`). Session 19
+> delivered `spec/Settlement.tla` — TLA+ behavioral spec of bilateral
+> settlement, six safety invariants TLC-validated (1.2M states under
+> honest model, 5M states under adversarial). The §C1 work is now
+> underway; remaining sub-specs (Attestation, Blackboard, DHT,
+> Gossip) queued.
 >
 > **What this file is.** A grounded reference. Everything below is
 > either (a) code that's been read and verified, (b) hard-won
@@ -436,6 +436,14 @@ fix parametrizes via `$(PYTHON)`. Packaging debt; tracked in §6.
 │   ├── invariants.md     # protocol invariants by ID (INV-X-N)
 │   ├── state-machines.md # state machines per major component
 │   └── wire-protocol.md  # consolidated wire-format reference
+├── spec/                 # Session 19 — TLA+ formal protocol spec
+│   ├── README.md         # how to run TLC, scope per sub-spec
+│   ├── Settlement.tla    # bilateral settlement behavioral spec
+│   ├── Settlement.cfg    # TLC honest-only model config
+│   ├── Settlement_adversarial.cfg # TLC adversarial (MalleableSigs=TRUE)
+│   ├── Settlement_invariants.md   # TLA+ predicate ↔ INV-SETTLE-N mapping
+│   ├── tools/tla2tools.jar        # TLC + SANY (official TLA+ release)
+│   └── states/                    # TLC scratch (gitignored)
 ├── tests/                # pytest, all green
 │   # 457 fast slice + 1 skipped + 19 heavy integration as of Session 16
 │   # (Go: +3 dht A1 tests + 11 capability A2 tests = +14 vs Session 15)
@@ -624,6 +632,106 @@ Newer sessions on top. Each entry: what it shipped, the architectural
 decisions, the trip-wires discovered. These narratives are the
 durable institutional memory of the project; they're load-bearing
 for future sessions and should be preserved across rewrites.
+
+### 5-pre-7. Session 19 — first §C1 sub-spec: Settlement.tla
+
+First TLA+ behavioral spec under the vNext commitment. Formalizes
+the bilateral settlement protocol from `gyza/economy/settlement.py`
+and validates six safety invariants via the TLC model checker.
+
+**Deliverables:**
+
+- `spec/Settlement.tla` (~600 lines) — TLA+ behavioral spec covering:
+  - State machine: `proposed → earner_signed → payer_cosigned → applied`
+  - Four dispute paths: forged earner sig, envelope mismatch,
+    amount tolerance, misroute
+  - Adversarial submit action (`MalleableSigs=TRUE`) modeling four
+    attack vectors
+  - Six safety invariants:
+    - `INV_SETTLE_1_StateMachineOrdering` (INV-SETTLE-1)
+    - `INV_SETTLE_2_SigsVerifiedBeforeApply` (INV-SETTLE-2)
+    - `INV_SETTLE_3_EnvelopeResolvedBeforeApply` (INV-SETTLE-3)
+    - `INV_SETTLE_4_AmountToleranceBeforeApply` (INV-SETTLE-4)
+    - `INV_SETTLE_5_AppliedConsistencyAcrossSides` (INV-SETTLE-5,
+      weakened form — see notes)
+    - `INV_SETTLE_6_AppliedEntriesAreStable` (INV-SETTLE-6, safety
+      part; conservation theorem is §C2 work)
+- `spec/Settlement.cfg` — TLC config, honest-only model, default for
+  fast iteration (~25s wall-clock)
+- `spec/Settlement_adversarial.cfg` — TLC config with
+  `MalleableSigs=TRUE` for adversarial discrimination test
+- `spec/Settlement_invariants.md` — TLA+-predicate ↔ INV-SETTLE-N
+  mapping with soundness arguments per invariant
+- `spec/README.md` — how to run, scope, maintenance workflow
+- `spec/tools/tla2tools.jar` (2.2 MB, official TLA+ release)
+
+**TLC results:**
+
+| Config | States generated | Distinct states | Depth | Wall time | Outcome |
+|---|---|---|---|---|---|
+| `Settlement.cfg` (honest, 3 peers, 2 envelopes, 2 entries) | 1.2M | 495K | 9 | 25s | ✓ No error |
+| `Settlement_adversarial.cfg` (adversarial, 2 peers, 1 envelope, 1 entry) | 5M | 828K | 22 | 40s | ✓ No error |
+| Larger adversarial (3 peers, 2 envelopes, 2 entries) | 41M | 22 min | (interrupted; no violations found in window) | n/a | ◯ in-progress |
+
+All six safety invariants hold across the explored state space.
+
+**Trip-wires surfaced this session:**
+
+- **`Int` not in `Naturals`.** Reputation can go negative under
+  disputes; spec needs `EXTENDS Integers`. Caught at parse time.
+- **TypeOK can't enumerate the partial-function type.** `[A -> B]`
+  where B is large forces TLC to materialize the set. Workaround:
+  assert structural well-formedness per-element (`\A k \in DOMAIN
+  f: f[k] \in B`) rather than `f \in [A -> B]`. Saves orders of
+  magnitude of memory.
+- **Adversarial-submit state space is huge.** With
+  `MalleableSigs=TRUE` AND unconstrained constants, every multiset
+  of in-flight forged messages produces a distinct state. The
+  spec's value is in INVARIANT CHECKING, not full state-space
+  exploration of the adversary. Tight bounds (2/1/1/2) suffice for
+  discrimination; full coverage is hours of compute.
+- **First invariant violation TLC found was real (and educational).**
+  Original INV-SETTLE-5 asserted "if either side is applied, both
+  must be applied." The protocol has a transient gap: payer applies
+  on cosigning, earner applies on receiving cosigned message. TLC
+  caught this in <5 seconds. Weakened to "when BOTH sides applied,
+  fields agree"; the stronger property is liveness, not safety.
+  Documented in `Settlement_invariants.md`.
+- **Bracket-counting in TLA+ record literals.** Nested
+  `{[outer |-> [inner |-> ...]]}` needs `]]}`. Off-by-one in
+  `AdversarialSubmit` first draft. SANY's parser caught it; the
+  error message points to the wrong line because the close mismatch
+  shifts the parser frame. Always count opens and closes carefully
+  in nested-record literals.
+
+**Open follow-ups for §C1:**
+
+- **Reconciliation sub-spec.** INV-SETTLE-8..11 are deferred —
+  separable. Queue as `spec/Reconciliation.tla`.
+- **Liveness checking.** Spec design supports `FairDelivery` weak-
+  fairness; enable TLC liveness checking once the spec stabilizes.
+- **Discrimination test.** Intentionally break the spec (e.g.,
+  remove `sig_ok` guard) and confirm TLC catches it. Validates the
+  spec's safety properties actually discriminate. Documented in
+  `Settlement_invariants.md` as a one-time exercise.
+- **Conservation theorem.** TLA+ struggles with sum-over-function
+  formulations. Natural target for §C2 (Coq/Lean) proofs where
+  algebraic reasoning is first-class.
+- **Next sub-specs in §C1.** Attestation, Blackboard, DHT, Gossip.
+  Same pattern: TLA+ + cfg + invariants-mapping doc + TLC results.
+
+**What this DOESN'T accomplish:**
+
+- §C1 is not "done." This is the first of five planned sub-specs.
+  Settlement was chosen as the first target because it's the most
+  self-contained.
+- No code changes. The spec describes the protocol AS IT EXISTS.
+  Any future drift between code and spec is a bug — fix one or the
+  other and update the §5 narrative.
+- Conservation as a theorem is a §C2 deliverable, not §C1.
+- Cross-component spec composition (e.g., how Settlement interacts
+  with Blackboard's envelope persistence) is deferred until each
+  sub-spec is independently complete.
 
 ### 5-pre-6. Session 18 — pre-spec artifacts for §C1
 
@@ -1350,16 +1458,15 @@ directions" the user might choose between — they are the migration
 milestones, ordered. Each is necessary; the order is the order of
 work.
 
-**C1. Formal protocol specification of v1 (TLA+) — IMMEDIATE NEXT
-SESSION'S WORK.** Behavioral spec of the wire protocol AS IT EXISTS
-TODAY. All invariants named: settlement conservation, attestation
-validity, chain verification, gossip eventual consistency. Catches
-the class of bugs that Sessions 11–14 patched after the fact
-(canonicalization gap, plausibility-check matrix, ordering
-invariants). Required because every downstream vNext layer depends
-on a verified spec of what v1 actually does. ~6 weeks of focused
-work (reduced from ~12 weeks by Session 18's pre-spec artifacts).
-**Do not start vNext layer-2+ work without this.**
+**C1. Formal protocol specification of v1 (TLA+) — IN PROGRESS.**
+Behavioral spec of the wire protocol AS IT EXISTS TODAY. All
+invariants named: settlement conservation, attestation validity,
+chain verification, gossip eventual consistency. Catches the class
+of bugs that Sessions 11–14 patched after the fact (canonicalization
+gap, plausibility-check matrix, ordering invariants). Required
+because every downstream vNext layer depends on a verified spec of
+what v1 actually does. **Do not start vNext layer-2+ work without
+this.**
 
 **Inputs for C1 (produced in Session 18):**
 - `docs/invariants.md` — ~120 invariants by stable ID (`INV-X-N`).
@@ -1369,11 +1476,22 @@ work (reduced from ~12 weeks by Session 18's pre-spec artifacts).
 - `docs/wire-protocol.md` — every wire-visible format. TLA+ spec
   uses as the lexicon of "what's on the wire."
 
-**Recommended scope for the first C1 session:** Settlement module.
-Most self-contained (bilateral, well-tested, recently re-touched in
-Session 9), so it's the cleanest first formalization target.
-Attestation second (single applicant; many validators; canonical
-bytes). Blackboard/gossip last (most cross-component coupling).
+**Progress:**
+
+| Sub-spec | Status | Session |
+|---|---|---|
+| `spec/Settlement.tla` (bilateral, ex-reconciliation) | ✓ Shipped + TLC-validated | 19 |
+| `spec/Reconciliation.tla` (INV-SETTLE-8..11) | ◯ Queued | — |
+| `spec/Attestation.tla` (INV-ATT-*) | ◯ Queued | — |
+| `spec/Blackboard.tla` (INV-BB-*, INV-ICP-*, INV-RUN-*) | ◯ Queued | — |
+| `spec/DHT.tla` (INV-DHT-*) | ◯ Queued | — |
+| `spec/Gossip.tla` (INV-GOSS-*) | ◯ Queued | — |
+
+**Recommended order for remaining sub-specs:** Reconciliation first
+(continuation of settlement, the most natural follow-up).
+Attestation next (single applicant, many validators, canonical
+bytes — well-bounded). Blackboard/gossip last (most cross-component
+coupling).
 
 **C2. Coq or Lean proofs of v1 invariants.** Settlement conservation,
 sybil resistance threshold under stated assumptions, eventual
