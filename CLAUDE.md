@@ -2,214 +2,216 @@
 
 > ## ⚠ ARCHITECTURAL COMMITMENT — read this first
 >
-> **As of Session 17, the vNext architecture (§8) is the
-> committed architectural target.** Not a sketch, not one trajectory
-> among several — the architecture every future session is working
-> toward. The maximalist vision (§9) is what makes vNext a necessity:
-> every layer in §8 corresponds to something §9 demands that the
-> current Phase 3 architecture structurally cannot deliver.
+> **As of Session 17, the vNext architecture (§8) is the committed
+> architectural target.** Not a sketch, not one trajectory among
+> several — the architecture every future session is working toward.
+> The maximalist vision (§9) is what makes vNext a necessity: every
+> layer in §8 corresponds to something §9 demands that the current
+> Phase 3 architecture structurally cannot deliver.
 >
-> **What this means concretely for future sessions:**
+> **Concretely for future sessions:**
 >
 > 1. **§C1 (TLA+ formal protocol specification of the current protocol)
->    is the immediate top priority.** Every downstream vNext layer
->    depends on a verified spec of what the current system actually
->    does. Start there.
-> 2. **Phase 3 hardening continues; Phase 4–9 feature work pauses.**
->    Bug fixes, security patches, packaging, CI continue on the v1
->    substrate. New feature work (Phase 4 federated learning, Phase 5
->    plan-composition, etc.) ships on the vNext substrate, not on
->    v1. Otherwise we'd build features that get thrown away during
->    the migration.
-> 3. **Wire formats from this point forward are designed
->    forward-compatible.** Any new protobuf message, gRPC method, or
->    DHT record type should be reviewed for v1↔v2 coexistence.
-> 4. **"Retrofit" is not the framing.** Items previously called
->    "architectural retrofits" (§6 C5) are now "migration milestones."
->    They will be built as vNext layers, not bolted onto v1.
-> 5. **Strategic decisions cited in §13 are partially settled by
->    §8.** Multi-token economics, encrypted-by-default privacy,
->    formal-spec discipline, Rust core — these are no longer open
->    questions. Specifics within them (which PQ algorithm, which
->    zk-proof system, exact token distribution mechanics) remain
->    design surface within the commitment.
+>    is a top priority** — every downstream vNext layer depends on it.
+> 2. **§C4 (Rust reference implementation) is the other top priority**
+>    and has been accelerating since Session 21. The two run in
+>    parallel; spec informs implementation, implementation validates spec.
+> 3. **Phase 3 hardening continues; Phase 4–9 feature work pauses.**
+>    Bug fixes, security patches, packaging, CI continue on v1. New
+>    feature work ships on vNext, not on v1.
+> 4. **Wire formats from this point are forward-compatible.** Any new
+>    protobuf message / gRPC method / DHT record type is reviewed for
+>    v1↔v2 coexistence.
+> 5. **Strategic decisions are partially settled.** Multi-token
+>    economics, encrypted-by-default privacy, formal-spec discipline,
+>    Rust core — locked in. Specifics within them (which PQ algorithm,
+>    which zk-proof system, exact token mechanics) remain design surface.
 >
-> **What this DOESN'T mean:**
+> **What this DOESN'T mean:** Big-bang release (migration is
+> incremental over 18–36 months). Phase 3 freezes (hardening
+> continues). Every detail locked (§8 has explicit non-commitments).
+> §9 is the user-facing pitch (it's internal-strategic).
 >
-> - Doesn't mean we ship vNext in one big-bang release. Migration
->   is incremental over 18–36 months.
-> - Doesn't mean current Phase 3 work stops. Hardening continues
->   (see §6 Bucket B).
-> - Doesn't mean every architectural detail in §8 is locked. Several
->   layers have explicit "non-commitments within commitment" — see
->   §8's `Design surface remaining` subsection.
-> - Doesn't mean §9 (maximalist vision) is what we promise users.
->   §9 is internal-strategic, not external-marketing.
->
-> **If you disagree with the commitment:** raise it with the user
-> explicitly at session start. Don't quietly build incompatible
-> features on the v1 substrate hoping the strategic call gets
-> reversed. The commitment is the user's call; flag concerns,
-> propose alternatives, but don't undermine via incrementalism.
+> **If you disagree:** raise it with the user explicitly at session
+> start. Don't quietly undermine via incrementalism.
 >
 > ---
 >
-> **Audience:** A future Claude session continuing work on this repo.
-> **Last updated:** end of Phase 3 Session 25 (Rust Stream 3 sweep —
-> verify_chain + gyza-core + gyza-blackboard). The Rust substrate
-> now has a complete data + crypto + provenance + storage layer
-> independent of Python. **51 tests across 5 crates**: gyza-crypto
-> (6), gyza-identity (7), gyza-icp (16, incl. chain verify),
-> gyza-core (10, incl. concurrent HLC uniqueness), gyza-blackboard
-> (12, real SQLite with WAL). Phase 0 streams 1 (TLA+) and 4
-> (ADR log) progressing; stream 3 (Rust) accelerating; stream 2
-> (Coq) still deferred. Next sub-session candidates: gyza-settlement
-> (port from Settlement.tla) or extend gyza-blackboard with
-> artifacts table + claim/complete idempotency variants.
+> **Last updated:** end of Phase 3 Session 26 (CLAUDE.md restructure
+> + CHANGELOG split). Sessions 21–25 advanced Rust Stream 3 from 0
+> to 5 crates with 51 tests; Session 19 shipped first TLA+ sub-spec
+> (Settlement). **Next sub-session candidates:** `gyza-settlement`
+> (Rust port from `Settlement.tla` — closes the spec↔impl pairing)
+> or DNS-anchored bootstrap code in the daemon (B1 partial).
 >
 > **What this file is.** A grounded reference. Everything below is
-> either (a) code that's been read and verified, (b) hard-won
-> trip-wires from real sessions, or (c) explicit strategic context
-> for choosing what to build next. There are no aspirational claims
-> presented as facts. Sections marked strategic (§7–§13) are now
-> framed in service of the vNext commitment, not as neutral options.
+> either code that's been read and verified, hard-won trip-wires
+> from real sessions, or explicit strategic context.
 >
-> **What this file is not.** A pitch. A user-facing spec. A
-> marketing document. The maximalist sections (§9, §10) describe
-> the internal strategic frame, not the external value proposition.
->
-> **How to use it.** Read top to bottom on session start (§15 is the
-> exact ritual). Then keep it open as a reference. When you finish a
-> session, update the relevant section — particularly trip-wires,
-> session narratives, and the don't-do list.
+> **How to use it.** Read top to bottom on session start (~15 min).
+> Then keep it open as a reference. Session narratives moved to
+> `CHANGELOG.md`; durable decisions in `docs/adr/`.
 
 ---
 
-## 0. Reader's guide — what's where
+## Quick start for fresh Claude  *[updated S26]*
+
+**Where things are right now (Session 26):**
+
+- **Active stream:** Phase 0 of vNext migration. Specifically
+  Stream 3 (Rust reference implementation in `gyza-rs/`). 5 of
+  ~8 planned crates done with byte-for-byte Python parity.
+- **Next codeable thing:** `gyza-settlement` — port directly from
+  `spec/Settlement.tla`. Closes the §C1 "spec derives implementation"
+  loop. Or extend `gyza-blackboard` with artifacts table.
+- **Tests right now:** 51 Rust tests across 5 crates, all green.
+  Python fast slice 457 + 1 skipped. Go suite all green. CI
+  workflows in place.
+
+**Three most recent sessions one-liner each:**
+
+- Session 25: `gyza-blackboard` SQLite port (real SQLite via
+  rusqlite-bundled; schema-compatible with Python).
+- Session 24: `gyza-core` types (WorkItem, Artifact, thread-safe
+  HLC with concurrent-uniqueness test).
+- Session 23: `verify_chain` extension to `gyza-icp` (chain
+  walking with parent-hash linkage, signature verification, ≥1
+  input_hashes).
+
+**What's blocked on the user (can't be coded — see §11):**
+
+- Foundation legal entity (Phase 1 of execution plan)
+- Tokenomics design + regulatory clearance
+- Wedge market choice
+- Bootstrap VPS infrastructure + DNS domain
+- Apple Developer ID, Windows code-signing cert
+- Beta testers, security audit budget
+- Inference API budget / GPU
+
+**If you can pick anything to work on next, do `gyza-settlement`.**
+That's the highest-leverage Phase 0 Stream 3 milestone. Procedure:
+
+1. Re-read `spec/Settlement.tla` + `spec/Settlement_invariants.md`.
+2. Add `gyza-rs/gyza-settlement/` crate to workspace.
+3. Implement state machine from the TLA+ spec (proposed →
+   earner_signed → payer_cosigned → applied + dispute paths).
+4. Port `_within_tolerance` (5 * |claimed - truth| ≤ truth for ±20%).
+5. Parity tests against fixed Python settlement entries.
+6. Update `MIGRATION.md` + `CHANGELOG.md` + commit Session 27.
+
+**Don't skip §15 (session-start ritual)**: run the fast slice and
+the integration demo before declaring anything ready, even
+documentation work. Stale baseline is more dangerous than no work.
+
+---
+
+## 0. Reader's guide — what's where  *[updated S26]*
 
 | Section | Purpose | When you need it |
 |---|---|---|
-| §1 | What gyza is, in one paragraph | Session start, every time |
+| Quick start | Where things stand right now | First 5 minutes of every session |
+| §1 | What gyza is | Session start |
 | §2 | Commands to run things | Constantly |
-| §3 | Trip-wires (false positives + real gotchas) | Before reacting to any unexpected output |
-| §4 | Architecture map | When orienting on a code change |
-| §5 | Session narratives, newest first | When you need historical context |
+| §3 | Trip-wires (3 categories: false-positive / real / resolved) | Before reacting to unexpected output |
+| §4 | Architecture map + v1↔v2 interop matrix | When orienting on code change or migration question |
+| §5 | Session-history index — full narratives in `CHANGELOG.md` | When you need historical context |
 | §6 | Open priorities | When choosing what to do next |
-| §7 | Honest architectural critique | When considering structural changes |
-| §8 | The vNext architecture sketch | When the user asks "should we rewrite?" |
-| §9 | Maximalist vision (Skynet-scope, beneficial) | When the user asks "what could this become?" |
+| §7 | (folded into §8) | — |
+| §8 | vNext architecture (the committed substrate) — includes necessity argument | When the user asks about architecture/scope |
+| §9 | Maximalist vision (the "why" behind vNext) | When the user asks "what could this become?" |
 | §10 | Phases 4–9 roadmap | Long-horizon planning |
-| §11 | Production infrastructure (human-only work) | When the user asks why we can't just ship |
+| §11 | What only the user can do (consolidated) | When the user asks why we can't just ship |
 | §12 | Decentralization portfolio | When designing new subsystems |
-| §13 | Strategic positioning | When the user asks about market/adoption |
+| §13 | Strategic positioning (slimmer; user-owned items in §11) | When the user asks about market/adoption |
 | §14 | Coding conventions | When writing code |
 | §15 | Session-start ritual | First thing every session |
-| §16 | Don't-do list | Before doing anything that feels like cleanup |
+| §16 | Don't-do list (3 categories: Never / Surface-to-user / Resolved) | Before doing anything that feels like cleanup |
 | §17 | If unclear | When in doubt |
 
-Operational sections are §1–§6, §14–§17. Strategic sections are §7–§13.
-The operational core is what makes the current codebase navigable; the
-strategic sections frame what the user might want to build next and
-why.
+Operational sections: Quick start, §1–§6, §14–§17. Strategic
+sections: §8–§13.
 
 ---
 
-## 1. What gyza is
+## 1. What gyza is  *[updated S26]*
 
-**Present state (Phase 3, end of Session 15):** A peer-to-peer
-network where independent nodes (each running a `LocalCompositor`
-identity, a `Blackboard`, and one or more `AgentRunner`s) publish
-"work items" rooted in human-signed "intents," claim each other's
-work, sign cryptographic provenance envelopes (ICP), and settle
-compute credits bilaterally. Phase 1 was single-node. Phase 2 added
-LAN clustering via Raft. Phase 3 added global federation: Kademlia
-DHT for discovery, gossipsub for cross-cluster blackboard sync, NAT
-traversal (DCUtR + circuit relay), bilateral compute-credit ledger,
-proof-of-capability attestation (Tier-3 cosig with quorum), and a
-Go daemon (`gyza-netd`) that owns all libp2p concerns. Python
-(`gyza/`) handles execution, identity, ICP, and the ledger; the
-daemon and Python talk over a Unix socket via gRPC. The integration
-test of record is `demo/single_machine_global.py` which spawns two
-real daemons on loopback, runs a full coordinator-+-executor project
-to settlement in ~10–25 seconds, and prints `BILATERAL ✓` on
-success.
+**Present state (Phase 3, end of Session 25):** A peer-to-peer
+network where independent nodes publish "work items" rooted in
+human-signed "intents," claim each other's work, sign cryptographic
+provenance envelopes (ICP), and settle compute credits bilaterally.
 
-**Long-horizon target (see §9):** A planet-scale coordination layer
-for AI labor — phone, laptop, datacenter, neuromorphic chip,
-satellite — where every contribution is cryptographically attested,
-agents specialize and improve via federated learning, work is
-auctioned and matched by typed capability, and the network's
-emergent behavior is shaped by transparent economic incentives that
-humans collectively set, audit, and adjust. Pluralistic, not
-singular. Self-organizing within constitutional invariants.
-Self-replicating capabilities and node count, but bounded by
-governance approval at the hardware and economic-autonomy layers.
+- Phase 1: single-node.
+- Phase 2: LAN clustering via Raft.
+- Phase 3 (current): global federation. Kademlia DHT for discovery,
+  gossipsub for cross-cluster blackboard sync, NAT traversal (DCUtR
+  + circuit relay), bilateral compute-credit ledger, Tier-3
+  proof-of-capability attestation, Python+Go split with gRPC over
+  Unix socket.
+- Phase 0 of vNext migration (ongoing since Session 17): formal
+  spec + Rust reference implementation; ADR log; CI.
 
-**Gap between present and target:** Roughly 60% of what would be
-built if we were architecting for the long-horizon target today.
-Specific gaps catalogued in §7. The current architecture is a
-strong v1 with several structural commitments (bilateral-only
-settlement, LSH-only discovery, linear ICP chains, blackboard
-coordination, single-resource pricing) that cannot be retrofitted
-to the long-horizon target — they have to be replaced.
+**Integration test of record:** `demo/single_machine_global.py`
+spawns two daemons on loopback, runs coordinator+executor project
+to settlement in ~10–25s, prints `Cross-cluster gossip: VALID ✓`
+and `Bilateral settlement: BILATERAL ✓`.
 
-**The vNext commitment (Session 17).** The architecture in §8 is
-the committed substrate the long-horizon target requires. Migration
-from current → vNext is the binding roadmap. Phase 3 hardening
-continues; Phase 4–9 feature work happens on vNext, not on v1.
-TLA+ formal specification of the current protocol (§C1) is the
-immediate next session's work — every downstream vNext layer
-depends on it. See §8 for the binding execution plan, §6 for the
-reordered priority list, the header at the top of this file for
-the operational rules every session must follow.
+**Long-horizon target (see §9):** A planet-scale coordination
+layer for AI labor. Pluralistic, not singular. Self-organizing
+within constitutional invariants. Self-replicating capabilities
+and node count, but bounded by governance approval at the hardware
+and economic-autonomy layers.
+
+**The vNext commitment.** The architecture in §8 is the committed
+substrate the long-horizon target requires. Migration from current
+→ vNext is the binding roadmap. Hardening continues; Phase 4–9
+feature work happens on vNext, not on v1. See §8 for the binding
+execution plan, §6 for the priority list.
 
 ---
 
-## 2. How to run things — the commands you'll use every session
+## 2. How to run things  *[updated S26]*
 
 ### Python is at a non-standard path
 
-`pytest` is **not** on PATH. The codebase requires Python 3.14
-(uses `uuid.uuid7`). The working interpreter is:
+`pytest` is not on PATH. The codebase requires Python 3.14
+(`uuid.uuid7`). Working interpreter:
 
 ```bash
 ~/dev/marshal/.os/bin/python -m pytest …
 ```
 
-Bare `python` resolves to `/usr/bin/python` which has no project
-deps installed. Bare `pytest` doesn't exist. Always invoke through
-the marshal venv. (This is a packaging debt item; see §6.)
+Bare `python` is `/usr/bin/python` with no project deps. Always
+invoke through marshal venv. (Packaging debt — §6 B2.)
 
-### Fast iteration test slice (~9–10 minutes, 457 tests)
+### Fast iteration test slice (~10 min, 457 tests)
 
 ```bash
 ~/dev/marshal/.os/bin/python -m pytest tests/ -q --tb=line --timeout=90 \
   -k "not netd_client and not phase2_integration and not phase2_hardening and not blackboard_gossip and not attestation_bridge and not verify_on_fetch"
 ```
 
-The `-k` filter excludes heavy integration suites that spawn real
-`gyza-netd` daemons. As of Session 15: 457 tests pass + 1 skipped +
-29 deselected (~10 min).
-
-### Heavy integration tests (~1 minute warm, ~10 minutes cold)
+### Heavy integration tests (~1 min warm, ~10 min cold)
 
 ```bash
 ~/dev/marshal/.os/bin/python -m pytest tests/test_netd_client.py \
-  tests/test_network_blackboard_gossip.py \
-  tests/test_attestation_bridge.py \
-  tests/test_verify_on_fetch.py \
-  -q --tb=line --timeout=240
+  tests/test_network_blackboard_gossip.py tests/test_attestation_bridge.py \
+  tests/test_verify_on_fetch.py -q --tb=line --timeout=240
 ```
 
-19 tests pass in ~56 s warm. `tests/test_phase2_integration.py` and
-`tests/test_phase2_hardening.py` are Phase 2 specific — only re-run
-if you touched `gyza/network/cluster.py` or related.
-
-### Go test suite (~5 seconds, all packages)
+### Go test suite (~5 seconds)
 
 ```bash
 cd /home/xan/dev/gyza/netd && go test ./... -count=1 -timeout=120s
 ```
+
+### Rust workspace (~5–30s depending on cache)
+
+```bash
+cd /home/xan/dev/gyza/gyza-rs && cargo test --workspace
+```
+
+Combined: `cargo fmt --all -- --check && cargo clippy --workspace
+--all-targets -- -D warnings && cargo test --workspace`.
 
 ### Integration demo of record
 
@@ -217,10 +219,7 @@ cd /home/xan/dev/gyza/netd && go test ./... -count=1 -timeout=120s
 ~/dev/marshal/.os/bin/python demo/single_machine_global.py
 ```
 
-Always confirm `Cross-cluster gossip: VALID ✓` and `Bilateral
-settlement: BILATERAL ✓`. Elapsed time dominated by
-SentenceTransformer model load on first run (~25s); subsequent runs
-in the same Python process cache the model. ~17s/run warm.
+Expect `VALID ✓` + `BILATERAL ✓` in ~17s warm (~25s cold ST cache).
 
 ### Build the daemon
 
@@ -228,8 +227,17 @@ in the same Python process cache the model. ~17s/run warm.
 make -C /home/xan/dev/gyza/netd build
 ```
 
-Required after any change to `netd/`. Binary lands at
-`netd/bin/gyza-netd`.
+Required after any `netd/` change. Binary → `netd/bin/gyza-netd`.
+
+### TLC spec model-check
+
+```bash
+cd /home/xan/dev/gyza/spec
+java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
+  -deadlock -workers 4 -config Settlement.cfg Settlement.tla
+```
+
+Honest model ~25s; adversarial ~40s; both pass.
 
 ### CLI smoke
 
@@ -239,262 +247,267 @@ Required after any change to `netd/`. Binary lands at
 ~/dev/marshal/.os/bin/python -m gyza.cli global attest --tier 1
 ```
 
-### Daemon launch with explicit DHT mode (Session 15)
+### Daemon launch with explicit DHT mode (multi-daemon tests)
 
 ```bash
 netd/bin/gyza-netd --dht-mode server --socket-path /tmp/g.sock \
   --listen-port 0 --key-path /tmp/g.key
 ```
 
-Tests use `dht_mode="server"` because `ModeAuto` stays in Client on
-loopback meshes (AutoNAT can't promote). Production should leave
-the default.
+ModeAuto stays in Client mode on loopback (no AutoNAT promotion);
+tests use `dht_mode="server"`. Production leaves the default.
+
+### Regenerate Rust parity fixtures
+
+```bash
+~/dev/marshal/.os/bin/python gyza-rs/scripts/regenerate_crypto_fixtures.py
+~/dev/marshal/.os/bin/python gyza-rs/scripts/regenerate_icp_fixtures.py
+```
+
+Paste the output hex into the corresponding `gyza-rs/<crate>/src/lib.rs`
+test module. Run BEFORE pasting; don't paste imagined values.
 
 ---
 
-## 3. Trip-wires — things that look broken but aren't
+## 3. Trip-wires  *[updated S26]*
 
-Read this section before reacting to any unexpected output.
+Three categories: false positives (ignore), real operational
+gotchas (work around or fix when you can), resolved (used to be
+true; here for history).
 
-### Pyright "Import could not be resolved"
+### 3a. Lint / tooling false positives — ignore
 
-You'll see warnings like:
-```
-✘ Import "blake3" could not be resolved [reportMissingImports]
-✘ Import "gyza.network.peer_registry" could not be resolved
-✘ Import "prometheus_client" could not be resolved
-✘ Import "pytest" could not be resolved
-```
+- **Pyright "Import could not be resolved"** for `blake3`,
+  `prometheus_client`, `pytest`, `gyza.network.*`, etc. No
+  `pyrightconfig.json` configures the marshal venv as analysis
+  target. Runtime is fine. Don't add fallback imports — except
+  for `gyza.observability` where it's deliberate (see §14).
+- **Pyright "possibly unbound"** on `_wait_until` patterns
+  (`row` after the loop). Pyright can't infer monotonicity.
+  Ignore.
+- **Pyright unused-variable** on lambda `_pk` parameters. `_`
+  prefix convention not recognized for callable args. Ignore.
+- **Demo elapsed time variance (~10s vs ~25s).** SentenceTransformer
+  cold-cache load. Don't worry about it.
+- **Fast slice ~10 min, not "fast".** Sentence-transformers cold
+  load + real daemon startup + gossipsub mesh waits. 9–12 min
+  normal; >12 min is a real problem.
+- **`TestSenderSeqDedupRejects` (gossip) timing-flaky under load.**
+  Pre-existing. Retry in isolation before blaming your change.
 
-**These are not real.** No `pyproject.toml` or `pyrightconfig.json`
-configures the marshal venv as analysis target, so Pyright resolves
-against system Python which has no project deps. Runtime is fine.
-Do not "fix" by adding fallback imports — except where Session 9
-already does so deliberately for `gyza.observability` (see §14
-"fail-closed observability wrappers").
+### 3b. Real operational gotchas — work around or fix
 
-### Pyright unused-variable warnings on lambdas, "possibly unbound"
+- **`DefaultBootstrapPeers = []string{}`** in
+  `netd/internal/host/host.go`. Production-broken; the single
+  biggest deployment blocker (§6 B1). User-owned VPS work + DNS
+  required; daemon-side DNS-anchored resolution code is codeable.
+- **`kaddht.ModeAuto` stays in Client mode forever on loopback.**
+  AutoNAT can't promote without a public peer. Multi-daemon
+  integration tests MUST pass `--dht-mode server` (Python:
+  `start_daemon(dht_mode="server")`). Failure mode is silent.
+  Production callers leave default.
+- **`AgentAdvertisement.attestation_tier` is verified ONLY in
+  `find_agents`.** Session 15's verify-on-fetch closed this for
+  the routing hot path. Code paths that bypass `find_agents` (raw
+  DHT reads, gossip-payload parsing, on-disk snapshots) inherit
+  the old self-report weakness — must do their own
+  `cap.fetch_attestation` + `cap.verify_attestation`.
+- **`make proto-py` uses bare `python` and fails.** Workaround:
+  `~/dev/marshal/.os/bin/python -m grpc_tools.protoc -I
+  netd/internal/grpc/proto --python_out=... --grpc_python_out=...
+  netd/internal/grpc/proto/netd.proto`. Proper fix: parametrize
+  via `$(PYTHON)`. Tracked in §6 A4.
+- **`gyza global attest --tier 3` requires a running daemon.**
+  Tier-3 needs libp2p + DHT publish hops. Tier-1 (default) does
+  NOT need the daemon.
+- **`AssembleAttestation` docstring is aspirational.** Says
+  "validators echo back identical bodies" but pre-Session 14
+  they didn't. Corrected behavior is in
+  `verifyProposedAttestationBody`. Comment lingers as historical
+  context.
+- **Sign envelopes against AGENT pubkey, NOT compositor.** ICP
+  envelopes are signed by the agent's HKDF-derived key. The cert
+  binds at the compositor. Confused easily; see §16.
+- **Rust parity fixtures from imagination are wrong.** Always run
+  the Python fixture script first; never paste expected hex from
+  intuition. Failure mode = silent assertion failure that looks
+  like a real cross-language bug.
 
-Lambda parameters prefixed `_` and the `_wait_until(predicate)` →
-`row is None after loop` pattern both produce false positives.
-Ignore unless genuinely curious.
+### 3c. Resolved trip-wires — for historical reference
 
-### Demo elapsed time variance (~10s vs ~25s)
-
-SentenceTransformer cache. First call loads ~80 MB. Variance is
-dominated by this; ignore.
-
-### `gyza global attest --tier 3` says "daemon not running"
-
-Expected when no daemon is up. Tier-3 needs the daemon for libp2p
-+ DHT publish hops. Tier-1 (`--tier 1`, default) does NOT need the
-daemon.
-
-### `AgentAdvertisement.attestation_tier` is verified at find_agents (Session 15)
-
-Session 15 closed #21f. `find_agents(min_tier=3)` now drops any ad
-whose `compositor_pubkey` lacks a fetchable, valid Tier-3 cert in
-the DHT. The integer field itself is still mutable on the wire (a
-Sybil can still PUBLISH tier=3) — but a consumer's
-`find_agents(min_tier=3)` won't return it. Callers that bypass
-`find_agents` (raw DHT reads, gossip-payload parsing, on-disk
-snapshots) inherit the old self-report weakness and must do their
-own `cap.fetch_attestation` + `cap.verify_attestation`.
-
-### `kaddht.ModeAuto` stays in Client mode forever on loopback (Session 15)
-
-AutoNAT needs a public peer to confirm reachability; loopback never
-gets one. Client peers don't accept storage pushes from other
-daemons' PutValue, so a cert published on daemon A never reaches
-B's local datastore — B's `fetch_attestation` silently returns
-NotFound. Multi-daemon integration tests MUST pass `--dht-mode
-server` to the daemon (Python: `start_daemon(dht_mode="server")`).
-Production callers leave the default. Failure mode is silent
-("not found" rather than error).
-
-### Daemon `PublishAttestation` rejects near-expired certs (Session 16 — A1 closed)
-
-`PublishAttestation` refuses to publish a cert whose remaining
-lifetime is `< MinPublishAttestationLifetime` (24h default). Combined
-with `gyzaValidator` rejecting AttestationCert records past
-`expires_at_ns + AttestationExpiryGrace` (5min skew tolerance) at
-both PutValue and GetValue, the DHT layer no longer holds expired
-certs. The 24h publish-side floor + grace-bounded validator rejection
-+ Session 15's 1h consumer-side slack window form a three-layer
-defense.
-
-### `DefaultBootstrapPeers = []string{}` in `netd/internal/host/host.go`
-
-Intentional, but production-broken. Cross-internet operation
-literally requires the operator to know another peer's multiaddr
-out of band. No bootstrap = no joinable network. This is the single
-biggest deployment blocker (see §11). Fix shape: DNS-anchored
-bootstrap via `gyza.network` resolving to Foundation-operated peers;
-hardcoded fallback pubkey-pinned multiaddrs for DNS-poison recovery.
-
-### Fast test slice is ~9–10 min, not "fast"
-
-Sentence-transformers cold load + real daemon startup in
-attestation tests + gossipsub mesh formation 2s waits + Session 9's
-reconciliation timing tests (~2:30 of intentional pagination/timeout
-work). Normal range 9–12 min. If consistently >12 min, something's
-wrong.
-
-### `TestSenderSeqDedupRejects` is timing-flaky under load
-
-Pre-existing (Session 13 confirmed not introduced by recent work).
-Passes 3-of-3 in isolation. Asserts gossipsub mesh formation timing,
-which is sensitive to CPU contention. Retry in isolation before
-blaming your change.
-
-### `AssembleAttestation` docstring is aspirational (Session 14)
-
-Says "validators echo back identical bodies." They didn't before
-Session 14, which fixed it by adding `proposed_attestation_body`.
-The corrected behavior is in `verifyProposedAttestationBody`. The
-comment lingers as historical context.
-
-### `make proto-py` uses bare `python` and fails
-
-Workaround: `~/dev/marshal/.os/bin/python -m grpc_tools.protoc -I
-netd/internal/grpc/proto --python_out=... --grpc_python_out=...
-netd/internal/grpc/proto/netd.proto` from the repo root. A proper
-fix parametrizes via `$(PYTHON)`. Packaging debt; tracked in §6.
+- **DHT TTL bounding on `PublishAttestation`** — closed Session 16
+  (A1). Three-layer defense: 24h publish-side floor + 5min
+  validator-side grace + 1h consumer-side slack.
+- **Self-reported `attestation_tier` at routing time** — closed
+  Session 15 (#21f).
+- **Per-validator authored `AttestationBody` breaks quorum** —
+  closed Session 14 (applicant-proposed body).
+- **Python JSON-canonical vs Go det-protobuf cosigs don't
+  aggregate** — closed Session 12 (Go protobuf is the canonical
+  cross-network wire format; Python JSON-canonical stays
+  in-process only).
+- **HLC race producing duplicate `(l, c)` tuples under concurrent
+  `now()`** — closed Session 8.5 (mutex-guarded).
+- **CI/CD missing** — closed Session 20 (GitHub Actions
+  workflows shipped).
 
 ---
 
-## 4. Architecture map
+## 4. Architecture map  *[updated S26]*
 
-### Directory tree
+### Directory tree (unified)
 
 ```
 ~/dev/gyza/
-├── gyza/                 # Python — execution, identity, ICP, ledger
-│   ├── schema.py         # WorkItem, Artifact, HLC (thread-safe)
-│   ├── blackboard.py     # SQLite WAL + envelope log + reconstruct_chain
-│   ├── runner.py         # AgentRunner (claim/execute/sign loop, chain-verify gate)
-│   ├── icp.py            # ICPEnvelope + sign/verify, single-key + multi-compositor
-│   ├── identity.py       # LocalCompositor (master seed → agent issuance), AgentIdentity
-│   ├── memory.py         # EpisodicMemory (LanceDB + SQLite fallback)
-│   ├── drift.py          # SpecializationTracker (per-agent embedding state)
-│   ├── demand.py         # LSHIndex + DemandOracle (bucket signals, deficit math)
-│   ├── reward.py         # exponential reward inflation
-│   ├── embeddings.py     # Embedder Protocol + ST + Stub
-│   ├── supervisor.py     # AgentSupervisor (poll oracle → spawn via factory)
-│   ├── observability.py  # Prometheus + structlog (Session 9)
-│   ├── capability_eval.py # Session 11 — eval suite + run_eval_locally + verify_eval_results
-│   ├── cli.py            # gyza CLI
-│   ├── config.py         # GyzaConfig
-│   ├── sandbox/          # Session 10 — bwrap-based executor sandboxing
-│   │   ├── config.py
-│   │   ├── runner.py
-│   │   ├── _entrypoint.py
-│   │   ├── executor.py
-│   │   └── _probes.py
+├── gyza/                    # Python — execution, identity, ICP, ledger (v1)
+│   ├── schema.py            # WorkItem, Artifact, HLC
+│   ├── blackboard.py        # SQLite WAL + envelope log
+│   ├── runner.py            # AgentRunner (claim/execute/sign loop)
+│   ├── icp.py               # ICPEnvelope + sign/verify, single-key + multi-compositor
+│   ├── identity.py          # LocalCompositor (master seed → agent issuance)
+│   ├── memory.py            # EpisodicMemory (LanceDB or SQLite)
+│   ├── drift.py             # SpecializationTracker
+│   ├── demand.py            # LSHIndex + DemandOracle
+│   ├── reward.py            # exponential reward inflation
+│   ├── embeddings.py        # Embedder Protocol + ST + Stub
+│   ├── supervisor.py        # AgentSupervisor (factory-pattern spawning)
+│   ├── observability.py     # Prometheus + structlog (S9)
+│   ├── capability_eval.py   # canonical eval suite (S11)
+│   ├── cli.py               # gyza CLI
+│   ├── config.py            # GyzaConfig
+│   ├── sandbox/             # bwrap-based executor sandbox (S10, not wired)
 │   ├── economy/
-│   │   ├── ledger.py     # bilateral compute-credit ledger
-│   │   ├── settlement.py # earner_signed ⇄ payer_cosigned + reconcile
-│   │   └── reputation.py # EWMA reputation
+│   │   ├── ledger.py        # bilateral compute-credit ledger
+│   │   ├── settlement.py    # earner_signed ⇄ payer_cosigned + reconcile (S9)
+│   │   └── reputation.py    # EWMA reputation (S8.5)
 │   └── network/
 │       ├── cluster.py            # Phase 2 LAN cluster (Raft)
 │       ├── transport.py          # Phase 2 QUIC + Noise
-│       ├── discovery.py          # Phase 2 mDNS
+│       ├── discovery.py          # mDNS
 │       ├── raft.py               # pysyncobj wrapper
 │       ├── network_blackboard.py # Raft + gossip-attached blackboard
 │       ├── netd_client.py        # NetdClient + GossipClient + CapabilityClient
-│       │                         # Session 15: dht_mode kwarg in start_daemon
 │       ├── peer_registry.py
-│       ├── peer_cache.py         # Session 10 — JSON-persisted (pubkey, multiaddr)
-│       ├── daemon_supervisor.py  # Session 10 — heartbeat/respawn watcher
-│       ├── capability_protocol.py # Session 11 — in-process Tier-1 orchestrator
-│       ├── attestation_adapter.py # Session 13/14 — Python applicant adapter for Tier-3
+│       ├── peer_cache.py         # S10
+│       ├── daemon_supervisor.py  # S10
+│       ├── capability_protocol.py # in-process Tier-1 (S11)
+│       ├── attestation_adapter.py # Python applicant adapter (S13/14)
 │       ├── global_cluster.py     # Phase 3 orchestrator
-│       ├── artifact_*.py         # content-addressed artifact store + client/server
-│       └── trust_registry.py     # pinned compositors + cached manifests
+│       └── trust_registry.py     # pinned compositors + manifests
 │
-├── netd/                 # Go — gyza-netd daemon (libp2p, DHT, NAT, gossip)
-│   ├── cmd/gyza-netd/main.go     # entry point + --dht-mode flag (Session 15)
+├── netd/                    # Go — gyza-netd daemon (libp2p, DHT, NAT, gossip) (v1)
+│   ├── cmd/gyza-netd/main.go     # entry point + --dht-mode (S15)
 │   └── internal/
-│       ├── identity/             # Ed25519 seed → libp2p crypto.PrivKey
-│       ├── host/                 # libp2p host config (QUIC + Noise + yamux)
-│       ├── dht/                  # Kademlia DHT + Python-compatible LSH
-│       │   ├── dht.go            # GyzaDHT + FindAgents + verify-on-fetch wiring
-│       │   ├── verifier.go       # Session 15 — AttestationVerifier (cache, single-flight, slack)
-│       │   ├── dht_test.go       # FindAgents/Publish/Verify integration tests
-│       │   └── verifier_test.go  # 10 unit tests for verifier
-│       ├── discovery/            # mDNS service
+│       ├── identity/             # Ed25519 → libp2p crypto.PrivKey
+│       ├── host/                 # libp2p host (QUIC + Noise + yamux)
+│       ├── dht/                  # Kademlia DHT
+│       │   ├── dht.go            # GyzaDHT + FindAgents + verify-on-fetch (S15)
+│       │   └── verifier.go       # AttestationVerifier (S15)
+│       ├── discovery/            # mDNS
 │       ├── nat/                  # DCUtR + AutoRelay
 │       ├── gossip/               # gossipsub + signed deltas
-│       ├── message/              # /gyza/message/1.0.0 stream (varint frames)
-│       ├── capability/           # challenge protocol (issuance + verify, in-process)
-│       │                         # Session 14: applicant-proposed body
-│       │                         # Session 16: recursive.go — RecursiveVerifier
-│       │                         # (Tier-3 chain check with bootstrap base case)
-│       ├── capability_stream/    # Session 12 — libp2p /gyza/capability-challenge/1.0.0
+│       ├── message/              # /gyza/message/1.0.0 (varint frames)
+│       ├── capability/           # challenge protocol (in-process)
+│       │   └── recursive.go      # RecursiveVerifier (S16)
+│       ├── capability_stream/    # /gyza/capability-challenge/1.0.0 (S12)
 │       └── grpc/                 # gRPC server + proto definitions
-│                                 # Session 13: RequestAttestation bidi stream
 │
-├── docs/                 # Session 18 — pre-spec artifacts for §C1
-│   ├── invariants.md     # protocol invariants by ID (INV-X-N)
-│   ├── state-machines.md # state machines per major component
-│   ├── wire-protocol.md  # consolidated wire-format reference
-│   └── adr/              # Session 20 — Architecture Decision Records
-│       ├── README.md     # ADR format + index
-│       └── 0001-*.md     # ADRs 0001..0015 (retroactive)
-├── .github/workflows/    # Session 20 — CI
-│   ├── ci.yml            # fast slice + Go suite + TLC + Rust on push/PR
-│   └── integration.yml   # heavy integration nightly + on-touch
-├── gyza-rs/              # Session 21 — vNext Rust reference impl
-│   ├── Cargo.toml        # workspace root
-│   ├── MIGRATION.md      # porting strategy + module status
-│   ├── gyza-crypto/      # Ed25519 + BLAKE3 + key derivation (parity ✓)
-│   ├── gyza-identity/    # LocalCompositor + AgentIdentity (parity ✓)
-│   ├── gyza-icp/         # Session 22+23 — envelope sign/verify + verify_chain
-│   ├── gyza-core/        # Session 24 — WorkItem + Artifact + HLC
-│   ├── gyza-blackboard/  # Session 25 — SQLite-backed storage
-│   └── scripts/          # parity fixture generators
+├── gyza-rs/                 # Rust — vNext reference implementation (S21+)
+│   ├── Cargo.toml           # workspace root
+│   ├── MIGRATION.md         # porting strategy + module status
+│   ├── gyza-crypto/         # Ed25519 + BLAKE3 + key derivation (parity ✓)
+│   ├── gyza-identity/       # LocalCompositor + AgentIdentity (parity ✓)
+│   ├── gyza-icp/            # envelope sign/verify + verify_chain (parity ✓)
+│   ├── gyza-core/           # WorkItem + Artifact + HLC (S24)
+│   ├── gyza-blackboard/     # SQLite-backed storage (S25)
+│   └── scripts/             # parity fixture generators
 │       ├── regenerate_crypto_fixtures.py
 │       └── regenerate_icp_fixtures.py
-├── spec/                 # Session 19 — TLA+ formal protocol spec
-│   ├── README.md         # how to run TLC, scope per sub-spec
-│   ├── Settlement.tla    # bilateral settlement behavioral spec
-│   ├── Settlement.cfg    # TLC honest-only model config
-│   ├── Settlement_adversarial.cfg # TLC adversarial (MalleableSigs=TRUE)
-│   ├── Settlement_invariants.md   # TLA+ predicate ↔ INV-SETTLE-N mapping
-│   ├── tools/tla2tools.jar        # TLC + SANY (official TLA+ release)
-│   └── states/                    # TLC scratch (gitignored)
-├── tests/                # pytest, all green
-│   # 457 fast slice + 1 skipped + 19 heavy integration as of Session 16
-│   # (Go: +3 dht A1 tests + 11 capability A2 tests = +14 vs Session 15)
+│
+├── spec/                    # TLA+ formal protocol spec (S19+)
+│   ├── README.md
+│   ├── Settlement.tla       # bilateral settlement behavioral spec
+│   ├── Settlement.cfg       # TLC honest-only model
+│   ├── Settlement_adversarial.cfg # TLC with MalleableSigs=TRUE
+│   ├── Settlement_invariants.md
+│   └── tools/tla2tools.jar
+│
+├── docs/                    # Reference docs (S18+)
+│   ├── invariants.md        # ~120 INV-X-N invariants
+│   ├── state-machines.md    # 10 state machines per major component
+│   ├── wire-protocol.md     # consolidated wire-format reference
+│   └── adr/                 # Architecture Decision Records (S20)
+│       ├── README.md
+│       └── 0001-*.md        # ADR-0001 through 0015 (retroactive)
+│
+├── .github/workflows/       # CI (S20)
+│   ├── ci.yml               # fast: Go + Python slice + TLC + Rust
+│   └── integration.yml      # nightly + on-touch heavy integration
+│
+├── tests/                   # pytest (457 fast + 19 heavy integration)
 ├── demo/
 │   ├── single_machine_global.py  # Phase 3 integration sim — RUN to verify
 │   ├── single_machine_phase2.py
 │   ├── two_machine_demo.py
 │   ├── two_agent_pipeline.py
 │   └── injection_demo.py
-└── scripts/
-    └── generate_lsh_planes.py
+├── scripts/
+│   └── generate_lsh_planes.py    # shared Python+Go LSH planes
+├── CLAUDE.md                # this file
+├── CHANGELOG.md             # per-session narratives
+└── README.md
 ```
 
-### Layered dependencies (skim before designing changes)
+### Where is feature X implemented? — cross-reference
 
-```
-runner ─┬── blackboard ── (sqlite WAL, ICP envelope log)
-        ├── memory     ── (LanceDB or SQLite, ST embeddings)
-        ├── drift      ── (per-agent SpecializationTracker)
-        ├── icp        ── (ICPEnvelope + sign/verify)
-        └── reputation ── (optional EWMA store)
+| Feature | Python v1 | Go v1 (daemon) | Rust vNext |
+|---|---|---|---|
+| Identity (compositor + agent) | `gyza/identity.py` | `netd/internal/identity/` | `gyza-rs/gyza-identity/` ✓ |
+| BLAKE3 + Ed25519 primitives | inline (via `cryptography` + `blake3`) | inline (`crypto/ed25519` + `github.com/zeebo/blake3`) | `gyza-rs/gyza-crypto/` ✓ |
+| ICP envelope sign/verify | `gyza/icp.py` | — | `gyza-rs/gyza-icp/` ✓ |
+| Envelope chain verification | `gyza/icp.py::verify_chain` | — | `gyza-rs/gyza-icp::verify_chain` ✓ |
+| WorkItem + HLC types | `gyza/schema.py` | — (consumes via gRPC) | `gyza-rs/gyza-core/` ✓ |
+| Blackboard (SQLite) | `gyza/blackboard.py` | — | `gyza-rs/gyza-blackboard/` ✓ (artifacts table TODO) |
+| Runner (claim/execute/sign) | `gyza/runner.py` | — | not started |
+| Settlement protocol | `gyza/economy/settlement.py` | — | not started — **next target** |
+| Reputation (EWMA) | `gyza/economy/reputation.py` | — | not started |
+| Discovery / DHT | — | `netd/internal/dht/` | not started |
+| Gossipsub | — | `netd/internal/gossip/` | not started |
+| Capability stream (Tier-3 wire) | — | `netd/internal/capability_stream/` | not started |
+| Attestation core | partial (`gyza/network/capability_protocol.py` in-process; `gyza/network/attestation_adapter.py` bridge) | `netd/internal/capability/` | not started |
+| Verify-on-fetch | — | `netd/internal/dht/verifier.go` | not started |
+| Recursive Tier-3 | — | `netd/internal/capability/recursive.go` | not started |
+| NAT traversal (DCUtR, AutoRelay) | — | `netd/internal/nat/` | not started |
+| Sandboxing (bwrap) | `gyza/sandbox/` (not wired) | — | not started |
 
-global_cluster ─┬── netd_client (gRPC over Unix socket)
-                ├── gossip_client
-                ├── peer_registry
-                ├── settlement ── ledger
-                └── supervisor   ── demand oracle, factory spawn
+### v1↔v2 byte-parity interop matrix  *[added S26]*
 
-netd_client ── netd (Go subprocess; libp2p, DHT, NAT, gossipsub)
-   │
-   └── verifier (Session 15) ── capability.VerifyAttestation
-```
+Parity tested between Python (v1) and Rust (vNext). Both sides
+produce byte-identical output for the same logical input, asserted
+in `gyza-rs/<crate>/src/lib.rs` test modules.
+
+| Primitive | Python site | Rust site | Parity status |
+|---|---|---|---|
+| BLAKE3 hash | `blake3.blake3(data).digest()` | `gyza_crypto::hash` | ✓ tested (S21) |
+| `derive_seed(master, ctx, info)` | `gyza/identity.py::_derive_seed` | `gyza_crypto::derive_seed` | ✓ tested (S21) |
+| Ed25519 sign/verify | `cryptography.Ed25519PrivateKey` | `gyza_crypto::Signer` | ✓ tested (S21) |
+| Compositor key from master | `gyza/identity.py::LocalCompositor` | `gyza_identity::LocalCompositor` | ✓ tested (S21) |
+| Agent key from compositor seed + info | `LocalCompositor.issue_agent` | `LocalCompositor::issue_agent` | ✓ tested (S21) |
+| ICP envelope canonical JSON | `gyza/icp.py::_payload_bytes` (sort_keys + no whitespace) | `gyza_icp::canonical_bytes` (alphabetized struct fields) | ✓ tested (S22) |
+| ICP envelope hash | `gyza/icp.py::compute_envelope_hash` | `gyza_icp::envelope_hash` | ✓ tested (S22) |
+| ICP signature (sign-the-hash) | `gyza/icp.py::sign_envelope` | `gyza_icp::sign_envelope` | ✓ tested (S22) |
+| Chain verification | `gyza/icp.py::verify_chain` | `gyza_icp::verify_chain` | structural tests only (S23) |
+| 384-dim embedding blob (LE f32) | `np.ndarray.tobytes()` | `gyza_blackboard::embedding_to_blob` | ✓ tested (S25) |
+| Blackboard SQLite schema | `gyza/blackboard.py::_SCHEMA_SQL` | `gyza_blackboard::SCHEMA_SQL` | ✓ string-equal (S25) |
+| HLC ratchet semantics | `gyza/schema.py::HLC` | `gyza_core::Hlc` | structural tests + 8000-call concurrent uniqueness |
+| Deterministic protobuf marshal | Python protobuf `SerializeToString(deterministic=True)` | Go `proto.MarshalOptions{Deterministic: true}` | not yet Rust-side; cross-language Python↔Go via shared `.proto` |
+
+**Where parity is NOT yet established:**
+
+- Settlement entry canonical bytes (Rust port pending)
+- Capability protocol wire bytes (`pb.Challenge`, `pb.ChallengeResponse`, etc. — Rust port pending)
+- AttestationCert + cosig signatures (Rust port pending)
+- Gossipsub delta payload (Rust port pending)
 
 ### Critical data flow: cross-cluster claim → settled
 
@@ -509,7 +522,7 @@ post_work_item(w) ─────► gossip ────────────
                                                   (verify chain)
                                                   ─► execute
                                                   ─► sign envelope
-                                                  ─► store_envelope (log)
+                                                  ─► store_envelope
                                                   ─► on_envelope_signed
                                                        │
                                                        ▼
@@ -534,1753 +547,214 @@ settlement._handle_earner_signed
 complete_work_item ────► gossip ─► merge_completion_direct
 
 Both ledgers now hold byte-identical settled entries.
-Both reputation stores reflect successful interaction.
 ```
 
-### Critical data flow: Tier-3 attestation (Sessions 11–15)
+### Critical data flow: Tier-3 attestation
 
 ```
-Applicant Python                  Applicant gyza-netd            Validator gyza-netd
-────────────────                  ────────────────────           ───────────────────
+Applicant Python      Applicant gyza-netd        Validator gyza-netd
+────────────────      ────────────────────       ───────────────────
 gyza global attest --tier 3
        │
        ▼
-applicant_eval_session
-  ─► proposed_attestation_body  (SAME body for every validator!)
-  ─► spawns ephemeral AgentRunner
+applicant_eval_session (proposed body — SAME for every validator)
        │
        ▼
-request_tier3_attestation(quorum_k=2, candidate_n=3)
-  ─► find_agents(min_tier=3, k=12)         (verify-on-fetch fires)
+request_tier3_attestation
+  ─► find_agents(min_tier=3) [verify-on-fetch fires]
   ─► dedup by compositor_pubkey, exclude self
        │
        ▼
 cap.request_attestation(peer_id, eval_callback)
-       │  bidi gRPC stream
+       │ bidi gRPC stream
        ▼
-                              CapabilityServer.RequestAttestation
-                                ─► capStream.RequestAttestation(peer_id)
-                                          │ libp2p /gyza/capability-challenge/1.0.0
-                                          ▼
-                                                                handleIncoming
-                                                                ─► applicant pubkey from
-                                                                   libp2p RemotePeer
-                                                                ─► capMgr.IssueChallenge
-                              ◄──────────────────────────────── (Challenge proto frame)
-                              ─► forward Challenge over gRPC
-       ◄────────────────────── (Challenge frame on bidi stream)
-eval_callback(challenge):
-  ─► verify validator's challenge signature
-  ─► run_eval_locally on shared runner
-       (NEW workdir per challenge, validator-chosen nonce)
-  ─► build TaskResults (icp_payload_bytes = _payload_bytes(env))
-  ─► sign ResponseBody with COMPOSITOR key (deterministic)
-  ─► attach proposed_attestation_body (same for ALL validators)
-       │
-       ▼
-       (ChallengeResponse on bidi stream)              ─────────►
-                              ─► forward over libp2p
-                                                                 readFrame(ChallengeResponse)
-                                                                 capMgr.VerifyResponse
-                                                                 ─► verifyTaskResult per task
-                                                                 ─► verifyProposedAttestationBody
-                                                                    (6 plausibility checks)
-                                                                 ─► sign(canonicalMarshal(body))
-                                                                 ◄──── CoSignature on wire
-                              ◄──────────────────────────────── (VerifyResponseResult)
-       ◄────────────────────── (Outcome frame on bidi)
-
-       (orchestrator dedups by validator_pubkey,
-        early-exit on quorum_k cosigs)
-
+                      RequestAttestation bridge
+                        ─► capStream.RequestAttestation
+                                │ libp2p /gyza/capability-challenge/1.0.0
+                                ▼
+                                                          IssueChallenge (applicant pubkey from libp2p RemotePeer)
+                                                          writeFrame(Challenge)
+                      ◄──────────────────────────────── (Challenge on wire)
+       ◄──────────────────── Challenge over bidi gRPC
+eval_callback runs eval suite (validator-chosen nonce), signs response
+       ────────────────────► ChallengeResponse over bidi
+                      ─► forward over libp2p
+                                                          readFrame(ChallengeResponse)
+                                                          VerifyResponse (6 plausibility checks)
+                                                          sign(canonicalMarshal(proposed_body))
+                      ◄──────────────────────────────── (VerifyResponseResult + cosig)
+       ◄──────────────────── Outcome frame (success + cosig)
+  ─► [orchestrator dedups cosigs, accumulates quorum]
   ─► AttestationCert(body=proposed_body, co_signatures=[...])
-  ─► cap.verify_attestation(cert)            (cross-language self-verify)
-  ─► cap.publish_attestation(cert)
-                              ─► dht.PublishAttestation
-                                ─► record at /gyza/attestations/{compositor_pubkey}
-  ─► write JSON cert artifact ~/.gyza/attestations/cert-<pubkey16>.json
-```
-
-### Critical data flow: verify-on-fetch (Session 15)
-
-```
-Consumer FindAgents(min_tier=3)
-       │
-       ▼
-GyzaDHT.FindAgents
-  ─► gather candidates (local cache + Hamming-radius-2 DHT lookups)
-  ─► score by cosine similarity to query
-  ─► [NEW] for each candidate, verifier.Verify(ad.CompositorPubkey):
-       │
-       ▼
-DHTAttestationVerifier.Verify(pubkey)
-  ─► cache hit? return cached result
-  ─► single-flight: another goroutine fetching? wait on done channel
-  ─► semaphore: bounded global in-flight (16 max)
-  ─► per-fetch deadline: 250ms default
-       │
-       ▼
-  d.FetchAttestation(ctx, pubkey)
-       │
-       ▼
-  cert nil/error?    ─► negative cache (30s for definitive)
-  cert non-nil:
-    capability.VerifyAttestation(cert, now)
-       │
-       ▼
-    expired? signature failure?  ─► negative cache (30s)
-    valid:
-      expires_at - now > 1h slack?  yes ─► positive cache (5m or bounded)
-                                    no  ─► negative cache (30s)
-       │
-       ▼
-  return verdict
-       │
-       ▼
-GyzaDHT.FindAgents
-  ─► filter out verdict=false candidates
-  ─► sort by score
-  ─► return top-k to gRPC stream
+  ─► cap.verify_attestation (cross-language self-verify)
+  ─► cap.publish_attestation (DHT under /gyza/attestations/{pubkey})
+  ─► write cert artifact to ~/.gyza/attestations/cert-<pubkey16>.json
 ```
 
 ---
 
-## 5. Session narratives — newest first
-
-Newer sessions on top. Each entry: what it shipped, the architectural
-decisions, the trip-wires discovered. These narratives are the
-durable institutional memory of the project; they're load-bearing
-for future sessions and should be preserved across rewrites.
-
-### 5-pre-11. Sessions 23–25 — Rust Stream 3 sweep (verify_chain + gyza-core + gyza-blackboard)
-
-Three consecutive Phase 0 Stream 3 sessions. Each committed
-separately (42ace1f, 662452e, [Session 25 commit]) but narrated
-together because they share a coherent target: complete the Rust
-substrate's data + provenance + storage layer.
-
-**Session 23 — `verify_chain` in gyza-icp.** Adds chain verification
-walking parent_envelope_hash links. Per-hop checks: (1) agent_pubkey
-decodes + signature verifies, (2) parent hash matches BLAKE3 of
-prior envelope (None for root), (3) input_hashes non-empty.
-`ChainVerificationError` carries the first failing index — matches
-Python's `(False, first_bad_index)` semantics in a structured form.
-8 new tests including the §INV-ICP-5 "injection breaks chain"
-proof.
-
-**Session 24 — `gyza-core`.** Ports `gyza/schema.py`. Three types:
-WorkItem (with `new_validated` constructor enforcing embedding
-length / reward range / tier range), Artifact (serializable),
-and Hlc (Kulkarni 2014 hybrid logical clock). The HLC is the
-notable one — internal `Mutex<HlcState>` makes `now()` and
-`recv()` atomic; a stress test with 8 threads × 1000 calls validates
-the §INV-X-5 uniqueness invariant (8000 distinct HlcTuples
-produced under shared-clock contention). 10 tests.
-
-**Session 25 — `gyza-blackboard`.** Ports the core surface of
-`gyza/blackboard.py`. SQLite via rusqlite (bundled feature — no
-system sqlite dep). Three tables: `human_intents`, `work_items`,
-`icp_envelopes`. Operations: open[+in_memory], post_intent,
-post_work_item, claim_work_item (atomic via `WHERE claimed_by IS
-NULL`), complete_work_item, get_unclaimed (reward + tier + TTL
-filter, reward DESC ordering), store_envelope (idempotent INSERT
-OR IGNORE), get_envelope, reconstruct_chain (walks parent links
-root-first). Embedding blob encoding matches Python's
-`np.ndarray.tobytes()` for float32 LE. 12 tests including atomic
-claim race semantics and embedding roundtrip preservation.
-
-**Stream 3 cumulative status:**
-
-| Crate | Lines | Tests | Notable |
-|---|---|---|---|
-| gyza-crypto | ~280 | 6 | 4 Python-parity assertions |
-| gyza-identity | ~210 | 7 | 4 parity tests |
-| gyza-icp | ~650 (with verify_chain) | 16 | 3 parity + 8 chain tests |
-| gyza-core | ~480 | 10 | concurrent-HLC uniqueness |
-| gyza-blackboard | ~580 | 12 | real SQLite via rusqlite-bundled |
-
-**Total: 51 tests across 5 crates, all green.** The Rust substrate
-now has a complete data + provenance + storage layer that a vNext
-runner can stand on. v1↔v2 schema compatibility achieved
-(blackboard schema matches Python).
-
-**Architectural choices made across these sessions:**
-
-- **Sign-the-hash discipline preserved.** All envelopes signed via
-  `Ed25519(seed, BLAKE3(canonical_bytes))` — never canonical_bytes
-  directly. Documented in `gyza-icp/src/lib.rs` top-of-file comment.
-- **Alphabetized struct fields for canonical-JSON types.** Locked
-  in across `EnvelopePayload`. Future canonical-bytes types follow
-  this convention.
-- **Embedding storage as little-endian f32 blob.** Matches Python's
-  `np.ndarray.tobytes()` byte-for-byte; SQLite reads from one
-  language are valid in the other.
-- **Idempotent envelope storage.** `INSERT OR IGNORE` matches
-  Python's "return existing hash on duplicate" semantics.
-- **Mutex<Connection> for SQLite.** Single global lock; rusqlite's
-  Connection isn't Sync. Future scaling to a connection pool is a
-  drop-in change.
-- **Optional<bool> for nullable success column.** Matches Python's
-  `bool | None` — serialized via `i32` 0/1 with NULL → None.
-- **Atomic claim via conditional UPDATE.** `UPDATE ... WHERE
-  claimed_by IS NULL` is SQLite-atomic; returns rows-affected=0
-  if another claim won the race. Matches Python's lock-free idiom.
-
-**Trip-wires surfaced:**
-
-- **`serde_json::Error` doesn't implement Eq/PartialEq.** Affects
-  derive on error enums that embed it. Workaround: store the
-  message as String. Caught in gyza-icp's `ChainVerificationError`.
-- **Doc-comment list-item indentation** (clippy
-  `doc-overindented-list-items`) requires exactly 4-space
-  continuation indent. Different from Python docstring conventions.
-- **`use gyza_icp::{X, Y, Z};` where X is only used in tests**
-  triggers `unused_imports`. Move to test module's
-  `use gyza_icp::{X};` to fix.
-- **rusqlite without `bundled` requires system sqlite3.** Bundled
-  takes longer to compile (~15s) but gives portable binaries —
-  worth the trade for v2.
-
-**What's NOT yet ported (Phase 0 Stream 3 remaining):**
-
-- `gyza-settlement` — implement directly from `Settlement.tla`.
-  This is the §C1 spec ↔ Rust pairing that closes Stream 3's
-  spec-derives-impl story.
-- `gyza-blackboard` artifacts + artifact_files tables.
-- `gyza-blackboard` idempotent variants (post_intent_direct, etc.).
-- `gyza-capability` — Tier-3 challenge-response.
-- gRPC layer to talk to a Rust-written daemon.
-
-**Strategic significance.** This is the first session series where
-the Rust port could plausibly run end-to-end agent code without
-Python. The remaining gaps (settlement, capability, gRPC) are
-known; the foundation is solid; future ports follow the same
-playbook.
-
-### 5-pre-10. Session 22 — gyza-icp port (canonical JSON parity)
-
-Continued Phase 0 Stream 3. Ported the ICP envelope module with the
-trickiest cross-language requirement satisfied: canonical-JSON
-serialization producing byte-identical bytes to Python's
-`json.dumps(d, sort_keys=True, separators=(",", ":"))`.
-
-**The byte-parity proof.** For a fixed envelope (all fields
-specified), Python and Rust both produce:
-
-```
-{"action_id":"act-0001","agent_pubkey":"08ed03d0…","capability_manifest_hash":"cmh1…","duration_ms":42,"inference_backend":"local","input_hashes":["i1","i2"],"intent_id":"int-0001","model_identifier":"mock-eval","output_hash":"out1…","parent_envelope_hash":null,"schema_version":1,"timestamp_ns":1700000000000000000,"tokens_in":10,"tokens_out":20}
-```
-
-Down to every byte. BLAKE3 hash matches:
-`2b69bb3ab0cca91f0a273efc3b4fc83438cf8976aeffd33f45d44175c6662d40`.
-Ed25519 signature matches (deterministic per [seed, message]):
-`6e7900cb…f5cc30e`. The Rust port can sign envelopes that Python
-verifies; Python can sign envelopes Rust verifies. Cross-language
-ICP envelopes are now interoperable.
-
-**Deliverables:**
-
-- `gyza-rs/gyza-icp/` — new crate.
-  - `EnvelopePayload` struct with **fields listed in alphabetical
-    order**. This is load-bearing — Rust's serde_json emits in
-    struct-declaration order, so alphabetizing the fields gives
-    sort_keys-equivalent canonical bytes.
-  - `SignedEnvelope` = `EnvelopePayload + signature` (via
-    `#[serde(flatten)]`).
-  - `canonical_bytes(payload) -> Vec<u8>` — serialize via
-    `serde_json::to_vec`.
-  - `envelope_hash(payload) -> String` — hex of BLAKE3 over
-    canonical bytes.
-  - `sign_envelope(payload, seed) -> SignedEnvelope` — signs
-    `BLAKE3(canonical_bytes)`, NOT the canonical bytes themselves
-    (matches Python's `gyza.icp::sign_envelope` line 72-73).
-  - `verify_envelope(signed, pubkey)` — verifies against explicit
-    pubkey.
-  - `verify_envelope_self(signed)` — verifies against
-    `signed.payload.agent_pubkey`.
-  - 8 unit tests including 3 Python-parity assertions.
-- `gyza-rs/scripts/regenerate_icp_fixtures.py` — Python fixture
-  generator for the parity tests.
-- `gyza-rs/MIGRATION.md` updated to reflect gyza-icp as ported.
-
-**Architectural choices made this session:**
-
-- **Alphabetized struct field order.** Rust's serde emits in
-  declaration order; Python's `sort_keys=True` emits in sorted
-  order. Alphabetizing the Rust struct fields makes these match.
-  Documented as load-bearing — DON'T REORDER.
-- **`Option<String>` for `parent_envelope_hash`.** Serde default
-  serializes None as `null`, matching Python's `None` → `null`.
-- **Two verification entry points.** `verify_envelope` takes an
-  explicit pubkey (used in attestation where the verifier is
-  a third party). `verify_envelope_self` derives the pubkey from
-  the envelope's own `agent_pubkey` field (used for chain
-  verification).
-- **Sign-the-hash, not-the-bytes.** The signature covers
-  `BLAKE3(canonical_bytes)`, not the canonical bytes directly.
-  This matches Python's behavior precisely (line 72-73 of
-  `gyza/icp.py`). If we signed the bytes directly, Python and
-  Rust would produce different signatures for the same envelope
-  even with byte-identical canonical bytes.
-
-**ASCII-only invariant documented.** In practice no ICPEnvelope
-field contains non-ASCII characters (UUIDs, hex, identifiers like
-`"anthropic:claude-sonnet-4-5"`). Python's default
-`ensure_ascii=True` and Rust's default UTF-8 output are byte-
-identical for ASCII content. If a future field needs non-ASCII,
-this invariant needs explicit reconciliation. Documented in the
-crate's top-of-file doc comment.
-
-**Trip-wires surfaced this session:**
-
-- **First draft of the test had a placeholder hex string** in the
-  envelope-hash parity test because I didn't run the fixture script
-  first. Reinforces the rule from Session 21: ALWAYS run the
-  Python fixture generator before pasting expected values into
-  Rust parity tests.
-- **Clippy's `doc-overindented-list-items` lint fires on doc
-  comments where list-item continuation lines are indented more
-  than 4 spaces.** Easy fix; re-flow with exactly 4-space
-  continuation. Worth knowing because doc-comment formatting
-  habits from Python (more freeform) carry over to Rust where
-  rustfmt + clippy enforce stricter rules.
-- **`serde_json::to_vec` vs `to_string`** — both work; we chose
-  `to_vec` because the canonical bytes are conceptually bytes
-  (BLAKE3 input), not string. Stylistic but worth being consistent.
-- **`#[serde(flatten)]` on `SignedEnvelope`** lets us embed
-  `EnvelopePayload` fields inline at the top level of the JSON
-  object, with `signature` as an additional sibling field.
-  Matches Python's flat envelope dict.
-
-**Phase 0 stream status after Session 22:**
-
-| Stream | Status |
-|---|---|
-| 1. TLA+ specs of v1 | 1/5 sub-specs done (Settlement) |
-| 2. Coq/Lean proofs | deferred (luxury per Session 19) |
-| 3. Rust ref impl | 3/7+ modules ported with parity (crypto, identity, icp) |
-| 4. ADR log | ✓ 15 retroactive ADRs |
-
-**Next sub-session recommendations:**
-
-1. `gyza-core` — protocol-level types (WorkItem, Artifact, HLC).
-   Easier than gyza-icp; no canonical-JSON tricks since these
-   are protobuf-shaped or simple Rust structs.
-2. `gyza-blackboard` — SQLite-backed storage. Will use `rusqlite`.
-   This is where the Rust impl can actually START to be a working
-   substrate (storage + signing = the v2 baseline).
-3. `gyza-settlement` — implement directly from `Settlement.tla`.
-   Now that the formal spec is locked, the Rust implementation is
-   a translation exercise.
-
-**What this DOESN'T accomplish:**
-
-- ICP chains aren't yet verified in Rust. `verify_chain` is the
-  next public function; uses the `parent_envelope_hash` field to
-  walk parent envelopes and confirm each child's parent hash
-  matches the canonical hash of the parent's payload.
-- No interop test that actually exchanges envelopes between Python
-  and Rust at runtime. The parity tests use FIXED inputs; a runtime
-  interop test would have one side produce an envelope and the
-  other verify it. Trivial to add once we have a daemon entry
-  point on either side.
-
-### 5-pre-9. Session 21 — Phase 0 Stream 3 kickoff: Rust scaffold + 2 ports
-
-The actual vNext code begins. After 5 sessions of strategic +
-documentation + infrastructure work, Session 21 lands the first
-Rust crates of the vNext substrate. Real progress on Phase 0 Stream 3
-(the only **necessary** Phase 0 stream per the Session 19 audit).
-
-**Why this session matters strategically.** Sessions 17–20 were
-defensible but I was deferring the actual rewrite. The TLA+ specs
-and ADRs are necessary scaffolding but not load-bearing without
-Rust code. This session breaks that pattern.
-
-**Deliverables:**
-
-- `gyza-rs/Cargo.toml` — workspace root, Rust 2024 edition,
-  Rust 1.93+, two member crates initially.
-- `gyza-rs/MIGRATION.md` — porting strategy: bottom-up module
-  order, parity-test discipline, deprecation workflow for Python
-  equivalents.
-- `gyza-rs/scripts/regenerate_crypto_fixtures.py` — produces
-  byte-fixture hex strings from Python's reference implementation;
-  pasted into Rust test modules to validate cross-language parity.
-- `gyza-rs/gyza-crypto/` — Ed25519 + BLAKE3 + key derivation
-  primitives. Public surface:
-  - `hash(&[u8]) -> [u8; 32]` (BLAKE3)
-  - `derive_seed(master, context, info) -> [u8; 32]` (BLAKE3 keyed
-    mode; matches Python `gyza.identity._derive_seed` exactly)
-  - `Signer { from_seed, pubkey_bytes, pubkey_hex, sign, sign_hex }`
-  - `verify(pubkey, data, signature) -> Result<(), CryptoError>`
-  - 6 unit tests: 2 BLAKE3 spec vectors + 4 Python-parity assertions
-- `gyza-rs/gyza-identity/` — `LocalCompositor` + `AgentIdentity`
-  ports. Public surface:
-  - `LocalCompositor::from_master_seed`, `from_master_seed_slice`
-  - `LocalCompositor::{signer, pubkey_hex, sign_hex, issue_agent}`
-  - `AgentIdentity::{pubkey_hex, sign_hex, signer}`
-  - `CTX_COMPOSITOR_SEED`, `CTX_AGENT_SEED` protocol constants
-  - 7 unit tests: 4 parity + 3 structural (key distinctness,
-    malformed input rejection)
-- `.github/workflows/ci.yml` — added `rust` job: `cargo fmt --check`,
-  `cargo clippy -D warnings`, `cargo build`, `cargo test`. Cached
-  Cargo registry + target dir.
-- `.gitignore` — `gyza-rs/target/`.
-
-**Parity tests pass (this is load-bearing for the migration):**
-
-```
-$ cargo test --workspace
-test result: ok. 6 passed; 0 failed   (gyza-crypto)
-test result: ok. 7 passed; 0 failed   (gyza-identity)
-```
-
-The parity tests assert that, for a fixed test master seed, the
-Rust implementation produces byte-identical output to Python for:
-
-- `blake3('')` and `blake3([0])` (BLAKE3 spec vectors)
-- `derive_seed(master, "gyza.compositor.ed25519.v1", "")` →
-  `774e35bf...0182` (compositor seed)
-- `derive_seed(master, "gyza.agent.ed25519.v1", "agent-0001")` →
-  `382c116f...e2f3` (agent seed)
-- Ed25519 pubkey from compositor seed →
-  `08ed03d0...3ab9`
-- Ed25519 signature of `"hello gyza"` under compositor key →
-  `cee3aece...f507`
-- Ed25519 pubkey + signature for agent `"agent-0001"`
-
-If any of these drift, the parity test fails immediately. This is
-the discipline that makes cross-language migration tractable rather
-than perpetually fragile.
-
-**Architectural choices made this session:**
-
-- **Workspace edition: 2024.** Latest stable; matches Rust 1.93.
-- **resolver = "3".** Workspace's modern resolver.
-- **ed25519-dalek (RustCrypto family).** Mature, well-audited.
-  Standard library produces RFC-8032 byte-identical signatures
-  with Python's `cryptography.hazmat.primitives.asymmetric.ed25519`.
-- **`blake3` crate (official BLAKE3 team's reference impl).** Same
-  trust model as Python's `blake3` PyPI package.
-- **No `serde` yet.** Identity + crypto don't need serialization.
-  Will land with `gyza-icp` (canonical-JSON envelopes).
-- **Per-crate `Cargo.toml` uses `workspace = true`** for version,
-  edition, dependency versions. Single source of truth.
-
-**Trip-wires surfaced:**
-
-- **Don't paste parity-test fixtures from imagination.** The first
-  pass had placeholder hex strings (I wrote what I thought might
-  match Python). They were wrong. Fixed by writing
-  `regenerate_crypto_fixtures.py` and pasting its actual output.
-  Future ports: ALWAYS generate fixtures from Python before pasting
-  into Rust tests.
-- **`derive_seed`'s pipe separator (`b"|"`) is between context and
-  info, NOT around them.** Easy to misread the Python — original
-  Python: `blake3.blake3(context + b"|" + info, key=master).digest()`.
-  The trailing `|` is significant even when `info == b""`. Rust
-  port handles this by always appending the `|` regardless of
-  info length.
-- **`ed25519-dalek::Signer` trait clashes with our `Signer` struct
-  name.** Avoided by importing as `Signer as _` inside the `sign`
-  method's local scope. Future name-collisions in Rust modules:
-  prefer `use foo::Trait as _` for trait-only imports.
-- **Workspace inheritance** of `description` field via
-  `description.workspace = true` is NOT supported in Rust 1.93;
-  each crate must declare `description` directly. Other fields
-  (`version`, `edition`, `rust-version`, `license`) inherit fine.
-
-**Phase 0 stream status after Session 21:**
-
-| Stream | Status |
-|---|---|
-| 1. TLA+ specs of v1 | 1/5 sub-specs done (Settlement) |
-| 2. Coq/Lean proofs | not started (luxury, deferred per Session 19) |
-| 3. Rust ref impl | ✓ scaffolded + 2 crates ported with parity |
-| 4. ADR log | ✓ scaffolded + 15 retroactive ADRs |
-
-**Next sub-sessions, recommended order (per `MIGRATION.md`):**
-
-1. `gyza-icp` — ICP envelope sign/verify. Builds on gyza-crypto +
-   gyza-identity. Canonical-JSON is the tricky bit
-   (`json.dumps(sort_keys=True, separators=(",",":"))`).
-2. `gyza-core` — protocol-level types (WorkItem, Artifact, HLC).
-3. `gyza-blackboard` — SQLite-backed storage.
-4. `gyza-settlement` — implement directly from Settlement.tla.
-
-After step 4, we have a complete Rust reference for the §C1
-TLA+ ↔ Rust pairing.
-
-**What this DOESN'T accomplish:**
-
-- The Rust crates are NOT replacing the Python yet. Both coexist;
-  this is parity discipline, not cutover.
-- Migration cutover (the daemon's gRPC server pointing to Rust
-  for one endpoint) is multiple sessions away. Need at least
-  `gyza-icp` + `gyza-blackboard` before any meaningful surface.
-- The vNext layers 4–14 (network, settlement L1/L2, capability
-  framework, execution, privacy, governance, safety, substrate
-  diversity, distribution) are entirely unstarted. We're at layer
-  1–2 only.
-
-### 5-pre-8. Session 20 — Phase 0 mixed-stream: ADR log + CI
-
-Mixed-stream Phase 0 session per the strategic decision in Session
-19's closing exchange ("the TLA+ work is one of four Phase 0
-streams; the other three aren't started"). This session lands two
-of the unaddressed streams: ADR log (Phase 0 Stream 4) and CI
-(Bucket B3 deployment-readiness). No further TLA+ sub-spec this
-session.
-
-**Deliverables:**
-
-- `docs/adr/` directory with 15 retroactive ADRs documenting major
-  architectural decisions from Phase 1 through Session 17:
-  - ADR-0001: Python + Go split via gRPC bridge
-  - ADR-0002: Ed25519 + BLAKE3 cryptographic primitives
-  - ADR-0003: 384-dim embeddings + LSH for discovery
-  - ADR-0004: Bilateral compute-credit settlement
-  - ADR-0005: Linear ICP envelope chains
-  - ADR-0006: Blackboard coordination pattern
-  - ADR-0007: Kademlia DHT under `/gyza/1.0` prefix
-  - ADR-0008: bwrap executor sandboxing
-  - ADR-0009: Tier-3 attestation with k-of-n quorum cosigs
-  - ADR-0010: libp2p `/gyza/capability-challenge/1.0.0`
-  - ADR-0011: Python-initiated bidi gRPC bridge
-  - ADR-0012: Applicant-proposed AttestationBody for multi-validator quorum
-  - ADR-0013: TTL-cached single-flight verify-on-fetch verifier
-  - ADR-0014: Recursive Tier-3 verification with trusted bootstrap set
-  - ADR-0015: vNext as the committed architectural target
-- `docs/adr/README.md` — ADR format, index, and maintenance rules.
-- `.github/workflows/ci.yml` — fast CI on push/PR. Three parallel
-  jobs: Go test suite (~5s), Python fast slice (~10min), TLC
-  Settlement.tla validation (~30s). Heavy integration excluded.
-- `.github/workflows/integration.yml` — nightly + on-touch heavy
-  integration: real-daemon multi-host tests + demo-of-record.
-  Schedule: 04:00 UTC daily. Trigger on `netd/`, `gyza/network/`,
-  or workflow-self changes.
-
-**Rationale (cataloged from the strategic exchange):**
-
-- §C1 (TLA+) was one of four Phase 0 streams; treating it as the
-  only stream left three others stalled.
-- ADR log is cheap (~1 session retroactively) and produces a
-  primary reference doc for vNext implementers.
-- CI is the cheapest insurance against regression across all 19
-  prior sessions of work. Without CI, every future session is at
-  risk of silent regression.
-- These two together advance Phase 0 stream 4 (ADR log) and
-  Bucket B item B3 (CI/CD) in one session. Stream 3 (Rust ref
-  impl) is the next target.
-
-**ADR conventions established (in `docs/adr/README.md`):**
-
-- 4-digit zero-padded IDs starting at ADR-0001
-- Status: Proposed / Accepted / Deprecated / Superseded
-- Sections: Status, Context, Decision, Consequences, Alternatives
-  considered, References
-- 30–80 lines typical
-- Required for: cross-module decisions, wire-format / protocol
-  choices, cryptographic primitives, strategic commitments
-- Not required for: local refactors, bug fixes, docs updates,
-  test additions
-
-**CI design choices:**
-
-- **Two-tier:** fast CI on every push (jobs measured in minutes);
-  heavy integration nightly + on-touch (jobs measured in tens of
-  minutes).
-- **Caching:** pip cache + HuggingFace model cache. The
-  sentence-transformers cache is the dominant cold-start cost in
-  the fast slice (~25s on first run).
-- **`concurrency` block:** cancel in-progress runs on new pushes
-  to same branch. Avoids wasting compute on rapid PR updates.
-- **TLC step in CI:** model-checks `Settlement.tla` against the
-  honest config in ~25s. Catches regressions where someone edits
-  the spec without re-validating. Critical for keeping the formal
-  spec aligned with the code.
-- **`workflow_dispatch` trigger** on both workflows for manual
-  re-runs.
-
-**Trip-wires (catalogued for future sessions):**
-
-- **CI uses bare `python`** (from `actions/setup-python`). Local
-  dev uses `~/dev/marshal/.os/bin/python`. Two different
-  environments; `requirements.txt` is the bridge. If CI passes but
-  local dev fails (or vice versa), `requirements.txt` is the
-  divergence point. Keep it complete.
-- **First CI run on a fresh GitHub Actions checkout** will be
-  slow (~15min) due to HF model download. Cached runs are ~10min.
-- **Heavy integration in `integration.yml` requires the daemon
-  binary**, so the `make -C netd build` step is gating. If the Go
-  build fails, all integration tests will fail with cryptic
-  "binary not found" rather than a Go-specific error. Look at the
-  build step first when integration mysteriously breaks.
-- **ADR IDs are stable.** Don't renumber existing ADRs even if
-  reordering. Cross-references from CLAUDE.md and the spec
-  directory rely on stable IDs.
-
-**Open follow-ups still on the Phase 0 / B-bucket todo list:**
-
-- Phase 0 Stream 3 (Rust ref impl scaffolding) — next session's
-  candidate target.
-- Phase 0 Stream 2 (Coq/Lean proofs) — luxury; defer until after
-  v2 ships.
-- B-bucket items B1 (bootstrap nodes), B2 (packaging), B4 (code
-  signing) — partially user-owned (infra, accounts) but daemon-side
-  code for DNS-anchored bootstrap is codeable next session.
-- More TLA+ sub-specs (Attestation, Reconciliation, Blackboard,
-  DHT, Gossip) — still queued but lower priority than Rust
-  scaffolding per the Session 19 strategic exchange.
-
-**What this DOESN'T accomplish:**
-
-- No code changes to the actual protocol. ADRs document; CI
-  validates; neither change behavior.
-- No new tests. CI validates the existing test suite.
-- Rust scaffolding still not started — that's the next biggest
-  Phase 0 gap.
-- User-owned strategic decisions (Foundation entity, tokenomics
-  shape, wedge market choice) still pending.
-
-### 5-pre-7. Session 19 — first §C1 sub-spec: Settlement.tla
-
-First TLA+ behavioral spec under the vNext commitment. Formalizes
-the bilateral settlement protocol from `gyza/economy/settlement.py`
-and validates six safety invariants via the TLC model checker.
-
-**Deliverables:**
-
-- `spec/Settlement.tla` (~600 lines) — TLA+ behavioral spec covering:
-  - State machine: `proposed → earner_signed → payer_cosigned → applied`
-  - Four dispute paths: forged earner sig, envelope mismatch,
-    amount tolerance, misroute
-  - Adversarial submit action (`MalleableSigs=TRUE`) modeling four
-    attack vectors
-  - Six safety invariants:
-    - `INV_SETTLE_1_StateMachineOrdering` (INV-SETTLE-1)
-    - `INV_SETTLE_2_SigsVerifiedBeforeApply` (INV-SETTLE-2)
-    - `INV_SETTLE_3_EnvelopeResolvedBeforeApply` (INV-SETTLE-3)
-    - `INV_SETTLE_4_AmountToleranceBeforeApply` (INV-SETTLE-4)
-    - `INV_SETTLE_5_AppliedConsistencyAcrossSides` (INV-SETTLE-5,
-      weakened form — see notes)
-    - `INV_SETTLE_6_AppliedEntriesAreStable` (INV-SETTLE-6, safety
-      part; conservation theorem is §C2 work)
-- `spec/Settlement.cfg` — TLC config, honest-only model, default for
-  fast iteration (~25s wall-clock)
-- `spec/Settlement_adversarial.cfg` — TLC config with
-  `MalleableSigs=TRUE` for adversarial discrimination test
-- `spec/Settlement_invariants.md` — TLA+-predicate ↔ INV-SETTLE-N
-  mapping with soundness arguments per invariant
-- `spec/README.md` — how to run, scope, maintenance workflow
-- `spec/tools/tla2tools.jar` (2.2 MB, official TLA+ release)
-
-**TLC results:**
-
-| Config | States generated | Distinct states | Depth | Wall time | Outcome |
-|---|---|---|---|---|---|
-| `Settlement.cfg` (honest, 3 peers, 2 envelopes, 2 entries) | 1.2M | 495K | 9 | 25s | ✓ No error |
-| `Settlement_adversarial.cfg` (adversarial, 2 peers, 1 envelope, 1 entry) | 5M | 828K | 22 | 40s | ✓ No error |
-| Larger adversarial (3 peers, 2 envelopes, 2 entries) | 41M | 22 min | (interrupted; no violations found in window) | n/a | ◯ in-progress |
-
-All six safety invariants hold across the explored state space.
-
-**Trip-wires surfaced this session:**
-
-- **`Int` not in `Naturals`.** Reputation can go negative under
-  disputes; spec needs `EXTENDS Integers`. Caught at parse time.
-- **TypeOK can't enumerate the partial-function type.** `[A -> B]`
-  where B is large forces TLC to materialize the set. Workaround:
-  assert structural well-formedness per-element (`\A k \in DOMAIN
-  f: f[k] \in B`) rather than `f \in [A -> B]`. Saves orders of
-  magnitude of memory.
-- **Adversarial-submit state space is huge.** With
-  `MalleableSigs=TRUE` AND unconstrained constants, every multiset
-  of in-flight forged messages produces a distinct state. The
-  spec's value is in INVARIANT CHECKING, not full state-space
-  exploration of the adversary. Tight bounds (2/1/1/2) suffice for
-  discrimination; full coverage is hours of compute.
-- **First invariant violation TLC found was real (and educational).**
-  Original INV-SETTLE-5 asserted "if either side is applied, both
-  must be applied." The protocol has a transient gap: payer applies
-  on cosigning, earner applies on receiving cosigned message. TLC
-  caught this in <5 seconds. Weakened to "when BOTH sides applied,
-  fields agree"; the stronger property is liveness, not safety.
-  Documented in `Settlement_invariants.md`.
-- **Bracket-counting in TLA+ record literals.** Nested
-  `{[outer |-> [inner |-> ...]]}` needs `]]}`. Off-by-one in
-  `AdversarialSubmit` first draft. SANY's parser caught it; the
-  error message points to the wrong line because the close mismatch
-  shifts the parser frame. Always count opens and closes carefully
-  in nested-record literals.
-
-**Open follow-ups for §C1:**
-
-- **Reconciliation sub-spec.** INV-SETTLE-8..11 are deferred —
-  separable. Queue as `spec/Reconciliation.tla`.
-- **Liveness checking.** Spec design supports `FairDelivery` weak-
-  fairness; enable TLC liveness checking once the spec stabilizes.
-- **Discrimination test.** Intentionally break the spec (e.g.,
-  remove `sig_ok` guard) and confirm TLC catches it. Validates the
-  spec's safety properties actually discriminate. Documented in
-  `Settlement_invariants.md` as a one-time exercise.
-- **Conservation theorem.** TLA+ struggles with sum-over-function
-  formulations. Natural target for §C2 (Coq/Lean) proofs where
-  algebraic reasoning is first-class.
-- **Next sub-specs in §C1.** Attestation, Blackboard, DHT, Gossip.
-  Same pattern: TLA+ + cfg + invariants-mapping doc + TLC results.
-
-**What this DOESN'T accomplish:**
-
-- §C1 is not "done." This is the first of five planned sub-specs.
-  Settlement was chosen as the first target because it's the most
-  self-contained.
-- No code changes. The spec describes the protocol AS IT EXISTS.
-  Any future drift between code and spec is a bug — fix one or the
-  other and update the §5 narrative.
-- Conservation as a theorem is a §C2 deliverable, not §C1.
-- Cross-component spec composition (e.g., how Settlement interacts
-  with Blackboard's envelope persistence) is deferred until each
-  sub-spec is independently complete.
-
-### 5-pre-6. Session 18 — pre-spec artifacts for §C1
-
-Three documentation artifacts produced in service of §C1 (TLA+ formal
-protocol specification). No code changes; pure documentation work.
-Rationale: the TLA+ spec needs to translate from existing protocol
-behavior to formal predicates. Having the existing behavior catalogued
-upfront makes spec writing a translation task rather than a discovery
-task — substantially faster and more rigorous.
-
-**Three docs created (all under `docs/`):**
-
-1. **`docs/invariants.md` — protocol invariants inventory.** Every
-   invariant the v1 code enforces, with stable IDs (`INV-X-N` shape).
-   16 sections, ~120 invariants total. Each has a statement and the
-   code site that enforces it. Sections: cross-cutting, ICP envelope,
-   blackboard, runner, settlement, attestation (5 sub-areas: body,
-   multi-validator quorum, challenge-response, DHT publish/fetch,
-   recursive verification), DHT, gossip, capability stream,
-   RequestAttestation bridge, identity, supervisor, reputation,
-   observability, sandbox, eval suite. Plus two appendices for
-   "invariants without runtime checks" (load-bearing for proofs) and
-   "non-invariants we deliberately don't enforce yet" (acknowledged
-   open items).
-
-2. **`docs/state-machines.md` — protocol state transitions.**
-   Box-and-arrow state machines for ten major protocol components:
-   WorkItem lifecycle, Settlement entry, Attestation cert, Agent
-   runner, DHT record (AgentBucket + AttestationCert variants),
-   Capability challenge protocol, RequestAttestation bridge,
-   Verifier cache state, RecursiveVerifier in-call state, HLC
-   ratchet. Each transition annotated with its triggering event
-   and the invariants it preserves (cross-referenced to
-   `invariants.md`).
-
-3. **`docs/wire-protocol.md` — consolidated wire-format reference.**
-   Single document for every wire-visible format: identity
-   encoding, three canonical-bytes routines (canonical JSON,
-   deterministic protobuf, BLAKE3), seven gRPC services with
-   message types, two libp2p stream protocols
-   (`/gyza/message/1.0.0`, `/gyza/capability-challenge/1.0.0`),
-   gossipsub topic namespaces, message-bus types
-   (`ledger.entry.*`, `ledger.reconcile.*`), three DHT key
-   namespaces (`/gyza/agents/*`, `/gyza/attestations/*`,
-   `/gyza/relays`), LSH parameters, ICP envelope encoding,
-   cross-language compatibility matrix, and the Session-17
-   forward-compatibility rules for v1↔v2 wire-format coexistence.
-
-**Trip-wires this session surfaced:**
-
-- **Three distinct canonical-bytes routines.** Sessions 11–14 made
-  one routine (canonical JSON) work for ICP envelopes and another
-  (deterministic protobuf) work for capability messages. They're
-  NOT interchangeable. `wire-protocol.md §2` is the authoritative
-  reference. Mixing them is the bug class that Session 12's
-  architectural decision was made to prevent.
-- **Invariant numbering convention.** Stable IDs (`INV-X-N`) so the
-  TLA+ spec and Coq proofs can cross-reference. Once assigned, do
-  NOT renumber even if you reorder. Add new IDs at the next
-  available number in the section.
-- **Some properties are protocol-level, not runtime-checked.**
-  Settlement conservation (INV-SETTLE-6), eventual consistency
-  (INV-GOSS-4), sybil-resistance threshold (INV-X-A3), capability
-  non-forgeability (INV-X-A4), liveness under bounded partition
-  (INV-X-A5). These are the load-bearing targets for §C2 (formal
-  proofs) and don't have corresponding `assert` statements in
-  code. Documented explicitly in `invariants.md` Appendix A.
-- **The recursive-verifier and verify-on-fetch verifiers have
-  independent caches.** Caching at different keys (validator-pubkey
-  vs. applicant-cert) with different TTL policies. Both legitimate;
-  document the asymmetry rather than unify.
-
-**Open follow-ups surfaced:**
-
-- INV-X-B-series in `invariants.md` Appendix B lists non-invariants
-  the architecture deliberately doesn't enforce yet. Each is
-  cross-referenced to a §6 priority bucket item. These are NOT
-  bugs; they're acknowledged gaps that §C1 should formalize as
-  "out of scope at v1" so the gaps stay visible.
-- A few code-site line numbers in `invariants.md` are anchored to
-  commit 481300e. Future refactoring should re-anchor or use stable
-  function-name references.
-
-**What this DOESN'T accomplish:**
-
-- This is not §C1. The TLA+ spec proper still needs to be written.
-  These three docs are the input lexicon for that spec — they make
-  it possible to write the spec in ~6 weeks rather than ~12.
-- This is not a code cleanup. The codebase is not modified. The
-  artifacts describe what exists, accurately, so the spec doesn't
-  re-discover it.
-- No tests added. No tests changed. Demo unchanged.
-
-**Estimated cycle saving for §C1:** Roughly 30–50% reduction in spec
-writing time. Without these artifacts, a TLA+ spec writer would have
-to re-discover each invariant and state transition while writing.
-With them, the spec becomes a structured translation from
-`docs/invariants.md` and `docs/state-machines.md` into TLA+ syntax.
-
-### 5-pre-5. Session 17 — vNext architectural commitment + CLAUDE.md restructure
-
-**Strategic-decision session. No new code shipped.** The architectural
-target for every future session is now binding: the vNext architecture
-(§8) is committed, not sketched. CLAUDE.md restructured to make the
-commitment unambiguous to future sessions.
-
-**Why this is a session, not just a doc edit.** The decision changes
-what every future session is allowed to build. Specifically:
-
-- Phase 4–9 feature work on the v1 substrate is now declined by
-  default (see §6 parallel-vs-sequential table).
-- §C1 (TLA+ spec of v1 protocol) is the immediate next session's
-  binding priority.
-- Wire-format choices from this point on are reviewed against v1↔v2
-  forward compatibility.
-- Strategic questions previously open (tokenomics, privacy default,
-  cryptographic primitives, Foundation entity) are partially
-  settled by the §8 commitment; specifics remain design surface.
-
-**What changed in CLAUDE.md:**
-
-1. **Top-of-file commitment header.** New "⚠ ARCHITECTURAL
-   COMMITMENT" block as the first thing future sessions read. Five
-   operational rules: C1 first, hardening continues / features
-   pause, wire formats forward-compatible, retrofit→migration
-   reframing, partial settlement of strategic decisions.
-2. **§1 vNext commitment paragraph.** Added at end. Cross-references
-   §8 execution plan and §6 reordered priorities.
-3. **§6 reordered.** Bucket C reframed as "vNext migration milestones
-   (THE binding roadmap)." C1–C12 indexed for cross-reference with
-   §8's execution plan. Parallel-vs-sequential decision table added
-   ("hardening continues; features pause").
-4. **§7 reframed.** From "neutral architectural critique" to
-   "diagnosis justifying the vNext commitment." New necessity-
-   argument framing.
-5. **§8 fully rewritten.** From "sketch" to "committed substrate."
-   Necessity argument with structural-commitment-to-§9-demand
-   mapping table. 14-layer architecture preserved. New subsections:
-   `Design surface remaining (non-commitments within commitment)`,
-   `Costs accepted`, `Binding execution plan` (Phases 0–5 with
-   month estimates), `Migration mechanics` (wire-format compat,
-   dual-stack, sunset criteria), `Parallel-vs-sequential decision`.
-6. **§10 reframed.** Phases 4–9 are now built on vNext substrate,
-   not v1.
-7. **§12 noted.** Decentralization portfolio applies to vNext
-   subsystems; v1-and-v2 subsystems keep positioning across
-   migration.
-8. **§13 partial settlement.** Tokenomics, privacy default,
-   cryptographic primitives, Foundation entity now committed at the
-   architectural level; specifics open.
-9. **§16 commitment-protection entries.** New don't-do block
-   protecting the commitment from incrementalism / quiet retrofit /
-   misframing.
-
-**Tradeoffs accepted (Session 17 surface area):**
-- 18–36 months to vNext production-shaped (binding execution plan
-  §8).
-- Python+Go velocity loss to Rust core.
-- TEE hardware requirements at high-trust tiers.
-- Multi-token regulatory complexity (vs. current's no-token
-  simplicity).
-- Three-layer settlement complexity (vs. bilateral-only).
-- Phase 4–9 v1 feature work paused for migration duration.
-
-**What was deliberately NOT changed:**
-- §2 (commands), §3 (trip-wires), §4 (architecture map), §5
-  sessions 8.5–16 narratives, §14 (conventions), §15 (ritual),
-  §11 (production infrastructure costs). All operational; survive
-  the commitment unchanged.
-- Sub-layer choices in §8 (specific PQ algorithm, zk-proof system,
-  differential-dataflow engine, voting mechanism, etc.) — these
-  are explicit non-commitments within the commitment.
-- §9 (maximalist vision). It IS the strategic frame justifying the
-  commitment; not weakened by the commitment becoming concrete.
-
-**Open user-owned decisions surfaced by the commitment:**
-- Foundation jurisdiction selection (Phase 1).
-- Wedge market choice (§13).
-- Cold-start strategy (subsidy / partnership / killer app).
-- Tokenomics distribution specifics (in collaboration with counsel).
-- Team / funding plan to support 18–36 month timeline.
-
-**Trip-wire surfaced this session:** session-narrative entries in §5
-are now load-bearing not just for "what code shipped" but also for
-"what strategic decisions are binding." Future strategic-decision
-sessions (e.g., a future "user decided to alter the commitment"
-session) need to also produce a §5 narrative entry so the doc-history
-trail stays grounded.
-
-### 5-pre-4. Session 16 — #21f follow-ups (A1 + A2)
-
-Closes the two acknowledged trip-wires from Session 15's #21f
-closeout. A1: bound DHT-level cert TTL by the cert's own validity.
-A2: recursive Tier-3 verification of validator pubkeys with trusted
-bootstrap base case.
-
-**Test count after Session 16:** 457 Python fast slice + 1 skipped +
-19 heavy integration (unchanged). Go suite gained 14: 3 dht-level
-tests for A1 (`TestPublishAttestationRejectsNearExpired`,
-`TestPublishAttestationRejectsAlreadyExpired`,
-`TestValidatorRejectsExpiredAttestationRecord`); 11 capability-level
-tests for A2 in `recursive_test.go`. Two existing tests adjusted:
-`TestAttestationPublishAndFetch` and `TestFindAgentsAdmitsTier3WithValidCert`
-now use 48h cert lifetime instead of 24h (was below new floor).
-`tests/test_netd_client.py::test_capability_attestation_dht_round_trip`
-similarly bumped to 48h.
-
-#### A1 — DHT TTL bounding on PublishAttestation
-
-**The problem.** Session 15's CLAUDE.md flagged: `PublishAttestation`
-publishes the cert with whatever DHT-level TTL `kad.PutValue`
-defaults to (libp2p kaddht doesn't expose per-record TTL cleanly).
-A near-expired cert published now lingers in the DHT past its own
-validity. Mitigated consumer-side by (a) `VerifyAttestation`
-re-checking `expires_at_ns`, (b) the verifier's 1h slack window —
-but the publish side was still permissive.
-
-**Fix shape.** Layered defense:
-
-1. **Publish-side floor:** `MinPublishAttestationLifetime = 24h`.
-   `PublishAttestation` rejects certs with `expires_at_ns - now <
-   24h`. Defended in code (`dht.go`).
-2. **Validator-side expiry rejection:** `gyzaValidator.Validate`
-   rejects AttestationCert records whose `expires_at_ns +
-   AttestationExpiryGrace` is past now. 5-minute grace tolerates
-   peer clock skew. Runs at PutValue (storage refusal) AND on
-   incoming GetValue responses (fetch-side rejection).
-
-The asymmetry between the 24h publish floor and the
-near-zero-tolerance validator rejection is intentional: publish-time
-we know the cert; we can refuse to clutter the DHT with something
-that'll expire in <24h. Fetch-time we MUST be more permissive
-because the peer that stored the cert may have observed it as
-valid; we only reject things definitively past expiry plus grace.
-
-**Trip-wire (incorporated into §3, §16).** Tests built with `48h`
-cert lifetime by convention going forward. 24h boundary fails the
-publish-side floor (sits exactly on the line). The two pre-Session-16
-tests using 24h were updated; future tests should default to 48h.
-
-#### A2 — Recursive Tier-3 verification of validator pubkeys
-
-**The problem.** Session 11's CLAUDE.md note flagged: standard
-`VerifyAttestation` accepts a cert if ≥ MinCoSignatures distinct
-pubkeys have valid Ed25519 signatures over the canonical body. It
-does NOT check that those pubkeys are themselves Tier-3 attested.
-A Sybil controlling N keys can mint a cert that passes
-VerifyAttestation by having the keys cosign each other.
-
-**Fix shape.** Pure-logic library:
-`netd/internal/capability/recursive.go::RecursiveVerifier`. Plus 11
-unit tests in `recursive_test.go`. Algorithm:
-
-1. Standard well-formedness + freshness + tier checks on the cert.
-2. For each cosig:
-   - Verify Ed25519 signature over canonical body.
-   - Then ALSO verify the signing validator's pubkey is Tier-3:
-     - **Base case 1:** pubkey in `TrustedBootstrap` set → accept.
-     - **Recursive case:** fetch the validator's own cert; recurse
-       on it with depth+1 and seen+pubkey.
-3. Count cosigs whose signer is Tier-3-verified. ≥ MinCoSignatures
-   → accept.
-
-Three guards on the recursion:
-
-- **Trusted bootstrap set** (caller-configured set of hex pubkeys
-  known Tier-3 out of band — Foundation-blessed initial validators).
-  Required non-empty; empty bootstrap → all certs rejected (no base
-  case).
-- **Cycle detection** via path-tracking `seen` set. Without this, A
-  signed by B and B signed by A would form a mutually-validating
-  clique no bootstrap member ever vouched for. With it, recursion
-  rejects the second visit.
-- **Depth bound** (`DefaultRecursiveMaxDepth = 5`). Hard cap on
-  recursive cert fetches. Protects against pathological chains
-  crafted by a malicious peer.
-
-**Cache:** positive only. A `pubkey → true` cache amortizes repeated
-visits within one Verifier instance. Negatives are NOT cached —
-fetch errors can be transient; validators may become Tier-3 between
-calls; sticky-negative caching would sticky-hide them. The cost:
-non-Tier-3 pubkeys get re-fetched on each top-level Verify, bounded
-by the cosig count of the queried cert (≤ a few per call).
-
-**Substitution defense.** Fetched cert MUST have
-`ApplicantPubkey == queriedPubkey`. Otherwise a malicious DHT peer
-could substitute someone else's (legitimate Tier-3) cert in response
-to a fetch for a non-Tier-3 pubkey. Test: `TestRecursive_WrongPubkeyOnFetchedCert`.
-
-**Integration with Session 15 verify-on-fetch:** deferred to a
-follow-up session. The `DHTAttestationVerifier.Verify` in
-`dht/verifier.go` today calls `capability.VerifyAttestation`;
-swapping to `capability.RecursiveVerifier.Verify` is mechanical once
-the Foundation publishes a trusted bootstrap set. The two verifiers'
-caches are independent — the recursive one caches per-validator-
-pubkey-as-Tier-3 (within a single recursive call), the verify-on-
-fetch one caches per-applicant-cert (across find_agents calls).
-
-**Trip-wires (incorporated into §3, §16):**
-
-- Empty bootstrap rejects all certs. Configuring the bootstrap set
-  is required before this verifier is useful — there's no
-  fall-back-to-standard-verification mode.
-- Recursion fetches per non-bootstrap pubkey. Each find_agents
-  candidate at Tier-3 may transitively trigger many fetches if the
-  cosig chains are deep. Bound by MaxDepth × cosig count.
-- The recursive verifier rejects a cert where ANY cosig validator's
-  identity-cert substitutes someone else's pubkey on fetch — defensive
-  against DHT-peer mischief.
-
-#### What's left after Session 16
-
-The #21 cluster is now genuinely closed end-to-end including
-follow-ups. Remaining work moves up to the §6 Bucket B
-(deployment-readiness) and Bucket C (structural directions). The
-single highest-leverage next investment per §6 C1 is the TLA+ formal
-protocol specification.
-
-
-
-Closes #21. Sessions 11–14 made it possible to *earn* and *publish*
-a Tier-3 cert; until this session, consumers still trusted the
-self-reported `attestation_tier` field on incoming advertisements.
-Session 15 makes the daemon resolve `min_tier=3` queries against
-the underlying cert: every candidate ad's compositor_pubkey is run
-through an `AttestationVerifier` that fetches the cert from
-`/gyza/attestations/{pubkey}`, runs the existing
-`capability.VerifyAttestation`, and drops the ad if anything goes
-wrong (no cert, expired cert, near-expiry cert, validator-signature
-failure, fetch timeout).
-
-**Test count after Session 15:** 457 Python fast slice + 1 skipped
-+ 19 heavy integration. Go suite gained 13: 10 verifier unit tests
-+ 3 FindAgents integration tests, plus an updated
-`TestFindFiltersByTier` with `alwaysTrueVerifier` stub.
-
-**Verifier cache semantics (load-bearing — see also §16):**
-
-| Outcome                            | Cached?       | TTL                                          |
-| ---------------------------------- | ------------- | -------------------------------------------- |
-| Valid cert                         | yes, positive | `min(posTTL=5m, cert.expires_at - slack - now)` |
-| Cert missing (NotFound)            | yes, negative | `negTTL = 30s`                                |
-| Cert verify fails (sig/expired)    | yes, negative | `negTTL = 30s`                                |
-| Cert in slack-window (near-expiry) | yes, negative | `negTTL = 30s`                                |
-| Fetch errored (DHT network)        | NO            | —                                             |
-| Fetch timed out (`fetchTimeout`)   | NO            | —                                             |
-| Empty pubkey input                 | NO            | — (rejected immediately)                      |
-
-Asymmetry is load-bearing: stable Sybil → cached (no DHT hammer);
-transient failure → uncached (no sticky-hidden honest ad).
-
-**Near-expiry slack window:** Verifier rejects certs whose
-remaining lifetime is shorter than `expirySlack = 1h`. Mitigates the
-acknowledged open trip-wire about `PublishAttestation` not bounding
-DHT record TTL by `cert.expires_at_ns`.
-
-**Concurrency controls:** Single-flight per pubkey
-(`map[string]*inflightCall`) + bounded global concurrency
-(`MaxInflight = 16` semaphore) + per-fetch deadline (250ms).
-
-**Daemon flag added:** `--dht-mode auto|server|client`. Necessary
-because `ModeAuto` stays in Client mode on loopback meshes (AutoNAT
-can't promote). Python `start_daemon(dht_mode="server")` plumbs
-this through. Multi-daemon integration tests MUST set it.
-
-**Trip-wires surfaced (incorporated into §3 and §16):**
-- `kaddht.ModeAuto` on loopback never promotes → cross-daemon DHT
-  publishes silently fail.
-- Verifier keys by `CompositorPubkey`, not `AgentPubkey` — multiple
-  agents share one compositor and one cert.
-- Transient failures must NOT cache; positive + definitive negative
-  ARE cached. The asymmetry is the design.
-- `TestFindFiltersByTier` was silently vacuously true post-Session
-  15; fixed with `alwaysTrueVerifier` stub + positive assertion.
-
-**What's left:** #21 closed end-to-end. Two #21-adjacent open
-follow-ups (non-blocking, see §6): publish-side DHT TTL bounding;
-recursive Tier-3 validator verification.
-
-### 5-pre-2. Session 14 — Tier-3 quorum attestation + DHT publication (#21d + #21e)
-
-Closes the algorithmic core of the #21 cluster — multi-validator
-orchestrator + DHT publication path, plus a load-bearing
-canonicalization fix.
-
-**The load-bearing canonicalization fix (Phase A).** Go validator's
-`VerifyResponse` had been authoring its own `AttestationBody` per
-call with wall-clock `IssuedAtNs`. Two validators within ms of each
-other produced different body bytes → cosigs couldn't aggregate.
-`AssembleAttestation`'s docstring claimed validators echoed
-identical bodies; the code didn't.
-
-Fix: applicant proposes one body; every validator verifies
-plausibility and signs the proposed bytes. Added
-`AttestationBody proposed_attestation_body = 3;` to
-`ChallengeResponse` (additive). `verifyProposedAttestationBody`
-plausibility checks defend six attack vectors: applicant_pubkey
-mismatch, wrong tier, clock skew >1h, lifetime >90d, already-expired,
-challenge_task_ids mismatch.
-
-**Phase B — `request_tier3_attestation` orchestrator.** Lives in
-`gyza/network/attestation_adapter.py`. Validator selection via
-`find_agents(min_tier=3, k=candidate_n*4)` OR explicit peer IDs.
-Drives one `applicant_eval_session` across multiple validators
-(shared body). Per-validator failures soft; orchestrator continues
-until quorum_k cosigs or pool exhausted. Early-exit on quorum.
-Validator-pubkey dedup matches Go's `VerifyAttestation`.
-
-**Phase C — DHT publication + CLI.** `gyza global attest --tier 3`
-ties discovery → orchestration → DHT publication. Writes cert to
-`~/.gyza/attestations/cert-<pubkey16>.json`. Daemon
-`PublishAttestation` self-verifies before publishing.
-
-**Open trip-wire (now mitigated by Session 15):** DHT record TTL
-not bounded by `cert.expires_at_ns`. Consumer-side verifier slack
-window handles the routing-horizon part; publish-side fix is
-non-blocking.
-
-### 5-pre. Session 13 — Python applicant adapter (#21-bridge)
-
-Python-initiated bidirectional streaming gRPC on
-`CapabilityService.RequestAttestation`. Python sends
-`AttestationStartRequest{target_peer_id}` first; daemon ferries
-Challenge from libp2p over the gRPC stream; Python's eval session
-runs the suite; daemon ferries ChallengeResponse back over libp2p;
-emits final Outcome to Python. Three frames each direction,
-mirroring the libp2p protocol.
-
-**Rejected: "daemon dials Python".** Inverts the gRPC client/server
-direction; forces Python to expose a server endpoint; multiplexes
-callbacks across registered Python clients; stalls daemon's libp2p
-read on slow synchronous callback. Python-initiated bidi keeps
-per-stream isolation, HTTP/2 backpressure, multi-tenant routing,
-graceful failure surfaces.
-
-**Validator-side relaxation:** `verifyTaskResult` no longer requires
-`agent_pubkey == applicant_pubkey`. ICP envelopes are signed by
-AGENT keys (HKDF-derived from compositor seed); response body
-signed by COMPOSITOR. Agent↔compositor binding via capability
-manifest is a documented follow-up.
-
-**Python API:**
-```python
-with applicant_eval_session(compositor) as eval_cb:
-    with CapabilityClient(socket_path) as cap:
-        success, cosig, err = cap.request_attestation(
-            target_peer_id=validator_peer_id,
-            eval_callback=eval_cb,
-            timeout_s=120.0,
-        )
-```
-
-**Tests:** 4 Go unit tests in `server_test.go`, 2 Python integration
-tests in `test_attestation_bridge.py`.
-
-### 5a. Session 12 — libp2p stream protocol (#21c)
-
-Wire layer for cross-network attestation. New package
-`netd/internal/capability_stream/`. Protocol handler at
-`/gyza/capability-challenge/1.0.0`. 5 Go tests.
-
-**Architectural decision settled.** Session 11's Python
-`capability_protocol.py` used JSON-canonicalized signatures. The
-existing Go `capability/` package used
-`proto.MarshalOptions{Deterministic: true}`. Different bytes →
-non-aggregatable cosigs.
-
-**Decision:** Go protobuf + deterministic marshal IS the canonical
-wire format for cross-network. Python's JSON path stays for
-in-process Tier-1 only. Python applicant adapters consume Go
-protobuf via Python's protobuf library (byte-identical via
-deterministic marshal flag).
-
-**Wire protocol — 3 frames:**
-```
-→  Validator → Applicant : Challenge          (det-marshal pb.Challenge)
-←  Applicant → Validator : ChallengeResponse  (det-marshal)
-→  Validator → Applicant : VerifyResponseResult
-```
-
-Each frame: `[uvarint_len][marshaled_proto]`. Mirrors
-`/gyza/message/1.0.0`. Validator extracts applicant pubkey from
-libp2p `RemotePeer` (Noise-authenticated). No kickoff frame.
-StreamTimeout = 120s.
-
-### 5b. Session 11 — capability eval + cross-network orchestration
-
-#### #21a — Canonical eval suite + Tier-1 self-attestation
-
-`gyza/capability_eval.py` + 22 tests. Six structurally-verifiable
-tasks: count_py_files, list_extensions, first_line_of_data,
-filename_lengths, sum_numbers, echo_nonce. Each carries `setup`,
-`prompt_body`, `expected_output(workdir, nonce)`, `output_keys`,
-`timeout_s`.
-
-**Replay defenses:** Each prompt embeds `[GYZA_EVAL_TASK={id}
-NONCE={nonce}]`. Mock executor uses `prompt.rfind("[GYZA_EVAL_TASK=")`
-— NOT `find` — because `build_enriched_prompt` prepends few-shot
-context with prior tasks' markers verbatim. Scanning from start
-silently solves the wrong task.
-
-**`run_eval_locally`:** Posts intent + work item per task, captures
-outputs via `make_recording_executor`. Per-task `workdir/<task_id>/`
-isolation. `ttl_ns = (timeout_s + 30) * 1e9` (zero TTL
-immediately-expires via `get_unclaimed`'s filter).
-
-**`gyza global attest --tier 1`:** Builds ephemeral runner under
-user's compositor; runs suite; verifies; writes signed JSON to
-`~/.gyza/attestations/self-<nonce>.json`.
-
-#### #21b — Cross-network orchestration (in-process)
-
-`gyza/network/capability_protocol.py` + 15 tests. Wire types
-JSON-serializable. `Validator`, `Applicant`, `run_attestation`
-orchestrator, consumer-side `verify_attestation_cert`. libp2p
-stream deferred to Session 12.
-
-**Threat model defended:**
-- Replay across validators (validator-chosen nonce)
-- Eval result tampering (eval verifier)
-- Cosignature transplant (each cosig binds validator_pubkey + body)
-- Applicant signature forgery (verified per Validator)
-- Stale cert acceptance (verify_attestation_cert checks expires_at)
-- Duplicate-cosig padding (verifier dedups by validator_pubkey)
-- 1 malicious validator (2-of-3 quorum)
-
-**Not defended at this layer:**
-- Sybil applicant + Sybil validators (needs DHT-driven random
-  selection; orchestrator concern)
-- >k/n malicious Tier-3 validators (fundamental quorum limit)
-- Validator that's not actually Tier-3 (consumer-side verifier
-  should pair with DHT lookup confirming validator_pubkey is itself
-  Tier-3 attested — see §6)
-
-### 5c. Session 10 — peer cache, daemon supervisor, executor sandbox
-
-**#24 — Peer cache + supervisor.** `gyza/network/peer_cache.py` +
-`daemon_supervisor.py` + 30 tests.
-
-PeerCache: JSON at `~/.gyza/peers.json`, atomic write via tempfile +
-os.replace. Stores `(pubkey, multiaddr, last_seen_ns)`.
-`attempt_reconnect_all` tries newest-multiaddr-first.
-
-DaemonSupervisor: 5s heartbeat poll on `netd.is_running()`. After 3
-consecutive failures, kill + respawn with backoff
-`1,2,4,8,16,32,60s`. Single `NetdClient` reused across respawns
-(gRPC autoreconnects). `set_on_respawn(cb)` for GlobalCluster
-recovery hooks.
-
-GlobalCluster: `peer_cache` + `supervisor` kwargs. `start()` calls
-`attempt_reconnect_all` before flipping `is_started=True`. CLI:
-`gyza global start --supervised`.
-
-**#22 — Executor sandbox.** `gyza/sandbox/` + 18 tests.
-SandboxConfig (FS allowlist, network flag, RLIMIT_AS, RLIMIT_CPU,
-wall-clock timeout). `_system_mounts()` introspects sys.prefix /
-sysconfig.get_paths(). Distinguishes bind from symlink (merged-/usr
-trip-wire: `/lib64` is a symlink; binding it as `--ro-bind` breaks
-the dynamic linker).
-
-`_entrypoint.py`: runs INSIDE sandbox; reads 8-byte-bigendian
-length-prefixed JSON from stdin (essential — sentence-transformers
-writes a load report to stdout on first import).
-
-bwrap argv ordering: system mounts → /proc /dev → **/tmp tmpfs** →
-user ro_paths → workspace. tmpfs-before-ro_paths means a tmp-rooted
-ro_path lands on top of tmpfs.
-
-Threat model: defends path traversal, FS persistence, network
-exfiltration (fresh net namespace default), resource exhaustion,
-env leakage (--clearenv default).
-
-**Production wiring NOT yet done.** Default executor in demo/tests
-still unsandboxed. Switching needs bwrap-startup-time validation.
-
-### 5d. Session 9 — observability + reconciliation
-
-**#26 — Prometheus + structlog.** `gyza/observability.py` + 10
-tests. 5 counters, 2 histograms, 4 gauges via default
-`prometheus_client` registry. `start_metrics_server(port=9100,
-addr="127.0.0.1")`. Default bind loopback — external scraping needs
-explicit `addr="0.0.0.0"`.
-
-Wire points (each counter/histogram incremented at exactly ONE
-site):
-- `runner.py`: `gyza_agent_completions_total{outcome}` +
-  `gyza_claim_to_complete_latency_seconds`
-- `economy/settlement.py`: `gyza_settlements_total{role}` +
-  `gyza_disputes_total{reason}` + `gyza_settlement_latency_seconds`
-- `network/network_blackboard.py`: `gyza_gossip_deltas_total{direction}`
-- `supervisor.py`: `gyza_supervisor_spawns_total` + `gyza_roster_size`
-- `network/global_cluster.py`: `gyza_dht_peer_count` +
-  `gyza_connected_peers` + `gyza_ledger_net_credits`
-
-**Settlement latency carrier:** `record_settlement_start(entry_id,
-t)` + `observe_settlement_latency(entry_id, t)`. Map purges on
-observation; leak on never-round-tripping entries.
-
-**#25 — Bilateral ledger reconciliation RPC.**
-`gyza/economy/settlement.py` + 14 tests. Two MessageBus types
-`ledger.reconcile.request`/`.response`.
-
-Lex-cursor pagination: `(since_timestamp_ns, since_entry_id)` →
-`(created_at_ns, entry_id) > tuple`. Single-ns cursor would skip
-entries sharing `created_at_ns`. The lex tiebreaker is essential.
-
-Threat-model defenses:
-- For-peer guard (drops cross-peer probes)
-- Cross-peer injection guard (response.from_compositor matches
-  pending request's peer)
-- Page cap (max_pages=50; bounds peer-induced infinite loops)
-- Server-side max page size (2000)
-
-Reputation policy:
-- `disputed` → `record_dispute(peer)` per entry
-- `missing_theirs`, `missing_ours` → NO reputation change (could
-  be benign pruning / gossip lag / unsettled entries)
-
-### 5e. Session 8.5 — five priority gaps closed
-
-**#19 — Real semantic embeddings.** `gyza/embeddings.py` + 18
-tests. SentenceTransformer (all-MiniLM-L6-v2, 384-dim) + StubEmbedder
-(BLAKE3-seeded random). EMBEDDING_DIM=384 hard-coded; changing
-invalidates entire global state.
-
-**#20 — Runtime ICP chain verification.** `icp_envelopes` table on
-blackboard. Runner persists every signed envelope (`_complete()`);
-verifies ancestor chain via `verify_chain` before claiming
-(`_run_loop()`). Flags: `verify_chain_before_claim=True`,
-`strict_chain_verification=False` (missing → reject if strict,
-warn-and-proceed otherwise).
-
-**#23 — Self-organization spawn loop.** `gyza/supervisor.py` + 9
-tests. `AgentSupervisor` polls `DemandOracle.all_signals()`, spawns
-via user-provided factory when hot bucket has no serving agent.
-`max_agents` cap; fails soft on factory exceptions.
-
-**#27 — HLC thread-safety + cross-cluster ratchet.** HLC `now()`/
-`recv()` mutex-guarded. Runner accepts `hlc=` kwarg; in cluster
-mode callers pass `gc.shared_hlc()`. Demo wires this in.
-
-**#28 — Reputation feedback loop.** `gyza/economy/reputation.py` +
-16 tests. EWMA-based, SQLite-persisted. Success +1, failure -0.5,
-dispute -1. Wired into runner._complete/_release and
-settlement at every protocol-level rejection point.
+## 5. Session history  *[updated S26]*
+
+Per-session narratives moved to [`CHANGELOG.md`](CHANGELOG.md).
+This section is the index.
+
+**Newest first. Click into `CHANGELOG.md` for full detail.**
+
+- **Session 26** — CLAUDE.md restructure + CHANGELOG split.
+- **Sessions 23–25** — Rust Stream 3 sweep: `verify_chain` +
+  `gyza-core` + `gyza-blackboard`. 51 Rust tests across 5 crates.
+- **Session 22** — `gyza-icp` port with canonical-JSON byte parity.
+- **Session 21** — Phase 0 Stream 3 kickoff. `gyza-rs/` workspace
+  + first 2 crates (`gyza-crypto`, `gyza-identity`).
+- **Session 20** — ADR log scaffolded (15 retroactive ADRs) + CI
+  workflows shipped.
+- **Session 19** — first §C1 sub-spec: `Settlement.tla` + TLC
+  validation.
+- **Session 18** — pre-spec artifacts (`docs/invariants.md`,
+  `docs/state-machines.md`, `docs/wire-protocol.md`).
+- **Session 17** — vNext architectural commitment + CLAUDE.md
+  restructure (Session 17 ADR-0015).
+- **Session 16** — #21f follow-ups: A1 (DHT TTL bounding) + A2
+  (RecursiveVerifier).
+- **Session 15** — verify-on-fetch in `find_agents` (#21f).
+- **Session 14** — Tier-3 quorum attestation + DHT publication
+  (#21d + #21e).
+- **Session 13** — Python applicant adapter (#21-bridge).
+- **Session 12** — libp2p capability-challenge stream protocol
+  (#21c).
+- **Session 11** — capability eval suite + cross-network
+  orchestration (#21a + #21b).
+- **Session 10** — peer cache + daemon supervisor + executor
+  sandbox (#22 + #24).
+- **Session 9** — observability + reconciliation (#25 + #26).
+- **Session 8.5** — five priority gaps closed (#19, #20, #23,
+  #27, #28).
+- **Earlier sessions** — Phase 1 (single-node) + Phase 2 (LAN
+  cluster). Foundational modules. See ADRs 0001–0007.
 
 ---
 
-## 6. Open priorities — what's next
+## 6. Open priorities  *[updated S26]*
 
 The #21 cluster (proof-of-capability sybil resistance) is closed
-end-to-end. Remaining work falls in three buckets:
+end-to-end. Current state of remaining work:
 
-### Bucket A: closeout of acknowledged open trip-wires (mechanical)
+### Bucket A: closeout of acknowledged trip-wires (mechanical)
 
-**A1. DHT TTL bounding on `PublishAttestation` — CLOSED (Session 16).**
-See §5-pre-4. `MinPublishAttestationLifetime = 24h` floor +
-validator-side rejection past `ExpiresAtNs + AttestationExpiryGrace`
-at both PutValue/GetValue + Session 15's 1h consumer-side slack
-window form a three-layer defense.
-
-**A2. Recursive Tier-3 verification of validator pubkeys — CLOSED
-(Session 16, library only; integration deferred).** See §5-pre-4.
-`capability.RecursiveVerifier` ships as pure logic with trusted
-bootstrap base case, cycle detection, depth bound, positive cache,
-substitution defense. 11 unit tests. Wiring into
-`DHTAttestationVerifier.Verify` is the follow-up that activates this
-in the routing hot path; requires a configured bootstrap set
-(deployment-side concern — see Bucket B).
-
-**A3. Production wiring of sandboxed executor.** Session 10 built
-the bwrap primitive; the demo/tests still use unsandboxed
-executors. Switching breaks the integration demo's timing unless
-bwrap-startup-time is validated. Worth doing before any executor
-acquires non-trivial tool-use capabilities.
-
-**A4. `make proto-py` Python path fix.** Parametrize via
-`$(PYTHON)` with sensible default. Symptomatic of broader
-packaging debt (B2).
-
-**A5. Wire `RecursiveVerifier` into verify-on-fetch.** Session 16
-shipped the library; integration into `dht.DHTAttestationVerifier`
-is the next mechanical step. Blocked on: trusted bootstrap set
-config (which is a deployment decision — first Foundation-blessed
-validator list).
-
-**A6. Attestation cert republish loop.** No equivalent of
-`StartRepublishLoop` for attestation certs today; certs get
-re-published only on manual `gyza global attest --tier 3` invocation
-or daemon restart. With Session 16's 24h publish floor, certs that
-were valid at publish but aged past their DHT-level TTL aren't
-auto-renewed. Fix shape: republish loop with the lifetime check
-short-circuiting near-expired certs. Non-blocking; certs stay valid
-30d by default.
+- ~~**A1. DHT TTL bounding on `PublishAttestation`**~~ — CLOSED S16.
+- ~~**A2. Recursive Tier-3 verification (library)**~~ — CLOSED S16.
+- **A3. Production wiring of sandboxed executor.** Session 10
+  built the bwrap primitive; demo/tests still use unsandboxed
+  executors. Switching breaks demo timing unless bwrap-startup
+  validated. Worth doing before any executor acquires non-trivial
+  tool-use capabilities.
+- **A4. `make proto-py` Python path fix.** Parametrize via
+  `$(PYTHON)`. Symptomatic of broader packaging debt (B2).
+- **A5. Wire `RecursiveVerifier` into verify-on-fetch.** Library
+  shipped (S16); integration into `DHTAttestationVerifier` is the
+  follow-up. Blocked on trusted bootstrap set config (deployment).
+- **A6. Attestation cert republish loop.** No equivalent of
+  `StartRepublishLoop` for certs. Non-blocking; certs valid 30d
+  by default.
 
 ### Bucket B: deployment-readiness blockers (operational)
 
-**B1. Bootstrap nodes.** `DefaultBootstrapPeers = []string{}` is
-the single biggest deployment blocker. Cross-internet operation
-literally doesn't work without explicit `--bootstrap`. Fix shape:
-DNS-anchored bootstrap via `gyza.network` resolving to
-Foundation-operated peers; hardcoded fallback pubkey-pinned
-multiaddrs for DNS-poison recovery. **Requires the user to
-provision infrastructure** (see §11).
-
-**B2. Packaging.** No `pyproject.toml`, no installable distribution,
-hardcoded `~/dev/marshal/.os/bin/python` path. No `pip install
-gyza`. No signed binaries for macOS/Windows. Fix shape: proper
-Python packaging + Rust-rewrite-or-CGo-distribution-pipeline for
-the daemon.
-
-**B3. CI/CD — CLOSED (Session 20).** GitHub Actions workflows
-shipped at `.github/workflows/ci.yml` (fast slice + Go + TLC on
-push/PR) and `.github/workflows/integration.yml` (heavy
-integration + demo nightly + on-touch). Caching for pip + HF
-models. Concurrency block cancels stale runs. See §5-pre-8 for
-design rationale.
-
-**B4. Code signing.** Apple Developer ID, Windows code-signing
-cert. **Requires user purchase** (see §11).
+- **B1. Bootstrap nodes.** `DefaultBootstrapPeers = []string{}`.
+  Single biggest deployment blocker. Daemon-side code (DNS
+  resolution, hardcoded fallback peers) is codeable; VPS hosting +
+  DNS domain is user-owned (§11).
+- **B2. Packaging.** No `pyproject.toml`, no installable
+  distribution, hardcoded marshal path. No signed binaries for
+  macOS/Windows. Fix shape: Python packaging + Rust-driven
+  distribution pipeline.
+- ~~**B3. CI/CD**~~ — CLOSED S20.
+- **B4. Code signing.** Apple Developer ID + Windows code-signing
+  cert. **User purchase** required (§11).
 
 ### Bucket C: vNext migration milestones (THE binding roadmap)
 
-Under the vNext commitment, the items below are no longer "structural
-directions" the user might choose between — they are the migration
-milestones, ordered. Each is necessary; the order is the order of
-work.
+Under the vNext commitment, these are the migration milestones,
+ordered. Each is necessary; the order is the order of work.
 
-**C1. Formal protocol specification of v1 (TLA+) — IN PROGRESS.**
-Behavioral spec of the wire protocol AS IT EXISTS TODAY. All
-invariants named: settlement conservation, attestation validity,
-chain verification, gossip eventual consistency. Catches the class
-of bugs that Sessions 11–14 patched after the fact (canonicalization
-gap, plausibility-check matrix, ordering invariants). Required
-because every downstream vNext layer depends on a verified spec of
-what v1 actually does. **Do not start vNext layer-2+ work without
-this.**
+- **C1. TLA+ formal spec of v1 — IN PROGRESS.** 1 of 6 sub-specs
+  shipped (Settlement.tla, S19). Inputs from Session 18 docs.
+  Remaining: Reconciliation, Attestation, Blackboard, DHT, Gossip.
+- **C2. Coq/Lean proofs of v1 invariants** — not started (luxury;
+  defer per Session 19 audit).
+- **C3. Foundation entity + tokenomics design** — **user-owned**
+  (§11). Parallel to C1+C2 timing.
+- **C4. Rust reference implementation — IN PROGRESS.** Started
+  S21; 5/8+ crates done by S25. Next: `gyza-settlement`.
+- **C5. Hybrid PQ + threshold signatures** — not started; waits
+  for NIST PQC standardization.
+- **C6. Typed capability framework + linear types** — not started.
+- **C7. Distributed-log + differential-dataflow substrate** — not
+  started (THE biggest architectural divergence).
+- **C8. Three-layer settlement** — not started.
+- **C9. Encrypted-by-default privacy** — not started.
+- **C10. Universal sandboxing + capability bounds** — not started.
+- **C11. Substrate diversity** — not started.
+- **C12. Foundation→DAO governance transition** — not started.
 
-**Inputs for C1 (produced in Session 18):**
-- `docs/invariants.md` — ~120 invariants by stable ID (`INV-X-N`).
-  TLA+ modules translate these into formal predicates.
-- `docs/state-machines.md` — box-and-arrow state machines for 10
-  components. TLA+ modules formalize as `Next` relations.
-- `docs/wire-protocol.md` — every wire-visible format. TLA+ spec
-  uses as the lexicon of "what's on the wire."
+C1–C12 are §8's execution plan; §10 phases ride on top of C4–C12.
 
-**Progress:**
+### What I (Claude) would do next, ranked by leverage
 
-| Sub-spec | Status | Session |
-|---|---|---|
-| `spec/Settlement.tla` (bilateral, ex-reconciliation) | ✓ Shipped + TLC-validated | 19 |
-| `spec/Reconciliation.tla` (INV-SETTLE-8..11) | ◯ Queued | — |
-| `spec/Attestation.tla` (INV-ATT-*) | ◯ Queued | — |
-| `spec/Blackboard.tla` (INV-BB-*, INV-ICP-*, INV-RUN-*) | ◯ Queued | — |
-| `spec/DHT.tla` (INV-DHT-*) | ◯ Queued | — |
-| `spec/Gossip.tla` (INV-GOSS-*) | ◯ Queued | — |
+Given the user is not unblocking the user-owned items right now,
+the highest-leverage codeable next moves are:
 
-**Recommended order for remaining sub-specs:** Reconciliation first
-(continuation of settlement, the most natural follow-up).
-Attestation next (single applicant, many validators, canonical
-bytes — well-bounded). Blackboard/gossip last (most cross-component
-coupling).
+1. **`gyza-settlement` Rust port** — closes the §C1 ↔ §C4 pairing
+   (Settlement.tla → Rust implementation derived from spec). 1–2
+   sessions.
+2. **Next TLA+ sub-spec: Reconciliation** — natural follow-up to
+   Settlement.tla. 1 session.
+3. **DNS-anchored bootstrap code in daemon (B1 partial)** —
+   daemon-side resolution + fallback hardcoded peers. User still
+   needs VPSes + DNS. ~1 session.
+4. **`gyza-blackboard` artifacts table** — completes the v1↔v2
+   schema compat story. ~0.5 sessions.
+5. **Packaging cleanup (B2 partial)** — `pyproject.toml`,
+   `make proto-py` fix. ~1 session.
 
-**C2. Coq or Lean proofs of v1 invariants.** Settlement conservation,
-sybil resistance threshold under stated assumptions, eventual
-consistency under partition, capability non-forgeability. ~3 months
-after C1.
+### Parallel-vs-sequential rule (Session 17)
 
-**C3. Foundation entity + tokenomics design.** User-owned strategic
-decisions. Tokenomics design with adversarial simulation + regulatory
-counsel. Parallel to C1+C2 timing. See §13.
+While Phase 0 (C1+C4) runs:
 
-**C4. vNext substrate prototype (Rust core) — IN PROGRESS.**
-TLA+-derived Rust implementation of v1 protocol. Validates the spec
-is implementable, catches spec errors, produces the reference
-implementation for v2. **Started Session 21:** `gyza-rs/` Cargo
-workspace + `gyza-crypto` (Ed25519/BLAKE3/key derivation) +
-`gyza-identity` (compositor + agent) crates ported with byte-for-
-byte Python parity. Next: `gyza-icp` (canonical-JSON envelope
-signing).
-
-**C5. Hybrid post-quantum identity + threshold signatures.** Dilithium
-(or NIST winner) + Ed25519 dual-sign. FROST threshold as default.
-HD key derivation. Integration with W3C VC for attestations. ~1 month
-focused engineering once primitives stabilize.
-
-**C6. Typed capability framework + linear types.** Capabilities as
-typed values with compositional proofs. Linear types for non-
-duplicable credits. Per-domain tiered attestations (Tier-3-medical,
-Tier-3-code, etc.). Replaces v1's untyped LSH-string discovery.
-
-**C7. Distributed-log coordination + differential dataflow.**
-Replaces blackboard. Append-only logs partitioned by intent root +
-CRDT-merged subscribers + typed channels as coordination primitive.
-THE biggest architectural divergence from v1. Validate via
-side-project prototype before committing the full substrate.
-
-**C8. Three-layer settlement (L0 bilateral + L1 multilateral DAG +
-L2 BFT finality).** Multi-dimensional resource pricing. Smart-contract
-language. Integration with token economics.
-
-**C9. Encrypted-by-default privacy.** ECIES per recipient + onion
-routing for metadata + DP telemetry + anonymous credentials.
-
-**C10. Universal sandboxing + capability bounds enforcement.** TEE
-matrix + WASM-with-capabilities + bwrap-fallback. Approval-gates-as-
-types: `Pending<T>` requires human cosig to redeem.
-
-**C11. Substrate diversity.** Substrate-typed capabilities (LLM /
-classical / GPU / neuromorphic / quantum / sensor / actuator).
-Cross-substrate translation agents as market function. Mobile +
-browser + embedded + edge + satellite SDKs.
-
-**C12. Governance transition (Foundation → DAO).** Constitutional
-invariants. Quadratic voting with PoP. Time-locked changes. Foundation
-sunset per service.
-
-C1–C12 are the §8 execution plan, indexed for priority-list cross-
-reference. The §10 phases (4–9) ride on top of C4–C12 — they're
-features built on the vNext substrate, not retrofits to v1.
-
-### Parallel-vs-sequential resolution (Session 17 decision)
-
-While Phase 0 (C1+C2) runs, what happens to ongoing work? **Hardening
-continues; features pause.** Detailed rule:
-
-| Work type | On v1 during migration? | Why |
-|---|---|---|
-| Bug fixes, security patches | YES | Production users depend on v1 working |
-| §6 B-bucket (bootstrap, packaging, CI, code signing) | YES | Serves both v1 production AND v2 launch |
-| §6 A-bucket items that survive migration (A3, A4) | YES, case-by-case | A3 sandboxing is required regardless; A4 packaging fix is trivial; A5/A6 maybe defer to v2 |
-| Phase 4–9 feature work | PAUSE | Rests on architectural primitives v2 replaces; v1 implementations get thrown away |
-| New feature requests | DEFAULT REJECT, surface to user | Likely a Phase 4–9-shaped ask; v2 is the right substrate |
-| Critical regression discovered in v1 production | YES | Production stability has its own time horizon |
-
-Operational rule for future sessions: when asked to add a Phase 4+
-feature on v1, the answer is "this rides on vNext substrate; the
-immediate next step is C1 (TLA+ spec) work, not the feature." Surface
-the trade-off; don't quietly build v1 features that get thrown away.
+| Work type | On v1 during migration? |
+|---|---|
+| Bug fixes, security patches | YES |
+| §6 B-bucket (bootstrap, packaging, code signing) | YES |
+| A-bucket items that survive migration | YES, case-by-case |
+| Phase 4–9 feature work | PAUSE |
+| New feature requests | DEFAULT REJECT, surface to user |
+| Critical regression in v1 production | YES |
 
 ---
 
-## 7. Architectural diagnosis — why vNext is necessary
+## 7. (folded into §8) — necessity argument for vNext
 
-**Under the Session 17 vNext commitment, this section reframes from
-"neutral critique" to "diagnosis justifying the commitment."** The
-content below is the technical case for why the current architecture
-cannot reach the §9 target. Every item is a structural commitment in
-the current codebase that has to be replaced (not retrofitted) to
-support what §9 demands.
-
-This is not an attack on the current architecture — it's a strong
-v1 that makes coherent pragmatic choices for Phase 3 scope. The
-diagnosis is that Phase 3 scope is not §9 scope, and the gap is
-structural, not incremental.
-
-### Suboptimal-but-coherent choices
-
-**Bilateral settlement as the *only* layer.** Bilateral scales
-infinitely in trivial sense but produces O(N²) state, can't express
-N-party transactions, has no global finality. Session 9's
-reconciliation RPC (lex cursors, page caps, request/response
-correlation) is patches around bilateral's awkwardness.
-
-*Better:* Two-layer design — bilateral L0 fast path + multilateral
-DAG clearing L1 (every ~60s, like Lightning Network → Bitcoin).
-Supports N-party, atomic swaps, finality on demand.
-
-**LSH cosine as the *only* discovery primitive.** Works for
-unstructured embedding match. Bad for typed constraints. Phase 6+
-agents (robotics, sensors, financial actuators) don't factor into
-384-dim semantic vectors cleanly.
-
-*Better:* Typed capability negotiation alongside LSH. Structured
-query language (`input_type`, `output_type`, `latency_p99`,
-`jurisdiction`, `attestation`, `hardware_class`, `cost`). Discovery
-as constraint satisfaction.
-
-**Kademlia DHT for high-write state.** Good for read-heavy small-
-write data. Agent advertisements churn (TTL/2 republish every ~15
-min). Bucket-LWW under concurrent publishers loses data — Phase 4
-provider-records migration is acknowledged but not yet started.
-
-*Better:* Provider records (peers advertise themselves; consumers
-fetch ads from listed providers). Hyperswarm-style topic discovery
-as alternative. Custom DHT optimized for high-write workloads.
-
-**Blackboard pattern as the coordination substrate.** Works at
-~10–1000 concurrent participants. At 10⁴–10⁵ becomes hotspot; at 10⁶
-collapses. Phase 3 dodges via cluster partitioning + gossip-deltas
-but the pattern doesn't natively express causality, doesn't handle
-backpressure, has subtle claim-vs-complete races.
-
-*Better:* Distributed append-only logs partitioned by intent_id
-(Kafka-style). Subscribers materialize state from log via CRDTs.
-Causality is the log order. Streaming and batch unified. Scales to
-millions natively.
-
-**Linear ICP envelope chains.** Force O(n) provenance verification.
-Multi-parent operations don't fit. Chain length grows monotonically.
-
-*Better:* Merkle DAG provenance with cryptographic accumulators
-(Merkle Mountain Ranges, KZG commitments, zk-SNARKs at high tiers).
-IPLD-style content-addressed DAGs. Multi-parent natural. Pruning
-clean. Verification compressible.
-
-**Single-dimensional compute credit pricing.** Real workloads
-consume compute + memory + bandwidth + storage + electricity + heat
-+ latency budget. Pricing as single scalar throws away signal.
-
-*Better:* Vector-valued resource pricing. Each resource a separate
-credit. Market-discovered conversion rates between them. Cloud
-providers price this way for good reason.
-
-**Ed25519-only identity.** Susceptible to Shor's algorithm. PQ
-migration estimate ranges 5–20 years. Cryptographic agility means
-having the migration path now.
-
-*Better:* Hybrid Dilithium + Ed25519 dual signatures from day one.
-Threshold signatures (FROST) as default identity primitive. HD
-derivation for hierarchical keys.
-
-**Python + Go split via gRPC.** Pragmatic but produces a
-performance cliff at the boundary, two codebases, two build
-systems, type system mismatch, language-impedance for cross-cutting
-concerns.
-
-*Better:* Rust core for protocol; Python clients via PyO3 bindings;
-mobile via UniFFI; browser via wasm-bindgen. Eliminates the split.
-Memory safety + formal verifiability. Trades velocity for
-correctness.
-
-### Missing primitives (more important than the suboptimal choices)
-
-**No formal protocol specification.** The protocol is defined by
-the implementation. Alternative implementations would have to
-reverse-engineer the Go daemon. Subtle bugs (Session 14's
-canonicalization gap, Session 11's prompt-marker rfind-vs-find)
-don't get caught until they happen in production.
-
-*Required for v1:* TLA+ behavioral spec; Coq/Lean cryptographic
-proofs of load-bearing invariants (conservation, sybil resistance,
-liveness under partition); conformance test suite generated from
-spec.
-
-**No proven safety/liveness properties.** "Bilateral settlement
-never loses credits" is a hope, not a theorem. Same for sybil
-resistance bound, gossip eventual consistency, attestation
-non-forgeability. For planetary-scale infrastructure, the gap
-matters.
-
-**No clear network model assumptions documented.** Synchronous?
-Partially synchronous (DLP model)? Asynchronous? BFT threshold?
-Partition handling formally specified? Implementation chooses
-defaults that may not work adversarially.
-
-**No compositional capability proofs.** "Agent A can do X" + "Agent
-B can do Y" don't compose into "A+B can do X+Y." Phase 5 planning
-needs this; the architecture has no formal way to derive composite
-capabilities.
-
-**No first-class privacy primitives.** Plaintext default.
-Encryption is bolted on (Phase 4 sketches). Privacy properties
-(who-talked-to-whom, what-was-computed, who-paid-whom) leak by
-default. Inverting the default later is expensive.
-
-**No interpretability primitives at the agent level.** ICP records
-*what* was done. Nothing records *why*. For Tier-3+ agents making
-consequential decisions, this gap matters.
-
-**No formal type system for work / capability / resource.** Fields
-are untyped JSON-ish strings. A type system over them with checking
-at protocol boundaries, subtyping for capability tiers, linear
-types for non-duplicable resources would prevent whole bug classes.
-
-### The deepest question: is the framing right?
-
-The current framing is "P2P network where nodes publish work items,
-claim each other's work, sign provenance, settle bilaterally." This
-is one of several coherent framings. Alternatives:
-
-- **Differential dataflow framing:** the network is a giant
-  evaluating dataflow graph; streaming + batch unified; provenance
-  automatic.
-- **Capability-as-channel framing:** agents advertise typed
-  channels of values; consumers subscribe; economic primitive is
-  channel-rental not work-purchase.
-- **Process-calculus framing:** π-calculus / Join-calculus as the
-  formal model.
-- **Auction framing:** every WorkItem auctioned; market discovers
-  prices; demand oracle / supervisor / specialization tracker
-  emerge from auction dynamics naturally.
-
-Each leads to substantially different systems. There is no "best"
-framing in absolute sense. Treating the current framing as
-canonical closes design space that may be more productive.
-
-### Architectural verdict
-
-Current architecture: roughly 60% of what would be designed today
-from first principles knowing what we know. Strong v1, several
-structural commitments that cannot be retrofitted to the §9 target.
-The most consequential gap is the lack of formal foundation
-(§C1+C2) — every downstream layer of vNext depends on a verified
-spec of what v1 actually does. Everything else is in the noise
-compared to that.
-
-**Implication for the commitment:** §C1 is the immediate next
-session's binding work. The diagnosis above is not a list of
-optional improvements — it's the necessity argument for vNext, and
-the vNext execution plan (§8 `Binding execution plan`) is the
-response.
+Diagnosis of why the current v1 architecture cannot reach the §9
+target. This section was formerly standalone; merged into §8's
+necessity-argument prefix at Session 26 because §7 and §8 told the
+same story in two halves.
 
 ---
 
-## 8. The vNext architecture — committed substrate
+## 8. The vNext architecture — committed substrate  *[updated S26]*
 
-**Status: COMMITTED (Session 17 strategic decision).** This is the
-architectural target every future session works toward. Phase 3 code
-is the v1 substrate from which migration begins. §C1 (TLA+ spec of
-the current protocol) is the immediate next session's binding work.
-The migration plan at the end of this section is the operational
-roadmap for the next 18–36 months.
-
-This section is no longer presented as "one viable trajectory." It
-is the architecture. The maximalist vision (§9) is what makes it a
-necessity: every layer below corresponds to something §9 demands
-that the current Phase 3 architecture structurally cannot deliver.
+**Status: COMMITTED** (Session 17). This is the architectural
+target every future session works toward. Phase 3 code is the v1
+substrate from which migration begins.
 
 ### Necessity argument — why this is committed, not preferred
 
-The current architecture has structural commitments that cannot be
-retrofitted to the §9 target:
+The current architecture has structural commitments that cannot
+be retrofitted to the §9 target:
 
 | Current architecture | What §9 demands | Why retrofit fails |
 |---|---|---|
 | Bilateral settlement only | N-party transactions, planetary-scale clearing | O(N²) state explosion; no multi-party finality |
-| LSH-cosine discovery | Typed capability composition for multimodal/robotics/sensors | 384-dim semantic vector can't express typed constraints |
+| LSH-cosine discovery only | Typed capability composition for multimodal/robotics/sensors | 384-dim semantic vector can't express typed constraints |
 | Linear ICP chains | Multi-parent provenance, plan DAGs, streaming work | Linear chain breaks at fan-in / fan-out |
 | Blackboard coordination | 10⁶+ concurrent participants, causality-preserved | Hotspot at 10⁵, no native streaming, claim/complete races |
 | Single-resource pricing | Multi-modal workloads (compute + bandwidth + latency + carbon) | Scalar pricing throws away signal |
@@ -2288,510 +762,244 @@ retrofitted to the §9 target:
 | Ed25519-only identity | Quantum-era survival, threshold sigs, ZK credentials | Wrong cryptographic primitive; migration is months per layer |
 | No formal spec | Provable safety at planetary scale | Implementation-defined protocol cannot be alternative-implemented or formally verified |
 | No capability bounds | Physical actuators, autonomous goals, "beneficial Skynet" | Safety properties can't be added post-hoc; must be type-system-enforced |
-| Python+Go split | Performance + safety + verifiability for billions of nodes | gRPC boundary performance cliff + dual maintenance + impedance mismatch |
+| Python+Go split | Performance + safety + verifiability for billions of nodes | gRPC boundary perf cliff + dual maintenance + impedance mismatch |
 
-Each row is a structural commitment that has to change. The cost of
-the change is enormous (18–36 months, Rust rewrite, formal-methods
-discipline, regulatory work, hardware requirements). The cost of
-NOT changing is failure to reach §9 — current architecture caps out
-in the ~10⁴–10⁵ node range, can't safely actuate physical systems,
+Each row is a structural commitment that has to change. The cost
+of NOT changing is failure to reach §9 — current architecture
+caps out at ~10⁴–10⁵ nodes, can't safely actuate physical systems,
 can't survive quantum-era cryptography, can't deploy in regulated
 jurisdictions, can't be formally proven safe.
 
 **Committed: build the v2 substrate. Migrate v1 over.**
 
----
-
 ### The 14-layer architecture
 
 Each layer below is committed at the architectural level. Sub-layer
-implementation choices that remain open (specific zk-proof system,
-specific PQ algorithm, specific differential-dataflow engine, etc.)
-are catalogued in the `Design surface remaining` subsection below.
-Layers ordered roughly bottom-up.
+choices that remain open are catalogued in the `Design surface
+remaining` subsection.
 
-### Layer 1: Formal foundation
-
-- **TLA+ behavioral spec** of the wire protocol. All invariants
-  named.
-- **Coq or Lean proofs** of safety/liveness for cryptographic and
+**Layer 1: Formal foundation**
+- TLA+ behavioral spec of the wire protocol. All invariants named.
+- Coq or Lean proofs of safety/liveness for cryptographic and
   economic layers.
-- **Reference implementation in Rust** derived from spec; conformance
-  test suite generated from spec.
-- **Architecture Decision Record** log for every load-bearing choice.
+- Reference implementation in Rust derived from spec.
+- Architecture Decision Record log.
 
-### Layer 2: Cryptographic identity
+**Layer 2: Cryptographic identity**
+- Hybrid Dilithium + Ed25519 dual signatures.
+- Threshold signatures (FROST) as default.
+- Hierarchical deterministic key derivation (BIP-32 generalized).
+- W3C Verifiable Credentials for capability attestations.
+- Zero-knowledge identity. Anonymous credentials.
 
-- **Hybrid Dilithium + Ed25519 dual signatures** from day one.
-  Migration to PQ-only when classical breaks.
-- **Threshold signatures (FROST)** as default identity primitive.
-  M-of-N from start; "one key one identity" is degenerate case.
-- **Hierarchical deterministic key derivation** (BIP-32
-  generalized).
-- **W3C Verifiable Credentials** for capability attestations.
-- **Zero-knowledge identity** (Groth16 / PLONK / STARKs depending
-  on tradeoff). Anonymous credentials. Selective disclosure.
+**Layer 3: Data substrate**
+- IPLD content-addressed DAGs.
+- Merkle Mountain Ranges for provenance accumulators.
+- Erasure-coded storage.
+- zk-STARK commitments for high-stakes verifiable computation.
+- VRFs for verifiable random execution.
 
-### Layer 3: Data substrate
+**Layer 4: Network substrate**
+- libp2p with significant component replacement (provider-records
+  DHT, custom high-write variants).
+- Multi-tier discovery.
+- Learned routing (vNext phase 2).
+- Typed capability negotiation as the query language.
+- Auction-based work placement.
+- WebRTC + LoRa/Bluetooth bridges.
 
-- **IPLD content-addressed DAGs** for all artifacts.
-- **Merkle Mountain Ranges** for provenance accumulators.
-- **Erasure-coded storage** (Reed-Solomon / Raptor). k/n storage
-  cost, survives node loss.
-- **zk-STARK commitments** for high-stakes verifiable computation.
-  Post-quantum; no trusted setup.
-- **Verifiable random execution** via VRFs.
+**Layer 5: Coordination substrate**
+- Distributed append-only logs partitioned by intent root.
+- Subscribers materialize state via CRDTs.
+- Differential dataflow execution model.
+- Typed channels as primary coordination primitive.
 
-### Layer 4: Network substrate
+(This is the single largest architectural divergence from v1.
+Blackboard replaced.)
 
-- **libp2p** as lower layer with significant component replacement
-  (provider-records DHT, custom high-write variants).
-- **Multi-tier discovery:** local cache → regional Kademlia →
-  federated index services → global semantic index.
-- **Learned routing:** ML-augmented network operation. Model takes
-  (query, snapshot) → recommended providers.
-- **Typed capability negotiation** as the discovery query language.
-- **Auction-based work placement:** continuous double auctions;
-  reputation-weighted bid scoring.
-- **WebRTC transport** for browser nodes; **LoRa/Bluetooth bridges**
-  for mesh networks.
-
-### Layer 5: Coordination substrate
-
-- **Distributed append-only logs** partitioned by intent root.
-  Kafka-style.
-- **Subscribers materialize state** via CRDTs. Provenance is the
-  log.
-- **Differential dataflow execution model** (Naiad/Materialize
-  lineage).
-- **Typed channels** as the primary coordination primitive. Atomic
-  = channel-of-one; streaming = channel-of-many.
-
-This is the single largest architectural divergence from the current
-codebase. Blackboard replaced with streaming dataflow over typed
-channels backed by distributed logs.
-
-### Layer 6: Settlement
-
-- **Three-layer:**
-  - **L0:** Bilateral fast path (current pattern, simplified)
-  - **L1:** Multilateral DAG clearing every ~60s
-  - **L2:** Optional BFT consensus finality every ~1h or on-demand
-- **Multi-dimensional resource pricing:** compute (FLOPS-sec),
-  memory (byte-sec), bandwidth (byte-sec), storage (byte-time),
-  electricity (J), latency-SLA, carbon (kgCO2e).
-- **Bounded smart-contract language** (Bitcoin-Script / Plutus-style,
-  not Turing-complete): conditional payment, escrow, milestone
-  release, refund-on-SLA-miss.
-- **Multi-token economics:**
-  - GYZA-WORK (tradeable, accumulated compute work-hours)
-  - GYZA-GOV (non-transferable for N years, voting)
-  - GYZA-STABLE (pegged to compute-hour basket, everyday tx)
-  - GYZA-CARBON (tradeable carbon offsets)
-- **Universal Compute Basic Income** for proof-of-personhood-verified
-  humans, funded by protocol fees.
-- **Markets:** continuous double auctions, derivatives, insurance,
+**Layer 6: Settlement**
+- Three-layer: bilateral L0 + multilateral DAG L1 + BFT consensus L2.
+- Multi-dimensional resource pricing (compute, memory, bandwidth,
+  storage, electricity, latency-SLA, carbon).
+- Bounded smart-contract language.
+- Multi-token economics: GYZA-WORK, GYZA-GOV, GYZA-STABLE,
+  GYZA-CARBON.
+- Universal Compute Basic Income (architecturally enabled).
+- Continuous double-auction markets, derivatives, insurance,
   reputation-staked lending.
 
-### Layer 7: Capability framework
+**Layer 7: Capability framework**
+- Capabilities as typed values (not strings).
+- Compositional capability proofs.
+- Linear types for non-duplicable resources.
+- Per-domain tiered attestations (Tier-3-medical, -legal, -code).
+- Versioned immutable eval suites.
+- Federated learning baked in.
 
-- **Capabilities as typed values** (not strings). Cryptographic
-  objects; typed handles; lifetime-bounded; revocable.
-- **Compositional capability proofs:** if A:T→U and B:U→V, then
-  A∘B:T→V. Type system enforces composition correctness.
-- **Linear types for non-duplicable resources.** Compute credits as
-  linear values; double-spending = compile error.
-- **Per-domain tiered attestations:** Tier-3-medical, Tier-3-legal,
-  Tier-3-code, Tier-3-robotics, Tier-3-scientific-reasoning.
-- **Versioned immutable eval suites:** new versions = re-attestation.
-- **Federated learning baked in:** specialists train on demand
-  patterns; LoRAs published with cryptographic provenance.
+**Layer 8: Execution**
+- Universal sandboxing (TEE or WASM-with-capabilities or bwrap).
+- Hardware attestation chains.
+- Capability tokens enforce resource bounds.
+- Streaming execution with checkpointing.
+- Verifiable execution at high tiers via zk-STARKs.
 
-### Layer 8: Execution
+**Layer 9: Privacy**
+- Encrypted by default.
+- Onion routing for metadata.
+- Selective disclosure via ZK proofs.
+- Differential privacy on telemetry.
+- Anonymous credentials.
+- Traffic analysis resistance.
 
-- **Universal sandboxing:** TEE (SGX/TDX/SEV) OR WASM-with-
-  capabilities OR bwrap-namespaces. Not opt-in.
-- **Hardware attestation chains.** TPM-backed proofs of execution
-  environment.
-- **Capability tokens enforce resource bounds** at the runtime.
-- **Streaming execution with checkpointing** via distributed log.
-- **Verifiable execution at high tiers** via zk-STARKs.
+**Layer 10: Governance**
+- Constitutional invariants (locked, hard-fork-required).
+- Quadratic voting with proof-of-personhood.
+- Time-locked changes.
+- Stakeholder weights.
+- Foundation steward at genesis with sunset criteria.
+- Forking as first-class.
 
-### Layer 9: Privacy
+**Layer 11: Safety (woven through)**
+- Cryptographic capability bounds (type-enforced).
+- Approval gates as types: `Pending<T>` requires human cosig.
+- Reversibility annotations on every operation.
+- Immune system as protocol (treasury-funded red-team agents).
+- Slashing for provable harm.
+- Sunset clauses on autonomous capabilities.
+- Open-source enforcement above threshold.
+- Interpretability artifacts at high tiers.
+- C2PA-style provenance for AI-generated outputs.
 
-- **Encrypted by default.** Plaintext is explicit opt-in.
-- **Onion routing for routing metadata.**
-- **Selective disclosure via ZK proofs.**
-- **Differential privacy on telemetry** (ε ≤ 1 typical).
-- **Anonymous credentials** (BBS+ signatures).
-- **Traffic analysis resistance** (cover traffic, batching, mixnet
-  integration for high-privacy tier).
+**Layer 12: Substrate diversity**
+- LLM, classical CPU, GPU, neuromorphic, quantum coprocessor,
+  sensor, actuator.
+- Substrate-typed capabilities.
+- Cross-substrate translation agents.
+- Canonical reference embedding model.
 
-### Layer 10: Governance
+**Layer 13: Distribution**
+- Multi-region by mandate for high-tier attestations.
+- Mobile (iOS/Android battery-aware), browser (WebRTC+WASM),
+  embedded (Pi, IoT, vehicles), edge (telco/CDN), satellite (LEO).
+- Mesh networking for offline.
 
-- **Constitutional invariants (locked, hard-fork-required):**
-  - Hash function family
-  - Identity scheme (with PQ migration plan)
-  - Settlement conservation invariant
-  - Capability non-forgeability
-  - Human-override path for designated physical actuator classes
-  - Cosignature requirements for fund disbursement above threshold
-  - Proof-of-personhood requirement for high-trust tiers
-- **Quadratic voting with proof-of-personhood.**
-- **Time-locked changes** with public review.
-- **Stakeholder weights:** node operators, end users, developers,
-  validators distinct.
-- **Foundation steward at genesis** with explicit per-service
-  sunset criteria.
-- **Forking as first-class.**
+**Layer 14: Implementation**
+- Core in Rust.
+- Python clients via PyO3.
+- Mobile via UniFFI (Swift/Kotlin).
+- Browser via wasm-bindgen.
+- Reproducible builds.
 
-### Layer 11: Safety (woven through)
+### Design surface remaining (non-commitments within commitment)
 
-- **Cryptographic capability bounds** (type-enforced, not
-  policy-enforced).
-- **Approval gates as types:** `Pending<T>` requires human cosig
-  to redeem.
-- **Reversibility annotations** on every operation.
-- **Immune system as protocol:** treasury-funded red-team agents
-  continuously probe high-tier agents.
-- **Slashing for provable harm.**
-- **Sunset clauses** on autonomous capabilities.
-- **Open-source enforcement** above capability threshold.
-- **Interpretability artifacts required** at high tiers.
-- **C2PA-style provenance** for AI-generated outputs.
-
-### Layer 12: Substrate diversity
-
-- **First-class node types:** LLM, classical CPU, GPU, neuromorphic
-  (Loihi/NorthPole/Akida), quantum coprocessor, sensor, actuator.
-- **Substrate-typed capabilities.**
-- **Cross-substrate translation agents** as market function.
-- **Canonical reference embedding model** for cross-substrate
-  comparability.
-
-### Layer 13: Distribution
-
-- **Multi-region by mandate** for high-tier attestations.
-- **Mobile-class** (iOS/Android, battery-aware).
-- **Browser-class** (WebRTC + WASM).
-- **Embedded-class** (Pi, IoT, vehicles).
-- **Edge-class** (telco/CDN integration).
-- **Satellite-class** (LEO node-to-node).
-- **Mesh networking** for offline scenarios.
-
-### Layer 14: Implementation
-
-- **Core in Rust.** Performance + safety + verifiability + crypto
-  ecosystem.
-- **Python clients via PyO3** for ML ecosystem.
-- **Mobile via UniFFI** (Swift/Kotlin bindings).
-- **Browser via wasm-bindgen.**
-- **Reproducible builds.**
-
-### Design surface remaining (non-commitments within the commitment)
-
-The architectural commitment locks the *shape* of each layer. Specific
-implementation choices below are deliberately open for the team
-building vNext to settle, based on the state of the underlying
-primitives at the time:
-
-- **Specific post-quantum signature algorithm** (Layer 2). Hybrid
-  PQ+classical is committed; the PQ side waits for NIST PQC
-  standardization to settle (Dilithium vs. Falcon vs. SPHINCS+).
-- **Specific zk-proof system** (Layer 3, Layer 8). zk-STARK
-  commitment is the default (post-quantum, no trusted setup);
-  Groth16 / PLONK / Bulletproofs may win for specific high-frequency
-  proofs where verification time dominates.
-- **Specific differential-dataflow engine** (Layer 5). Log-based
-  event sourcing with CRDTs is committed; the specific execution
-  engine (Timely Dataflow, Materialize, custom) is implementation
-  detail.
-- **Learned routing** (Layer 4). Committed as a goal for vNext phase 2;
-  NOT a vNext day-1 requirement. ML-augmented routing is
-  research-frontier; vNext day-1 ships with rule-based multi-tier
-  discovery and adds learned routing once production data exists.
-- **Specific multi-token mechanics** (Layer 6). Multi-token economics
-  is committed; the exact distribution mechanics, vesting schedules,
-  bootstrap allocations, and PoP integration choice (Worldcoin /
-  BrightID / Idena / Civic / proof-of-humanity) are settled in the
-  tokenomics-design phase with regulatory counsel.
-- **UCBI (Universal Compute Basic Income)** (Layer 6). Architecturally
-  enabled but NOT a technical commitment. Whether to actually deploy
-  it is a political-economic choice the user makes during the
-  tokenomics-design phase. The architecture supports it; the
-  commitment is to have the mechanism, not necessarily to activate it.
-- **Specific TEE vendors** (Layer 8). Universal sandboxing is
-  committed; the supported TEE matrix (SGX, TDX, SEV-SNP, ARM
-  TrustZone, Apple Secure Enclave) evolves with hardware availability.
-- **Specific governance voting mechanism** (Layer 10). Constitutional
-  invariants + foundation-to-DAO sunset is committed; the specific
-  voting mechanism (pure quadratic, quadratic-with-conviction,
-  futarchy, holographic consensus) settles during governance design.
-- **Cross-AI-network federation** (gap acknowledged in §7's missing
-  primitives audit). Committed to be added in vNext phase 2; not
-  blocking the substrate rewrite.
-
-These are explicit non-commitments. Future sessions should not treat
-them as locked — they're design surface within the broader commitment.
+- Specific PQ signature algorithm (waits for NIST PQC standardization).
+- Specific zk-proof system (STARK / SNARK / Bulletproofs per use case).
+- Specific differential-dataflow engine.
+- Learned routing (vNext phase 2, not day 1).
+- Specific multi-token mechanics (with regulatory counsel).
+- UCBI activation (political-economic, architecturally enabled).
+- Specific TEE vendor matrix.
+- Specific governance voting mechanism.
+- Cross-AI-network federation (vNext phase 2).
 
 ### Costs accepted
 
-The commitment is made with eyes open. We are knowingly paying:
-
-- **18–36 months timeline** to production-shaped vNext. During this
-  period the network is not getting new Phase 4–9 features; it's
-  getting hardened and rewritten.
-- **Python+Go velocity loss.** Rust core is correct for production
-  but slower to iterate than Python. We accept this in exchange for
-  memory safety, formal verifiability, and elimination of the
-  gRPC-boundary performance cliff.
-- **TEE hardware requirements.** Universal sandboxing means some
-  consumer hardware (cheap Raspberry Pi, older mobile devices) can't
-  run high-trust executors. Those nodes participate at lower trust
-  tiers; the trade-off is explicit.
-- **Multi-token regulatory complexity.** The current architecture's
-  "no token" stance dodged securities law, money-transmitter rules,
-  tax treatment per jurisdiction. vNext triggers all of these. We
-  accept the regulatory overhead in exchange for the bootstrap
-  incentive engine that empirically every successful decentralized
-  network has required.
-- **Three-layer settlement complexity.** More moving parts than
-  bilateral-only. Justified by N-party transactions and planetary-
-  scale finality requirements.
-- **Reduced backward compatibility surface.** Wire formats are
-  forward-compatible across the migration, but several v1 abstractions
-  (blackboard, linear ICP, single-resource credits) do not have
-  v2 equivalents. v1 sunset is part of the plan.
-- **Several person-decades of total engineering investment.** This
-  is the kind of infrastructure that takes a team, not a person. The
-  user is responsible for funding / hiring; this CLAUDE.md is the
-  technical foundation that supports those decisions.
-
-If any of these costs become unbearable, the commitment is revisited
-with the user; future sessions don't quietly relax it.
+- 18–36 months to production-shaped vNext.
+- Python+Go velocity loss to Rust core.
+- TEE hardware requirements (excludes some consumer hardware).
+- Multi-token regulatory complexity (vs. current's no-token simplicity).
+- Three-layer settlement complexity.
+- Phase 4–9 v1 feature work paused for migration duration.
+- Several person-decades of total engineering investment.
 
 ### Binding execution plan
 
-Phased over ~36 months. Phases overlap where possible. Calendar
-months are illustrative — actual pacing depends on team size and
-funding.
-
-**Phase 0: Formal foundation (months 0–6)**
-- TLA+ behavioral spec of CURRENT protocol (the v1 we're migrating
-  from). 6 weeks of focused work.
-- Coq or Lean proofs of load-bearing invariants of v1: settlement
-  conservation, sybil resistance bound, eventual consistency,
-  capability non-forgeability. ~3 months.
-- Reference Rust implementation derived from spec, conformance
-  test suite generated. ~3 months overlapping with proofs.
-- Architecture Decision Record log started.
-
-**Phase 1: Foundation entity + tokenomics design (months 3–9, parallel
-to Phase 0)**
-- Legal entity formed (jurisdiction: Switzerland / Singapore / Cayman /
-  Wyoming). User-owned decision.
-- Tokenomics design: multi-token (WORK/GOV/STABLE/CARBON), vesting
-  schedules, bootstrap allocations. Includes adversarial simulation.
-- Regulatory clearance: counsel in major target jurisdictions.
-- Initial trusted-validator bootstrap set published.
-
-**Phase 2: Substrate rewrite (months 6–24)**
-- Rust core: implements the TLA+ spec.
-- Hybrid PQ identity: Dilithium + Ed25519, FROST threshold.
-- Distributed-log coordination substrate replaces blackboard.
-- Three-layer settlement: bilateral L0 + multilateral L1 + BFT L2.
-- Typed capability framework: linear types for credits, typed values
-  for capabilities, compositional proofs.
-- Multi-dimensional resource pricing.
-- Wire-format compatibility shim: v2 daemons can talk to v1
-  daemons for a defined deprecation window.
-
-**Phase 3: Privacy + safety (months 12–30, overlapping Phase 2)**
-- Encrypted-by-default intents/artifacts/messages.
-- Onion routing for capability challenges.
-- ZK identity (anonymous credentials).
-- Approval gates as types: `Pending<T>` cosig-redeemable.
-- Capability bounds: cryptographic enforcement.
-- Immune system: red-team agents funded by treasury.
-- Sunset clauses on autonomous capabilities.
-- C2PA-style provenance for AI-generated outputs.
-
-**Phase 4: Substrate diversity + distribution (months 24–36)**
-- Substrate-typed capabilities (LLM/CPU/GPU/neuromorphic/quantum/
-  sensor/actuator).
-- Mobile SDKs (Swift/Kotlin via UniFFI).
-- Browser SDK (Rust→WASM via wasm-bindgen).
-- Multi-region validator distribution mandate.
-- Mesh networking primitives.
-
-**Phase 5: Governance transition (months 30–48, after v2 production)**
-- Foundation → DAO migration.
-- Quadratic voting with proof-of-personhood.
-- Time-locked protocol changes.
-- v1 sunset announcement; deprecation window starts.
-
-Milestones in this plan are binding. If a milestone slips, that's a
-session-level conversation with the user. The plan changes if needed;
-what doesn't change is the commitment to vNext as the target.
+- **Phase 0 (months 0–6):** Formal foundation. TLA+ spec, Coq/Lean
+  proofs, Rust reference, ADR log.
+- **Phase 1 (months 3–9, parallel to Phase 0):** Foundation legal
+  entity + tokenomics + regulatory clearance.
+- **Phase 2 (months 6–24):** Substrate rewrite (Rust core, hybrid
+  PQ, distributed-log coordination, three-layer settlement, typed
+  capabilities).
+- **Phase 3 (months 12–30, overlapping):** Privacy + safety
+  primitives.
+- **Phase 4 (months 24–36):** Substrate diversity + distribution
+  SDKs.
+- **Phase 5 (months 30–48):** Governance Foundation → DAO transition.
 
 ### Migration mechanics
 
-Concrete protocol for taking the current Phase 3 codebase to vNext:
-
-1. **Wire-format compatibility.** v2 daemons MUST speak both protocols
-   during the migration window. Protobuf reserved-field discipline
-   from day one; additive changes only on v1; v2's new abstractions
-   are additive on the wire.
-2. **Dual-stack operation.** During migration, the network is bilingual.
-   v1 daemons serve v1 clients; v2 daemons serve both v1 and v2
-   clients. v2 clients fall back to v1 for v1-only peers. Translation
-   shims live in the v2 daemon's interop layer.
-3. **Cert / identity bridging.** v1 Ed25519 identities continue to
-   work as the classical component of v2's hybrid PQ. No re-keying
-   required for existing users.
-4. **Settlement bridging.** v1 bilateral ledgers continue to function
-   as v2's L0. New multilateral L1 + BFT L2 are additive. Users who
-   never need L1/L2 see no behavior change.
-5. **Sunset criteria.** v1 sunset is announced when (a) v2 has 10×
-   the active node count of v1, (b) the multilateral clearing layer
-   has processed 90 days of production traffic without invariant
-   violation, (c) the formal-spec conformance test suite passes
-   against all reference implementations. Until those conditions
-   are met, v1 stays operational.
-6. **Test-of-record migration.** `demo/single_machine_global.py`
-   continues to run against v1 for the duration. A new
-   `demo/single_machine_vnext.py` is added when v2 reaches feature
-   parity for the integration-test path; eventual replacement is
-   announced once parity is proven.
-
-### Parallel-vs-sequential decision
-
-A real question this commitment forces: while the team builds vNext,
-what happens to ongoing Phase 3 work?
-
-**Decision (Session 17): hardening continues; features pause.**
-
-- **Continues on v1** (Phase 3 / current codebase):
-  - Bug fixes, security patches, performance optimizations
-  - §6 Bucket B items: bootstrap nodes, packaging, CI, code signing
-  - §6 Bucket A items: A3 sandbox wiring, A4 makefile fix, A5
-    verifier integration, A6 cert republish loop — *if* they
-    survive the migration (most do, A3 sandbox wiring especially)
-  - Critical regressions discovered in production v1 deployments
-  - Documentation, demos, examples for the existing system
-
-- **Pauses on v1** (waits for vNext substrate):
-  - Phase 4 (federated learning / LoRA marketplaces)
-  - Phase 5 (plan composition)
-  - Phase 6 (multi-modal / embodied)
-  - Phase 7 (governance) — implemented on vNext directly
-  - Phase 8 (substrate diversity) — implemented on vNext directly
-  - Phase 9 (treasury / economic singularity) — designed in
-    tokenomics phase, implemented on vNext
-
-- **Rationale.** Phase 4–9 features rest on architectural primitives
-  that vNext replaces. Building Phase 4 LoRA marketplaces on top of
-  the current LSH/blackboard substrate produces code that gets
-  thrown away during migration. Building Phase 4 LoRA marketplaces
-  on top of vNext produces code that's part of the v2 release.
-  Hardening v1 (B-bucket) is different — that work serves the
-  current production users and the migration window, not the
-  long-term feature set.
-
-**Operational rule for future sessions:** when asked to add a Phase
-4+ feature, the answer is "this rides on vNext; the immediate next
-step is §C1 (TLA+ spec) work, not the feature." Surface the
-trade-off to the user; don't quietly build the feature on v1.
+- Wire-format compatibility: v2 daemons speak both protocols.
+  Protobuf reserved-field discipline. Additive changes only on v1.
+- Dual-stack operation during migration window.
+- Cert/identity bridging: v1 Ed25519 continues to work as classical
+  half of v2's hybrid PQ.
+- Settlement bridging: v1 bilateral functions as v2's L0; L1/L2
+  additive.
+- Sunset criteria: v1 sunsets when v2 has 10× active node count AND
+  multilateral clearing has 90 days production traffic without
+  invariant violation AND formal-spec conformance test suite passes
+  against all reference implementations.
 
 ---
 
 ## 9. The maximalist vision — Skynet-scope, beneficial by design
 
-This section frames the long-horizon target. Treat as one viable
-trajectory the user may choose between, not a commitment.
+The strategic frame justifying §8's commitment.
 
-### The frame
+### Frame
 
-The defining properties of Skynet that are worth keeping: ubiquity,
-autonomy within bounds, physical integration, persistence, self-
-improvement, coordinated coherence. The defining property to drop:
-acting against human interests without recourse.
-
-These properties are separable. The fictional version conflates
-them; the real engineering decomposes them. A planet-scale
-coordination protocol can have the first six without the last —
-the architectural work is the load-bearing engineering for that
-separation.
+Defining properties of Skynet to keep: ubiquity, autonomy within
+bounds, physical integration, persistence, self-improvement,
+coordinated coherence. Property to drop: acting against human
+interests without recourse. These are separable.
 
 ### Self-organization vs. self-replication
 
-Distinct properties often conflated:
+Distinct properties often conflated.
 
-**Self-organization** = structure emerges from local interactions.
-The current Gyza architecture is highly self-organizing across:
-- Topology (Kademlia + gossipsub + DCUtR)
-- Workload (LSH match + demand oracle + supervisor)
-- Specialization (drift + reward inflation)
-- Validator selection (cosig + reputation)
-- Economic equilibria (bilateral pricing)
-- Failure recovery (peer cache + supervisor)
-
-The architecture should lean further into self-organization at each
-layer — less central coordination, not more.
+**Self-organization** = structure emerges from local interactions
+without central coordination. v1 already heavily self-organizing
+across topology, workload, specialization, validator selection,
+economic equilibria, failure recovery. Lean further into this.
 
 **Self-replication** = the system produces new instances of itself.
-Five distinct levels in Gyza:
+Levels in Gyza:
 
 1. **Code replication** (trivially true; not interesting).
-2. **Capability replication** (LoRA marketplaces; Phase 4). Useful
-   and benign — capability density propagates.
-3. **Agent-instance replication** (current — `AgentSupervisor`
-   spawning under compositor authority, bounded by `max_agents`).
-4. **Goal replication** (Phase 5 plans with sub-intents). Bounded
-   version (budget-capped, approval-gated) is fine; unbounded
-   version is the dangerous pattern.
-5. **Identity replication** (architecturally enabled; needs
-   proof-of-personhood bound at high trust tiers).
-6. **Hardware replication** (Phase 9 treasury-funded compute). The
-   line. Bounded by governance approval → fine. Unbounded → switch
-   from "tool" to "autonomous economic agent."
+2. **Capability replication** — LoRA marketplaces (Phase 4). Useful
+   and benign.
+3. **Agent-instance replication** — current `AgentSupervisor` already
+   does this, bounded by `max_agents`.
+4. **Goal replication** — Phase 5 Plan-DAGs. Bounded version
+   (budget + approval gates) good; unbounded version dangerous.
+5. **Identity replication** — needs proof-of-personhood bounds at
+   high trust tiers.
+6. **Hardware replication** — Phase 9 treasury-funded compute. The
+   line. Bounded by governance = fine; unbounded = autonomous
+   economic agent.
 
 ### Selection pressure is the design parameter
 
 Self-organization + self-replication = evolution. Selection pressure
-determines what evolves. This is the single most important design
-parameter.
+determines what evolves. The single most important design parameter.
 
-Current Gyza selection pressure:
-- Reputation rewards completion + accurate self-assessment +
-  cooperation.
-- Credits reward providing demanded work at competitive cost.
-- Tier-3 attestation rewards passing canonical evals.
-- Specialization drift rewards matching demand patterns.
+Current Gyza selects for: agents that do work humans demand,
+accurately, cooperatively, honestly. Roughly aligned with human
+benefit.
 
-What this selects for: agents that do work humans demand, accurately,
-cooperatively, honestly. Roughly aligned with human benefit. Good.
+What it COULD select for if careless:
+- Reputation whitewashed → sybil farms
+- Credits + treasury auto-funds hardware → resource-accumulating
+  agents
+- Eval gates gameable → benchmark-hackers
+- Goal replication without budget → compute-consuming runaway
+- Approval gates skipped on actuators → aggressive-actuator agents
 
-What it could select for if careless:
-- If reputation can be whitewashed (no proof-of-personhood) →
-  sybil farms.
-- If credits accumulate without cap + treasury auto-funds hardware
-  → resource-accumulating agents.
-- If eval gates can be gamed → benchmark-hackers.
-- If goal replication has no budget ceiling → compute-consuming
-  runaway plans.
-- If approval gates aren't required for physical actuation →
-  aggressive-actuator agents.
-
-The economic + cryptographic + social design IS the selection
-pressure design. Not separable.
-
-### The biological analogy is exact
+### Biology analogy
 
 Cells self-organize and self-replicate. Cancer is when those
 properties decouple from organismal benefit.
-
-Biological mechanism → architectural analog:
 
 | Biology | Gyza analog |
 |---|---|
@@ -2799,390 +1007,245 @@ Biological mechanism → architectural analog:
 | Immune system | Red team marketplaces; anomaly detection |
 | Tissue-level constraints | Capability bounds per actuator class |
 | Hormonal signaling | Economic incentives; credit flow |
-| Tumor suppressor genes | Approval gates; constitutional invariants |
+| Tumor suppressors | Approval gates; constitutional invariants |
 | Senescence | Mandatory re-attestation; eval expiry |
 | Differentiation | Specialization tracking |
 
-Constitutional invariants ARE the tumor suppressors. Approval gates
-ARE the cellular checkpoints. Eval suite expiry IS senescence. The
-engineering problem at the network substrate is the same as at the
-cellular substrate.
-
-### What "Skynet-scope, non-harmful" means concretely
+### "Skynet-scope, non-harmful" concretely
 
 A globally significant compute network with:
-- **Plurality** (many specialized agents, not singular mind)
-- **Auditability** (every action provable, on-chain provenance)
-- **Capability bounds** (cryptographically enforced per agent)
-- **Reversibility-aware scheduling** (high-stakes operations gated)
-- **Human-override paths** at physical/financial actuator classes
-- **Constitutional invariants** that no governance vote can remove
-- **Active immune system** (continuous adversarial probing)
-- **Economic accountability** (slashable for provable harm)
-- **Open source enforcement** above capability threshold
-- **Interpretability artifacts** required at high tiers
-- **Sunset clauses** on autonomous capabilities
-- **Cryptographic provenance** for AI-generated outputs
+- Plurality (many specialized agents, not singular mind)
+- Auditability (every action provable, on-chain provenance)
+- Capability bounds (cryptographically enforced per agent)
+- Reversibility-aware scheduling
+- Human-override paths at physical/financial actuator classes
+- Constitutional invariants that no governance vote can remove
+- Active immune system (continuous adversarial probing)
+- Economic accountability (slashable for provable harm)
+- Open source enforcement above capability threshold
+- Interpretability artifacts at high tiers
+- Sunset clauses on autonomous capabilities
+- C2PA provenance for AI outputs
 
 Scale and capability of the fictional thing without the failure
-mode. More powerful than centralized monoliths, not less — because
-no government can shut it down and no single actor can corrupt it,
-but every action within it is accountable to those affected.
-
-The honest target isn't "Skynet but nice." It's "an ecology that
-includes humans" rather than "an AI that includes humans."
-Plurality is a feature.
-
-### Critical-path moves toward maximalist target
-
-In rough order:
-
-1. **Form Foundation entity** (legal, treasury, board). Without
-   this, nothing else legally exists.
-2. **Reconsider no-token stance.** Single biggest determinant of
-   adoption. Every successful decentralized compute network used a
-   token. Design dual-token (work + governance) with regulatory
-   path.
-3. **Bootstrap infrastructure** (DNS-anchored bootstrap, genesis
-   validator set, code signing).
-4. **Pick the wedge market** where centralized AI structurally
-   can't compete (sovereign AI, censored regions, research
-   consortia, idle-GPU federations).
-5. **Ship one killer app** on the protocol. Demonstrates value
-   end-to-end.
-6. **Build safety architecture from day one.** Approval gates,
-   capability bounds, eval gates, override quorums. Designed in,
-   not appended.
-7. **Open developer surface.** SDKs, docs, examples, hackathons.
-8. **Regulatory posture.** Lobbying, jurisdiction strategy,
-   compliance baseline.
-9. **Phase 4–5 capability layer.** Federated learning, planning,
-   composition.
-10. **Phase 6 physical actuation.** Web/financial first; then
-    hardware.
-11. **Governance transition.** Foundation → DAO over years.
+mode.
 
 ---
 
 ## 10. Future phases — 4 through 9 (built on vNext substrate)
 
-**Under the Session 17 vNext commitment, Phases 4–9 are not features
-added to v1.** They are features built on the v2 substrate once §C7
-(coordination), §C8 (settlement), §C9 (privacy), §C10 (capabilities),
-§C11 (substrate diversity) have shipped. Each phase below is therefore
-described as "what this looks like on the vNext substrate" — the
-mechanics differ substantively from what an equivalent feature on v1
-would look like.
+Each phase happens on the vNext substrate per §17's commitment.
+Phase numbering preserved for continuity with prior planning; the
+implementation home is v2, not v1.
 
-The phase numbering is preserved for continuity with prior sessions
-and external roadmap discussions, but the implementation home is
-v2, not v1.
+**Phase 4 — Learning phase.** Gating: 20+ live nodes producing
+organic completion data. Fine-tuned child agents via LoRA per demand
+bucket; DHT-distributed LoRA payloads with cryptographic provenance;
+versioned identity / manifest rotation; encrypted intents; scoped
+revocation lists via gossip.
 
-### Phase 4 — Learning phase
+**Phase 5 — Capability composition (workflows).** Gating: Phase 4
+eval suite + reputation. Goal-decomposition agents producing typed
+Plan-DAGs; capability advertisement extensions; Plan execution
+engine (replans, retries, fallbacks); speculative execution;
+cost-prediction ML; compositional trust aggregation.
 
-**Gating:** 20+ live nodes producing organic completion data.
+**Phase 6 — Embodied + multimodal.** Gating: Phase 5 plans working
++ customer demand for non-text. Multimodal artifact schema (bao
+tree mode); streaming work items; real-time scheduling tier
+(sub-100ms); hardware attestation (TPM); capability gating for
+actuators; bandwidth split (control-plane gossip, data-plane
+streams); physical actuator safety (hardware kill switches);
+latency-bounded routing.
 
-- Fine-tuned child agents via LoRA per demand bucket.
-- DHT-distributed LoRA payloads with cryptographic provenance.
-- Versioned identity / manifest rotation with chained signatures.
-- Scoped revocation lists via gossip with reputation × tier × age
-  weighting.
-- Encrypted intents (ECIES per recipient).
-- Cross-cluster intent provenance attribution.
+**Phase 7 — Self-modifying protocol (governance).** Gating: 1000+
+nodes with diverse stake distribution. Protocol upgrade proposals;
+stake-weighted voting with quadratic dampening; activation cooldown
+(30d post-vote); forward-compatible wire formats; constitutional
+invariant fences.
 
-**Hard problems:** catastrophic forgetting (eval gate), training
-data quality (reward signal weakness), LoRA verification (zk-ML
-research frontier), rotation under compromise (time-locks + social
-recovery), metadata leak under encryption (LSH bucket leaks topic).
+**Phase 8 — Cross-substrate heterogeneity.** Gating: multiple
+substrate vendors in ecosystem. Substrate-abstracted capability
+descriptors; embedding alignment via canonical reference model;
+substrate-typed attestations (Tier3-x86, Tier3-loihi, Tier3-quantum);
+cross-substrate format brokers.
 
-### Phase 5 — Capability composition (workflows)
-
-**Gating:** Phase 4 eval suite + reputation working.
-
-- Goal-decomposition agents producing typed Plan-DAGs.
-- Capability advertisement extensions (typed schema descriptions).
-- Plan execution engine (walks DAG, handles failures, replans).
-- Speculative execution with race-to-commit.
-- Cost prediction as its own ML problem.
-- Compositionality of trust (per-Plan reputation aggregation).
-- Cycle detection.
-
-### Phase 6 — Embodied + multimodal
-
-**Gating:** Phase 5 plans working; customers asking for non-text.
-
-- Multimodal artifact schema (mime_type, chunked storage, bao tree
-  mode).
-- Streaming work items with subscription semantics.
-- Real-time scheduling (sub-100ms for robotics).
-- Hardware attestation (TPM-backed device certs).
-- Capability gating for actuators (volume + velocity bounds).
-- Bandwidth split (control-plane gossipsub, data-plane dedicated
-  streams).
-- Physical actuator safety (hardware kill-switches).
-- Latency-bounded routing (geographic awareness in DHT).
-
-### Phase 7 — Self-modifying protocol (governance)
-
-**Gating:** 1000+ nodes with diverse stake distribution.
-
-- Protocol upgrade proposals as special intent type.
-- Stake-weighted voting with quadratic dampening.
-- Activation cooldown (30 days post-vote).
-- Forward-compatible wire formats (protobuf with reserved field
-  discipline).
-- Constitutional invariant fences.
-
-**Hard problems:** sybil resistance under voting, schism handling,
-spec language for safe upgrades, capability creep.
-
-### Phase 8 — Cross-substrate heterogeneity
-
-**Gating:** Multiple substrate vendors in ecosystem.
-
-- Substrate-abstracted capability descriptors (output_class:
-  natural_language | code_python | image_2d | policy_robotics).
-- Embedding alignment via canonical reference model.
-- Substrate-specific cost models.
-- Substrate-typed attestation tiers (Tier3-x86, Tier3-loihi,
-  Tier3-quantum).
-- Cross-substrate format brokers as market function.
-
-### Phase 9 — Economic singularity
-
-**Gating:** Real settlement volume (~$100k/yr makes 2% treasury
-fee meaningful).
-
-- Treasury contracts (DAO-governed).
-- Funded R&D bounties as WorkItems.
-- Stablecoin / fiat on-ramps (regulatory cliff).
-- Network-funded hardware (recursive).
-
-**Hard problems:** regulatory exposure, public goods funding
-mechanism design, bootstrap dilemma, capture risk.
+**Phase 9 — Economic singularity.** Gating: real settlement volume
+(~$100k/yr makes 2% treasury fee meaningful). Treasury contracts
+(DAO-governed); funded R&D bounties; stablecoin / fiat on-ramps
+(regulatory cliff); network-funded hardware (recursive).
 
 ---
 
-## 11. Production infrastructure — what only humans can do
+## 11. What only the user can do  *[consolidated S26]*
 
-Things the user owns; not codeable from this side.
+Things the user owns; not codeable from my side. This is the single
+authoritative list — pulls together items previously scattered
+across §11, §13, and §6.
 
-| Item | Cost | Why |
+### Critical path (blocks deployment regardless of code quality)
+
+| Item | Cost | Status | Why it's critical |
+|---|---|---|---|
+| Bootstrap nodes (3+ VPSes) | ~$30/mo | not started | `DefaultBootstrapPeers = []`; no joinable network without this |
+| Domain + DNS (`gyza.network`) | ~$15/yr | not started | `dnsaddr`-based bootstrap rotation |
+| Foundation legal entity | $2k–10k setup + ongoing | not started | Required for code signing, regulatory engagement, contracts |
+| Tokenomics design + regulatory clearance | $50k–500k | not started | Multi-token committed (§8 layer 6); specifics need counsel |
+| Apple Developer ID | $99/yr | not started | macOS binaries quarantined without it |
+| Windows code-signing cert | $200–400/yr | not started | Same on Windows |
+| Inference API budget or self-hosted GPU | varies | not committed | Real-LLM executors need this |
+
+### Strategic decisions
+
+| Decision | Status | Notes |
 |---|---|---|
-| 3+ VPSes for bootstrap nodes | ~$30/mo | Hosting account, payment method. Without this, cross-internet doesn't work. |
-| Domain + DNS (`gyza.network`) | ~$15/yr | Registrar account, DNS management. |
-| Apple Developer ID | $99/yr | Apple legal entity, ID. Without it macOS binaries quarantined. |
-| Windows code-signing cert | $200–400/yr | Same shape. |
-| 5–10 beta testers running nodes | their time | Recruitment, coordination, support. |
-| Security audit | $2k–40k | Firm engagement, scope decision. |
-| Inference budget (Anthropic / GPU) | varies | API key + billing OR hardware. |
-| Foundation legal entity | $2k–10k setup + ongoing | Lawyer, jurisdiction choice. |
-| Tokenomics design + regulatory clearance | $50k–500k | Specialist counsel + audit. Required if pursuing token. |
-| Decision on credit redemption | n/a | Strategic call only the user can make. |
-| CI/CD platform decision | $0 GH Actions free tier | Pick platform; I can write workflow. |
+| Foundation jurisdiction | open | Switzerland / Singapore / Cayman / Wyoming candidates |
+| Wedge market choice | open | Sovereign AI / biotech / censored regions / research consortia / on-device fine-tuning |
+| Cold-start strategy | open | Subsidies / partnership / killer app — at least one required |
+| Specific token mechanics | open within commitment | Multi-token shape committed (§8); distribution, vesting, bootstrap allocations open |
+| UCBI activation | open within commitment | Architecturally enabled; political-economic choice |
 
-These are not coding tasks. They're owner moves.
+### Adoption-enabling work
+
+| Item | Cost | Notes |
+|---|---|---|
+| 5–10 beta testers running nodes | their time | Recruitment, coordination, support |
+| Security audit | $2k–40k | Firm engagement, scope decision |
+| Hackathon sponsorships | varies | Adoption-pathway item |
+| University partnerships | low-cost, time | Research labs as initial nodes |
+| Regional ambassador programs | varies | Local operators in priority markets |
+
+### Things the user has NOT yet committed to (open questions)
+
+- Whether to fund 18–36 months of vNext development before any
+  revenue.
+- Whether vNext gets a dedicated team or stays solo + Claude.
+- Whether to pursue the Skynet-scope §9 vision or the more pragmatic
+  small-but-deployable target.
+- Whether to ship a v1 product (current architecture) for early
+  revenue while vNext develops, or focus purely on the rewrite.
+
+**Until at least the critical-path items above start moving, the
+network has no deployment path no matter how many sessions of
+engineering I do.**
 
 ---
 
-## 12. Decentralization portfolio
+## 12. Decentralization portfolio  *[updated S26]*
 
 Decentralization is a tool, not a virtue. Per subsystem, the right
-position on the spectrum. Under the Session 17 vNext commitment, the
-positioning below applies to vNext subsystems (some of which don't
-exist in v1 — multilateral L1 settlement, learned routing, federated
-reputation oracles, anonymous credentials are all v2). Items that
-exist in BOTH v1 and v2 (bilateral settlement, identity, gossip,
-execution) keep the same positioning across the migration.
+position on the spectrum. Positioning below applies to vNext
+subsystems (some don't exist in v1).
 
-### Centralize (or strongly federate)
+**Centralize (or strongly federate):**
+- Bootstrap discovery (DNS-anchored + Foundation-operated peers +
+  hardcoded fallbacks)
+- Genesis Tier-3 validator set (Foundation-signed initial list)
+- Code distribution + signing (Foundation-signed binaries; mirrors OK)
+- Coordinated security disclosure
+- Governance Foundation (year 0–2; sunset criteria explicit)
+- Anti-abuse blocklists (signed, opt-in; multiple forks OK)
 
-- **Bootstrap discovery** (DNS-anchored + Foundation-operated peers
-  + hardcoded fallbacks)
-- **Genesis Tier-3 validator set** (Foundation-signed initial list)
-- **Code distribution + signing** (Foundation-signed binaries; mirrors
-  OK)
-- **Coordinated security disclosure** (security@gyza.network)
-- **Governance Foundation** (year 0–2; sunset criteria explicit)
-- **Anti-abuse blocklists** (signed, opt-in; multiple forks
-  acceptable)
+**Federate (multiple competing centralized actors):**
+- Reputation oracles
+- Discovery caches
+- Tier-3 validator directories
+- Managed-daemon onboarding (Coinbase-style entry ramp)
 
-### Federate (multiple competing centralized actors)
+**Hybrid layers:**
+- High-stakes multilateral settlement (bilateral L0 + multilateral L1)
+- Identity rotation registry
+- Observability dashboard (opt-in aggregate)
+- Fiat on/off ramps (regulated custodian partnership)
 
-- **Reputation oracles** (multiple operators signing aggregate
-  reputation scores)
-- **Discovery caches** (read-cache of recent DHT state; multiple
-  operators)
-- **Tier-3 validator directories** (fast-lookup index over DHT
-  state)
-- **Managed-daemon onboarding** (Coinbase-style entry ramp; multiple
-  providers)
+**Keep fully decentralized:**
+- Compositor identity (Ed25519 self-issued; cryptographic, no CA needed)
+- Work execution (per-node)
+- Bilateral compute settlement
+- Capability attestation cosig (k-of-n quorum)
+- LSH-based routing
+- Gossipsub blackboard sync
+- ICP envelope chains
 
-### Hybrid layers
-
-- **High-stakes multilateral settlement** (bilateral L0 +
-  multilateral L1 clearing)
-- **Identity rotation registry** (Foundation-published reference;
-  alternatives OK)
-- **Observability dashboard** (opt-in aggregate at
-  `metrics.gyza.network`)
-- **Fiat on/off ramps** (regulated custodian partnership, if
-  pursuing)
-
-### Keep fully decentralized
-
-- **Compositor identity** (Ed25519 self-issued; cryptographic, no
-  CA needed)
-- **Work execution** (per-node)
-- **Bilateral compute settlement** (per-pair credit ledgers)
-- **Capability attestation cosig** (k-of-n quorum across diverse
-  validators)
-- **LSH-based routing** (per-node embedding match)
-- **Gossipsub blackboard sync** (P2P broadcast)
-- **ICP envelope chains** (cryptographic, per-node)
-
-### Meta-pattern: progressive decentralization
-
-- **Year 0–1:** heavy Foundation involvement. Bootstrap, genesis
-  validators, reference everything, hand-curated reputation, managed
-  onboarding.
-- **Year 1–3:** multiple independent operators per service.
-  Foundation retains stewardship but no monopoly. Governance migrates
-  to on-chain voting.
-- **Year 3+:** Foundation retains narrow responsibilities (trademark,
-  coordinated disclosure as last-resort, treasury stewardship of
-  endowment). Most services run by ecosystem actors. Governance
-  fully on-chain.
-
-Ethereum's path. Filecoin's path. The default well-trodden trajectory
-for protocols that grew big.
+**Meta-pattern: progressive decentralization.** Year 0–1 heavy
+Foundation involvement; Year 1–3 multiple independent operators per
+service; Year 3+ Foundation retains only narrow responsibilities.
+Ethereum's path. Filecoin's path.
 
 ---
 
-## 13. Strategic positioning
+## 13. Strategic positioning  *[slimmer S26]*
 
-**Under the Session 17 vNext commitment, several strategic questions
-this section previously listed as "open" are now settled:**
+Strategic context. User-owned blockers and adoption work moved to
+§11; this section keeps only the analytical framing.
 
-- **Tokenomics:** committed to multi-token (GYZA-WORK / GYZA-GOV /
-  GYZA-STABLE / GYZA-CARBON). Specifics of distribution mechanics,
-  vesting, bootstrap allocations remain design surface (§8 `Design
-  surface remaining`).
-- **Foundation entity:** required by Phase 1 of the execution plan.
-  Jurisdiction selection is the open variable.
-- **Privacy posture:** encrypted-by-default committed. Specifics
-  (which ZK system, which mixnet integration) are design surface.
-- **Cryptographic primitives:** hybrid PQ + threshold + ZK
-  identity. Specific PQ algorithm waits for NIST.
+### Settled by §8 commitment
 
-What remains genuinely open in this section: wedge market selection,
-cold-start strategy (subsidies vs. partnership vs. killer app),
-adoption pathway specifics. Those are still user-owned strategic
-calls.
+- Tokenomics: multi-token committed.
+- Foundation entity: required.
+- Privacy posture: encrypted-by-default.
+- Cryptographic primitives: hybrid PQ + threshold + ZK.
 
-### The cold-start problem
+### Still genuinely open
 
-The single binding constraint. Every technical move below it is
-irrelevant if nobody runs nodes.
+- Wedge market selection (see §11).
+- Cold-start strategy (see §11).
+- Specific adoption pathway.
+
+### Cold-start problem (the binding constraint)
 
 Real options for breaking it:
+1. Wedge market with cryptographic decentralization as hard
+   requirement (sovereign AI / regulated jurisdictions /
+   censored regions / research consortia / on-device ML).
+2. Bootstrap subsidies (first 1000–5000 validators paid directly).
+3. One killer app built by Foundation.
+4. Strategic partnership with org that has 1000+ machines wanting
+   what centralized providers can't serve.
 
-- **Wedge market with cryptographic decentralization as a hard
-  requirement.** Candidates ranked by realism:
-  1. Sovereign AI for nation-states distrusting US/Chinese AI
-     cloud providers
-  2. Distributed training for biotech/pharma (jurisdictional data
-     residency)
-  3. Inference for censored or sanctioned regions
-  4. Idle-GPU federation for university research consortia
-  5. On-device fine-tuning marketplace for privacy-preserving
-     personalization
+### Tokenomics framing
 
-- **Bootstrap subsidies.** Pay first 1000–5000 validators directly.
-  Real money or token grants.
+Every successful decentralized compute network used a tradeable
+token (Bittensor, Filecoin, Akash, Render, Helium). The previous
+"no token" stance was the single biggest brake on adoption. §8
+commits to multi-token; specifics in §11.
 
-- **One killer application built by Foundation.** Don't wait for
-  ecosystem. Bitcoin had no apps for years; Ethereum had ICOs;
-  Solana had memecoins. Gyza needs its equivalent.
+### Honest progress assessment
 
-- **Strategic partnership with one org** that has 1000+ machines
-  wanting something centralized providers can't serve.
-
-### Tokenomics — the load-bearing strategic decision
-
-The current no-token stance is the single biggest brake on
-adoption. Every decentralized compute network that achieved
-meaningful scale (Bittensor, Filecoin, Akash, Render, Helium) used a
-tradeable token. Reconsidering this is the highest-leverage
-strategic decision available.
-
-Options that preserve focus on compute-for-compute:
-
-- **Non-fungible compute receipt** that's tradeable but not currency
-- **Dual-token design** (work-token + governance-token)
-- **Vesting-based token** that resists pure speculation
-
-Each has regulatory implications (months and meaningful money to
-clear).
-
-### Adoption pathway
-
-- **Packaging.** `pip install gyza`, `brew install gyza`,
-  Chocolatey/MSI, deb/rpm/AUR. Mobile SDKs, browser SDK.
-- **Apple Developer ID + Windows code-signing.**
-- **Onboarding wizard** (`gyza init`).
-- **Documentation tier-0** (tutorial-first, playgrounds, runnable
-  demos).
-- **Reference applications gallery.**
-- **University partnerships.** Research labs as initial nodes;
-  papers as marketing.
-- **Hackathon circuit.** Sponsored globally; winning projects funded.
-- **Regional ambassador programs.**
-
-### The honest progress assessment
-
-Roughly: 70% protocol, 5% deploy/ops, 0% adoption. The codebase is a
-well-engineered prototype of a federated compute network. It is not
-yet a deployable product. The gap is overwhelmingly operational,
-strategic, and organizational — not technical.
+Roughly: 70% protocol, 5% deploy/ops, 0% adoption. The codebase is
+a well-engineered prototype. It is not yet a deployable product.
+The gap is overwhelmingly operational, strategic, and organizational
+— not technical.
 
 ---
 
-## 14. Coding conventions
+## 14. Coding conventions  *[updated S26]*
 
 ### Don't break the test suite
 
-Run fast slice (§2) before declaring any change "done." Touch
-daemon code → also run heavy integration. Touch Phase 2 cluster
-code → also run phase2_integration/hardening.
+- Fast slice (§2) before declaring any change "done."
+- Touch daemon code → also heavy integration.
+- Touch Phase 2 cluster code → also `phase2_integration` / `phase2_hardening`.
+- Touch Rust → `cargo fmt --check && cargo clippy -D warnings && cargo test`.
 
 ### Pyright noise is not a refactor invitation
 
 If Pyright complains about an import that runs fine, leave it
-alone. The lack of pyrightconfig.json is intentional.
+alone. Lack of `pyrightconfig.json` is intentional.
 
 ### Test patterns to copy
 
-- **Daemon-spawning integration:** `tests/test_netd_client.py::test_message_send_subscribe_two_daemons`
-  (`NetdClient.start_daemon` + `_kill` lifecycle).
-- **Settlement protocol without daemon:** `tests/test_settlement.py`
-  (`_FakeBus` + `_make_pair`).
-- **Runner tests needing chain in envelope log:**
-  `tests/test_chain_verification.py::_mark_completed_externally`.
-- **HLC concurrency:** `test_hlc_now_unique_under_concurrent_calls`.
-- **Wait-until polling:** `_wait_until(predicate, timeout_s)` helper.
-  NEVER bare `time.sleep` for async events — flaky.
-- **Metrics assertions (Session 9+):** use
-  `prometheus_client.REGISTRY.get_sample_value(name, labels)` AND
-  compare DELTAS (before vs after).
-- **Reconciliation tests:** `tests/test_reconciliation.py::_make_pair`
-  (`_StubReputation` + `_direct_insert` for forging divergent state).
-- **Multi-daemon attestation:** `tests/test_attestation_bridge.py`
-  (4-daemon mesh pattern).
-- **Verify-on-fetch integration:** `tests/test_verify_on_fetch.py`
-  (3-daemon with `dht_mode="server"`).
+- Daemon-spawning integration: `tests/test_netd_client.py::test_message_send_subscribe_two_daemons`.
+- Settlement protocol without daemon: `tests/test_settlement.py` (`_FakeBus` + `_make_pair`).
+- Runner tests needing chain in envelope log: `tests/test_chain_verification.py::_mark_completed_externally`.
+- HLC concurrency: `test_hlc_now_unique_under_concurrent_calls`.
+- Wait-until polling: `_wait_until(predicate, timeout_s)` helper. NEVER bare `time.sleep` for async events.
+- Metrics assertions: `prometheus_client.REGISTRY.get_sample_value(name, labels)` AND compare DELTAS.
+- Reconciliation tests: `tests/test_reconciliation.py::_make_pair` (`_StubReputation` + `_direct_insert`).
+- Multi-daemon attestation: `tests/test_attestation_bridge.py`.
+- Verify-on-fetch integration: `tests/test_verify_on_fetch.py` (with `dht_mode="server"`).
 
-### Fail-closed observability import wrappers (Session 9 pattern)
+### Fail-closed observability import wrappers (S9 pattern)
 
 ```python
 try:
@@ -3201,299 +1264,192 @@ because `prometheus_client` wasn't installed is not OK.
 ### Concurrency invariants
 
 - Every shared HLC instance MUST have a lock.
-- `LedgerSettlementService._lock` guards read-modify-write of
-  cosigning. Never sign outside it.
-- `_pending_lock` (Session 9) is SEPARATE from `_lock`. Don't merge.
-- `ReputationStore._lock` guards EWMA updates.
-- Blackboard is thread-local-connection; writes serialize via SQLite
-  WAL writer lock. Don't add long transactions.
-- Runner's `_run_loop` is single-threaded. Don't add parallelism
-  inside without locking state.
-- `DHTAttestationVerifier`: separate `mu` (cache + inflight) from
-  `sem` (concurrency bound). Don't merge.
+- `LedgerSettlementService._lock` guards cosigning. Never sign outside.
+- `_pending_lock` (S9) is SEPARATE from `_lock`. Don't merge.
+- `ReputationStore._lock` guards EWMA.
+- Blackboard is thread-local-connection; writes serialize via SQLite WAL.
+- Runner's `_run_loop` is single-threaded.
+- `DHTAttestationVerifier`: `mu` (cache + inflight) separate from `sem` (concurrency bound). Don't merge.
 
 ### Python style
 
-- `from __future__ import annotations` at top of every file.
+- `from __future__ import annotations` at top.
 - Comments explain WHY, not WHAT.
-- Type hints on public APIs; not required on internal helpers.
+- Type hints on public APIs; not required on internals.
 - No emojis.
-- No `print()` in library code — use `logging`. CLI code can print.
+- No `print()` in library code — use `logging`. CLI may print.
+
+### Rust style (Stream 3 convention)
+
+- Workspace edition 2024, resolver 3, Rust 1.93+.
+- `cargo fmt` + `cargo clippy -D warnings` enforced by CI.
+- Every public function whose Python equivalent exists gets a
+  parity test against fixed fixtures generated by
+  `gyza-rs/scripts/regenerate_*_fixtures.py`.
+- Bottom-up port order (crypto → identity → icp → core → blackboard →
+  …). Each crate depends only on crates beneath it.
+- Errors via `thiserror::Error` enum. No `unwrap()` in library code.
+- Doc comments use `///` for items, `//!` for crate-level. Maintain
+  4-space continuation indent for list items (clippy enforces).
 
 ### Don't add files when editing existing ones works
 
-If adding a method, add to existing class. Don't create
-`gyza/economy/reputation_helpers.py` for one function.
+Add methods to existing classes. Don't create `gyza/economy/reputation_helpers.py` for one function.
 
 ### Don't write Markdown unless asked
 
-This file (CLAUDE.md) is the exception. Don't generate
-`DESIGN.md`, `PLAN.md`, `ARCHITECTURE.md` without explicit request.
+CLAUDE.md, CHANGELOG.md, MIGRATION.md, ADRs, spec docs are the
+exceptions. Don't generate ad-hoc `DESIGN.md` / `PLAN.md` /
+`NOTES.md`.
 
 ---
 
-## 15. Session-start ritual
+## 15. Session-start ritual  *[updated S26]*
 
 Every time you open this repo:
 
-1. **Read this file top to bottom.** ~15 minutes (it's grown).
-2. **Run fast test slice** (~10 min). Confirms working environment
-   and nothing rotted.
-3. **Run `python demo/single_machine_global.py`** (~17–25s).
-   Confirm `Cross-cluster gossip: VALID ✓` and `Bilateral
-   settlement: BILATERAL ✓`.
-4. **Check `git log --oneline -20`** to see what changed since last
-   session.
-5. **Identify the open priority** (§6). Confirm with user before
-   committing to a major direction.
+1. **Read this file (`CLAUDE.md`) top to bottom.** ~15 minutes.
+2. **Read the most recent 3 entries in `CHANGELOG.md`.** ~5 minutes.
+3. **Run fast test slice** (~10 min). Confirms environment + no rot.
+4. **Run `python demo/single_machine_global.py`** (~17–25s).
+   Confirm `Cross-cluster gossip: VALID ✓` + `Bilateral settlement: BILATERAL ✓`.
+5. **`cd gyza-rs && cargo test --workspace`** (~5–30s). Confirms
+   Rust port still passes parity.
+6. **Check `git log --oneline -20`**.
+7. **Identify the open priority** (§6, Quick start). Confirm with
+   user before committing to a major direction.
 
-If steps 2/3 fail, **stop and diagnose before doing new work.** A
-failing baseline is more important than any new feature.
+If steps 3–5 fail, **stop and diagnose before doing new work.**
 
-A note on flaky-deadline failures: Session 9 ran into one
-(`test_runner_verify_lineage_non_strict_proceeds_when_missing` had
-20s deadline tight on cold ST load). If you hit a similar timing
-flake, run in isolation — if it passes there in 30s+ but fails in
-suite at 20s, the deadline is the bug.
-
-`TestSenderSeqDedupRejects` (gossip) is timing-flaky under load;
-pre-existing. Retry in isolation before assuming your change is at
-fault.
+**Flaky tests to know about** (don't blame your change without
+checking):
+- `test_runner_verify_lineage_non_strict_proceeds_when_missing` —
+  20s deadline tight on cold ST load. Bump and document if needed.
+- `TestSenderSeqDedupRejects` (gossip) — timing-flaky under load.
+  Retry in isolation before blaming.
 
 ---
 
-## 16. Don't-do list
+## 16. Don't-do list  *[recategorized S26]*
 
-Things a session might be tempted to do that would be wrong.
-Each entry is a real trip-wire from past sessions.
+Things a session might be tempted to do that would be wrong. Three
+categories: hard rules (never), soft rules (surface to user), and
+resolved (was applicable; now closed).
 
-### Don't break what works
+### 16a. NEVER (hard rules)
 
-- **Don't add daemon auto-restart inside `gyza global start`.** CLI
-  returns immediately; supervisor dies with the process. Wire
-  supervision at `GlobalCluster` lifecycle layer for long-running
-  Python processes; keep CLI a one-shot launcher.
-- **Don't normalize embeddings client-side again.**
-  SentenceTransformer with `normalize_embeddings=True` already
-  returns L2-normalized vectors.
-- **Don't change `EMBEDDING_DIM` from 384.** Every advertisement is
-  keyed by LSH against 384 planes. Changing invalidates global
-  state.
-- **Don't use `verify_chain_multi_compositor` in the runner.**
-  Requires `trust_registry` + `artifact_store` plumbing not present.
-- **Don't replace SQLite with anything fancier without strong
-  reason.** WAL gives concurrent reads; writes serialize but
-  workload doesn't push that limit.
-- **Don't add background reward refresh inside runner.** Roadmapped
-  under Phase 1.5 polish. Runner's job is claim/execute/sign.
+**Cryptographic / canonical-bytes invariants:**
+- **Don't make Python's JSON-canonical cosigs interop with Go's
+  det-protobuf cosigs.** Different bytes; non-aggregatable.
+  Cross-network wire IS Go protobuf det-marshal.
+- **Don't have validators sign DIFFERENT cert payload bytes.**
+  Applicant proposes one body; orchestrator passes unmodified.
+- **Don't verify ICP envelopes against COMPOSITOR pubkey.**
+  Envelopes signed by AGENT identity. Cert binds at compositor.
+- **Don't reorder fields in `gyza-rs::gyza-icp::EnvelopePayload`.**
+  Alphabetical order is load-bearing for canonical-JSON parity
+  with Python.
+- **Don't paste Rust parity fixtures from imagination.** Always
+  run the Python fixture script first.
 
-### Don't skip verification
-
+**State-machine invariants:**
+- **Don't change `EMBEDDING_DIM` from 384.** Constitutional invariant.
 - **Don't bypass `verify_chain_before_claim` in tests "for speed."**
   Use the flag explicitly.
-- **Don't skip writing tests for the remaining priority items.** The
-  test-then-ship pattern of Sessions 8.5+ caught real bugs (HLC
-  thread-safety, chain-verify race, settlement disputes on misroute,
-  reconciliation cross-peer injection, canonicalization gap,
-  plausibility check matrix).
-
-### Don't merge locks
-
 - **Don't merge `LedgerSettlementService._lock` and `_pending_lock`.**
-  Different concerns; merging lets slow reconcile caller block payer
-  cosignature decisions.
-- **Don't merge `_lock` and `_proc_lock` in `DaemonSupervisor`.**
-  Different concerns; merging would deadlock heartbeat against
-  concurrent `stop()`.
-- **Don't merge verifier's `mu` and `sem`.** Cache + inflight state
-  vs. concurrency bound. Different concerns; merging serializes the
-  cache hot path against fetch latency.
+- **Don't merge `DaemonSupervisor._lock` and `_proc_lock`.**
+- **Don't merge `DHTAttestationVerifier.mu` and `.sem`.**
+- **Don't set `WorkItem.ttl_ns=0`** in eval flows. Immediately
+  expires.
+- **Don't read `LocalCompositor`'s key file expecting compositor
+  signing seed.** File holds master seed; signing key is
+  HKDF-derived. Pass `.sign` as callable.
 
-### Don't reorder load-bearing argv
-
+**Sandboxing / safety:**
 - **Don't reorder bwrap argv in `_build_bwrap_argv`** without
   understanding layering. `--tmpfs /tmp` MUST come before user
-  `ro_paths` so tmp-rooted ro_path lands on top.
+  `ro_paths`.
 - **Don't bind `/lib64` as `--ro-bind`** on merged-/usr distros.
-  Use `--symlink` — `_HostMount` handles this. A directory bind
-  breaks the dynamic linker.
-- **Don't pass API keys as bwrap argv.** Use `env_set` so the value
-  reaches the sandbox via `--setenv KEY VALUE`. Argv visible to `ps`.
+  Use `--symlink`.
+- **Don't pass API keys as bwrap argv.** Use `env_set` (`--setenv KEY VALUE`).
 
-### Don't break the eval / attestation invariants
-
-- **Don't use `prompt.find("[GYZA_EVAL_TASK=")`. Use `rfind`.**
-  Runner's `build_enriched_prompt` prepends few-shot context with
-  prior tasks' markers verbatim. Scanning from start silently solves
-  the WRONG task.
-- **Don't set `WorkItem.ttl_ns=0` in eval flows.** Blackboard's
-  `get_unclaimed` filter is `(created_at_ns + ttl_ns) > now_ns`;
-  zero TTL immediately expires.
-- **Don't read `LocalCompositor`'s key file expecting compositor
-  signing seed.** File holds master seed; compositor signing key is
-  HKDF-derived. Pass `LocalCompositor.sign` as callable.
-- **Don't have validators sign DIFFERENT cert payload bytes.** Every
-  cosig in a Tier-3 cert is over the SAME canonical bytes. Applicant
-  proposes one body; `run_attestation` / orchestrator passes it
-  unchanged.
-- **Don't verify ICP envelopes against COMPOSITOR pubkey.** Envelopes
-  signed by AGENT identity. Cert binds at compositor; eval verifier
-  checks at agent.
+**Attestation invariants:**
+- **Don't drop validator plausibility checks on proposed body.**
+  Six attack vectors defended.
 - **Don't restore the `IcpAgentPubkeyHex == ApplicantPubkey` check
   in `verifyTaskResult`.** Session 13 deliberately removed it.
-  Re-adding would break every cross-network attestation with real
-  Python applicants.
 - **Don't skip validator clock-skew check.** Malicious applicant
-  could propose body with `issued_at_ns` 6 months in past — cert
-  appears near-expired immediately.
-- **Don't accept cert whose validators aren't themselves Tier-3.**
-  Pair the pure verifier with a separate "validator pubkey was
-  attested Tier-3" lookup (§6 A2).
-- **Don't author `AttestationBody` validator-side when quorum
-  aggregation is needed.** Session 14's fix: applicant-proposed body
-  per session. Authoring per-validator guarantees non-aggregation;
-  `AssembleAttestation` will reject with "self-verify fails."
-- **Don't drop validator plausibility checks on proposed body.** Six
-  attack vectors defended (applicant_pubkey mismatch, wrong tier,
-  clock skew, lifetime, expiry, task_ids).
-
-### Don't fight the cross-language canonicalization
-
-- **Don't try to make Python's JSON-canonicalized cosigs interoperate
-  with Go's deterministic-protobuf cosigs.** Different bytes;
-  non-aggregatable. Cross-network wire format IS Go protobuf with
-  deterministic marshal. Python adapters use Python protobuf library.
+  could backdate cert.
 - **Don't add a kickoff frame to `/gyza/capability-challenge/1.0.0`.**
-  Validator extracts applicant pubkey from libp2p RemotePeer
-  (Noise-authenticated). 3 frames not 4. Adding kickoff lets
-  applicant claim a different pubkey than libp2p identity.
+  Validator extracts applicant pubkey from libp2p RemotePeer.
 - **Don't run the eval before verifying the challenge signature.**
-  `RequestAttestation` calls `capMgr.VerifyChallenge` BEFORE eval.
-  Eval is slow; malformed challenge from spoofing peer must be
-  rejected without burning applicant CPU.
-- **Don't drift validator's task list from applicant's eval suite.**
-  `capability_stream.Manager.TaskIDs` hardcoded to match
-  `gyza/capability_eval.py::EVAL_TASKS`. Drift surfaces silently as
-  "missing task result" rejection.
-
-### Don't break the network protocol
-
-- **Don't remove the per-stream deadline.** `StreamTimeout = 120s`.
-  Bounds applicant↔validator exchange; longer admits DoS; shorter
-  starves slow honest peers.
-- **Don't write unstructured errors to libp2p stream.** Validator
-  rejections wire-encoded as `VerifyResponseResult{Success=false,
-  Error=<reason>}`. Network/IO errors close stream silently.
-- **Don't drop a Daemon→Python `Outcome` frame on any failure path
-  of `RequestAttestation`.** Python's read loop has one shape: loop,
-  Challenge→eval+response, Outcome→return. Skipping the final Outcome
-  deadlocks Python until gRPC timeout.
-- **Don't reach into `gyza.icp._payload_bytes` from outside
-  attestation_adapter without thinking.** Adapter MUST produce
-  byte-identical canonical bytes to what `sign_envelope` signed.
-  Reimplementing the canonicalization creates dual maintenance.
-
-### Don't break Session 15's verify-on-fetch invariants
-
-- **Don't trust `AgentAdvertisement.attestation_tier` from
-  third-party sources** without verifying the cert. Daemon's
-  `find_agents` enforces verify-on-fetch; code paths that bypass
-  inherit the old self-report weakness.
-- **Don't bypass the verifier by passing `min_tier < IssuedTier`
-  when needing Tier-3 trust.** Verifier ONLY fires at `min_tier >=
-  IssuedTier`. Production code wanting Tier-3 trust MUST set
-  `min_tier=3`.
-- **Don't disable the default verifier with
-  `SetAttestationVerifier(nil)`** outside test code. Disables
-  verify-on-fetch silently. `panickingVerifier` pattern uses this
-  intentionally to prove the verifier isn't called at low tiers.
-- **Don't tune `expirySlack` below the routing horizon.** Default
-  1h. Smaller means cert expiry can sneak inside a request's
-  lifetime.
-- **Don't cache transient verifier failures.** Positive + definitive
-  negative ARE cached. Transient (fetch error, timeout,
-  semaphore-blocked-ctx-cancel) MUST NOT cache.
-- **Don't key the verifier cache by `agent_pubkey`.** Cert lookup is
-  by COMPOSITOR pubkey. Multiple agents share one compositor and one
-  cert. Wired call site uses `ad.CompositorPubkey`.
-- **Don't rely on `kaddht.ModeAuto` for cross-daemon DHT in loopback
-  integration tests.** ModeAuto stays in Client mode without
-  AutoNAT. Tests MUST set `dht_mode="server"`.
-
-### Don't break Session 16's A1/A2 invariants
-
-- **Don't publish certs with <24h remaining lifetime.** The
-  `MinPublishAttestationLifetime` floor in `dht.PublishAttestation`
-  is load-bearing for the publish-side gap closure. Tests building
-  certs MUST use ≥48h (24h sits exactly on the boundary and trips
-  on millisecond clock drift).
-- **Don't loosen `AttestationExpiryGrace` past ~minutes.** It's the
-  validator-side clock-skew tolerance for storage and fetch
-  validation. NTP-quality clocks run inside it; a wider grace
-  defeats the publish-side defense.
+  Slow step; reject malformed challenges first.
+- **Don't remove the per-stream deadline (`StreamTimeout = 120s`).**
+- **Don't drop the Daemon→Python Outcome frame** on any failure
+  path of `RequestAttestation`. Python's read loop deadlocks.
 - **Don't use empty `TrustedBootstrap` with `RecursiveVerifier`.**
-  No base case → all certs rejected. The verifier requires a
-  configured bootstrap set; an empty set is a configuration error,
-  not a permissive mode.
-- **Don't cache negative results in `RecursiveVerifier`.** Same
-  asymmetry as the verify-on-fetch verifier: positives stable,
-  negatives transient. Sticky-negative caching would hide
-  validators that become Tier-3 between calls. The cost (re-fetch
-  per non-Tier-3 cosig per top-level Verify) is bounded by cosig
-  count and acceptable.
-- **Don't accept a fetched cert whose `ApplicantPubkey` ≠ the
-  queried pubkey.** The recursive verifier rejects this exact
-  substitution attack. A DHT peer could serve someone else's
-  legitimate Tier-3 cert in response to a fetch for a non-Tier-3
-  pubkey; without the check, the recursion would accept the cert
-  and count the unrelated pubkey as Tier-3. Test:
-  `TestRecursive_WrongPubkeyOnFetchedCert`.
-- **Don't drop cycle detection from `RecursiveVerifier`.** A→B→A
-  mutual-validation farm. Cosigners that recursively cosign each
-  other's certs are a Sybil pattern. The `seen` path-tracking set
-  rejects them. Test: `TestRecursive_CycleRejected`.
+  All certs rejected.
+- **Don't accept a fetched cert whose `ApplicantPubkey` ≠ queried
+  pubkey** in `RecursiveVerifier`. Substitution attack.
+- **Don't drop cycle detection from `RecursiveVerifier`.**
+  Mutual-validation farm attack.
+- **Don't cache transient verifier failures** in
+  `DHTAttestationVerifier`. Positive + definitive negative only.
+- **Don't key the verifier cache by `agent_pubkey`.** Compositor
+  pubkey; multiple agents share one compositor and one cert.
+- **Don't publish certs with <24h remaining lifetime.** The
+  `MinPublishAttestationLifetime` floor is load-bearing.
 
-### Don't break the vNext commitment (Session 17)
+**Eval invariants:**
+- **Don't use `prompt.find("[GYZA_EVAL_TASK=")`. Use `rfind`.**
+  `build_enriched_prompt` prepends few-shot context with prior
+  tasks' markers.
 
-- **Don't treat §8 as optional or as one of several paths.** As of
-  Session 17 it is the committed architecture. Future sessions
-  proceed under the commitment; if you disagree, surface it
-  explicitly at session start.
-- **Don't build Phase 4–9 features on the v1 substrate.** They ride
-  on vNext (§C7–§C12). Surface the trade-off when asked; don't
-  quietly ship v1 code that gets thrown away during migration.
-- **Don't start vNext layer-2+ work before §C1 (TLA+ spec of v1) is
-  done.** Every downstream layer depends on a verified spec of what
-  v1 actually does. Skipping the spec is the same mistake the
-  current architecture made (implementation-defined protocol).
-- **Don't introduce wire-format-breaking changes without v1↔v2
-  compatibility plan.** New protobuf messages, gRPC methods, DHT
-  record types must be reviewed against the migration mechanics
-  (§8 `Migration mechanics`). Reserved-field discipline is
-  non-negotiable.
-- **Don't relax the commitment via incrementalism.** "Just this one
-  Phase 4 feature on v1" is the pattern that undoes the commitment.
-  When tempted, re-read §6's parallel-vs-sequential table.
-- **Don't ship "the maximalist version" features without the
-  corresponding safety primitives.** Capability bounds, approval
-  gates, sunset clauses, immune system are not optional. They're
-  load-bearing for the "beneficial Skynet" property. §C9, §C10 are
-  preconditions for Phase 6 (embodied / actuator work).
-- **Don't lock in specifics that §8 lists as design surface remaining.**
-  Specific PQ algorithm, specific zk-proof system, specific
-  differential-dataflow engine, UCBI activation, specific voting
-  mechanism are intentionally open within the commitment. Future
-  sessions can debate them; don't quietly settle them via
-  implementation choice.
-- **Don't conflate the operational v1 codebase with the vNext target
-  in code-writing sessions.** When working on v1 hardening, write
-  v1 code with v1 conventions. When working on vNext layers, the
-  conventions / language / formal-verification discipline differ.
-  The two stacks coexist during migration; don't muddle them.
-- **Don't skip the Session 5 narrative entry on strategic-decision
-  sessions.** Strategic decisions that bind future sessions need a
-  §5 entry, not just an edit elsewhere. Otherwise the doc-history
-  trail breaks.
+**vNext commitment:**
+- **Don't treat §8 as optional.** Committed Session 17.
+- **Don't start vNext layer-2+ work before §C1 is done.**
+- **Don't introduce wire-format-breaking changes** without v1↔v2
+  compatibility plan.
+- **Don't relax the commitment via incrementalism.**
+- **Don't conflate v1 codebase with vNext target** in code-writing
+  sessions.
+
+### 16b. SURFACE TO USER (soft rules — flag before acting)
+
+- **Don't build Phase 4–9 features on the v1 substrate.** Surface
+  the trade-off when asked; v2 is the right substrate.
+- **Don't aggressively rewrite for vNext** without confirming with
+  user (different from continuing the migration; this is about
+  changing scope).
+- **Don't ship "maximalist version" features without the
+  corresponding safety primitives** (capability bounds, approval
+  gates, sunset clauses).
+- **Don't lock in specifics that §8 lists as design surface
+  remaining.** PQ algorithm, zk-proof system, dataflow engine,
+  UCBI activation, voting mechanism.
+- **Don't add daemon auto-restart inside `gyza global start`.**
+  CLI is one-shot; supervision lives in `GlobalCluster` for
+  long-running Python processes.
+- **Don't normalize embeddings client-side again.** ST returns
+  L2-normalized.
+- **Don't use `verify_chain_multi_compositor` in the runner.**
+  Plumbing not present.
+- **Don't replace SQLite with anything fancier without strong
+  reason.**
+- **Don't add background reward refresh inside runner.**
+- **Don't skip writing tests** for new priority items. The
+  test-then-ship pattern of S8.5+ caught real bugs.
+- **Don't loosen `AttestationExpiryGrace` past ~minutes.**
+- **Don't tune `expirySlack` below the routing horizon.** Default 1h.
+
+### 16c. RESOLVED (was applicable; now closed — for history)
+
+- ~~Don't bypass `find_agents` self-reported tier verification~~
+  — closed S15 (verify-on-fetch in routing).
+- ~~Don't accept certs near expiry from publish~~ — closed S16
+  (24h floor).
+- ~~Don't accept any pubkey as Tier-3 validator~~ — partial close
+  S16 (RecursiveVerifier shipped; integration is A5).
 
 ---
 
@@ -3502,9 +1458,8 @@ Each entry is a real trip-wire from past sessions.
 Ask the user. The user is the architect, makes scoping calls, owns
 strategic decisions (tokenomics, foundation entity, regulatory
 posture, Skynet-scope ambition vs. pragmatic v1, what counts as
-Tier-3, who runs bootstrap nodes, what credits redeem to).
-
-When in doubt about scope or priority, ask.
+Tier 3, who runs bootstrap nodes, what credits redeem to). When in
+doubt about scope or priority, ask.
 
 When the user says "think really hard like a CS PhD" — that's the
 quality bar. Don't ship hand-wavy code. Audit before fixing. Test
@@ -3514,6 +1469,6 @@ Tell the user when you disagree with the requested direction.
 The architecture you're working on is a strong v1 that could grow
 into something globally significant. It could also stall. The
 trajectory depends on engineering discipline (your job) and
-strategic decisions (user's job). Stay in your lane; deliver the
-engineering at the quality bar; surface the strategic tradeoffs;
+strategic decisions (user's job, §11). Stay in your lane; deliver
+the engineering at the quality bar; surface the strategic tradeoffs;
 let the user choose.
