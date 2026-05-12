@@ -55,17 +55,17 @@
 > ---
 >
 > **Audience:** A future Claude session continuing work on this repo.
-> **Last updated:** end of Phase 3 Session 22 (Rust Stream 3
-> continues — `gyza-icp` ported with canonical-JSON byte-parity).
-> Sessions 17–20 closed strategic + documentation + infrastructure
-> scaffolding. Session 21 kicked off Stream 3 (`gyza-crypto` +
-> `gyza-identity`). **Session 22 adds `gyza-icp`** — ICP envelope
-> canonical-JSON serialization + BLAKE3 hashing + Ed25519 signing,
-> validated by Python-parity assertions on canonical bytes,
-> envelope hash, AND signature. 21 Rust tests total across 3 crates,
-> all passing. Phase 0 streams 1 (TLA+), 3 (Rust), 4 (ADR log) all
-> in progress; stream 2 (Coq proofs) deferred per Session 19 luxury
-> assessment.
+> **Last updated:** end of Phase 3 Session 25 (Rust Stream 3 sweep —
+> verify_chain + gyza-core + gyza-blackboard). The Rust substrate
+> now has a complete data + crypto + provenance + storage layer
+> independent of Python. **51 tests across 5 crates**: gyza-crypto
+> (6), gyza-identity (7), gyza-icp (16, incl. chain verify),
+> gyza-core (10, incl. concurrent HLC uniqueness), gyza-blackboard
+> (12, real SQLite with WAL). Phase 0 streams 1 (TLA+) and 4
+> (ADR log) progressing; stream 3 (Rust) accelerating; stream 2
+> (Coq) still deferred. Next sub-session candidates: gyza-settlement
+> (port from Settlement.tla) or extend gyza-blackboard with
+> artifacts table + claim/complete idempotency variants.
 >
 > **What this file is.** A grounded reference. Everything below is
 > either (a) code that's been read and verified, (b) hard-won
@@ -449,7 +449,9 @@ fix parametrizes via `$(PYTHON)`. Packaging debt; tracked in §6.
 │   ├── MIGRATION.md      # porting strategy + module status
 │   ├── gyza-crypto/      # Ed25519 + BLAKE3 + key derivation (parity ✓)
 │   ├── gyza-identity/    # LocalCompositor + AgentIdentity (parity ✓)
-│   ├── gyza-icp/         # Session 22 — ICP envelope sign/verify (parity ✓)
+│   ├── gyza-icp/         # Session 22+23 — envelope sign/verify + verify_chain
+│   ├── gyza-core/        # Session 24 — WorkItem + Artifact + HLC
+│   ├── gyza-blackboard/  # Session 25 — SQLite-backed storage
 │   └── scripts/          # parity fixture generators
 │       ├── regenerate_crypto_fixtures.py
 │       └── regenerate_icp_fixtures.py
@@ -649,6 +651,111 @@ Newer sessions on top. Each entry: what it shipped, the architectural
 decisions, the trip-wires discovered. These narratives are the
 durable institutional memory of the project; they're load-bearing
 for future sessions and should be preserved across rewrites.
+
+### 5-pre-11. Sessions 23–25 — Rust Stream 3 sweep (verify_chain + gyza-core + gyza-blackboard)
+
+Three consecutive Phase 0 Stream 3 sessions. Each committed
+separately (42ace1f, 662452e, [Session 25 commit]) but narrated
+together because they share a coherent target: complete the Rust
+substrate's data + provenance + storage layer.
+
+**Session 23 — `verify_chain` in gyza-icp.** Adds chain verification
+walking parent_envelope_hash links. Per-hop checks: (1) agent_pubkey
+decodes + signature verifies, (2) parent hash matches BLAKE3 of
+prior envelope (None for root), (3) input_hashes non-empty.
+`ChainVerificationError` carries the first failing index — matches
+Python's `(False, first_bad_index)` semantics in a structured form.
+8 new tests including the §INV-ICP-5 "injection breaks chain"
+proof.
+
+**Session 24 — `gyza-core`.** Ports `gyza/schema.py`. Three types:
+WorkItem (with `new_validated` constructor enforcing embedding
+length / reward range / tier range), Artifact (serializable),
+and Hlc (Kulkarni 2014 hybrid logical clock). The HLC is the
+notable one — internal `Mutex<HlcState>` makes `now()` and
+`recv()` atomic; a stress test with 8 threads × 1000 calls validates
+the §INV-X-5 uniqueness invariant (8000 distinct HlcTuples
+produced under shared-clock contention). 10 tests.
+
+**Session 25 — `gyza-blackboard`.** Ports the core surface of
+`gyza/blackboard.py`. SQLite via rusqlite (bundled feature — no
+system sqlite dep). Three tables: `human_intents`, `work_items`,
+`icp_envelopes`. Operations: open[+in_memory], post_intent,
+post_work_item, claim_work_item (atomic via `WHERE claimed_by IS
+NULL`), complete_work_item, get_unclaimed (reward + tier + TTL
+filter, reward DESC ordering), store_envelope (idempotent INSERT
+OR IGNORE), get_envelope, reconstruct_chain (walks parent links
+root-first). Embedding blob encoding matches Python's
+`np.ndarray.tobytes()` for float32 LE. 12 tests including atomic
+claim race semantics and embedding roundtrip preservation.
+
+**Stream 3 cumulative status:**
+
+| Crate | Lines | Tests | Notable |
+|---|---|---|---|
+| gyza-crypto | ~280 | 6 | 4 Python-parity assertions |
+| gyza-identity | ~210 | 7 | 4 parity tests |
+| gyza-icp | ~650 (with verify_chain) | 16 | 3 parity + 8 chain tests |
+| gyza-core | ~480 | 10 | concurrent-HLC uniqueness |
+| gyza-blackboard | ~580 | 12 | real SQLite via rusqlite-bundled |
+
+**Total: 51 tests across 5 crates, all green.** The Rust substrate
+now has a complete data + provenance + storage layer that a vNext
+runner can stand on. v1↔v2 schema compatibility achieved
+(blackboard schema matches Python).
+
+**Architectural choices made across these sessions:**
+
+- **Sign-the-hash discipline preserved.** All envelopes signed via
+  `Ed25519(seed, BLAKE3(canonical_bytes))` — never canonical_bytes
+  directly. Documented in `gyza-icp/src/lib.rs` top-of-file comment.
+- **Alphabetized struct fields for canonical-JSON types.** Locked
+  in across `EnvelopePayload`. Future canonical-bytes types follow
+  this convention.
+- **Embedding storage as little-endian f32 blob.** Matches Python's
+  `np.ndarray.tobytes()` byte-for-byte; SQLite reads from one
+  language are valid in the other.
+- **Idempotent envelope storage.** `INSERT OR IGNORE` matches
+  Python's "return existing hash on duplicate" semantics.
+- **Mutex<Connection> for SQLite.** Single global lock; rusqlite's
+  Connection isn't Sync. Future scaling to a connection pool is a
+  drop-in change.
+- **Optional<bool> for nullable success column.** Matches Python's
+  `bool | None` — serialized via `i32` 0/1 with NULL → None.
+- **Atomic claim via conditional UPDATE.** `UPDATE ... WHERE
+  claimed_by IS NULL` is SQLite-atomic; returns rows-affected=0
+  if another claim won the race. Matches Python's lock-free idiom.
+
+**Trip-wires surfaced:**
+
+- **`serde_json::Error` doesn't implement Eq/PartialEq.** Affects
+  derive on error enums that embed it. Workaround: store the
+  message as String. Caught in gyza-icp's `ChainVerificationError`.
+- **Doc-comment list-item indentation** (clippy
+  `doc-overindented-list-items`) requires exactly 4-space
+  continuation indent. Different from Python docstring conventions.
+- **`use gyza_icp::{X, Y, Z};` where X is only used in tests**
+  triggers `unused_imports`. Move to test module's
+  `use gyza_icp::{X};` to fix.
+- **rusqlite without `bundled` requires system sqlite3.** Bundled
+  takes longer to compile (~15s) but gives portable binaries —
+  worth the trade for v2.
+
+**What's NOT yet ported (Phase 0 Stream 3 remaining):**
+
+- `gyza-settlement` — implement directly from `Settlement.tla`.
+  This is the §C1 spec ↔ Rust pairing that closes Stream 3's
+  spec-derives-impl story.
+- `gyza-blackboard` artifacts + artifact_files tables.
+- `gyza-blackboard` idempotent variants (post_intent_direct, etc.).
+- `gyza-capability` — Tier-3 challenge-response.
+- gRPC layer to talk to a Rust-written daemon.
+
+**Strategic significance.** This is the first session series where
+the Rust port could plausibly run end-to-end agent code without
+Python. The remaining gaps (settlement, capability, gRPC) are
+known; the foundation is solid; future ports follow the same
+playbook.
 
 ### 5-pre-10. Session 22 — gyza-icp port (canonical JSON parity)
 

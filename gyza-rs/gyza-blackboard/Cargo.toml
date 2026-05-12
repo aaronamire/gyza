@@ -1,0 +1,15 @@
+[package]
+name = "gyza-blackboard"
+description = "SQLite-backed blackboard for Gyza. Stores intents, work_items, ICP envelope log. Single-process; thread-safe via internal mutex. Ports gyza/blackboard.py's core surface."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gyza-core = { path = "../gyza-core" }
+gyza-icp = { path = "../gyza-icp" }
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

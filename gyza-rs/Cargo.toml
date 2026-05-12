@@ -27,6 +27,7 @@ members = [
     "gyza-identity",
     "gyza-icp",
     "gyza-core",
+    "gyza-blackboard",
 ]
 
 [workspace.package]
@@ -49,6 +50,11 @@ thiserror = "2.0"
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# Storage
+# bundled = statically compile SQLite so we don't depend on a
+# system-installed sqlite3; trades binary size for portability.
+rusqlite = { version = "0.32", features = ["bundled"] }
 
 # Testing
 hex-literal = "0.4"
