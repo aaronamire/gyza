@@ -204,6 +204,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gyza-core"
+version = "0.1.0-vnext.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "gyza-crypto"
 version = "0.1.0-vnext.0"
 dependencies = [

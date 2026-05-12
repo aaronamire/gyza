@@ -26,6 +26,7 @@ members = [
     "gyza-crypto",
     "gyza-identity",
     "gyza-icp",
+    "gyza-core",
 ]
 
 [workspace.package]
