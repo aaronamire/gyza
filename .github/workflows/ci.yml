@@ -107,3 +107,38 @@ jobs:
           java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
             -deadlock -workers 4 \
             -config Settlement.cfg Settlement.tla
+
+  rust:
+    name: gyza-rs (Rust reference impl)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo registry + git
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            gyza-rs/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('gyza-rs/**/Cargo.toml', 'gyza-rs/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Format check
+        run: cd gyza-rs && cargo fmt --all -- --check
+
+      - name: Clippy lint
+        run: cd gyza-rs && cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Build all crates
+        run: cd gyza-rs && cargo build --workspace --all-targets
+
+      - name: Run all tests (incl. Python-parity fixtures)
+        run: cd gyza-rs && cargo test --workspace --all-targets

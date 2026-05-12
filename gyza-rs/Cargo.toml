@@ -1,0 +1,55 @@
+# Gyza Rust workspace — vNext reference implementation.
+#
+# Phase 0 Stream 3 of the §C1 migration plan. Each crate ports one
+# Python module while maintaining byte-for-byte parity with the
+# existing implementation (validated by parity tests against fixed
+# Python-generated test vectors).
+#
+# Workspace layout:
+#
+#   gyza-rs/
+#     Cargo.toml              # this file — workspace root
+#     MIGRATION.md            # porting strategy + module-by-module status
+#     gyza-crypto/            # Ed25519 + BLAKE3 + HKDF-style derive primitives
+#     gyza-identity/          # LocalCompositor + AgentIdentity
+#     gyza-icp/               # (queued) ICP envelope sign/verify
+#     gyza-blackboard/        # (queued) blackboard interfaces
+#     gyza-core/              # (queued) protocol-level types
+#
+# Convention: every public function and type has a parity test
+# against fixed bytes that match Python's output exactly. Without
+# this, cross-language drift is silent.
+
+[workspace]
+resolver = "3"
+members = [
+    "gyza-crypto",
+    "gyza-identity",
+]
+
+[workspace.package]
+version = "0.1.0-vnext.0"
+edition = "2024"
+rust-version = "1.93"
+license = "MIT OR Apache-2.0"
+
+# Pinned-version table. Every crate inherits versions from here so
+# we have a single source of truth for the dependency tree.
+[workspace.dependencies]
+# Cryptography
+ed25519-dalek = { version = "2.2", default-features = false, features = ["std"] }
+blake3 = "1.5"
+hex = "0.4"
+
+# Errors
+thiserror = "2.0"
+
+# Testing
+hex-literal = "0.4"
+
+[profile.release]
+# Reasonable defaults for a library workspace. Tuning waits until we
+# have benchmarks.
+opt-level = 3
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,16 @@
+[package]
+name = "gyza-crypto"
+description = "Cryptographic primitives for Gyza — Ed25519, BLAKE3, key derivation. Byte-for-byte parity with the Python reference implementation."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+ed25519-dalek.workspace = true
+blake3.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+hex-literal.workspace = true

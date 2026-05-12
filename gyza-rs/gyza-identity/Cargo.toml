@@ -1,0 +1,15 @@
+[package]
+name = "gyza-identity"
+description = "Compositor + agent identity for Gyza. Master seed → HKDF-derived compositor signing key → per-agent identity issuance. Byte-for-byte parity with gyza.identity Python module."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gyza-crypto = { path = "../gyza-crypto" }
+hex.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+hex-literal.workspace = true

@@ -24,3 +24,6 @@ netd/bin/
 
 # TLA+ TLC scratch state (per-run state queue + checkpoints)
 spec/states/
+
+# Rust workspace build output.
+gyza-rs/target/
