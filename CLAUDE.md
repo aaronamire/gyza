@@ -37,12 +37,13 @@
 >
 > ---
 >
-> **Last updated:** end of Phase 3 Session 26 (CLAUDE.md restructure
-> + CHANGELOG split). Sessions 21–25 advanced Rust Stream 3 from 0
-> to 5 crates with 51 tests; Session 19 shipped first TLA+ sub-spec
-> (Settlement). **Next sub-session candidates:** `gyza-settlement`
-> (Rust port from `Settlement.tla` — closes the spec↔impl pairing)
-> or DNS-anchored bootstrap code in the daemon (B1 partial).
+> **Last updated:** end of Phase 3 Session 27 (`gyza-settlement`
+> Rust port — closes the §C1↔§C4 spec-derives-implementation loop).
+> Rust workspace now has 6 crates with 71 tests; Settlement.tla
+> (Session 19) → gyza-settlement (Session 27) is the first
+> formal-spec-to-Rust pairing. **Next sub-session candidates:**
+> Reconciliation TLA+ sub-spec, `gyza-capability` Rust port, or
+> DNS-anchored bootstrap code in the daemon (B1 partial).
 >
 > **What this file is.** A grounded reference. Everything below is
 > either code that's been read and verified, hard-won trip-wires
@@ -59,24 +60,26 @@
 **Where things are right now (Session 26):**
 
 - **Active stream:** Phase 0 of vNext migration. Specifically
-  Stream 3 (Rust reference implementation in `gyza-rs/`). 5 of
-  ~8 planned crates done with byte-for-byte Python parity.
-- **Next codeable thing:** `gyza-settlement` — port directly from
-  `spec/Settlement.tla`. Closes the §C1 "spec derives implementation"
-  loop. Or extend `gyza-blackboard` with artifacts table.
-- **Tests right now:** 51 Rust tests across 5 crates, all green.
+  Stream 3 (Rust reference implementation in `gyza-rs/`). 6 of
+  ~8 planned crates done with byte-for-byte Python parity. The
+  §C1↔§C4 spec-derives-implementation loop closed for Settlement
+  in Session 27.
+- **Next codeable thing:** Reconciliation TLA+ sub-spec
+  (continuation of Settlement.tla), OR `gyza-capability` Rust
+  port (Tier-3 challenge-response), OR daemon-side DNS-anchored
+  bootstrap code (B1 partial).
+- **Tests right now:** 71 Rust tests across 6 crates, all green.
   Python fast slice 457 + 1 skipped. Go suite all green. CI
   workflows in place.
 
 **Three most recent sessions one-liner each:**
 
-- Session 25: `gyza-blackboard` SQLite port (real SQLite via
-  rusqlite-bundled; schema-compatible with Python).
-- Session 24: `gyza-core` types (WorkItem, Artifact, thread-safe
-  HLC with concurrent-uniqueness test).
-- Session 23: `verify_chain` extension to `gyza-icp` (chain
-  walking with parent-hash linkage, signature verification, ≥1
-  input_hashes).
+- Session 27: `gyza-settlement` Rust port. Bilateral settlement
+  state machine derived directly from `Settlement.tla`. Python
+  parity on canonical sign bytes validated.
+- Session 26: CLAUDE.md restructure + CHANGELOG split.
+- Sessions 23–25: Rust Stream 3 sweep (`verify_chain`,
+  `gyza-core`, `gyza-blackboard`).
 
 **What's blocked on the user (can't be coded — see §11):**
 
@@ -88,16 +91,24 @@
 - Beta testers, security audit budget
 - Inference API budget / GPU
 
-**If you can pick anything to work on next, do `gyza-settlement`.**
-That's the highest-leverage Phase 0 Stream 3 milestone. Procedure:
+**If you can pick anything to work on next, candidates ranked:**
 
-1. Re-read `spec/Settlement.tla` + `spec/Settlement_invariants.md`.
-2. Add `gyza-rs/gyza-settlement/` crate to workspace.
-3. Implement state machine from the TLA+ spec (proposed →
-   earner_signed → payer_cosigned → applied + dispute paths).
-4. Port `_within_tolerance` (5 * |claimed - truth| ≤ truth for ±20%).
-5. Parity tests against fixed Python settlement entries.
-6. Update `MIGRATION.md` + `CHANGELOG.md` + commit Session 27.
+1. **Reconciliation TLA+ sub-spec** — natural continuation of
+   Settlement.tla. Closes INV-SETTLE-8..11 (cursor pagination,
+   for-peer guard, cross-peer injection, page cap). ~1 session.
+2. **`gyza-capability` Rust port** — Tier-3 challenge-response.
+   Larger than gyza-settlement; depends on `gyza-icp` (done) but
+   also needs deterministic-protobuf Rust port for cross-language
+   wire compat. ~2 sessions.
+3. **DNS-anchored bootstrap code in the daemon (B1 partial)** —
+   daemon-side `DefaultBootstrapPeers` resolution from
+   `gyza.network` DNS + hardcoded pubkey-pinned fallbacks. User
+   still needs VPSes + DNS domain (§11). ~1 session.
+4. **`gyza-reputation` Rust port** — EWMA-based reputation
+   tracker. Small, useful, no cross-language byte parity needed
+   (per-node state). ~1 session.
+5. **`gyza-blackboard` artifacts table** — completes the schema
+   compat. ~0.5 sessions.
 
 **Don't skip §15 (session-start ritual)**: run the fast slice and
 the integration demo before declaring anything ready, even
@@ -420,9 +431,11 @@ true; here for history).
 │   ├── gyza-icp/            # envelope sign/verify + verify_chain (parity ✓)
 │   ├── gyza-core/           # WorkItem + Artifact + HLC (S24)
 │   ├── gyza-blackboard/     # SQLite-backed storage (S25)
+│   ├── gyza-settlement/     # entry signing + payer_validate (parity ✓) (S27)
 │   └── scripts/             # parity fixture generators
 │       ├── regenerate_crypto_fixtures.py
-│       └── regenerate_icp_fixtures.py
+│       ├── regenerate_icp_fixtures.py
+│       └── regenerate_settlement_fixtures.py
 │
 ├── spec/                    # TLA+ formal protocol spec (S19+)
 │   ├── README.md
@@ -600,6 +613,8 @@ This section is the index.
 
 **Newest first. Click into `CHANGELOG.md` for full detail.**
 
+- **Session 27** — `gyza-settlement` Rust port (closes §C1↔§C4
+  spec-derives-implementation loop). 6 crates, 71 tests.
 - **Session 26** — CLAUDE.md restructure + CHANGELOG split.
 - **Sessions 23–25** — Rust Stream 3 sweep: `verify_chain` +
   `gyza-core` + `gyza-blackboard`. 51 Rust tests across 5 crates.

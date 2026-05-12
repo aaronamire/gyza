@@ -13,6 +13,103 @@
 
 ---
 
+## Session 27 — `gyza-settlement` Rust port (spec ↔ impl loop closed)
+
+Phase 0 Stream 3 + §C1↔§C4 milestone: the first Rust crate
+derived directly from a TLA+ formal spec. `spec/Settlement.tla`
+(Session 19) is the ground truth; `gyza-rs/gyza-settlement/` is
+the implementation.
+
+**Deliverables:**
+
+- `gyza-rs/gyza-settlement/` (~600 lines).
+  - `LedgerEntry` struct — bilateral ledger entry mirroring
+    `gyza.economy.ledger.LedgerEntry` (preserves the
+    `from_compositor` = payer / `to_compositor` = earner naming
+    for Python parity).
+  - `canonical_sign_bytes(entry, role)` — produces a 32-byte
+    BLAKE3 digest. `role` is `"earner"` or `"payer"`. **Python
+    parity validated** by fixture test.
+  - `sign_as_earner(entry, earner_signer)` /
+    `sign_as_payer(entry, payer_signer)` — set `to_signature` /
+    `from_signature` respectively. Verify signer's pubkey matches
+    the entry's claimed role.
+  - `verify_earner_signature` / `verify_payer_signature` /
+    `verify_entry`.
+  - `apply_cosigned_entry(entry)` — verify both sigs, flip
+    `settled = true`.
+  - `payer_validate(entry, recipient_pubkey, resolved_envelope,
+    our_amount, tolerance_ratio)` — the Settlement.tla
+    `HandleEarnerSigned` guard chain as a pure function. Checks
+    misroute → earner sig → envelope hash → amount tolerance, in
+    that order, matching the TLA+ action's branch structure.
+  - `within_tolerance(claimed, truth, ratio)` — ±tolerance check.
+- `gyza-rs/scripts/regenerate_settlement_fixtures.py` — Python
+  fixture generator.
+
+**20 unit tests:**
+- Amount canonicalization (`{:.6}` formatting matches Python `:.6f`).
+- Role distinctness (earner vs payer digests differ).
+- Earner sign + verify roundtrip.
+- Earner sign rejects wrong signer pubkey.
+- Payer cosign requires earner signature first.
+- Payer cosign verifies earner sig BEFORE signing (Settlement.tla
+  INV-SETTLE-2).
+- Payer cosign rejects wrong signer pubkey.
+- Full bilateral roundtrip → applied + verifiable.
+- Apply rejects unsettled (no payer sig) entry.
+- Apply rejects tampered amount (re-verify catches it).
+- `within_tolerance` basic + zero-truth edge case.
+- `payer_validate` happy path + 4 dispute paths (misroute,
+  envelope mismatch, amount outside tolerance, invalid earner sig).
+- Serde JSON roundtrip preserves verifiability.
+- **Canonical sign bytes parity with Python** (load-bearing):
+  - `canonical_sign_bytes(entry, "earner")` =
+    `6e9d9ae550d0c36b40038dd5e2f0c8f1bfb84bd392c845d3cdda1254fc67b440`
+  - `canonical_sign_bytes(entry, "payer")` =
+    `4f521f5c5b7461181de4c914a2d23753e5628c8649af263f1c4cd73a82412b1a`
+
+**Strategic significance.** Closes the §C1 ↔ §C4 loop: TLA+ spec
+(Session 19) → Rust implementation derived from spec (Session 27).
+The Settlement.tla state machine's branch structure (4 dispute
+paths + happy path) maps 1:1 onto `payer_validate`'s match arms
+and `SettlementError` variants. Future spec changes propagate to
+Rust via the parity tests + structured error types.
+
+**Workspace total after Session 27:** 71 tests across 6 crates
+(gyza-crypto 6, gyza-identity 7, gyza-icp 16, gyza-core 10,
+gyza-blackboard 12, **gyza-settlement 20**). All passing under
+`cargo fmt --check + clippy -D warnings + test --workspace`.
+
+**What this DOESN'T port (deferred to follow-ups):**
+
+- SQLite-backed `ComputeLedger` storage. Will mirror
+  `gyza-blackboard` pattern. ~1 session.
+- `LedgerSettlementService` (the network/messaging layer that
+  orchestrates the state machine over libp2p). Depends on Rust
+  gRPC + libp2p layers which don't exist yet. Multi-session work.
+- Reconciliation RPC. Separate Settlement.tla sub-spec needed
+  first (acknowledged in CLAUDE.md §6 C1 progress table).
+- Reputation hooks (`gyza-reputation` crate, future).
+- Settlement-latency observability (`gyza-observability` crate,
+  future).
+
+**Trip-wires this session surfaced:**
+
+- **`format!("{:.6}", f64)` rounds half-to-even by default**, same
+  as Python's `f"{:.6f}"`. Parity test passes for the values the
+  protocol uses. Don't rely on this for adversarial-edge floats;
+  Python's float repr has corner cases.
+- **`SettlementError::InvalidRole` returns early before any
+  other check.** Important: tests that construct entries with
+  invalid roles should expect this error, not the downstream
+  checks.
+- **Don't reuse the same Rust `Signer` for earner and payer.**
+  They have different compositor identities; tests use
+  `TEST_MASTER` for earner and `PAYER_MASTER` for payer.
+
+---
+
 ## Session 26 — CLAUDE.md restructure + CHANGELOG split
 
 **Strategic-decision session.** Restructured CLAUDE.md per the

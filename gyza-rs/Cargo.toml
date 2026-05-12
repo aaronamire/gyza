@@ -28,6 +28,7 @@ members = [
     "gyza-icp",
     "gyza-core",
     "gyza-blackboard",
+    "gyza-settlement",
 ]
 
 [workspace.package]

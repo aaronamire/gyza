@@ -49,6 +49,7 @@ TRACTABLE rather than perpetually fragile.
 | Envelope chain verification | gyza/icp.py::verify_chain | gyza-icp::verify_chain | ✓ Ported | 23 |
 | Schema types (WorkItem, Artifact, HLC) | gyza/schema.py | gyza-core | ✓ Ported (HLC thread-safe via Mutex) | 24 |
 | Blackboard core (intents, work_items, envelopes) | gyza/blackboard.py | gyza-blackboard | ✓ Ported (artifacts/files deferred) | 25 |
+| Settlement (entry signing + verification + payer validation) | gyza/economy/ledger.py + spec/Settlement.tla | gyza-settlement | ✓ Ported (storage / network deferred) | 27 |
 | Settlement (the §C1 spec target) | gyza/economy/settlement.py | gyza-settlement | ◯ Queued | — |
 | Attestation (Tier-3) | gyza/network/capability_protocol.py + netd/internal/capability/ | gyza-capability | ◯ Queued | — |
 
