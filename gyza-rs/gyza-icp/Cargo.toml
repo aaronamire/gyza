@@ -1,0 +1,17 @@
+[package]
+name = "gyza-icp"
+description = "Intent Chain Protocol envelopes for Gyza. Canonical-JSON over alphabetized fields; BLAKE3 hashing; Ed25519 signing. Byte-for-byte parity with the Python reference implementation."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gyza-crypto = { path = "../gyza-crypto" }
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+hex-literal.workspace = true

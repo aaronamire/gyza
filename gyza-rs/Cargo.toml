@@ -25,6 +25,7 @@ resolver = "3"
 members = [
     "gyza-crypto",
     "gyza-identity",
+    "gyza-icp",
 ]
 
 [workspace.package]
@@ -43,6 +44,10 @@ hex = "0.4"
 
 # Errors
 thiserror = "2.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 # Testing
 hex-literal = "0.4"

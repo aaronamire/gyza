@@ -45,7 +45,7 @@ TRACTABLE rather than perpetually fragile.
 |---|---|---|---|---|
 | Crypto primitives | gyza/icp.py (BLAKE3), Ed25519 wrappers | gyza-crypto | ✓ Ported, parity ✓ | 21 |
 | Compositor + agent identity | gyza/identity.py | gyza-identity | ✓ Ported, parity ✓ | 21 |
-| ICP envelope sign/verify | gyza/icp.py | gyza-icp | ◯ Queued | — |
+| ICP envelope sign/verify | gyza/icp.py | gyza-icp | ✓ Ported, parity ✓ | 22 |
 | Blackboard interfaces | gyza/blackboard.py | gyza-blackboard | ◯ Queued | — |
 | Schema types (WorkItem, Artifact, HLC) | gyza/schema.py | gyza-core | ◯ Queued | — |
 | Settlement (the §C1 spec target) | gyza/economy/settlement.py | gyza-settlement | ◯ Queued | — |
