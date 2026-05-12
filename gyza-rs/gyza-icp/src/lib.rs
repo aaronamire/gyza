@@ -184,6 +184,99 @@ pub fn verify_envelope_self(signed: &SignedEnvelope) -> Result<(), IcpError> {
     verify_envelope(signed, &pubkey)
 }
 
+/// Reasons a chain can fail verification at a specific envelope.
+///
+/// Mirrors the failure modes in Python `gyza.icp::verify_chain`. The
+/// `index` field is the position in the chain where the failure was
+/// observed — same semantics as the Python function's
+/// `(False, first_bad_index)` return tuple.
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+pub enum ChainVerificationError {
+    #[error("envelope at index {index}: agent_pubkey is malformed")]
+    BadAgentPubkey { index: usize },
+    #[error("envelope at index {index}: signature verification failed")]
+    SignatureFailed { index: usize },
+    #[error(
+        "envelope at index {index}: parent_envelope_hash mismatch \
+         (expected {expected:?}, got {got:?})"
+    )]
+    ParentHashMismatch {
+        index: usize,
+        expected: String,
+        got: Option<String>,
+    },
+    #[error("root envelope at index {index} has a non-null parent_envelope_hash")]
+    RootHasParent { index: usize },
+    #[error("envelope at index {index}: input_hashes is empty")]
+    EmptyInputHashes { index: usize },
+    /// Encoding failures shouldn't be reachable in practice (envelopes
+    /// constructed via the public API serialize cleanly), but we
+    /// surface a structured variant rather than panicking. The
+    /// message is a String rather than `serde_json::Error` because
+    /// the latter doesn't implement Eq/PartialEq.
+    #[error("internal canonical-bytes encoding failed at index {index}: {message}")]
+    EncodingError { index: usize, message: String },
+}
+
+/// Walk an envelope chain and verify each hop.
+///
+/// At each envelope `envelopes[i]`, three checks fire in order:
+///   1. `agent_pubkey` decodes to 32 bytes AND signature verifies.
+///   2. `parent_envelope_hash` matches `BLAKE3(canonical_bytes(envelopes[i-1]))`,
+///      OR is `None` if `i == 0` (the root envelope).
+///   3. `input_hashes` is non-empty.
+///
+/// Returns `Ok(())` on a chain that fully verifies. Returns an
+/// error with the first failing index otherwise. An empty chain
+/// is vacuously `Ok(())`.
+///
+/// Python equivalent: `gyza.icp::verify_chain(envelopes)` returning
+/// `(True, -1)` or `(False, first_bad_index)`. The Rust signature
+/// uses idiomatic `Result` with a structured error.
+pub fn verify_chain(envelopes: &[SignedEnvelope]) -> Result<(), ChainVerificationError> {
+    for (i, env) in envelopes.iter().enumerate() {
+        // (1) agent_pubkey + signature
+        let pk_bytes = hex::decode(&env.payload.agent_pubkey)
+            .map_err(|_| ChainVerificationError::BadAgentPubkey { index: i })?;
+        if pk_bytes.len() != 32 {
+            return Err(ChainVerificationError::BadAgentPubkey { index: i });
+        }
+        verify_envelope(env, &pk_bytes)
+            .map_err(|_| ChainVerificationError::SignatureFailed { index: i })?;
+
+        // (2) parent_envelope_hash linkage
+        if i == 0 {
+            if env.payload.parent_envelope_hash.is_some() {
+                return Err(ChainVerificationError::RootHasParent { index: i });
+            }
+        } else {
+            let prev = &envelopes[i - 1];
+            let expected = envelope_hash(&prev.payload).map_err(|e| {
+                ChainVerificationError::EncodingError {
+                    index: i,
+                    message: e.to_string(),
+                }
+            })?;
+            match env.payload.parent_envelope_hash.as_deref() {
+                Some(actual) if actual == expected => {}
+                got => {
+                    return Err(ChainVerificationError::ParentHashMismatch {
+                        index: i,
+                        expected,
+                        got: got.map(|s| s.to_string()),
+                    });
+                }
+            }
+        }
+
+        // (3) input_hashes non-empty
+        if env.payload.input_hashes.is_empty() {
+            return Err(ChainVerificationError::EmptyInputHashes { index: i });
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -339,5 +432,174 @@ mod tests {
         let h1 = envelope_hash(&p1).unwrap();
         let h2 = envelope_hash(&p2).unwrap();
         assert_ne!(h1, h2, "different envelopes must produce different hashes");
+    }
+
+    // ---- verify_chain tests ----------------------------------------
+
+    /// Build a fixed Ed25519 seed for test chains. Wraps gyza-crypto's
+    /// derive_seed against the test master so we don't redefine
+    /// crypto fixtures here.
+    fn test_compositor_seed() -> [u8; 32] {
+        use gyza_crypto::derive_seed;
+        const TEST_MASTER: [u8; 32] = hex_literal::hex!(
+            "0102030405060708090a0b0c0d0e0f10"
+            "1112131415161718191a1b1c1d1e1f20"
+        );
+        derive_seed(&TEST_MASTER, b"gyza.compositor.ed25519.v1", b"")
+    }
+
+    /// Build a length-N honest chain. Each envelope's
+    /// parent_envelope_hash references the prior envelope's hash;
+    /// each is signed with the compositor key from the test master.
+    fn build_honest_chain(n: usize) -> Vec<SignedEnvelope> {
+        let seed = test_compositor_seed();
+        let signer = gyza_crypto::Signer::from_seed(&seed);
+        let pubkey_hex = signer.pubkey_hex();
+
+        let mut chain: Vec<SignedEnvelope> = Vec::with_capacity(n);
+        let mut prev_hash: Option<String> = None;
+        for i in 0..n {
+            let payload = EnvelopePayload {
+                action_id: format!("act-{:04}", i),
+                agent_pubkey: pubkey_hex.clone(),
+                capability_manifest_hash: "cm".repeat(32),
+                duration_ms: 10 + i as i64,
+                inference_backend: "local".to_string(),
+                input_hashes: vec!["in".to_string()],
+                intent_id: "int-0001".to_string(),
+                model_identifier: "mock-eval".to_string(),
+                output_hash: format!("o{:063}", i),
+                parent_envelope_hash: prev_hash.clone(),
+                schema_version: 1,
+                timestamp_ns: 1_700_000_000_000_000_000 + i as i64,
+                tokens_in: 1,
+                tokens_out: 1,
+            };
+            let signed = sign_envelope(payload, &seed).expect("sign");
+            prev_hash = Some(envelope_hash(&signed.payload).expect("hash"));
+            chain.push(signed);
+        }
+        chain
+    }
+
+    #[test]
+    fn verify_chain_honest_chain_succeeds() {
+        let chain = build_honest_chain(5);
+        verify_chain(&chain).expect("honest chain must verify");
+    }
+
+    #[test]
+    fn verify_chain_empty_chain_vacuously_ok() {
+        let empty: Vec<SignedEnvelope> = Vec::new();
+        verify_chain(&empty).expect("empty chain verifies vacuously");
+    }
+
+    #[test]
+    fn verify_chain_root_with_parent_rejected() {
+        let mut chain = build_honest_chain(2);
+        // Set a parent on the root — must fail at index 0.
+        chain[0].payload.parent_envelope_hash = Some("aa".repeat(32));
+        // Re-sign so the signature matches the tampered payload;
+        // otherwise we'd hit SignatureFailed first instead of
+        // RootHasParent.
+        let seed = test_compositor_seed();
+        let payload = chain[0].payload.clone();
+        let resigned = sign_envelope(payload, &seed).unwrap();
+        chain[0] = resigned;
+
+        let err = verify_chain(&chain).expect_err("must reject");
+        assert_eq!(err, ChainVerificationError::RootHasParent { index: 0 });
+    }
+
+    #[test]
+    fn verify_chain_wrong_parent_hash_rejected() {
+        let mut chain = build_honest_chain(3);
+        // Tamper with the middle envelope's parent_envelope_hash and
+        // re-sign so we hit the parent-hash check rather than the
+        // signature check.
+        let seed = test_compositor_seed();
+        chain[1].payload.parent_envelope_hash = Some("ff".repeat(32));
+        let resigned = sign_envelope(chain[1].payload.clone(), &seed).unwrap();
+        chain[1] = resigned;
+
+        let err = verify_chain(&chain).expect_err("must reject");
+        match err {
+            ChainVerificationError::ParentHashMismatch { index, .. } => {
+                assert_eq!(index, 1)
+            }
+            other => panic!("expected ParentHashMismatch, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn verify_chain_signature_failure_rejected() {
+        let mut chain = build_honest_chain(3);
+        // Tamper with envelope 2's signature without re-signing.
+        // Signature is hex; flip the last nibble.
+        let mut sig: Vec<char> = chain[2].signature.chars().collect();
+        let last = sig.last_mut().unwrap();
+        *last = if *last == '0' { '1' } else { '0' };
+        chain[2].signature = sig.into_iter().collect();
+
+        let err = verify_chain(&chain).expect_err("must reject");
+        assert_eq!(err, ChainVerificationError::SignatureFailed { index: 2 });
+    }
+
+    #[test]
+    fn verify_chain_empty_input_hashes_rejected() {
+        let mut chain = build_honest_chain(2);
+        let seed = test_compositor_seed();
+        chain[1].payload.input_hashes.clear();
+        let resigned = sign_envelope(chain[1].payload.clone(), &seed).unwrap();
+        chain[1] = resigned;
+
+        let err = verify_chain(&chain).expect_err("must reject");
+        assert_eq!(err, ChainVerificationError::EmptyInputHashes { index: 1 });
+    }
+
+    #[test]
+    fn verify_chain_bad_agent_pubkey_rejected() {
+        let mut chain = build_honest_chain(2);
+        // Truncate the agent_pubkey hex — won't decode to 32 bytes.
+        // We do NOT re-sign, but BadAgentPubkey fires before
+        // signature verification by design.
+        chain[0].payload.agent_pubkey = "abc".to_string();
+        let err = verify_chain(&chain).expect_err("must reject");
+        assert_eq!(err, ChainVerificationError::BadAgentPubkey { index: 0 });
+    }
+
+    #[test]
+    fn verify_chain_injection_detected() {
+        // Splicing a forged envelope between two real ones breaks
+        // the chain. This is the §INV-ICP-5 invariant.
+        let mut chain = build_honest_chain(3);
+
+        // Forge an envelope with arbitrary fields and a non-matching
+        // signature. Splice it at index 1.
+        let fake = SignedEnvelope {
+            payload: EnvelopePayload {
+                action_id: "act-fake".to_string(),
+                agent_pubkey: "00".repeat(32),
+                capability_manifest_hash: "00".repeat(32),
+                duration_ms: 0,
+                inference_backend: "mock".to_string(),
+                input_hashes: vec!["ff".repeat(32)],
+                intent_id: "fake-intent".to_string(),
+                model_identifier: "injected".to_string(),
+                output_hash: "ff".repeat(32),
+                parent_envelope_hash: Some(envelope_hash(&chain[0].payload).unwrap()),
+                schema_version: 1,
+                timestamp_ns: 0,
+                tokens_in: 0,
+                tokens_out: 0,
+            },
+            signature: "ab".repeat(32),
+        };
+        chain.insert(1, fake);
+
+        // Fake envelope's signature won't verify against the all-zero
+        // pubkey, so we get SignatureFailed at index 1.
+        let err = verify_chain(&chain).expect_err("injection must break chain");
+        assert_eq!(err, ChainVerificationError::SignatureFailed { index: 1 });
     }
 }
