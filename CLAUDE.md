@@ -55,15 +55,17 @@
 > ---
 >
 > **Audience:** A future Claude session continuing work on this repo.
-> **Last updated:** end of Phase 3 Session 19 (first §C1 sub-spec:
-> Settlement.tla). Session 17 made vNext the architectural commitment.
-> Session 18 produced pre-spec artifacts (`docs/invariants.md`,
-> `docs/state-machines.md`, `docs/wire-protocol.md`). Session 19
-> delivered `spec/Settlement.tla` — TLA+ behavioral spec of bilateral
-> settlement, six safety invariants TLC-validated (1.2M states under
-> honest model, 5M states under adversarial). The §C1 work is now
-> underway; remaining sub-specs (Attestation, Blackboard, DHT,
-> Gossip) queued.
+> **Last updated:** end of Phase 3 Session 20 (Phase 0 mixed-stream
+> work: ADR log + CI workflows). Session 17 made vNext the
+> architectural commitment. Session 18 produced pre-spec artifacts.
+> Session 19 delivered the first TLA+ sub-spec. Session 20 added
+> the ADR log (15 retroactive ADRs documenting Phase 1 → Session 17
+> decisions, ADR-0001 through ADR-0015) and CI workflows
+> (`.github/workflows/ci.yml` for fast slice + TLC spec validation;
+> `.github/workflows/integration.yml` for nightly heavy integration).
+> §C1 work remains in progress; Phase 0 streams 1 (TLA+) and 4
+> (ADR log) now have artifacts; stream 3 (Rust ref impl) and
+> stream 2 (Coq proofs) not started.
 >
 > **What this file is.** A grounded reference. Everything below is
 > either (a) code that's been read and verified, (b) hard-won
@@ -435,7 +437,13 @@ fix parametrizes via `$(PYTHON)`. Packaging debt; tracked in §6.
 ├── docs/                 # Session 18 — pre-spec artifacts for §C1
 │   ├── invariants.md     # protocol invariants by ID (INV-X-N)
 │   ├── state-machines.md # state machines per major component
-│   └── wire-protocol.md  # consolidated wire-format reference
+│   ├── wire-protocol.md  # consolidated wire-format reference
+│   └── adr/              # Session 20 — Architecture Decision Records
+│       ├── README.md     # ADR format + index
+│       └── 0001-*.md     # ADRs 0001..0015 (retroactive)
+├── .github/workflows/    # Session 20 — CI
+│   ├── ci.yml            # fast slice + Go suite + TLC on push/PR
+│   └── integration.yml   # heavy integration nightly + on-touch
 ├── spec/                 # Session 19 — TLA+ formal protocol spec
 │   ├── README.md         # how to run TLC, scope per sub-spec
 │   ├── Settlement.tla    # bilateral settlement behavioral spec
@@ -632,6 +640,126 @@ Newer sessions on top. Each entry: what it shipped, the architectural
 decisions, the trip-wires discovered. These narratives are the
 durable institutional memory of the project; they're load-bearing
 for future sessions and should be preserved across rewrites.
+
+### 5-pre-8. Session 20 — Phase 0 mixed-stream: ADR log + CI
+
+Mixed-stream Phase 0 session per the strategic decision in Session
+19's closing exchange ("the TLA+ work is one of four Phase 0
+streams; the other three aren't started"). This session lands two
+of the unaddressed streams: ADR log (Phase 0 Stream 4) and CI
+(Bucket B3 deployment-readiness). No further TLA+ sub-spec this
+session.
+
+**Deliverables:**
+
+- `docs/adr/` directory with 15 retroactive ADRs documenting major
+  architectural decisions from Phase 1 through Session 17:
+  - ADR-0001: Python + Go split via gRPC bridge
+  - ADR-0002: Ed25519 + BLAKE3 cryptographic primitives
+  - ADR-0003: 384-dim embeddings + LSH for discovery
+  - ADR-0004: Bilateral compute-credit settlement
+  - ADR-0005: Linear ICP envelope chains
+  - ADR-0006: Blackboard coordination pattern
+  - ADR-0007: Kademlia DHT under `/gyza/1.0` prefix
+  - ADR-0008: bwrap executor sandboxing
+  - ADR-0009: Tier-3 attestation with k-of-n quorum cosigs
+  - ADR-0010: libp2p `/gyza/capability-challenge/1.0.0`
+  - ADR-0011: Python-initiated bidi gRPC bridge
+  - ADR-0012: Applicant-proposed AttestationBody for multi-validator quorum
+  - ADR-0013: TTL-cached single-flight verify-on-fetch verifier
+  - ADR-0014: Recursive Tier-3 verification with trusted bootstrap set
+  - ADR-0015: vNext as the committed architectural target
+- `docs/adr/README.md` — ADR format, index, and maintenance rules.
+- `.github/workflows/ci.yml` — fast CI on push/PR. Three parallel
+  jobs: Go test suite (~5s), Python fast slice (~10min), TLC
+  Settlement.tla validation (~30s). Heavy integration excluded.
+- `.github/workflows/integration.yml` — nightly + on-touch heavy
+  integration: real-daemon multi-host tests + demo-of-record.
+  Schedule: 04:00 UTC daily. Trigger on `netd/`, `gyza/network/`,
+  or workflow-self changes.
+
+**Rationale (cataloged from the strategic exchange):**
+
+- §C1 (TLA+) was one of four Phase 0 streams; treating it as the
+  only stream left three others stalled.
+- ADR log is cheap (~1 session retroactively) and produces a
+  primary reference doc for vNext implementers.
+- CI is the cheapest insurance against regression across all 19
+  prior sessions of work. Without CI, every future session is at
+  risk of silent regression.
+- These two together advance Phase 0 stream 4 (ADR log) and
+  Bucket B item B3 (CI/CD) in one session. Stream 3 (Rust ref
+  impl) is the next target.
+
+**ADR conventions established (in `docs/adr/README.md`):**
+
+- 4-digit zero-padded IDs starting at ADR-0001
+- Status: Proposed / Accepted / Deprecated / Superseded
+- Sections: Status, Context, Decision, Consequences, Alternatives
+  considered, References
+- 30–80 lines typical
+- Required for: cross-module decisions, wire-format / protocol
+  choices, cryptographic primitives, strategic commitments
+- Not required for: local refactors, bug fixes, docs updates,
+  test additions
+
+**CI design choices:**
+
+- **Two-tier:** fast CI on every push (jobs measured in minutes);
+  heavy integration nightly + on-touch (jobs measured in tens of
+  minutes).
+- **Caching:** pip cache + HuggingFace model cache. The
+  sentence-transformers cache is the dominant cold-start cost in
+  the fast slice (~25s on first run).
+- **`concurrency` block:** cancel in-progress runs on new pushes
+  to same branch. Avoids wasting compute on rapid PR updates.
+- **TLC step in CI:** model-checks `Settlement.tla` against the
+  honest config in ~25s. Catches regressions where someone edits
+  the spec without re-validating. Critical for keeping the formal
+  spec aligned with the code.
+- **`workflow_dispatch` trigger** on both workflows for manual
+  re-runs.
+
+**Trip-wires (catalogued for future sessions):**
+
+- **CI uses bare `python`** (from `actions/setup-python`). Local
+  dev uses `~/dev/marshal/.os/bin/python`. Two different
+  environments; `requirements.txt` is the bridge. If CI passes but
+  local dev fails (or vice versa), `requirements.txt` is the
+  divergence point. Keep it complete.
+- **First CI run on a fresh GitHub Actions checkout** will be
+  slow (~15min) due to HF model download. Cached runs are ~10min.
+- **Heavy integration in `integration.yml` requires the daemon
+  binary**, so the `make -C netd build` step is gating. If the Go
+  build fails, all integration tests will fail with cryptic
+  "binary not found" rather than a Go-specific error. Look at the
+  build step first when integration mysteriously breaks.
+- **ADR IDs are stable.** Don't renumber existing ADRs even if
+  reordering. Cross-references from CLAUDE.md and the spec
+  directory rely on stable IDs.
+
+**Open follow-ups still on the Phase 0 / B-bucket todo list:**
+
+- Phase 0 Stream 3 (Rust ref impl scaffolding) — next session's
+  candidate target.
+- Phase 0 Stream 2 (Coq/Lean proofs) — luxury; defer until after
+  v2 ships.
+- B-bucket items B1 (bootstrap nodes), B2 (packaging), B4 (code
+  signing) — partially user-owned (infra, accounts) but daemon-side
+  code for DNS-anchored bootstrap is codeable next session.
+- More TLA+ sub-specs (Attestation, Reconciliation, Blackboard,
+  DHT, Gossip) — still queued but lower priority than Rust
+  scaffolding per the Session 19 strategic exchange.
+
+**What this DOESN'T accomplish:**
+
+- No code changes to the actual protocol. ADRs document; CI
+  validates; neither change behavior.
+- No new tests. CI validates the existing test suite.
+- Rust scaffolding still not started — that's the next biggest
+  Phase 0 gap.
+- User-owned strategic decisions (Foundation entity, tokenomics
+  shape, wedge market choice) still pending.
 
 ### 5-pre-7. Session 19 — first §C1 sub-spec: Settlement.tla
 
@@ -1443,10 +1571,12 @@ gyza`. No signed binaries for macOS/Windows. Fix shape: proper
 Python packaging + Rust-rewrite-or-CGo-distribution-pipeline for
 the daemon.
 
-**B3. CI/CD.** No GitHub Actions / equivalent. Every test run is
-manual. Regressions can land silently between sessions. Fix shape:
-GitHub Actions workflow running Go suite + fast Python slice on
-push; nightly heavy integration tests.
+**B3. CI/CD — CLOSED (Session 20).** GitHub Actions workflows
+shipped at `.github/workflows/ci.yml` (fast slice + Go + TLC on
+push/PR) and `.github/workflows/integration.yml` (heavy
+integration + demo nightly + on-touch). Caching for pip + HF
+models. Concurrency block cancels stale runs. See §5-pre-8 for
+design rationale.
 
 **B4. Code signing.** Apple Developer ID, Windows code-signing
 cert. **Requires user purchase** (see §11).

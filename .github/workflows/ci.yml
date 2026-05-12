@@ -1,0 +1,109 @@
+name: CI
+
+# Fast-iteration CI. Runs on every push and PR. Two parallel jobs:
+#   1. Go suite (~5s, no system deps beyond Go)
+#   2. Python fast slice (~10min, excludes heavy multi-daemon
+#      integration tests — those run nightly in integration.yml)
+#
+# The heavy integration suite (test_netd_client, test_attestation_bridge,
+# test_verify_on_fetch, test_network_blackboard_gossip, phase2_*) is
+# deliberately excluded here. It spawns real gyza-netd daemons and
+# takes 1–2 minutes per test; running on every push burns minutes
+# we'd rather spend on fast feedback.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel in-progress runs on new pushes to the same branch — avoids
+# wasted CPU on rapid PR updates.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: Go test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+          cache-dependency-path: netd/go.sum
+
+      - name: Build gyza-netd
+        run: make -C netd build
+
+      - name: Run Go test suite
+        run: |
+          cd netd
+          go test ./... -count=1 -timeout=120s
+
+  python-fast:
+    name: Python fast slice
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: go    # need the daemon binary built (some fast-slice tests use it indirectly via mocks)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache HuggingFace models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: ${{ runner.os }}-hf-all-MiniLM-L6-v2-v1
+          # No restore-keys: model cache is opaque, an outdated
+          # entry won't help.
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run fast slice
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python -m pytest tests/ -q --tb=line --timeout=90 \
+            -k "not netd_client and not phase2_integration and not phase2_hardening and not blackboard_gossip and not attestation_bridge and not verify_on_fetch"
+
+  spec:
+    name: TLA+ Settlement spec
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Run TLC on Settlement.tla (honest model)
+        run: |
+          cd spec
+          java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
+            -deadlock -workers 4 \
+            -config Settlement.cfg Settlement.tla
