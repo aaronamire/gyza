@@ -13,7 +13,89 @@
 
 ---
 
-## Session 28 — `Reconciliation.tla` sub-spec (§C1 #2 of 6)
+## Session 29 — `Attestation.tla` sub-spec (§C1 #3) + scope revision
+
+Third §C1 sub-spec. Core cert assembly + cosig verification from
+`netd/internal/capability/capability.go`. Targets the
+security-critical invariants of the cert format itself.
+
+**Deliverables:**
+
+- `spec/Attestation.tla` (~250 lines).
+  - Actions: `HonestCosign`, `AssembleCert`, `AdversarialBadSig`,
+    `AdversarialWrongBody`.
+  - Six invariants: `INV_ATT_1_MinCoSignatures`,
+    `INV_ATT_2_TierFixed`, `INV_ATT_3_LifetimeBound`,
+    `INV_ATT_6_DistinctValidators`,
+    `INV_ATT_7_AllCosignSameBody`, `INV_ATT_8_BodyPlausible`.
+- `spec/Attestation.cfg` — honest model: 3 peers, 1 body,
+  MinCoSignatures=2. TLC ~1s, 5 distinct states.
+- `spec/Attestation_adversarial.cfg` — MalleableSigs=TRUE,
+  2 bodies. TLC ~1s, 80 distinct states.
+
+**Scope revision — §C1 from 6 → 9 sub-specs:**
+
+The original plan listed 6 §C1 sub-specs (Settlement,
+Reconciliation, Attestation, Blackboard, DHT, Gossip). During
+this session the Attestation surface turned out to need 4 specs
+because the protocol layers are genuinely separable and a single
+spec covering all of them blew up TLC's state space (we hit
+72M+ distinct states with no end in sight before tearing the
+spec apart).
+
+The Attestation portion splits into:
+- `Attestation.tla` — cert assembly + cosig verification
+  (this session, INV-ATT-1..3, 5, 6, 7, 8).
+- `CapabilityStream.tla` — wire protocol: challenge/response/nonce
+  + libp2p framing + gRPC bridge (INV-ATT-9..14, INV-CAPSTREAM-*,
+  INV-CAPBRIDGE-*).
+- `AttestationDHT.tla` — DHT publish/fetch + verifier cache
+  (INV-ATT-15..22).
+- `AttestationRecursive.tla` — TrustedBootstrap + recursive cert
+  verification + cycle detection (INV-ATT-23..28).
+
+New total: 9 sub-specs. 3 of 9 shipped.
+
+**What `Attestation.tla` (this sub-spec) does NOT cover:**
+
+- The wire protocol (challenge → response → verify → cosig).
+  In real Python+Go, validators issue a Challenge with a nonce,
+  the applicant signs a ChallengeResponse over the
+  applicant-proposed body, the validator runs plausibility
+  checks before emitting the cosig. This spec abstracts all of
+  that away — `HonestCosign` produces a cosig directly under
+  the assumption that the preceding wire steps succeeded. That
+  abstraction is what makes the state space tractable; the
+  wire-level guarantees live in `CapabilityStream.tla`.
+- The clock. INV-ATT-3 / INV-ATT-8's expiry checks are
+  structural in this spec (lifetime bounded); the dynamic
+  "cert is fresh AT TIME T" check lives in `AttestationDHT.tla`
+  / `AttestationRecursive.tla` where it matters operationally.
+- Multiple applicants. We model a single canonical applicant;
+  the cert format is symmetric across applicants.
+
+**Lessons from the abandoned full-shape spec:**
+
+The first draft tried to model challenge/response/nonce/clock all
+in one spec. At Peers={p1,p2,p3} / Nonces={n1,n2} / MaxClock=3
+TLC explored 72M+ distinct states with the queue still growing
+at depth 11 after 25 min. Diagnosis: too many existentials in
+`ProposeBody` (`iss`, `exp`, `task_set` all enumerated), plus
+the wire-message SUBSETs (`challenges`, `responses`, `cosigs`)
+growing combinatorially.
+
+Resolution: split the spec along the natural protocol boundary
+(cert format vs wire transport). The narrow spec is fast to
+model-check and the invariants it does check are the
+security-critical ones.
+
+**§C1 progress:** 3 of 9 sub-specs done. Remaining:
+CapabilityStream, AttestationDHT, AttestationRecursive,
+Blackboard, DHT, Gossip.
+
+---
+
+## Session 28 — `Reconciliation.tla` sub-spec (§C1 #2 of 9)
 
 Second §C1 sub-spec under the Session 17 vNext commitment.
 Companion to `Settlement.tla` (S19) — together they cover

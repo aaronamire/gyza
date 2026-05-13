@@ -37,12 +37,12 @@
 >
 > ---
 >
-> **Last updated:** end of Phase 3 Session 28 (`Reconciliation.tla`
-> sub-spec). spec/ now has 2 of 6 §C1 sub-specs; together
-> `Settlement.tla` (S19) and `Reconciliation.tla` (S28) cover the
-> full settlement-protocol portion of `docs/invariants.md` §4.
-> Rust workspace: 6 crates, 71 tests. **Next sub-session candidates:**
-> `gyza-capability` Rust port, Attestation TLA+ sub-spec, or
+> **Last updated:** end of Phase 3 Session 29 (`Attestation.tla`
+> sub-spec — core cert assembly + cosig verification). spec/ now
+> has 3 of 9 §C1 sub-specs (revised total — see §6 C1 for the
+> breakdown). Rust workspace: 6 crates, 71 tests.
+> **Next sub-session candidates:** `gyza-capability` Rust port,
+> `CapabilityStream.tla` (Attestation wire protocol), or
 > DNS-anchored bootstrap code in the daemon (B1 partial).
 >
 > **What this file is.** A grounded reference. Everything below is
@@ -55,31 +55,35 @@
 
 ---
 
-## Quick start for fresh Claude  *[updated S28]*
+## Quick start for fresh Claude  *[updated S29]*
 
-**Where things are right now (Session 28):**
+**Where things are right now (Session 29):**
 
 - **Active stream:** Phase 0 of vNext migration. §C1 (TLA+ formal
   spec) advancing in parallel with §C4 (Rust reference impl).
-  Settlement + Reconciliation sub-specs both shipped; 4 of 6
-  remain. Rust workspace at 6 of ~8 crates done.
+  Settlement + Reconciliation + Attestation-core sub-specs
+  shipped; 6 of 9 remain (§C1 scope revised — see §6 for the
+  expanded breakdown). Rust workspace at 6 of ~8 crates done.
 - **Next codeable thing:** `gyza-capability` Rust port (Tier-3
-  challenge-response), OR Attestation TLA+ sub-spec (third §C1),
-  OR daemon-side DNS-anchored bootstrap code (B1 partial).
+  challenge-response), OR `CapabilityStream.tla` (Attestation
+  wire protocol, 4th §C1), OR daemon-side DNS-anchored bootstrap
+  code (B1 partial).
 - **Tests right now:** 71 Rust tests across 6 crates, all green.
   Python fast slice 457 + 1 skipped. Go suite all green. TLC:
-  `Settlement.tla` (honest + adversarial) and `Reconciliation.tla`
-  (honest + adversarial) all pass. CI workflows in place.
+  `Settlement.tla`, `Reconciliation.tla`, `Attestation.tla`
+  (honest + adversarial each) all pass. CI workflows in place.
 
 **Three most recent sessions one-liner each:**
 
+- Session 29: `Attestation.tla` sub-spec (core cert assembly +
+  cosig verification). Wire protocol, DHT publish/fetch, and
+  recursive verification split into separate companion sub-specs.
+  §C1 scope revised from 6 → 9 sub-specs.
 - Session 28: `Reconciliation.tla` sub-spec. Models the bilateral
-  ledger-reconciliation RPC; covers INV-SETTLE-8..11. 2 of 6 §C1
-  sub-specs now shipped.
+  ledger-reconciliation RPC; covers INV-SETTLE-8..11.
 - Session 27: `gyza-settlement` Rust port. Bilateral settlement
   state machine derived directly from `Settlement.tla`. Python
   parity on canonical sign bytes validated.
-- Session 26: CLAUDE.md restructure + CHANGELOG split.
 
 **What's blocked on the user (can't be coded — see §11):**
 
@@ -253,10 +257,18 @@ java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
 java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
   -deadlock -workers 4 -config Reconciliation_adversarial.cfg \
   Reconciliation.tla
+# Attestation (honest + adversarial)
+java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
+  -deadlock -workers 4 -config Attestation.cfg Attestation.tla
+java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
+  -deadlock -workers 4 -config Attestation_adversarial.cfg \
+  Attestation.tla
 ```
 
 Settlement honest ~25s, adversarial ~40s. Reconciliation honest
-~15s, adversarial ~25s. All pass.
+~15s, adversarial ~25s. Attestation honest ~1s, adversarial ~1s
+(state space deliberately tiny — wire protocol deferred to
+`CapabilityStream.tla`). All pass.
 
 ### CLI smoke
 
@@ -621,8 +633,10 @@ This section is the index.
 
 **Newest first. Click into `CHANGELOG.md` for full detail.**
 
+- **Session 29** — `Attestation.tla` sub-spec (core cert assembly +
+  cosig verification). §C1 scope revised: 6 → 9 sub-specs.
 - **Session 28** — `Reconciliation.tla` sub-spec. Settlement + Reconciliation
-  cover all of `docs/invariants.md` §4. 2 of 6 §C1 sub-specs shipped.
+  cover all of `docs/invariants.md` §4.
 - **Session 27** — `gyza-settlement` Rust port (closes §C1↔§C4
   spec-derives-implementation loop). 6 crates, 71 tests.
 - **Session 26** — CLAUDE.md restructure + CHANGELOG split.
@@ -701,10 +715,28 @@ end-to-end. Current state of remaining work:
 Under the vNext commitment, these are the migration milestones,
 ordered. Each is necessary; the order is the order of work.
 
-- **C1. TLA+ formal spec of v1 — IN PROGRESS.** 2 of 6 sub-specs
-  shipped (Settlement.tla, S19; Reconciliation.tla, S28).
-  Inputs from Session 18 docs. Remaining: Attestation, Blackboard,
-  DHT, Gossip.
+- **C1. TLA+ formal spec of v1 — IN PROGRESS.** 3 of 9 sub-specs
+  shipped (revised scope — see below). Inputs from Session 18
+  docs.
+  - ✓ `Settlement.tla` (S19) — INV-SETTLE-1..7
+  - ✓ `Reconciliation.tla` (S28) — INV-SETTLE-8..11
+  - ✓ `Attestation.tla` (S29) — INV-ATT-1..3, 5, 6, 7, 8 (cert
+    assembly + cosig verification)
+  - ◯ `CapabilityStream.tla` — INV-ATT-9..14, INV-CAPSTREAM-1..5,
+    INV-CAPBRIDGE-1..4 (wire protocol)
+  - ◯ `AttestationDHT.tla` — INV-ATT-15..22 (publish/fetch +
+    verifier cache)
+  - ◯ `AttestationRecursive.tla` — INV-ATT-23..28 (trusted
+    bootstrap + recursive cert verification)
+  - ◯ `Blackboard.tla` — blackboard state machine + envelope log
+  - ◯ `DHT.tla` — Kademlia DHT routing
+  - ◯ `Gossip.tla` — gossipsub blackboard sync
+
+  **Scope revision (S29).** Original plan was 6 sub-specs; the
+  Attestation surface turned out to need 4 specs (core +
+  CapabilityStream + DHT + Recursive) because the protocol layers
+  are genuinely separable and TLC state space explodes if any
+  single spec tries to cover them all. The new total is 9.
 - **C2. Coq/Lean proofs of v1 invariants** — not started (luxury;
   defer per Session 19 audit).
 - **C3. Foundation entity + tokenomics design** — **user-owned**
