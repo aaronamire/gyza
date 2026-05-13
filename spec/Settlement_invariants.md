@@ -190,24 +190,44 @@ and assert reputation = accumulator. Out of scope for Session 19.
 
 ### INV-SETTLE-8..11: reconciliation invariants
 
-**Status:** DEFERRED.
+**Status:** ✓ shipped (Session 28). Lives in `Reconciliation.tla`
++ `Reconciliation.cfg` / `Reconciliation_adversarial.cfg`.
 
-These cover the reconciliation RPC (lex-cursor pagination,
-cross-peer injection guards, page caps, for-peer guard). Separable
-from the core settlement protocol; complex enough to deserve its
-own TLA+ sub-spec rather than co-mingling in `Settlement.tla`.
+The reconciliation RPC (lex-cursor pagination, cross-peer injection
+guard, page caps, for-peer guard) is separable from the core
+settlement protocol, so it lives in its own TLA+ sub-spec. The
+mapping to the canonical `INV-SETTLE-N` IDs:
 
-The follow-up sub-spec is named `Reconciliation.tla` and is queued
-under §C1 work.
+| docs/invariants.md | Reconciliation.tla predicate |
+|---|---|
+| INV-SETTLE-8 (lex cursor) | `INV_RECON_8_AcceptedFromTrueLedger` (honest only) |
+| INV-SETTLE-9 (cross-peer injection) | structural via `HandleResponse` match clause; `INV_RECON_9_AcceptedOnlyFromAllocatedIDs` is the state-predicate witness |
+| INV-SETTLE-10 (page cap) | `INV_RECON_10_PageCount` + `INV_RECON_10b_HonestResponsePageSize` |
+| INV-SETTLE-11 (for_peer guard) | structural via `HandleRequest`'s drop branch |
+
+The action-design properties (INV-9 and INV-11) hold by
+construction in the spec's actions. TLC exhaustively explores
+interleavings — including adversarial responder/requester actions —
+without finding a state violating these properties, which validates
+the structural argument.
+
+INV-9 ("never accept a response from a peer other than the one
+registered") is INTERESTING under the libp2p threat model: the
+adversary cannot spoof the sender field (Noise-bound), but they
+CAN emit a response with their true identity into a session
+registered against a different peer. `HandleResponse` drops these
+in the no-match branch.
 
 ### INV-SETTLE-12: reputation policy (disputed vs. missing)
 
 **Prose:** `disputed` entries → `record_dispute`. `missing_theirs` /
 `missing_ours` → NO reputation change.
 
-**TLA+:** Structurally encoded in the reconciliation actions.
-
-**Status:** DEFERRED (with INV-SETTLE-8..11).
+**TLA+:** structurally encoded in the reconciliation actions; not
+modeled in `Reconciliation.tla` because reputation is downstream
+of the diff classification, which is itself a pure function of
+`accepted` and `store`. Status: documented; covered by
+`tests/test_reconciliation.py`.
 
 ## Test of soundness
 

@@ -37,12 +37,12 @@
 >
 > ---
 >
-> **Last updated:** end of Phase 3 Session 27 (`gyza-settlement`
-> Rust port — closes the §C1↔§C4 spec-derives-implementation loop).
-> Rust workspace now has 6 crates with 71 tests; Settlement.tla
-> (Session 19) → gyza-settlement (Session 27) is the first
-> formal-spec-to-Rust pairing. **Next sub-session candidates:**
-> Reconciliation TLA+ sub-spec, `gyza-capability` Rust port, or
+> **Last updated:** end of Phase 3 Session 28 (`Reconciliation.tla`
+> sub-spec). spec/ now has 2 of 6 §C1 sub-specs; together
+> `Settlement.tla` (S19) and `Reconciliation.tla` (S28) cover the
+> full settlement-protocol portion of `docs/invariants.md` §4.
+> Rust workspace: 6 crates, 71 tests. **Next sub-session candidates:**
+> `gyza-capability` Rust port, Attestation TLA+ sub-spec, or
 > DNS-anchored bootstrap code in the daemon (B1 partial).
 >
 > **What this file is.** A grounded reference. Everything below is
@@ -55,31 +55,31 @@
 
 ---
 
-## Quick start for fresh Claude  *[updated S26]*
+## Quick start for fresh Claude  *[updated S28]*
 
-**Where things are right now (Session 26):**
+**Where things are right now (Session 28):**
 
-- **Active stream:** Phase 0 of vNext migration. Specifically
-  Stream 3 (Rust reference implementation in `gyza-rs/`). 6 of
-  ~8 planned crates done with byte-for-byte Python parity. The
-  §C1↔§C4 spec-derives-implementation loop closed for Settlement
-  in Session 27.
-- **Next codeable thing:** Reconciliation TLA+ sub-spec
-  (continuation of Settlement.tla), OR `gyza-capability` Rust
-  port (Tier-3 challenge-response), OR daemon-side DNS-anchored
-  bootstrap code (B1 partial).
+- **Active stream:** Phase 0 of vNext migration. §C1 (TLA+ formal
+  spec) advancing in parallel with §C4 (Rust reference impl).
+  Settlement + Reconciliation sub-specs both shipped; 4 of 6
+  remain. Rust workspace at 6 of ~8 crates done.
+- **Next codeable thing:** `gyza-capability` Rust port (Tier-3
+  challenge-response), OR Attestation TLA+ sub-spec (third §C1),
+  OR daemon-side DNS-anchored bootstrap code (B1 partial).
 - **Tests right now:** 71 Rust tests across 6 crates, all green.
-  Python fast slice 457 + 1 skipped. Go suite all green. CI
-  workflows in place.
+  Python fast slice 457 + 1 skipped. Go suite all green. TLC:
+  `Settlement.tla` (honest + adversarial) and `Reconciliation.tla`
+  (honest + adversarial) all pass. CI workflows in place.
 
 **Three most recent sessions one-liner each:**
 
+- Session 28: `Reconciliation.tla` sub-spec. Models the bilateral
+  ledger-reconciliation RPC; covers INV-SETTLE-8..11. 2 of 6 §C1
+  sub-specs now shipped.
 - Session 27: `gyza-settlement` Rust port. Bilateral settlement
   state machine derived directly from `Settlement.tla`. Python
   parity on canonical sign bytes validated.
 - Session 26: CLAUDE.md restructure + CHANGELOG split.
-- Sessions 23–25: Rust Stream 3 sweep (`verify_chain`,
-  `gyza-core`, `gyza-blackboard`).
 
 **What's blocked on the user (can't be coded — see §11):**
 
@@ -93,13 +93,13 @@
 
 **If you can pick anything to work on next, candidates ranked:**
 
-1. **Reconciliation TLA+ sub-spec** — natural continuation of
-   Settlement.tla. Closes INV-SETTLE-8..11 (cursor pagination,
-   for-peer guard, cross-peer injection, page cap). ~1 session.
-2. **`gyza-capability` Rust port** — Tier-3 challenge-response.
+1. **`gyza-capability` Rust port** — Tier-3 challenge-response.
    Larger than gyza-settlement; depends on `gyza-icp` (done) but
    also needs deterministic-protobuf Rust port for cross-language
    wire compat. ~2 sessions.
+2. **Attestation TLA+ sub-spec** — third §C1 sub-spec. Models the
+   k-of-n quorum + applicant-proposed-body + verify-on-fetch
+   pipeline. ~1–2 sessions.
 3. **DNS-anchored bootstrap code in the daemon (B1 partial)** —
    daemon-side `DefaultBootstrapPeers` resolution from
    `gyza.network` DNS + hardcoded pubkey-pinned fallbacks. User
@@ -244,11 +244,19 @@ Required after any `netd/` change. Binary → `netd/bin/gyza-netd`.
 
 ```bash
 cd /home/xan/dev/gyza/spec
+# Settlement (honest + adversarial)
 java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
   -deadlock -workers 4 -config Settlement.cfg Settlement.tla
+# Reconciliation (honest + adversarial)
+java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
+  -deadlock -workers 4 -config Reconciliation.cfg Reconciliation.tla
+java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
+  -deadlock -workers 4 -config Reconciliation_adversarial.cfg \
+  Reconciliation.tla
 ```
 
-Honest model ~25s; adversarial ~40s; both pass.
+Settlement honest ~25s, adversarial ~40s. Reconciliation honest
+~15s, adversarial ~25s. All pass.
 
 ### CLI smoke
 
@@ -613,6 +621,8 @@ This section is the index.
 
 **Newest first. Click into `CHANGELOG.md` for full detail.**
 
+- **Session 28** — `Reconciliation.tla` sub-spec. Settlement + Reconciliation
+  cover all of `docs/invariants.md` §4. 2 of 6 §C1 sub-specs shipped.
 - **Session 27** — `gyza-settlement` Rust port (closes §C1↔§C4
   spec-derives-implementation loop). 6 crates, 71 tests.
 - **Session 26** — CLAUDE.md restructure + CHANGELOG split.
@@ -691,9 +701,10 @@ end-to-end. Current state of remaining work:
 Under the vNext commitment, these are the migration milestones,
 ordered. Each is necessary; the order is the order of work.
 
-- **C1. TLA+ formal spec of v1 — IN PROGRESS.** 1 of 6 sub-specs
-  shipped (Settlement.tla, S19). Inputs from Session 18 docs.
-  Remaining: Reconciliation, Attestation, Blackboard, DHT, Gossip.
+- **C1. TLA+ formal spec of v1 — IN PROGRESS.** 2 of 6 sub-specs
+  shipped (Settlement.tla, S19; Reconciliation.tla, S28).
+  Inputs from Session 18 docs. Remaining: Attestation, Blackboard,
+  DHT, Gossip.
 - **C2. Coq/Lean proofs of v1 invariants** — not started (luxury;
   defer per Session 19 audit).
 - **C3. Foundation entity + tokenomics design** — **user-owned**
@@ -718,11 +729,12 @@ C1–C12 are §8's execution plan; §10 phases ride on top of C4–C12.
 Given the user is not unblocking the user-owned items right now,
 the highest-leverage codeable next moves are:
 
-1. **`gyza-settlement` Rust port** — closes the §C1 ↔ §C4 pairing
-   (Settlement.tla → Rust implementation derived from spec). 1–2
+1. **`gyza-capability` Rust port** — extends the §C4 stream into
+   the attestation surface. Requires a Rust port of deterministic
+   protobuf for cross-language wire compat. ~2 sessions.
+2. **Next TLA+ sub-spec: Attestation** — third of six §C1 sub-specs.
+   k-of-n quorum + applicant-proposed body + verify-on-fetch. ~1–2
    sessions.
-2. **Next TLA+ sub-spec: Reconciliation** — natural follow-up to
-   Settlement.tla. 1 session.
 3. **DNS-anchored bootstrap code in daemon (B1 partial)** —
    daemon-side resolution + fallback hardcoded peers. User still
    needs VPSes + DNS. ~1 session.

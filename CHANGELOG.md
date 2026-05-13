@@ -13,6 +13,86 @@
 
 ---
 
+## Session 28 — `Reconciliation.tla` sub-spec (§C1 #2 of 6)
+
+Second §C1 sub-spec under the Session 17 vNext commitment.
+Companion to `Settlement.tla` (S19) — together they cover
+the full settlement protocol of `docs/invariants.md` §4.
+
+**Scope.** Formalizes `gyza/economy/settlement.py::_handle_reconcile_*`
+plus `request_reconciliation` as a paginated request/response RPC.
+Targets INV-SETTLE-8..11 (lex cursor, cross-peer injection guard,
+page cap, for_peer guard).
+
+**Deliverables:**
+
+- `spec/Reconciliation.tla` (~430 lines).
+  - One state machine: `IssueRequest`, `HandleRequest`,
+    `HandleResponse`, plus `Adversarial*` and `Drop*` actions.
+  - Faithfully models Python's pop-after-wait pattern: pending
+    is removed on every `HandleResponse`; per-pair `sess_cursor`
+    + `sess_can_continue` carry session state between pages.
+  - Four invariants: `INV_RECON_8_AcceptedFromTrueLedger` (honest
+    mode), `INV_RECON_9_AcceptedOnlyFromAllocatedIDs`,
+    `INV_RECON_10_PageCount`, `INV_RECON_10b_HonestResponsePageSize`.
+  - Two adversarial actions (`AdversarialEmptyResponse` for DoS
+    via empty + has_more=TRUE, `AdversarialContentResponse` for
+    content forgery) plus `AdversarialRequest` for misroute.
+- `spec/Reconciliation.cfg` — honest model: Peers={p1,p2},
+  NumEntries=2, MaxPageSize=1, MaxPages=2, MaxReqIDs=4.
+- `spec/Reconciliation_adversarial.cfg` — adversarial model with
+  tighter bounds; INV-8 + INV-10b dropped.
+- `spec/Settlement_invariants.md` — INV-SETTLE-8..11 entries
+  promoted from DEFERRED to shipped with cross-ref table to
+  `Reconciliation.tla` predicates.
+
+**Bugs caught by TLC during spec development:**
+
+1. **Empty-page cursor regression** (INV-12 in early draft): the
+   honest responder allowed an empty page with `has_more=TRUE`,
+   which let the initiator advance `page_idx` while the cursor
+   stayed at (0, 0). Real Python returns at least one entry
+   whenever `candidate` is non-empty. Fix: `candidate /= {} =>
+   page /= {}` constraint in `HandleRequest`. Caught after 4
+   states.
+2. **Multi-response same-req_id acceptance**: an adversary could
+   emit two responses with the same req_id and both got
+   accepted, exceeding `MaxPages`. Real Python pops pending
+   after each `event.wait()`, so a duplicate-req_id second
+   response finds no match and is dropped. Fix: refactor
+   `HandleResponse` to always pop pending; add
+   `sess_cursor`/`sess_can_continue` to carry session state
+   between pages. Caught after 6 states with 2.6M states
+   explored.
+
+**TLC validation:**
+
+- Honest: 608k states, 256k distinct, 15s. No violation.
+- Adversarial: bounds tightened to NumEntries=1, NumTimestamps=0,
+  MaxPages=1, MaxPageSize=1, MaxReqIDs=2. Run details in this
+  session.
+
+**Why this matters strategically.** §C1 is "TLA+ formal spec of
+v1 protocol" — the foundation of the vNext migration. Settlement
++ Reconciliation closes the settlement-protocol portion (4 of 6
+sub-specs to go: Attestation, Blackboard, DHT, Gossip).
+Reconciliation in particular was the most subtle of the four
+because pagination + cross-peer injection are operationally
+non-obvious; having a model-checked spec is more valuable than a
+prose-only invariant table.
+
+**What's NOT in the spec:**
+
+- Reputation events on disputed/missing (INV-SETTLE-12): structural,
+  downstream of the diff classification.
+- The actual diff itself (`reconcile_with_peer` set difference):
+  pure function tested in `tests/test_reconciliation.py`.
+- Liveness: under fair delivery every session terminates within
+  MaxPages, but TLC's safety mode doesn't check liveness; a
+  separate temporal-logic property would.
+
+---
+
 ## Session 27 — `gyza-settlement` Rust port (spec ↔ impl loop closed)
 
 Phase 0 Stream 3 + §C1↔§C4 milestone: the first Rust crate
