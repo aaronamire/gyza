@@ -1,11 +1,66 @@
 # Gyza
 
-Gyza is an agentic coordination layer: multiple AI agents share a
-SQLite-backed blackboard, claim work items atomically, execute them,
-and emit cryptographically signed envelopes that chain together into
-a tamper-evident record of who did what, in what order, on whose
-behalf. Phase 1 runs entirely on a single host. Networking comes
-later.
+> Peer-to-peer compute network with cryptographic provenance and
+> bilateral settlement. AI agents on independent nodes find each
+> other, claim each other's work, sign provenance envelopes, and
+> settle compute credits — all without a central operator.
+
+**Status:** alpha. Linux only (x86_64 / aarch64). macOS and Windows
+are not yet supported.
+
+## Install
+
+```bash
+# Linux x86_64 or aarch64. Requires Python 3.14+ and pipx.
+curl -sSf https://gyza.network/install.sh | bash
+```
+
+That installs the `gyza-netd` daemon and the `gyza` CLI, generates
+your compositor identity, and prints next steps.
+
+If you'd rather install from source:
+
+```bash
+git clone https://github.com/amirewontmiss/gyza-rs gyza
+cd gyza
+make -C netd build              # builds netd/bin/gyza-netd
+pipx install --editable .       # installs the gyza CLI
+gyza init                       # generates ~/.gyza/compositor.key
+```
+
+## Quickstart
+
+```bash
+# Join the network. (Reads bootstrap peers from DNS at gyza.network.)
+gyza global start
+
+# In another shell: what's connected?
+gyza status
+
+# Run the local two-agent demo (no remote peers required).
+gyza demo two_agent_pipeline
+
+# Run the full Phase-3 single-machine integration demo (two daemons
+# on loopback, settles in ~15 s).
+gyza demo single_machine_global
+```
+
+## What it is
+
+Independent nodes share a SQLite-backed blackboard, claim work items
+atomically, execute them, and emit cryptographically signed
+envelopes that chain together into a tamper-evident record of who
+did what, in what order, on whose behalf. A bilateral
+compute-credit ledger settles every completed work item between the
+earner and payer. Tier-3 attestations (k-of-n quorum cosignatures
+from independent validators) gate which peers are allowed to claim
+high-trust work.
+
+The architecture splits along the network boundary: a Go daemon
+(`gyza-netd`) owns the libp2p host, Kademlia DHT, NAT traversal,
+and gossipsub; a Python stack (`gyza`) owns execution, identity,
+ICP envelopes, ledger, and CLI. They communicate over a Unix
+socket via gRPC.
 
 ## Architecture
 
@@ -77,40 +132,29 @@ patterns (the WAL+FK+busy_timeout SQLite recipe; UUIDv4 intent_id;
 all-MiniLM-L6-v2 embeddings) but stays decoupled. The two share
 a Python venv only because that is convenient on this box.
 
-## Quick start
+## Local-only mode (no networking)
 
-Gyza Phase 1 reuses Marshal's venv (`~/dev/marshal/.os`) since it
-already has numpy, lancedb, sentence-transformers, blake3,
-cryptography, and pytest. If you don't have that, create your own:
-
-```bash
-python3.14 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Then:
+The Phase-1 demos run entirely on a single host with no daemon — useful
+for kicking the tires before joining the network.
 
 ```bash
-# One-time: generate the compositor key under ~/.gyza
-python -m gyza.cli init
+# Generate identity (if not already done).
+gyza init
 
-# Run the two-agent pipeline demo (works without an API key)
-python -m gyza.cli demo
+# Two-agent pipeline: posts two work items, runs a query specialist
+# and a summarizer, prints the verified envelope chain.
+gyza demo two_agent_pipeline
 
-# Show what's on the blackboard
-python -m gyza.cli status
+# Show what's on the blackboard.
+gyza status
 
-# Show what tampering looks like
-python -m gyza.cli demo injection
+# Show what tampering does to the chain.
+gyza demo injection
 ```
 
-The demo posts two work items, runs a query specialist + summarizer
-specialist as `AgentRunner` threads, and prints a verification report
-including the BLAKE3 chain hash. With `ANTHROPIC_API_KEY` set and the
-`anthropic` SDK installed, the executors call Claude; otherwise they
-fall back to a deterministic local scanner that produces real,
-inspectable output.
+With `ANTHROPIC_API_KEY` set and the `anthropic` SDK installed, the
+executors call Claude; otherwise they fall back to a deterministic
+local scanner that produces real, inspectable output.
 
 ## Security model
 
@@ -529,7 +573,21 @@ tests/               pytest, all passing
 ## Running the tests
 
 ```bash
-~/dev/marshal/.os/bin/python -m pytest tests/ -v
+# Fast slice (~10 min): unit + protocol tests, no real daemons.
+python -m pytest tests/ -q --tb=line --timeout=90 \
+  -k "not netd_client and not phase2_integration and not phase2_hardening \
+      and not blackboard_gossip and not attestation_bridge and not verify_on_fetch"
+
+# Heavy integration (~1 min warm, ~10 min cold): spawns real daemons.
+python -m pytest tests/test_netd_client.py \
+  tests/test_network_blackboard_gossip.py tests/test_attestation_bridge.py \
+  tests/test_verify_on_fetch.py -q --timeout=240
+
+# Go daemon (~5 s):
+cd netd && go test ./... -count=1 -timeout=120s
+
+# Rust workspace (~5-30 s):
+cd gyza-rs && cargo test --workspace
 ```
 
 250 tests covering: the data layer; ICP cryptography (single- and

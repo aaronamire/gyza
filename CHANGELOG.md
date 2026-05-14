@@ -13,6 +13,69 @@
 
 ---
 
+## Session 31 — MVP-2: packaging (pyproject + install.sh + release pipeline)
+
+Second Linux-only MVP milestone (B2 from §6). After this session the
+developer install path works (`pip install -e .` gives you a working
+`gyza` CLI on PATH), and the release infrastructure is in place for
+when the bootstrap nodes go live.
+
+**Deliverables:**
+
+- `pyproject.toml` — PEP 621 metadata, hatchling backend.
+  - `gyza = "gyza.cli:main"` console_script entry point.
+  - Python 3.14+ required (uuid.uuid7 in stdlib).
+  - All Phase 1/2/3 deps pinned from requirements.txt.
+  - `sentence-transformers` moved to the `[embeddings]` extra
+    (multi-hundred-MB install; daemon-only users skip).
+  - Apache-2.0 license declared via SPDX.
+- `LICENSE` — full Apache 2.0 text.
+- `README.md` — top rewritten for product/user audience:
+  - One-line install (`curl ... | bash`).
+  - Source-install path for developers.
+  - Quickstart showing `gyza global start` + `gyza status` +
+    `gyza demo` flow.
+  - Old Phase-1-only intro moved below the new sections (technical
+    detail preserved for contributors).
+  - Test commands updated to canonical `python -m pytest ...` form
+    instead of `~/dev/marshal/.os/bin/python`.
+- `scripts/install.sh` — one-liner Linux installer:
+  - Detects arch (x86_64 / aarch64), refuses non-Linux.
+  - Resolves GYZA_VERSION from GitHub Releases /latest.
+  - Downloads + verifies gyza-netd tarball.
+  - pipx-installs the `gyza` Python CLI (from PyPI or release wheel).
+  - Runs `gyza init` to generate compositor identity.
+  - Color-coded output, idempotent.
+- `.github/workflows/release.yml` — tag-triggered release pipeline:
+  - Builds gyza-netd for linux/amd64 and linux/arm64 via Go
+    cross-compilation (single runner, CGO disabled, stripped binary).
+  - Builds Python wheel + sdist.
+  - SHA256 checksums for every artifact.
+  - Auto-generates release notes from commit history.
+  - Pre-release flag triggers on `aN`/`bN`/`rcN`/`-foo` tags.
+
+**Behavior change:** `pip install -e .` is now the canonical
+developer install. `requirements.txt` stays as a no-deps shortcut
+for the marshal-venv path but the source of truth is `pyproject.toml`.
+
+**Verified:**
+- `pip install -e .` succeeds, `gyza` lands on PATH (verified at
+  `~/dev/marshal/.os/bin/gyza`).
+- Fast Python slice: 457 passed, 1 skipped, no regressions.
+- `gyza --help`, `gyza init --help`, `gyza global start --help` all
+  display correct usage.
+
+**§6 progress:**
+- B1 (bootstrap): ✓ shipped (Session 30).
+- B2 (packaging): ✓ shipped. User-side: needs GitHub Releases live
+  once first tag is cut. install.sh currently references release
+  assets that don't exist yet; will work the moment v0.1.0a1 is
+  tagged and the release workflow runs.
+- B4 (code signing): EXPLICITLY DEFERRED — Linux-only MVP skips
+  Apple Developer ID and Windows code-signing.
+
+---
+
 ## Session 30 — MVP-1: DNS-anchored bootstrap + VPS deploy script
 
 First Linux-only MVP milestone (B1 from §6). Closes the

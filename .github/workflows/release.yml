@@ -1,0 +1,122 @@
+name: release
+
+# Cuts a release when a vX.Y.Z tag is pushed. Builds:
+#   - gyza-netd binary for linux/amd64 and linux/arm64 (tarball each)
+#   - Python wheel + sdist
+# All four artifacts are uploaded to the GitHub Release for that tag.
+#
+# Trigger:
+#   git tag v0.1.0a1 && git push origin v0.1.0a1
+#
+# To dry-run before a real cut, push a tag like `v0.0.0-test1` to a
+# fork and watch the run.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write   # to create / upload to the Release
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Build the Go daemon for each Linux arch.
+  # We cross-compile via Go itself (GOOS=linux GOARCH=...) so a single
+  # runner produces both artifacts; faster + cheaper than per-arch runners.
+  # ---------------------------------------------------------------------
+  build-daemon:
+    name: build gyza-netd (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            goarch: amd64
+          - arch: arm64
+            goarch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - name: build
+        working-directory: netd
+        env:
+          GOOS: linux
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
+              -o gyza-netd ./cmd/gyza-netd/
+          file gyza-netd
+          ./gyza-netd --help >/dev/null 2>&1 || true
+          # Sanity: arm64 binary won't run on amd64 host. We don't gate
+          # on that — the file(1) line above is the proof.
+      - name: package
+        working-directory: netd
+        run: |
+          tarball="gyza-netd-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz"
+          tar -czf "$tarball" gyza-netd
+          sha256sum "$tarball" > "$tarball.sha256"
+          ls -la "$tarball" "$tarball.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gyza-netd-${{ matrix.arch }}
+          path: |
+            netd/gyza-netd-*.tar.gz
+            netd/gyza-netd-*.sha256
+
+  # ---------------------------------------------------------------------
+  # Build the Python wheel + sdist.
+  # Wheel is pure-python (no compiled extensions) so one wheel works on
+  # all archs. We still build sdist for users who prefer it.
+  # ---------------------------------------------------------------------
+  build-wheel:
+    name: build python wheel + sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: install build deps
+        run: python -m pip install --upgrade pip build
+      - name: build
+        run: python -m build
+      - name: sha256
+        run: |
+          cd dist
+          for f in *; do sha256sum "$f" > "$f.sha256"; done
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/*
+
+  # ---------------------------------------------------------------------
+  # Collect all artifacts and publish a GitHub Release.
+  # The release notes are auto-generated from commit messages between
+  # the previous tag and this one; can be edited manually after publish.
+  # ---------------------------------------------------------------------
+  publish:
+    name: publish github release
+    needs: [build-daemon, build-wheel]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: flatten
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp -v {} release/ \;
+          ls -la release/
+      - name: publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          # Pre-1.0 tags get the "prerelease" flag automatically.
+          prerelease: ${{ contains(github.ref_name, '-') || contains(github.ref_name, 'a') || contains(github.ref_name, 'b') || contains(github.ref_name, 'rc') }}

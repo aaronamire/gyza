@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gyza"
+version = "0.1.0a1"
+description = "Peer-to-peer compute network with cryptographic provenance and bilateral settlement"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "Gyza contributors" },
+]
+keywords = [
+    "p2p",
+    "compute",
+    "libp2p",
+    "decentralized",
+    "ai",
+    "agents",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: System :: Distributed Computing",
+]
+# uuid.uuid7 is stdlib in 3.14+. Earlier interpreters would need an
+# `uuid6` / `uuid-utils` shim; we don't ship one and don't test on
+# anything older.
+requires-python = ">=3.14"
+dependencies = [
+    # --- core cryptographic + identity primitives ---
+    "blake3>=0.4.1",
+    "cryptography>=42.0.0",
+    # --- numerical + storage ---
+    "numpy>=1.26",
+    "lancedb>=0.5.0",
+    # --- LAN / mesh transport (Phase 2) ---
+    "aioquic>=0.9.25",
+    "zeroconf>=0.131",
+    "pysyncobj>=0.3.12",
+    # --- gRPC bridge to gyza-netd (Phase 3) ---
+    "grpcio>=1.60",
+    "protobuf>=4.25",
+    # --- observability ---
+    "prometheus_client>=0.19",
+    "structlog>=24.1",
+]
+
+[project.optional-dependencies]
+embeddings = [
+    # SentenceTransformers is a multi-hundred-MB install; users that only
+    # run the daemon / CLI without local semantic embeddings can skip.
+    "sentence-transformers>=2.5.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "grpcio-tools>=1.60",
+]
+
+[project.scripts]
+# The single user-facing CLI. Once installed, `gyza` is on PATH.
+gyza = "gyza.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/amirewontmiss/gyza-rs"
+Repository = "https://github.com/amirewontmiss/gyza-rs"
+Changelog = "https://github.com/amirewontmiss/gyza-rs/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+# Python wheel ships the gyza/ source tree. The gyza-netd Go binary is
+# distributed separately (see scripts/install.sh + GitHub Releases) —
+# bundling a Go binary inside a Python wheel makes the wheel
+# platform-specific and complicates manylinux builds. We accept the
+# split: pip install gyza; install.sh fetches the daemon binary.
+packages = ["gyza"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/gyza",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/LICENSE",
+    "/pyproject.toml",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/.pytest_cache",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+# Honest about flaky tests; CI uses --timeout via command line.
+markers = [
+    "slow: integration tests that spawn daemons (~30s each)",
+]
