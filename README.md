@@ -21,7 +21,7 @@ your compositor identity, and prints next steps.
 If you'd rather install from source:
 
 ```bash
-git clone https://github.com/amirewontmiss/gyza-rs gyza
+git clone https://github.com/aaronamire/gyza
 cd gyza
 make -C netd build              # builds netd/bin/gyza-netd
 pipx install --editable .       # installs the gyza CLI

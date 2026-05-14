@@ -33,7 +33,7 @@ set -euo pipefail
 
 # Customizable via env.
 GYZA_VERSION="${GYZA_VERSION:-latest}"
-GYZA_REPO="${GYZA_REPO:-amirewontmiss/gyza-rs}"
+GYZA_REPO="${GYZA_REPO:-aaronamire/gyza}"
 INSTALL_PREFIX="${INSTALL_PREFIX:-}"   # auto-detected below if empty
 
 # Pretty colors (only when stdout is a TTY).

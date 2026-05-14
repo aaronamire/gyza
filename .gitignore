@@ -27,3 +27,13 @@ spec/states/
 
 # Rust workspace build output.
 gyza-rs/target/
+
+# Claude Code per-project local state.
+.claude/
+
+# Editor / OS droppings.
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
