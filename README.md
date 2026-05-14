@@ -15,7 +15,7 @@ support is not on the roadmap for v0.1.x.
 Everything you need to see Gyza work, in five commands.
 
 ```bash
-# 1. Install. Linux x86_64 / aarch64, Python 3.14+, pipx required.
+# 1. Install. Linux x86_64 / aarch64, Python 3.10+, pipx required.
 curl -sSf https://raw.githubusercontent.com/aaronamire/gyza/main/scripts/install.sh | bash
 
 # 2. Generate your identity (~/.gyza/compositor.key, mode 0600).

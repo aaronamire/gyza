@@ -39,11 +39,27 @@ _model_lock = threading.Lock()
 _model_singleton: object | None = None
 
 
+class _EmbeddingsUnavailable(Exception):
+    """sentence-transformers is not installed in this environment."""
+
+
 def _get_model():
     global _model_singleton
     with _model_lock:
         if _model_singleton is None:
-            from sentence_transformers import SentenceTransformer
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError as e:
+                # On hosts that intentionally skip the [embeddings]
+                # extra (e.g. the demo agent on a 1 GB VPS), retrieving
+                # similar episodes is structurally impossible — there's
+                # no encoder. We raise a typed exception so
+                # retrieve_similar can degrade gracefully rather than
+                # crash mid-execution.
+                raise _EmbeddingsUnavailable(
+                    "sentence-transformers is not installed; "
+                    "EpisodicMemory.retrieve_similar will return []"
+                ) from e
             _model_singleton = SentenceTransformer(_EMBED_MODEL_NAME)
         return _model_singleton
 
@@ -386,7 +402,14 @@ class EpisodicMemory:
         if self._backend.count() == 0:
             return []
 
-        q_vec = _normalize(_embed([task_text])[0])
+        # Graceful degradation when sentence-transformers isn't
+        # installed (demo agent on small VPSes). Without the encoder
+        # we can't compute a query embedding — return empty so the
+        # caller falls back to a non-enriched prompt.
+        try:
+            q_vec = _normalize(_embed([task_text])[0])
+        except _EmbeddingsUnavailable:
+            return []
 
         if isinstance(self._backend, _LanceBackend):
             ranked = self._backend.search(q_vec, k=k)

@@ -555,12 +555,22 @@ class NetdClient:
             pass
 
         LOG.info("[netd_client] launching %s", " ".join(argv))
-        stderr = subprocess.STDOUT if stderr_to_stdout else None
+        # Detach the daemon so it survives the parent CLI's exit.
+        # Pre-fix this used subprocess.PIPE for stdout but never read
+        # from it; the daemon's stdout buffer eventually filled, the
+        # daemon blocked on write, and when the parent exited the
+        # daemon got SIGPIPE on its next log line. Now: stdout/stderr
+        # → DEVNULL (production logs go through journald via the
+        # systemd unit anyway), and start_new_session=True puts the
+        # daemon in its own session so a parent SIGHUP doesn't reach
+        # it. stderr_to_stdout is retained for API compatibility but
+        # is effectively a no-op when the parent is short-lived.
         proc = subprocess.Popen(
             argv,
-            stdout=subprocess.PIPE,
-            stderr=stderr,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             text=True,
+            start_new_session=True,
         )
 
         deadline = time.monotonic() + startup_timeout_s

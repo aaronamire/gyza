@@ -204,6 +204,76 @@ if ! systemctl is-active --quiet gyza-netd.service; then
     exit 1
 fi
 
+# -----------------------------------------------------------------------
+# Hosted demo agent (Python). Runs as a sidecar service that claims
+# free-text work items submitted to gyza-demo-public-v1 via `gyza
+# submit ...`. Deterministic executor in v0.1 — no LLM, no shell exec.
+# Installed into a dedicated venv so we don't touch system Python.
+# -----------------------------------------------------------------------
+echo "    installing gyza Python package for demo agent"
+apt-get install -y -qq python3-venv python3-pip build-essential python3-dev >/dev/null
+
+# Re-create the venv idempotently. ``--system-site-packages`` is
+# avoided so the venv pins its own dependency versions.
+if [[ ! -x /opt/gyza/agent-venv/bin/python ]]; then
+    python3 -m venv /opt/gyza/agent-venv
+fi
+# Upgrade pip first — old pip versions choke on modern wheels.
+/opt/gyza/agent-venv/bin/pip install -q --upgrade pip >/dev/null
+
+# Install gyza editable. Skip the [embeddings] extra — the demo
+# agent uses a stub specialization vector and doesn't need
+# sentence-transformers (~500 MB RAM). Skip [dev] for the same
+# reason.
+/opt/gyza/agent-venv/bin/pip install -q -e /opt/gyza >/dev/null
+
+chown -R gyza:gyza /opt/gyza/agent-venv
+
+# Systemd unit for the demo agent. Depends on gyza-netd.service
+# (the agent connects to the daemon's Unix socket). Restart=always
+# so a transient daemon hiccup doesn't permanently take the agent
+# down.
+cat > /etc/systemd/system/gyza-demo-agent.service <<UNIT
+[Unit]
+Description=Gyza demo agent ($NODE_NAME) — claims public demo work items
+Requires=gyza-netd.service
+After=gyza-netd.service
+
+[Service]
+Type=simple
+User=gyza
+Group=gyza
+Environment=HOME=/var/lib/gyza
+WorkingDirectory=/var/lib/gyza
+ExecStart=/opt/gyza/agent-venv/bin/gyza demo-agent --socket-path=/var/lib/gyza/.gyza/netd.sock
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/gyza
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+chmod 0644 /etc/systemd/system/gyza-demo-agent.service
+
+systemctl daemon-reload
+systemctl enable gyza-demo-agent.service
+systemctl restart gyza-demo-agent.service
+
+# Give it a moment to boot up before sanity-checking. The agent
+# imports take a few seconds (numpy + cryptography + grpcio).
+sleep 8
+if ! systemctl is-active --quiet gyza-demo-agent.service; then
+    echo "WARN: gyza-demo-agent.service did not start cleanly" >&2
+    journalctl -u gyza-demo-agent.service --since="1 minute ago" --no-pager | tail -20 >&2
+    echo "(continuing — bootstrap node is still functional without the agent)" >&2
+fi
+
 # Output the multiaddr the operator needs to add to DNS.
 MULTIADDR="/ip4/$PUBLIC_IP/udp/7749/quic-v1/p2p/$PEER_ID"
 echo

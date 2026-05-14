@@ -25,13 +25,17 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: System :: Distributed Computing",
 ]
-# uuid.uuid7 is stdlib in 3.14+. Earlier interpreters would need an
-# `uuid6` / `uuid-utils` shim; we don't ship one and don't test on
-# anything older.
-requires-python = ">=3.14"
+# 3.10+ supported. `uuid.uuid7` is stdlib only in 3.14+; on older
+# interpreters `gyza/_compat.py` registers a compliant fallback at
+# package import. No external shim required.
+requires-python = ">=3.10"
 dependencies = [
     # --- core cryptographic + identity primitives ---
     "blake3>=0.4.1",

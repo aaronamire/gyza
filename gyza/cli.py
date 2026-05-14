@@ -1207,6 +1207,235 @@ def cmd_credits_peers(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# submit — public demo task submission
+# ---------------------------------------------------------------------------
+
+def cmd_submit(args: argparse.Namespace) -> int:
+    """
+    Submit a free-text task to the public demo project. The user's
+    running daemon (started via ``gyza global start``) gossips the
+    task to ``gyza-demo-public-v1``; any hosted demo agent on that
+    topic can claim it. When the work item completes, we verify the
+    envelope chain and print the result.
+
+    The demo agents run with a deterministic executor in v0.1
+    (no real LLM). The value of this command is the *protocol* —
+    you can cryptographically verify that the result came from a
+    specific peer at a specific timestamp under a specific
+    capability manifest. Real LLM-backed responses land in v0.1.1.
+    """
+    import time as _time
+    import uuid as _uuid
+
+    from gyza.embeddings import embed_work_description
+    from gyza.icp import verify_envelope
+    from gyza.network.demo_agent import DEMO_PROJECT_ID
+    from gyza.network.global_cluster import GlobalCluster
+    from gyza.network.netd_client import GossipClient, NetdClient
+    from gyza.network.network_blackboard import NetworkBlackboard
+    from gyza.schema import WorkItem
+
+    cfg = load_config()
+    sock = str(_resolve(cfg.netd_socket_path))
+
+    # Sanity: is the daemon running? If not, fail fast with a
+    # helpful message rather than blocking on a non-existent socket.
+    if not Path(sock).exists():
+        print(
+            f"daemon socket not found at {sock}\n"
+            f"start it first with: gyza global start",
+            file=sys.stderr,
+        )
+        return 2
+
+    compositor = LocalCompositor(key_path=cfg.compositor_key_path)
+    bb = NetworkBlackboard(cfg.blackboard_db_path)
+    netd = NetdClient(sock)
+    gossip = GossipClient(sock)
+
+    cluster = GlobalCluster(
+        compositor=compositor,
+        config=cfg,
+        blackboard=bb,
+        netd_client=netd,
+        gossip_client=gossip,
+    )
+
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(cluster.start())
+        gossip.join_project(DEMO_PROJECT_ID)
+        bb.attach_gossip(
+            gossip, DEMO_PROJECT_ID, node_id=compositor.pubkey_hex,
+        )
+
+        # Build the intent + work item. The intent is signed by the
+        # local compositor; the work item is rooted in the intent
+        # and carries an embedding of the task description so that
+        # specialization-matching on the executor side can score
+        # cosine(spec, task_emb).
+        intent_id = str(_uuid.uuid7())
+        bb.post_intent({
+            "intent_id": intent_id,
+            "natural_text": args.task,
+            "category": "public_demo",
+            "actions": [],
+            "authorization": {
+                "resources": [],
+                "preview_required": False,
+                "reversible": True,
+            },
+        })
+
+        emb = embed_work_description(args.task)
+        wi = WorkItem(
+            id=str(_uuid.uuid7()),
+            lineage_root=intent_id,
+            parent_id=None,
+            description=args.task,
+            desc_embedding=emb,
+            reward=0.5,
+            reward_updated_ns=_time.time_ns(),
+            required_tier=0,
+            input_hashes=[],
+            output_spec={"kind": "public_demo"},
+            streaming_ok=False,
+            claimed_by=None,
+            claimed_at_ns=None,
+            claim_hlc_l=0, claim_hlc_c=0, claim_hlc_node="",
+            completed_at_ns=None,
+            output_hash=None,
+            icp_envelope_hash=None,
+            success=None,
+            created_at_ns=_time.time_ns(),
+            ttl_ns=3600 * 1_000_000_000,
+        )
+        bb.post_work_item(wi)
+
+        print(f"[submit] posted intent={intent_id[:16]}… work_item={wi.id[:16]}…")
+        print(f"[submit] gossiping to {DEMO_PROJECT_ID} — waiting for a hosted agent to claim…")
+
+        # Poll our local blackboard. Once a hosted agent claims +
+        # completes the work item, the completion gossips back to
+        # us with completed_at_ns + output_hash + icp_envelope_hash
+        # populated.
+        deadline = _time.monotonic() + args.timeout
+        last_status = ""
+        while _time.monotonic() < deadline:
+            items = bb.get_by_lineage(intent_id)
+            if items:
+                item = items[0]
+                if item.completed_at_ns is not None:
+                    print(f"[submit] completed in "
+                          f"{(_time.monotonic() - (deadline - args.timeout)):.1f}s")
+                    break
+                if item.claimed_by and item.claimed_by != last_status:
+                    print(f"[submit] claimed by {item.claimed_by[:16]}…")
+                    last_status = item.claimed_by
+            _time.sleep(0.5)
+        else:
+            print(f"[submit] timed out after {args.timeout}s waiting for a result.\n"
+                  f"  Possible causes:\n"
+                  f"    - No hosted agents are running on the demo project.\n"
+                  f"    - DHT/gossip mesh hasn't propagated your work item.\n"
+                  f"    - Check `gyza global status` to see peer count.",
+                  file=sys.stderr)
+            return 3
+
+        # Print completion proof. Note: the envelope + artifact bytes
+        # live on the executor's blackboard, not ours — gossip carries
+        # completion HASHES but not the underlying bytes by default
+        # (would balloon wire traffic on a large mesh). The CLI v0.1
+        # surfaces what gossip delivered; v0.1.1 will add a libp2p
+        # ``GetEnvelope`` RPC so the submitter can fetch + verify the
+        # full envelope from the executor by peer ID.
+        items = bb.get_by_lineage(intent_id)
+        item = items[0]
+        env = bb.get_envelope(item.icp_envelope_hash) if item.icp_envelope_hash else None
+        artifact = bb.get_artifact(item.output_hash) if item.output_hash else None
+
+        # If we DO have the envelope locally (which happens when the
+        # executor opted into gossipping it, or when this is a local-
+        # only demo), verify and print the full chain. Otherwise show
+        # what we know from the gossipped completion.
+        sig_ok: bool | None = None
+        result_text = ""
+        agent_pubkey = ""
+        model_id = ""
+        duration_ms: int | None = None
+        if env is not None:
+            sig_ok = verify_envelope(env, bytes.fromhex(env.agent_pubkey))
+            agent_pubkey = env.agent_pubkey
+            model_id = env.model_identifier
+            duration_ms = env.duration_ms
+        if artifact is not None:
+            try:
+                payload = json.loads(artifact.data.decode("utf-8"))
+                if isinstance(payload, dict):
+                    result_text = payload.get("text", "")
+            except Exception:  # noqa: BLE001
+                result_text = "<artifact decode failed>"
+
+        bar = "─" * 72
+        print()
+        print(bar)
+        if env is not None and result_text:
+            print(f"  RESULT (signed by {agent_pubkey[:16]}…)")
+            print(bar)
+            print(result_text)
+        else:
+            print("  COMPLETION PROOF")
+            print(bar)
+            print(
+                f"  A remote agent claimed and executed your task. The full\n"
+                f"  ICP envelope + result artifact live on that agent's\n"
+                f"  blackboard (we received only the cryptographic hashes\n"
+                f"  over gossip — by design, to keep mesh traffic small).\n"
+                f"\n"
+                f"  v0.1.1 will add a libp2p ``GetEnvelope`` RPC so this\n"
+                f"  CLI can fetch + verify the full chain from the executor.\n"
+                f"  For now, you have:"
+            )
+        print(bar)
+        print(f"  intent:           {intent_id}")
+        print(f"  work item:        {item.id}")
+        print(f"  claimed by:       {item.claimed_by or '?'}")
+        print(f"  envelope hash:    {item.icp_envelope_hash or '(none)'}")
+        print(f"  output hash:      {item.output_hash or '(none)'}")
+        if env is not None:
+            print(f"  signed by:        {agent_pubkey}")
+            print(f"  model:            {model_id}")
+            print(f"  duration:         {duration_ms} ms")
+            print(f"  signature:        {'✓ VALID' if sig_ok else '✗ INVALID'}")
+        else:
+            print(f"  signature:        (envelope not local — v0.1.1 will fetch)")
+        print(bar)
+        return 0
+    finally:
+        try:
+            loop.run_until_complete(cluster.stop())
+        except Exception:  # noqa: BLE001
+            pass
+        loop.close()
+
+
+# ---------------------------------------------------------------------------
+# demo-agent — long-running hosted executor
+# ---------------------------------------------------------------------------
+
+def cmd_demo_agent(args: argparse.Namespace) -> int:
+    """
+    Run a hosted demo agent that claims work items posted to the
+    public demo project. Long-running; intended for systemd or a
+    bootstrap-node sidecar process. Blocks on SIGTERM/SIGINT.
+    """
+    from gyza.network.demo_agent import run_hosted_demo_agent
+    return run_hosted_demo_agent(socket_path=args.socket_path)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="gyza", description="Gyza coordination network CLI"
@@ -1232,6 +1461,33 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")
+
+    # Public demo task submission. Submits a free-text task to the
+    # gyza-demo-public-v1 project, waits for a hosted agent on the
+    # network to claim it, then verifies + prints the signed result.
+    p_submit = sub.add_parser(
+        "submit",
+        help="post a free-text task to the public demo network and wait for a signed result",
+    )
+    p_submit.add_argument(
+        "task",
+        help="free-text task description (e.g. \"summarize https://example.com\")",
+    )
+    p_submit.add_argument(
+        "--timeout", type=float, default=60.0,
+        help="max seconds to wait for a hosted agent to complete the work (default 60)",
+    )
+
+    # Long-running hosted agent. Claims public demo work items and
+    # signs results. Intended for systemd / sidecar deployment.
+    p_demoagent = sub.add_parser(
+        "demo-agent",
+        help="run a hosted demo executor that claims and signs public demo work",
+    )
+    p_demoagent.add_argument(
+        "--socket-path", default=None,
+        help="gyza-netd socket (defaults to config.netd_socket_path)",
+    )
 
     p_net = sub.add_parser("network", help="LAN peer commands")
     netsub = p_net.add_subparsers(dest="network_cmd", required=True)
@@ -1377,6 +1633,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "submit":
+        return cmd_submit(args)
+    if args.command == "demo-agent":
+        return cmd_demo_agent(args)
     if args.command == "network":
         if args.network_cmd == "peers":
             return cmd_network_peers(args)

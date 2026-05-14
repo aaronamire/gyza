@@ -97,10 +97,12 @@ for tool in curl tar python3; do
     fi
 done
 
-# Python version: need 3.14+ for uuid.uuid7().
+# Python 3.10+ is supported. uuid.uuid7 is stdlib in 3.14+; older
+# interpreters get a compliant fallback shim that gyza installs at
+# package-import time (see gyza/_compat.py).
 py_version=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-if ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 14) else 1)'; then
-    die "Python 3.14+ required (you have $py_version). https://www.python.org/downloads/"
+if ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+    die "Python 3.10+ required (you have $py_version). Ubuntu 22.04 / Debian 12 / Fedora 38+ ship a compatible interpreter by default; older systems can use \`pyenv install 3.12\` or similar. https://www.python.org/downloads/"
 fi
 note "python = $py_version"
 
