@@ -69,6 +69,12 @@ rsync -az --delete \
     --exclude='/__pycache__' \
     --exclude='*.pyc' \
     --exclude='/.gyza' \
+    --exclude='/spec/states' \
+    --exclude='/.pytest_cache' \
+    --exclude='/.ruff_cache' \
+    --exclude='/.mypy_cache' \
+    --exclude='/.cache' \
+    --exclude='/node_modules' \
     "$REPO_ROOT/" "$SSH_TARGET:/opt/gyza/"
 
 # -----------------------------------------------------------------------

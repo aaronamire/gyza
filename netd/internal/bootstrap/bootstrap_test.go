@@ -83,6 +83,9 @@ func TestParseTXTRecords_HandlesWhitespace(t *testing.T) {
 }
 
 func TestResolve_DNSOnly(t *testing.T) {
+	orig := FallbackPeers
+	FallbackPeers = nil
+	defer func() { FallbackPeers = orig }()
 	r := &fakeResolver{
 		records: map[string][]string{
 			"_dnsaddr.example.test": {
@@ -237,6 +240,9 @@ func TestResolveWithExtras_DropsBadExtras(t *testing.T) {
 }
 
 func TestAsMultiaddrStrings_Roundtrip(t *testing.T) {
+	orig := FallbackPeers
+	FallbackPeers = nil
+	defer func() { FallbackPeers = orig }()
 	r := &fakeResolver{
 		records: map[string][]string{
 			"_dnsaddr.example.test": {

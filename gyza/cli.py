@@ -6,6 +6,7 @@ Subcommands:
   demo                    Run the two-agent pipeline demo (Phase 1, local)
   demo injection          Run the injection-attack demo
   demo lan                Run the Phase 2 single-machine simulation
+  demo global             Run the Phase 3 two-daemon end-to-end demo
   status                  Show blackboard / cluster / artifact stats
   network peers           List discovered + connected LAN peers
   network join HOST:PORT  Manually dial a peer over QUIC
@@ -22,6 +23,7 @@ import asyncio
 import json
 import runpy
 import sqlite3
+import subprocess
 import sys
 from pathlib import Path
 
@@ -92,11 +94,26 @@ def _run_demo_script(name: str) -> int:
     return 0
 
 
+def _run_demo_subprocess(name: str) -> int:
+    # For demos that own their own argparse and/or spawn subprocesses,
+    # run them in a fresh Python interpreter so the parent's sys.argv
+    # doesn't leak into the demo's parser and the demo's signal
+    # handlers / tmp dirs stay isolated.
+    repo_root = Path(__file__).resolve().parents[1]
+    script = repo_root / "demo" / name
+    if not script.exists():
+        print(f"demo script not found: {script}", file=sys.stderr)
+        return 2
+    return subprocess.call([sys.executable, str(script)])
+
+
 def cmd_demo(args: argparse.Namespace) -> int:
     if args.scenario == "injection":
         return _run_demo_script("injection_demo.py")
     if args.scenario == "lan":
         return _run_demo_script("single_machine_phase2.py")
+    if args.scenario == "global":
+        return _run_demo_subprocess("single_machine_global.py")
     return _run_demo_script("two_agent_pipeline.py")
 
 
@@ -1202,9 +1219,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_demo.add_argument(
         "scenario",
         nargs="?",
-        choices=["pipeline", "injection", "lan"],
+        choices=["pipeline", "injection", "lan", "global"],
         default="pipeline",
-        help="pipeline (default), injection, or lan (Phase-2 sim)",
+        help=(
+            "pipeline (default — Phase-1 two-agent local demo), "
+            "injection (tamper attack on the envelope chain), "
+            "lan (Phase-2 single-machine cluster sim), "
+            "global (Phase-3 end-to-end: two daemons on loopback "
+            "complete a project through bilateral settlement; needs "
+            "gyza-netd binary)"
+        ),
     )
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")

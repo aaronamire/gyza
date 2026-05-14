@@ -38,11 +38,11 @@ gyza global start
 gyza status
 
 # Run the local two-agent demo (no remote peers required).
-gyza demo two_agent_pipeline
+gyza demo pipeline
 
 # Run the full Phase-3 single-machine integration demo (two daemons
 # on loopback, settles in ~15 s).
-gyza demo single_machine_global
+gyza demo global
 ```
 
 ## What it is
@@ -143,7 +143,7 @@ gyza init
 
 # Two-agent pipeline: posts two work items, runs a query specialist
 # and a summarizer, prints the verified envelope chain.
-gyza demo two_agent_pipeline
+gyza demo pipeline
 
 # Show what's on the blackboard.
 gyza status

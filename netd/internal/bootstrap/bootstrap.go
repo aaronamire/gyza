@@ -66,8 +66,12 @@ const (
 // if Resolve falls back to this empty set and the operator hasn't
 // passed --bootstrap explicitly.
 var FallbackPeers = []string{
-	// Populated after the EU / US / Asia bootstrap nodes come online.
-	// Each: /ip4/<public-ip>/udp/7749/quic-v1/p2p/<peer-id>
+	// EU — Frankfurt (Vultr).
+	"/ip4/45.77.55.27/udp/7749/quic-v1/p2p/12D3KooWCfGdkEXZvgPMCfGD3K8xhdxpMHvbWJhUknEs4zRNHAAp",
+	// US — New Jersey (Vultr).
+	"/ip4/155.138.217.81/udp/7749/quic-v1/p2p/12D3KooWSwDNtty5Vgps452oKeVyUyn7tHyFnCks31xTwgYMPq8W",
+	// AP — Singapore (Vultr).
+	"/ip4/45.76.150.156/udp/7749/quic-v1/p2p/12D3KooWM8Jeu6p68dtavDHR7YSZGpBUN8cN26oPmRA8Fb1EYYjG",
 }
 
 // Resolver is the subset of net.Resolver we depend on. Tests inject

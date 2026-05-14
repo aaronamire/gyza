@@ -13,6 +13,87 @@
 
 ---
 
+## Session 32 — Network goes live + CLI demo fix
+
+The gyza network ships. Three Vultr bootstrap nodes provisioned
+(Frankfurt + New Jersey + Singapore), `gyza.network` registered at
+Namecheap, three `_dnsaddr` TXT records populated, local daemon
+verified to resolve DNS and connect to **3/3 bootstrap peers over
+the public internet**. Phase 3 "global federation" is no longer a
+code-only capability — it has actual reach.
+
+**Deliverables:**
+
+- 3× Vultr CX-equivalent VPSes (Ubuntu 24.04, $6/mo each)
+  provisioned via `scripts/deploy-bootstrap.sh`. Multiaddrs:
+  - EU: `/ip4/45.77.55.27/udp/7749/quic-v1/p2p/12D3KooWCfGdk…`
+  - US: `/ip4/155.138.217.81/udp/7749/quic-v1/p2p/12D3KooWSwDNt…`
+  - AP: `/ip4/45.76.150.156/udp/7749/quic-v1/p2p/12D3KooWM8Jeu…`
+- `netd/internal/bootstrap/bootstrap.go::FallbackPeers` — the
+  three multiaddrs baked into the daemon binary as the
+  defence-in-depth hardcoded list. DNS at `_dnsaddr.gyza.network`
+  is authoritative; this list catches the edge case where DNS
+  itself is unreachable. Two existing tests
+  (`TestResolve_DNSOnly`, `TestAsMultiaddrStrings_Roundtrip`)
+  needed the save/restore pattern the other tests in the file
+  already used.
+- `gyza/cli.py` — `gyza demo global` now wired to
+  `demo/single_machine_global.py`, the Phase-3 showcase that
+  S31's README invited users to run but the CLI didn't know
+  about. Uses a fresh subprocess (`_run_demo_subprocess`) so the
+  demo's own argparse + signal handlers + tmp dirs don't collide
+  with the parent CLI process. `pipeline`, `injection`, `lan`
+  paths unchanged.
+- `README.md` — replaced the wrong script-filename references
+  (`gyza demo two_agent_pipeline`, `gyza demo single_machine_global`)
+  with the actual CLI subcommands (`gyza demo pipeline`,
+  `gyza demo global`).
+- `scripts/deploy-bootstrap.sh` — rsync exclude list broadened
+  to skip `spec/states`, `.pytest_cache`, `.ruff_cache`,
+  `.mypy_cache`, `.cache`, `node_modules`. Prior deploys filled
+  the 25 GB Vultr disk on the rsync step because the local
+  repo had 35 GB of TLC model-checking state files in
+  `spec/states/`. Cleaned those locally and patched the script
+  so the disk-fill failure never recurs on future deploys or
+  rotation.
+- `tests/test_edge_cases.py::test_cli_parser_builds` — extended
+  to cover `gyza demo global` parses correctly.
+
+**Verified end-to-end (the headline result):**
+
+```
+[bootstrap] DNS resolved 3 peer(s) from _dnsaddr.gyza.network
+[bootstrap] connected to 12D3KooWM8Jeu6p68dtavDHR7YSZGpBUN8cN26oPmRA8Fb1EYYjG
+[bootstrap] connected to 12D3KooWSwDNtty5Vgps452oKeVyUyn7tHyFnCks31xTwgYMPq8W
+[bootstrap] connected to 12D3KooWCfGdkEXZvgPMCfGD3K8xhdxpMHvbWJhUknEs4zRNHAAp
+[host] bootstrap: connected to 3/3 addr(s)
+[dht] initialized (mode=client, prefix=/gyza/1.0)
+[gossip] gossipsub initialized
+```
+
+Local laptop joined the public mesh from a residential connection
+behind NAT, found the three bootstrap peers via DNS, established
+QUIC-over-Noise connections to all three over the public internet,
+DHT + gossipsub came up clean.
+
+**§6 progress:**
+- B1 (bootstrap nodes): operationally CLOSED. Three Vultr boxes
+  live, DNS records authoritative, daemon falls back to the same
+  set even with DNS unreachable. The two remaining tasks (cert
+  republish loop, recursive verifier wiring) are unrelated to
+  bootstrap presence.
+- B4 (code signing): still explicitly deferred per Linux-only MVP.
+
+**What this unblocks:**
+
+After this session the alpha is genuinely deployable. Any user on
+a Linux box with `pip install gyza` (S31) gets a daemon that, on
+`gyza global start`, will connect to the public mesh. The
+documentation no longer lies; the bootstrap path is live; the
+network is reachable from arbitrary geographies.
+
+---
+
 ## Session 31 — MVP-2: packaging (pyproject + install.sh + release pipeline)
 
 Second Linux-only MVP milestone (B2 from §6). After this session the

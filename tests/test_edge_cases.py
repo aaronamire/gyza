@@ -373,5 +373,7 @@ def test_cli_parser_builds():
     args = p.parse_args(["demo", "injection"])
     assert args.command == "demo"
     assert args.scenario == "injection"
+    args = p.parse_args(["demo", "global"])
+    assert args.scenario == "global"
     args = p.parse_args(["status"])
     assert args.command == "status"
