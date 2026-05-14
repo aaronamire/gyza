@@ -13,6 +13,65 @@
 
 ---
 
+## Session 30 — MVP-1: DNS-anchored bootstrap + VPS deploy script
+
+First Linux-only MVP milestone (B1 from §6). Closes the
+single-largest deployment trip-wire (`DefaultBootstrapPeers = []`)
+and provides repeatable bootstrap node provisioning.
+
+**Deliverables:**
+
+- `netd/internal/bootstrap/` (new Go package, ~250 lines).
+  - `Resolve(ctx, resolver, domain, logf)` → `[]peer.AddrInfo`.
+    Looks up `_dnsaddr.<domain>` TXT records, parses each
+    `dnsaddr=<multiaddr>` entry, merges with hardcoded
+    `FallbackPeers`, dedups by `peer.ID`.
+  - `ResolveWithExtras(...)` adds user-supplied `--bootstrap`
+    entries to the merge.
+  - `Resolver` interface for DNS injection (production uses
+    `net.DefaultResolver`; tests use a fake).
+  - 10 unit tests covering happy path, malformed multiaddrs,
+    DNS failure → fallback, dedup, empty-domain, no-sources.
+- `netd/cmd/gyza-netd/main.go`:
+  - New `--bootstrap-domain` flag (default `gyza.network`).
+  - New `--print-peer-id` mode: loads identity, prints peer ID
+    to stdout, exits 0. Stdin-clean for deploy-script parsing.
+  - `--bootstrap` semantically renamed: now "explicit extras
+    merged with DNS set" instead of "the bootstrap list."
+- `scripts/deploy-bootstrap.sh`. Idempotent provisioner for a
+  fresh Ubuntu 22.04/24.04 VPS:
+  - rsyncs source, installs Go 1.23.4, builds gyza-netd into
+    /usr/local/bin/
+  - Creates `gyza` system user with home `/var/lib/gyza`
+  - Generates `compositor.key` if absent (preserves existing on
+    re-run); writes 32 bytes from `/dev/urandom`, mode 0600
+  - Computes peer ID via `--print-peer-id`
+  - Installs systemd unit with `--dht-mode=server
+    --enable-relay-service --bootstrap-domain=gyza.network`
+  - Opens UDP 7749 in ufw (manual `ufw enable` left to operator)
+  - Prints the multiaddr to add to DNS
+- `scripts/verify-bootstrap.sh`. Post-deploy sanity check:
+  - Queries `_dnsaddr.<domain>` TXT records via dig
+  - Parses each `dnsaddr=` entry, extracts IP+port
+  - UDP-probes each peer for routability
+
+**Behavior change:** the daemon now does DNS resolution at startup
+by default. With the default `--bootstrap-domain=gyza.network` and
+no DNS records yet, the resolver logs an NXDOMAIN-style warning
+and continues with empty `FallbackPeers`. Production behavior
+unchanged when DNS records ARE published.
+
+**Test status:** all 12 Go packages green. `bootstrap` package has
+10 new unit tests; full Go suite runs in <10s.
+
+**§6 progress:**
+- B1: ✓ daemon-side code shipped. User-side: VPSes + DNS still
+  required. Deploy script + verify script make this <30 min of
+  operator work per VPS.
+- B2 (packaging): NEXT.
+
+---
+
 ## Session 29 — `Attestation.tla` sub-spec (§C1 #3) + scope revision
 
 Third §C1 sub-spec. Core cert assembly + cosig verification from

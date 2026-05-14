@@ -29,6 +29,7 @@ import (
 	"syscall"
 	"time"
 
+	"gyza/netd/internal/bootstrap"
 	"gyza/netd/internal/capability"
 	"gyza/netd/internal/capability_stream"
 	"gyza/netd/internal/dht"
@@ -97,25 +98,39 @@ func main() {
 		dhtMode = flag.String(
 			"dht-mode", "auto",
 			"Kademlia DHT mode: auto | server | client. ModeAuto starts as Client and promotes to Server when reachability is confirmed; on small/loopback meshes without AutoNAT signaling, promotion can take a while or never happen — integration tests should pass --dht-mode=server so PutValue replicates across peers without waiting on autonat.")
-		bootstrap   stringSliceFlag
-		staticRelay stringSliceFlag
+		bootstrapDomain = flag.String(
+			"bootstrap-domain", bootstrap.DefaultDomain,
+			"DNS domain to resolve for bootstrap peers via _dnsaddr.<domain> TXT records. Empty string disables DNS-based discovery (relies on --bootstrap + compiled-in FallbackPeers).")
+		printPeerID = flag.Bool(
+			"print-peer-id", false,
+			"load --key-path, print the resulting libp2p peer ID to stdout, and exit. Used by deploy scripts to compute the bootstrap multiaddr for DNS TXT records.")
+		bootstrapFlag stringSliceFlag
+		staticRelay   stringSliceFlag
 	)
-	flag.Var(&bootstrap, "bootstrap",
-		"bootstrap peer multiaddrs (comma-separated; defaults to public IPFS bootstrap until Phase 3 productionizes Gyza-owned ones)")
+	flag.Var(&bootstrapFlag, "bootstrap",
+		"explicit bootstrap peer multiaddrs (comma-separated). Merged with the DNS-resolved set from --bootstrap-domain. Useful for dev / private networks.")
 	flag.Var(&staticRelay, "static-relay",
 		"hardcoded relay peer multiaddrs (comma-separated). Surfaces immediately to AutoRelay before the DHT discovers any.")
 	flag.Parse()
 
 	logger := newLogger(*logLevel)
-	logger.Info("gyza-netd starting (Phase 3 Session 5)")
-	logger.Info("    socket-path     = %s", *socketPath)
-	logger.Info("    listen-port     = %d", *listenPort)
-	logger.Info("    key-path        = %s", *keyPath)
-	logger.Info("    bootstrap       = %d entries", len(bootstrap))
-	logger.Info("    static-relay    = %d entries", len(staticRelay))
-	logger.Info("    hole-punching   = %t", *holePunch)
-	logger.Info("    auto-relay      = %t", *autoRelay)
-	logger.Info("    relay-service   = %t", *enableRelaySvc)
+	// --print-peer-id is a non-interactive utility mode; we don't want
+	// the startup banner spamming stderr. The actual peer-id print
+	// happens after identity load below.
+	if !*printPeerID {
+		logger.Info("gyza-netd starting")
+		logger.Info("    socket-path        = %s", *socketPath)
+		logger.Info("    listen-port        = %d", *listenPort)
+		logger.Info("    key-path           = %s", *keyPath)
+		logger.Info("    bootstrap-domain   = %q", *bootstrapDomain)
+		logger.Info("    bootstrap (extras) = %d entries", len(bootstrapFlag))
+		logger.Info("    static-relay       = %d entries", len(staticRelay))
+	}
+	if !*printPeerID {
+		logger.Info("    hole-punching   = %t", *holePunch)
+		logger.Info("    auto-relay      = %t", *autoRelay)
+		logger.Info("    relay-service   = %t", *enableRelaySvc)
+	}
 
 	resolvedKey, err := expandUser(*keyPath)
 	if err != nil {
@@ -125,6 +140,16 @@ func main() {
 	if err != nil {
 		logger.Fatal("load identity: %v", err)
 	}
+
+	// --print-peer-id: short-circuit before any network setup. Used by
+	// deploy scripts to compute the DNS TXT record content without
+	// having to spin up the full daemon. Output is plain (no logger
+	// prefix) so it's parseable by shell pipelines.
+	if *printPeerID {
+		fmt.Println(id.PeerID.String())
+		return
+	}
+
 	logger.Info("[identity] peer_id=%s", id.PeerID.String())
 	logger.Info("[identity] compositor_pubkey=%s", id.PubKeyHex)
 
@@ -147,13 +172,28 @@ func main() {
 		AdvertiseInterval:  *relayAdvertiseInterval,
 	})
 
+	// Resolve the bootstrap peer set. DNS-anchored (via --bootstrap-domain)
+	// + compiled-in FallbackPeers + explicit --bootstrap entries from the
+	// command line, all unioned and deduped by peer.ID. Resolution is
+	// non-fatal: a failed DNS lookup just means we fall back to compiled
+	// and explicit entries. Zero resolved peers logs a warning but lets
+	// the daemon start; mDNS / direct-connect can still seed the routing
+	// table.
+	bootstrapAIs := bootstrap.ResolveWithExtras(
+		ctx, bootstrap.DefaultResolver(),
+		*bootstrapDomain, bootstrapFlag, logger.Info,
+	)
+	bootstrapStrings := bootstrap.AsMultiaddrStrings(bootstrapAIs)
+	logger.Info("[bootstrap] resolved %d peer(s), %d addr(s) total",
+		len(bootstrapAIs), len(bootstrapStrings))
+
 	// Real libp2p host with QUIC + Noise + Yamux + UPnP/NAT-PMP, plus
 	// DCUtR hole-punching and AutoRelay client when configured. The
 	// NAT-related libp2p options come from natMgr.LibP2POptions().
 	h, err := host.NewHost(ctx, host.Config{
 		Identity:       id,
 		ListenPort:     *listenPort,
-		BootstrapPeers: bootstrap,
+		BootstrapPeers: bootstrapStrings,
 		ExtraOptions:   natMgr.LibP2POptions(),
 	})
 	if err != nil {
@@ -171,11 +211,14 @@ func main() {
 
 	// Connect to bootstrap peers (if any). Failures here are non-fatal:
 	// the daemon is still usable for direct-connect peers and as an
-	// inert DHT node; Session 3's DCUtR can also seed the routing
-	// table from observed addresses later.
-	if len(bootstrap) > 0 {
-		ok := host.ConnectBootstrap(ctx, h, bootstrap, logger.Info)
-		logger.Info("[host] bootstrap: connected to %d/%d peers", ok, len(bootstrap))
+	// inert DHT node; DCUtR can also seed the routing table from
+	// observed addresses later.
+	if len(bootstrapStrings) > 0 {
+		ok := host.ConnectBootstrap(ctx, h, bootstrapStrings, logger.Info)
+		logger.Info("[host] bootstrap: connected to %d/%d addr(s)",
+			ok, len(bootstrapStrings))
+	} else {
+		logger.Info("[host] bootstrap: no peers resolved; running as DHT island")
 	}
 
 	// Kademlia DHT with /gyza/1.0 protocol prefix — segregated from

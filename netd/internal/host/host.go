@@ -117,17 +117,15 @@ func AddrStrings(h host.Host) []string {
 	return out
 }
 
-// DefaultBootstrapPeers — sentinel values used when no --bootstrap is
-// passed. Phase 3 Sessions 1-7 default to none (the demos either
-// connect peers directly or expect the user to point at a private
-// dev bootstrap). Production deployment of Phase 3 will populate
-// this with Gyza-controlled bootstrap nodes whose keys are pinned.
+// DefaultBootstrapPeers — historical sentinel kept for any callers
+// outside the daemon main that haven't migrated to
+// internal/bootstrap.ResolveWithExtras (which is the authoritative
+// production path — DNS-anchored discovery plus compile-time
+// FallbackPeers plus explicit --bootstrap entries). Empty here; the
+// real list lives in netd/internal/bootstrap/bootstrap.go.
 //
-// Note: the IPFS bootstrap nodes mentioned in the original Phase-3
-// spec WILL NOT work here — we use ProtocolPrefix("/gyza/1.0") in the
-// DHT, which means our Kademlia traffic is on a different protocol ID
-// than IPFS, and IPFS nodes will not respond to our kademlia queries.
-// Riding the IPFS DHT would require dropping the prefix, which would
-// also leak Gyza records into the public DHT. Not a tradeoff worth
-// making for "easier dev".
+// Note: public IPFS bootstrap nodes WILL NOT work here — we use
+// ProtocolPrefix("/gyza/1.0") in the DHT, which means our Kademlia
+// traffic is on a different protocol ID than IPFS, and IPFS nodes will
+// not respond to our queries.
 var DefaultBootstrapPeers = []string{}
