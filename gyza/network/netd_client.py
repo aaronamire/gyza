@@ -272,6 +272,7 @@ class NetdClient:
         k: int = 10,
         min_tier: int = 0,
         min_reputation: float = 0.0,
+        timeout_s: float = 30.0,
     ) -> list[AgentAdvertisement]:
         """
         Stream up to k matching advertisements from the DHT, ordered
@@ -279,6 +280,16 @@ class NetdClient:
 
         The query embedding must be float32 of shape (384,). Other
         dtypes are converted; other shapes raise ValueError.
+
+        ``timeout_s`` bounds the entire call (DHT walk + streaming
+        response). The daemon's FindAgents sweeps the LSH-Hamming
+        neighbor buckets and a single GetValue against a sparse mesh
+        can take seconds; on a 3-peer network with no published
+        agents, the worst-case walk is minutes. Without a deadline
+        the client hangs. Default 30 s is enough to populate any
+        non-trivial DHT result; raise it for known-large networks.
+        Returns whatever results streamed in before the deadline
+        (possibly empty); does not raise on timeout.
         """
         emb = np.asarray(query_embedding, dtype=np.float32)
         if emb.shape != (384,):
@@ -293,8 +304,16 @@ class NetdClient:
             min_reputation=min_reputation,
         )
         out: list[AgentAdvertisement] = []
-        for proto_ad in stub.FindAgents(req):
-            out.append(AgentAdvertisement.from_proto(proto_ad))
+        try:
+            for proto_ad in stub.FindAgents(req, timeout=timeout_s):
+                out.append(AgentAdvertisement.from_proto(proto_ad))
+        except grpc.RpcError as e:
+            # Deadline exceeded on a sparse-mesh DHT walk is the
+            # expected outcome when no agents match the query — surface
+            # whatever partial results we did collect rather than
+            # raising. Re-raise other RPC errors.
+            if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise
         return out
 
     def unpublish_agent(

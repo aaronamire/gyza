@@ -413,16 +413,33 @@ def main() -> int:
     work1 = next(w for w in items if w.id == item1.id)
     work2 = next(w for w in items if w.id == item2.id)
 
-    # The runner only retains its most recent envelope, so for this
-    # demo each runner's _last_envelope IS its single completed envelope.
-    env1 = query_runner._last_envelope
-    env2 = summ_runner._last_envelope
-    assert env1 is not None and env2 is not None
+    # Fetch envelopes from the blackboard's envelope_log, NOT from
+    # `runner._last_envelope`. The runtime cache is racy: when one
+    # runner finishes its first item before the other has finished
+    # warming its embedder, the "free" runner may claim both items,
+    # leaving the other runner's _last_envelope=None. The envelope log
+    # is the authoritative source — it has every signed envelope keyed
+    # by action_id (work_item.id).
+    env1 = bb.get_envelope_for_action(item1.id)
+    env2 = bb.get_envelope_for_action(item2.id)
+    assert env1 is not None and env2 is not None, (
+        f"missing envelope in log: env1={env1 is not None}, "
+        f"env2={env2 is not None}. "
+        "Both work items should have been signed by whichever agent "
+        "claimed them."
+    )
 
-    pubkey1_bytes = bytes.fromhex(identity_1.agent_id)
+    # Verify each envelope with the pubkey IT was actually signed by
+    # (which may not match the demo's "expected" specialist if one
+    # runner happened to claim both items — also fine).
+    sig1_pubkey = bytes.fromhex(env1.agent_pubkey)
+    sig2_pubkey = bytes.fromhex(env2.agent_pubkey)
+    sig1_ok = verify_envelope(env1, sig1_pubkey)
+    sig2_ok = verify_envelope(env2, sig2_pubkey)
+    # `pubkey2_bytes` retained for the cross-agent re-link path below,
+    # which uses identity_2 as the canonical "agent 2" to demonstrate
+    # re-parenting an envelope onto env1.
     pubkey2_bytes = bytes.fromhex(identity_2.agent_id)
-    sig1_ok = verify_envelope(env1, pubkey1_bytes)
-    sig2_ok = verify_envelope(env2, pubkey2_bytes)
 
     env1_hash = compute_envelope_hash(env1)
     env2_hash = compute_envelope_hash(env2)

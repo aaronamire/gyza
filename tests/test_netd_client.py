@@ -96,7 +96,13 @@ def test_daemon_starts_and_returns_node_info(netd_binary, daemon_setup):
 
             status = client.get_status()
             assert status.uptime_seconds >= 0
-            assert status.connected_peers == 0  # nothing wired in S1
+            # Pre-S32 this was always 0 ("nothing wired in S1"). Since
+            # S32 the daemon binary's FallbackPeers list dials the
+            # production bootstrap nodes (gyza.network) on startup, so
+            # connected_peers is typically ≥1 when the test box has
+            # internet. The test cares that the field round-trips
+            # safely; the exact count isn't load-bearing.
+            assert status.connected_peers >= 0
     finally:
         proc.send_signal(signal.SIGTERM)
         try:
