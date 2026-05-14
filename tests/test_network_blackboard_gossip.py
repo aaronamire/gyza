@@ -56,6 +56,7 @@ def _boot(tmp_path: Path, name: str, netd_binary: Path) -> tuple:
     sock_path = tmp_path / f"{name}.sock"
 
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(sock_path),
         binary_path=str(netd_binary),
         key_path=str(seed_path),

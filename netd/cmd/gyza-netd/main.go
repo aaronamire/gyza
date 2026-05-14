@@ -104,6 +104,9 @@ func main() {
 		printPeerID = flag.Bool(
 			"print-peer-id", false,
 			"load --key-path, print the resulting libp2p peer ID to stdout, and exit. Used by deploy scripts to compute the bootstrap multiaddr for DNS TXT records.")
+		noFallbackPeers = flag.Bool(
+			"no-fallback-peers", false,
+			"disable the compiled-in production FallbackPeers list. Used by tests and private-mesh deployments that don't want their daemon dialing gyza.network bootstrap peers on startup.")
 		bootstrapFlag stringSliceFlag
 		staticRelay   stringSliceFlag
 	)
@@ -179,6 +182,13 @@ func main() {
 	// and explicit entries. Zero resolved peers logs a warning but lets
 	// the daemon start; mDNS / direct-connect can still seed the routing
 	// table.
+	//
+	// --no-fallback-peers disables only the compiled-in production list
+	// (the 3 gyza.network bootstrap multiaddrs). DNS and --bootstrap
+	// still work. Used by tests so test daemons don't dial production.
+	if *noFallbackPeers {
+		bootstrap.FallbackPeers = nil
+	}
 	bootstrapAIs := bootstrap.ResolveWithExtras(
 		ctx, bootstrap.DefaultResolver(),
 		*bootstrapDomain, bootstrapFlag, logger.Info,

@@ -196,6 +196,20 @@ func (s *NetdServer) PublishAgent(ctx context.Context, ad *pb.AgentAdvertisement
 // FindAgents streams up to k matching advertisements ordered by
 // cosine similarity, descending. The stream closes when results are
 // exhausted; an empty result yields an immediate close.
+//
+// Streaming strategy (two-phase):
+//
+//  1. Local-cache matches stream IMMEDIATELY. No network round-trips
+//     blocking the first byte. A client that publishes an ad and
+//     queries it back gets an answer in microseconds.
+//  2. Then the DHT walk runs. Any additional matches (dedup'd by
+//     agent_pubkey against phase 1) stream as they come.
+//
+// On a sparse mesh, phase 2 can take 30-90 s (137-bucket Hamming
+// walk on a 3-peer mesh) and a tier-3 query adds verify-on-fetch
+// per candidate. Phase 1 unblocks the common case (find my own
+// agent) from that latency. Client-side deadlines should still
+// bound phase 2 — see netd_client.find_agents.timeout_s.
 func (s *NetdServer) FindAgents(q *pb.AgentQuery, stream pb.DiscoveryService_FindAgentsServer) error {
 	if s.dht == nil {
 		return status.Error(codes.Unavailable, "DHT not initialized")
@@ -211,11 +225,28 @@ func (s *NetdServer) FindAgents(q *pb.AgentQuery, stream pb.DiscoveryService_Fin
 		return status.Errorf(codes.InvalidArgument,
 			"query_embedding has %d dims, want %d", len(emb), dht.EmbeddingDim)
 	}
+
+	// Phase 1: stream local matches immediately.
+	seen := make(map[string]struct{})
+	for _, ad := range s.dht.LocalAgentMatches(emb, int(q.K), q.MinTier, q.MinReputation) {
+		if err := stream.Send(ad); err != nil {
+			return err
+		}
+		seen[ad.AgentPubkey] = struct{}{}
+	}
+
+	// Phase 2: DHT walk. May take a while on sparse meshes; client
+	// deadline (passed via stream.Context()) bounds it.
 	results, err := s.dht.FindAgents(stream.Context(), emb, int(q.K), q.MinTier, q.MinReputation)
 	if err != nil {
-		return status.Error(codes.Internal, err.Error())
+		// Local results already streamed in phase 1 — don't fail the
+		// whole call because the DHT walk hit a transient error.
+		return nil
 	}
 	for _, ad := range results {
+		if _, dup := seen[ad.AgentPubkey]; dup {
+			continue
+		}
 		if err := stream.Send(ad); err != nil {
 			return err
 		}

@@ -629,6 +629,52 @@ func (d *GyzaDHT) LocalAgents() []*pb.AgentAdvertisement {
 	return out
 }
 
+// LocalAgentMatches returns up to k local-cache ads scored against
+// queryEmbedding, descending. Applies the same min_tier /
+// min_reputation / embedding-shape filters as FindAgents but skips
+// the DHT walk entirely — so a client that publishes locally and
+// queries can be answered in microseconds, regardless of how slow
+// the DHT walk would be on a sparse mesh.
+//
+// Verify-on-fetch is NOT applied here: local ads were published by
+// this daemon's own clients and are already trusted (no Sybil
+// concern for an ad you put there yourself). The server streams
+// these results first, then the DHT-derived results (with dedup).
+func (d *GyzaDHT) LocalAgentMatches(queryEmbedding []float32, k int, minTier int32, minReputation float64) []*pb.AgentAdvertisement {
+	if len(queryEmbedding) != EmbeddingDim {
+		return nil
+	}
+	if k <= 0 {
+		k = BucketSize
+	}
+	type scored struct {
+		ad    *pb.AgentAdvertisement
+		score float64
+	}
+	d.mu.Lock()
+	cands := make([]scored, 0, len(d.local))
+	for _, a := range d.local {
+		if a == nil || a.AttestationTier < minTier || a.ReputationScore < minReputation {
+			continue
+		}
+		emb, err := decodeF32LE(a.SpecializationEmbedding)
+		if err != nil || len(emb) != EmbeddingDim {
+			continue
+		}
+		cands = append(cands, scored{ad: a, score: cosine(queryEmbedding, emb)})
+	}
+	d.mu.Unlock()
+	sort.Slice(cands, func(i, j int) bool { return cands[i].score > cands[j].score })
+	if len(cands) > k {
+		cands = cands[:k]
+	}
+	out := make([]*pb.AgentAdvertisement, len(cands))
+	for i, c := range cands {
+		out[i] = c.ad
+	}
+	return out
+}
+
 // StartRepublishLoop spawns a goroutine that re-publishes every local
 // advertisement on each `interval` tick. Without this, advertisements
 // expire from the DHT after their TTL and the node disappears from

@@ -135,6 +135,10 @@ def _build_side(
         key_path=str(key_path),
         log_level="info",
         startup_timeout_s=8.0,
+        # Single-machine demo: don't dial the public gyza.network
+        # bootstrap mesh. The two daemons in this demo find each
+        # other directly via mDNS / explicit Connect over loopback.
+        isolated=True,
     )
     netd = NetdClient(str(sock_path))
     gossip = GossipClient(str(sock_path))

@@ -12,7 +12,7 @@ are not yet supported.
 
 ```bash
 # Linux x86_64 or aarch64. Requires Python 3.14+ and pipx.
-curl -sSf https://gyza.network/install.sh | bash
+curl -sSf https://raw.githubusercontent.com/aaronamire/gyza/main/scripts/install.sh | bash
 ```
 
 That installs the `gyza-netd` daemon and the `gyza` CLI, generates

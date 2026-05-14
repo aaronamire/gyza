@@ -272,7 +272,7 @@ class NetdClient:
         k: int = 10,
         min_tier: int = 0,
         min_reputation: float = 0.0,
-        timeout_s: float = 30.0,
+        timeout_s: float = 120.0,
     ) -> list[AgentAdvertisement]:
         """
         Stream up to k matching advertisements from the DHT, ordered
@@ -282,14 +282,21 @@ class NetdClient:
         dtypes are converted; other shapes raise ValueError.
 
         ``timeout_s`` bounds the entire call (DHT walk + streaming
-        response). The daemon's FindAgents sweeps the LSH-Hamming
-        neighbor buckets and a single GetValue against a sparse mesh
-        can take seconds; on a 3-peer network with no published
-        agents, the worst-case walk is minutes. Without a deadline
-        the client hangs. Default 30 s is enough to populate any
-        non-trivial DHT result; raise it for known-large networks.
-        Returns whatever results streamed in before the deadline
-        (possibly empty); does not raise on timeout.
+        response). The daemon's FindAgents collects local-cache
+        results AND walks the LSH-Hamming neighbor buckets (137
+        keys at radius 2) BEFORE streaming anything to the client,
+        so even local-cache hits are gated on the slowest DHT
+        lookup. On sparse networks (3-peer mesh, no published
+        agents) the worst-case walk plus per-result verify-on-fetch
+        can take ~60-90s. Default 120s covers that with margin;
+        raise for known-large networks, lower for small private
+        ones. Returns whatever results streamed in before the
+        deadline (possibly empty); does not raise on timeout.
+
+        TODO: refactor the daemon to stream local-cache results
+        immediately, before the DHT walk. Then this timeout could
+        drop to ~10s without false negatives. Tracked as a Session
+        33 follow-up.
         """
         emb = np.asarray(query_embedding, dtype=np.float32)
         if emb.shape != (384,):
@@ -482,6 +489,7 @@ class NetdClient:
         startup_timeout_s: float = 5.0,
         stderr_to_stdout: bool = True,
         dht_mode: str | None = None,
+        isolated: bool = False,
     ) -> subprocess.Popen:
         """
         Launch gyza-netd as a subprocess. Block until the socket file
@@ -491,6 +499,13 @@ class NetdClient:
         binary_path / socket_path / key_path are tilde-expanded. We
         validate the binary exists up front (clearer error than
         FileNotFoundError from execve).
+
+        ``isolated`` (default False) — when True, passes
+        ``--bootstrap-domain=""`` and ``--no-fallback-peers`` so the
+        spawned daemon does NOT dial the public gyza.network
+        bootstrap mesh. Tests + the global-demo (single-machine
+        Phase 3) should set this; production daemons (gyza global
+        start) leave it False so they join the live mesh.
         """
         binary = _resolve(binary_path)
         if not os.path.isfile(binary):
@@ -513,6 +528,8 @@ class NetdClient:
             "--key-path", key,
             "--log-level", log_level,
         ]
+        if isolated:
+            argv += ["--bootstrap-domain=", "--no-fallback-peers"]
         if bootstrap:
             argv += ["--bootstrap", ",".join(bootstrap)]
         if dht_mode:

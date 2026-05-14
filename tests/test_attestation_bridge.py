@@ -48,6 +48,7 @@ def _boot_daemon(name: str, tmp_path: Path, netd_binary: Path):
     os.chmod(seed, 0o600)
     sock = tmp_path / f"{name}.sock"
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(sock),
         binary_path=str(netd_binary),
         key_path=str(seed),

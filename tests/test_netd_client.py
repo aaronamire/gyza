@@ -72,6 +72,7 @@ def test_daemon_starts_and_returns_node_info(netd_binary, daemon_setup):
     socket_path = tmp_path / "netd.sock"
 
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(socket_path),
         binary_path=str(netd_binary),
         key_path=str(key_path),
@@ -135,6 +136,7 @@ def test_start_daemon_raises_when_binary_missing(tmp_path):
     bad = tmp_path / "no-such-binary"
     with pytest.raises(FileNotFoundError):
         NetdClient.start_daemon(
+            isolated=True,
             socket_path=str(tmp_path / "x.sock"),
             binary_path=str(bad),
         )
@@ -163,6 +165,7 @@ def test_publish_and_find_agent_local(netd_binary, daemon_setup):
     socket_path = tmp_path / "netd.sock"
 
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(socket_path),
         binary_path=str(netd_binary),
         key_path=str(key_path),
@@ -261,6 +264,7 @@ def test_peer_service_connect_and_list(netd_binary, tmp_path):
         os.chmod(seed_path, 0o600)
         sock_path = tmp_path / f"{name}.sock"
         proc = NetdClient.start_daemon(
+            isolated=True,
             socket_path=str(sock_path),
             binary_path=str(netd_binary),
             key_path=str(seed_path),
@@ -328,6 +332,7 @@ def test_connect_peer_with_wrong_expected_pubkey_fails(netd_binary, daemon_setup
     key_path, _expected_pubkey, tmp_path = daemon_setup
     socket_path = tmp_path / "netd.sock"
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(socket_path),
         binary_path=str(netd_binary),
         key_path=str(key_path),
@@ -385,6 +390,7 @@ def test_gossip_publish_subscribe_two_daemons(netd_binary, tmp_path):
         os.chmod(seed_path, 0o600)
         sock_path = tmp_path / f"{name}.sock"
         proc = NetdClient.start_daemon(
+            isolated=True,
             socket_path=str(sock_path),
             binary_path=str(netd_binary),
             key_path=str(seed_path),
@@ -494,6 +500,7 @@ def test_capability_issue_challenge_and_verify_response(netd_binary, daemon_setu
     key_path, _expected_pubkey, tmp_path = daemon_setup
     socket_path = tmp_path / "netd.sock"
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(socket_path),
         binary_path=str(netd_binary),
         key_path=str(key_path),
@@ -576,6 +583,7 @@ def test_capability_attestation_dht_round_trip(netd_binary, daemon_setup):
     key_path, _expected_pubkey, tmp_path = daemon_setup
     socket_path = tmp_path / "netd.sock"
     proc = NetdClient.start_daemon(
+            isolated=True,
         socket_path=str(socket_path),
         binary_path=str(netd_binary),
         key_path=str(key_path),
@@ -681,6 +689,7 @@ def test_message_send_subscribe_two_daemons(netd_binary, tmp_path):
         os.chmod(seed, 0o600)
         sock = tmp_path / f"{name}.sock"
         proc = NetdClient.start_daemon(
+            isolated=True,
             socket_path=str(sock),
             binary_path=str(netd_binary),
             key_path=str(seed),
