@@ -39,8 +39,11 @@ installed by ``scripts/deploy-bootstrap.sh``.
 """
 from __future__ import annotations
 
+import datetime as _dt
 import logging
+import os
 import signal
+import sqlite3
 import sys
 import threading
 import time
@@ -56,7 +59,7 @@ from gyza.memory import EpisodicMemory
 from gyza.network.global_cluster import GlobalCluster
 from gyza.network.netd_client import GossipClient, NetdClient
 from gyza.network.network_blackboard import NetworkBlackboard
-from gyza.runner import AgentRunner
+from gyza.runner import AgentRunner, make_anthropic_executor
 from gyza.schema import EMBEDDING_DIM
 
 LOG = logging.getLogger("gyza.demo_agent")
@@ -101,12 +104,12 @@ def _demo_response(task: str) -> str:
     )
 
 
-def _build_demo_executor():
+def _build_deterministic_executor():
     """
-    Factory: produces an executor compatible with AgentRunner. The
-    runner calls ``executor(prompt: str, context: dict) -> dict``
-    and expects a dict with at least a ``"text"`` key. We adapt
-    _demo_response to that shape.
+    Fallback executor when no ANTHROPIC_API_KEY is set, or when the
+    quota / spend cap is exhausted. Returns the deterministic
+    "I received your task" response — same signed envelope path,
+    just no real LLM behind it.
     """
     def executor(prompt: str, _context: dict) -> dict:
         return {
@@ -117,6 +120,284 @@ def _build_demo_executor():
             "inference_backend": "deterministic",
         }
     return executor
+
+
+# ----------------------------------------------------------------------
+# Rate limit + spend cap for the Anthropic-backed executor.
+# ----------------------------------------------------------------------
+#
+# Why a SQLite table and not in-memory counters:
+# the demo agent runs as a long-lived service. If we lose state on
+# restart, a viral surge could trip the daily cap → systemd
+# restarts the agent → quota resets → traffic resumes uncapped.
+# SQLite is the simplest persistent store and the disk traffic is
+# trivial (one upsert per query).
+#
+# Pricing constants below match Claude Sonnet 4.5 as of 2026-05.
+# These are coarse — the goal is "approximately bounded spend", not
+# precise billing reconciliation. Anthropic's invoice is authoritative.
+
+CLAUDE_SONNET_USD_PER_M_INPUT = 3.0
+CLAUDE_SONNET_USD_PER_M_OUTPUT = 15.0
+
+
+def _query_cost_usd(tokens_in: int, tokens_out: int) -> float:
+    return (
+        (tokens_in / 1_000_000) * CLAUDE_SONNET_USD_PER_M_INPUT
+        + (tokens_out / 1_000_000) * CLAUDE_SONNET_USD_PER_M_OUTPUT
+    )
+
+
+class QuotaTracker:
+    """
+    Daily counters per submitter pubkey + a ``__global__`` row for
+    the agent-wide aggregate. Three gates checked before every
+    LLM call:
+
+      1. per-submitter daily query count (default 10)
+      2. global daily query count (default 1000)
+      3. global daily spend USD (default $5.00)
+
+    After every successful LLM call, ``record(...)`` updates BOTH
+    the per-submitter row AND the global row. So a 5-query batch
+    from one submitter consumes 5 from their daily allotment AND
+    5 from the global daily allotment.
+
+    Thread-safe via a single mutex; the daemon's gossip ingress
+    can in principle call the agent's executor concurrently
+    (though AgentRunner currently serializes).
+    """
+
+    SCHEMA_SQL = """
+    CREATE TABLE IF NOT EXISTS quota (
+        day_ymd          TEXT NOT NULL,
+        submitter_pubkey TEXT NOT NULL,
+        queries          INTEGER NOT NULL DEFAULT 0,
+        tokens_in        INTEGER NOT NULL DEFAULT 0,
+        tokens_out       INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (day_ymd, submitter_pubkey)
+    );
+    """
+
+    GLOBAL_KEY = "__global__"
+
+    def __init__(
+        self,
+        db_path: str,
+        *,
+        per_submitter_daily_queries: int = 10,
+        global_daily_queries: int = 1000,
+        global_daily_spend_usd: float = 5.0,
+    ):
+        self._db_path = db_path
+        self._per_submitter_cap = per_submitter_daily_queries
+        self._global_query_cap = global_daily_queries
+        self._global_spend_cap = global_daily_spend_usd
+        self._lock = threading.Lock()
+        # Eager schema init — avoids a race between concurrent first
+        # callers each trying to CREATE TABLE.
+        conn = self._open()
+        try:
+            conn.executescript(self.SCHEMA_SQL)
+            conn.commit()
+        finally:
+            conn.close()
+
+    def _open(self) -> sqlite3.Connection:
+        c = sqlite3.connect(self._db_path, timeout=5.0)
+        c.execute("PRAGMA journal_mode=WAL;")
+        c.execute("PRAGMA synchronous=NORMAL;")
+        return c
+
+    @staticmethod
+    def _today() -> str:
+        return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
+
+    def check(self, submitter_pubkey: str) -> tuple[bool, str]:
+        """
+        Returns ``(allowed, reason)``. If allowed=False, the caller
+        should NOT call the real LLM; the reason string is a
+        user-facing message safe to surface in the placeholder
+        response.
+        """
+        today = self._today()
+        with self._lock:
+            conn = self._open()
+            try:
+                row = conn.execute(
+                    "SELECT queries, tokens_in, tokens_out FROM quota "
+                    "WHERE day_ymd=? AND submitter_pubkey=?",
+                    (today, submitter_pubkey),
+                ).fetchone()
+                sub_queries = row[0] if row else 0
+
+                g = conn.execute(
+                    "SELECT queries, tokens_in, tokens_out FROM quota "
+                    "WHERE day_ymd=? AND submitter_pubkey=?",
+                    (today, self.GLOBAL_KEY),
+                ).fetchone()
+                g_queries = g[0] if g else 0
+                g_tokens_in = g[1] if g else 0
+                g_tokens_out = g[2] if g else 0
+                g_spend = _query_cost_usd(g_tokens_in, g_tokens_out)
+            finally:
+                conn.close()
+
+        if sub_queries >= self._per_submitter_cap:
+            return False, (
+                f"per-submitter daily quota ({self._per_submitter_cap} queries) "
+                f"exhausted for compositor {submitter_pubkey[:16]}…. "
+                f"resets daily at 00:00 UTC."
+            )
+        if g_queries >= self._global_query_cap:
+            return False, (
+                f"agent-wide daily query cap ({self._global_query_cap}) "
+                f"reached. resets daily at 00:00 UTC."
+            )
+        if g_spend >= self._global_spend_cap:
+            return False, (
+                f"agent-wide daily spend cap (${self._global_spend_cap:.2f}) "
+                f"reached. resets daily at 00:00 UTC."
+            )
+        return True, ""
+
+    def record(self, submitter_pubkey: str, tokens_in: int, tokens_out: int) -> None:
+        """Record one successful LLM call against both rows."""
+        today = self._today()
+        with self._lock:
+            conn = self._open()
+            try:
+                for key in (submitter_pubkey, self.GLOBAL_KEY):
+                    conn.execute(
+                        "INSERT INTO quota (day_ymd, submitter_pubkey, queries, tokens_in, tokens_out) "
+                        "VALUES (?, ?, 1, ?, ?) "
+                        "ON CONFLICT(day_ymd, submitter_pubkey) DO UPDATE SET "
+                        "  queries = queries + 1, "
+                        "  tokens_in = tokens_in + excluded.tokens_in, "
+                        "  tokens_out = tokens_out + excluded.tokens_out",
+                        (today, key, tokens_in, tokens_out),
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+
+
+def _gated_anthropic_response(reason: str) -> str:
+    """Placeholder returned when a quota gate is hit."""
+    return (
+        f"[demo-agent: real-LLM response gated]\n\n"
+        f"{reason}\n\n"
+        f"This response is signed by the demo agent but was NOT "
+        f"generated by Claude — you've hit a rate limit / spend cap. "
+        f"Run your own gyza node with your own ANTHROPIC_API_KEY for "
+        f"unlimited real-LLM queries: see https://github.com/aaronamire/gyza"
+    )
+
+
+def _build_anthropic_executor_gated(quota: QuotaTracker, blackboard: NetworkBlackboard):
+    """
+    Returns an executor that wraps make_anthropic_executor with the
+    three quota gates. Submitter identity is recovered from the work
+    item's lineage_root → intent → compositor_pubkey when available;
+    if the intent isn't in our blackboard (gossip race), the
+    submitter is treated as anonymous (still subject to the global
+    gates).
+    """
+    real_exec = make_anthropic_executor()
+
+    def _lookup_submitter(lineage_root: str) -> str:
+        """
+        Read goal_spec_json from the human_intents row this work
+        item descends from. The submitter's compositor_pubkey is
+        embedded in that JSON by ``gyza submit``. If the intent
+        hasn't gossipped to us yet (race) or the field is missing,
+        we fall back to 'anonymous' — the global gates still apply.
+        """
+        import json as _json
+        try:
+            conn = blackboard._conn()  # type: ignore[attr-defined]
+            row = conn.execute(
+                "SELECT goal_spec_json FROM human_intents WHERE intent_id=?",
+                (lineage_root,),
+            ).fetchone()
+            if row is None:
+                return "anonymous"
+            spec = _json.loads(row[0])
+            return spec.get("compositor_pubkey") or "anonymous"
+        except Exception:  # noqa: BLE001
+            return "anonymous"
+
+    def executor(prompt: str, context: dict) -> dict:
+        item = context.get("item")
+        submitter = "anonymous"
+        if item is not None:
+            submitter = _lookup_submitter(item.lineage_root)
+
+        allowed, reason = quota.check(submitter)
+        if not allowed:
+            LOG.info("[quota] gated submitter=%s — %s", submitter[:16], reason)
+            return {
+                "text": _gated_anthropic_response(reason),
+                "tokens_in": len(prompt) // 4,
+                "tokens_out": 100,
+                "model_identifier": "gyza-demo-gated-v1",
+                "inference_backend": "deterministic",
+            }
+
+        try:
+            result = real_exec(prompt, context)
+        except Exception as e:  # noqa: BLE001
+            # Surface API errors as a placeholder rather than blowing
+            # up the runner. The signed envelope still chains; the
+            # response text is honest about what went wrong.
+            LOG.warning("[anthropic] call failed: %s", e)
+            return {
+                "text": f"[demo-agent: Anthropic API error] {e}",
+                "tokens_in": len(prompt) // 4,
+                "tokens_out": 100,
+                "model_identifier": "gyza-demo-error-v1",
+                "inference_backend": "deterministic",
+            }
+
+        quota.record(
+            submitter,
+            int(result.get("tokens_in", 0)),
+            int(result.get("tokens_out", 0)),
+        )
+        return result
+
+    return executor
+
+
+def _build_executor(blackboard: NetworkBlackboard, quota_db_path: str):
+    """
+    Choose the executor based on environment:
+
+      - ANTHROPIC_API_KEY set → real Claude calls, gated by QuotaTracker
+      - otherwise            → deterministic fallback (no API spend)
+
+    Both produce signed ICP envelopes; only ``model_identifier`` and
+    ``inference_backend`` differ.
+    """
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        per_sub = int(os.environ.get("GYZA_DEMO_PER_SUBMITTER_QUERIES", "10"))
+        glob_q = int(os.environ.get("GYZA_DEMO_GLOBAL_QUERIES", "1000"))
+        glob_s = float(os.environ.get("GYZA_DEMO_GLOBAL_SPEND_USD", "5.0"))
+        LOG.info(
+            "[exec] real-LLM mode (anthropic) — per_submitter=%d/day, "
+            "global=%d/day, spend_cap=$%.2f/day",
+            per_sub, glob_q, glob_s,
+        )
+        quota = QuotaTracker(
+            db_path=quota_db_path,
+            per_submitter_daily_queries=per_sub,
+            global_daily_queries=glob_q,
+            global_daily_spend_usd=glob_s,
+        )
+        return _build_anthropic_executor_gated(quota, blackboard)
+
+    LOG.info("[exec] deterministic mode (no ANTHROPIC_API_KEY)")
+    return _build_deterministic_executor()
 
 
 def run_hosted_demo_agent(
@@ -226,13 +507,16 @@ def run_hosted_demo_agent(
     )
     lsh = LSHIndex(seed=42)
 
+    quota_db_path = str(
+        Path(cfg.blackboard_db_path).parent / "demo-agent-quota.db"
+    )
     runner = AgentRunner(
         identity=ident,
         blackboard=bb,
         memory=mem,
         specialization=spec,
         lsh=lsh,
-        executor=_build_demo_executor(),
+        executor=_build_executor(bb, quota_db_path),
         min_reward_threshold=0.0,
         min_similarity_threshold=min_similarity_threshold,
         poll_interval_s=poll_interval_s,

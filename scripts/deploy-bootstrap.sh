@@ -45,6 +45,22 @@ SSH_TARGET="$1"
 NODE_NAME="$2"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+# Optional: secrets file (gitignored) that gets sourced and the named
+# env vars threaded to the agent's systemd unit. Today we use this to
+# pass ANTHROPIC_API_KEY through to the demo agent so its executor
+# can make real LLM calls. Without it the agent falls back to the
+# deterministic executor (same protocol path, no real LLM).
+#
+# Format (scripts/deploy.env):
+#   ANTHROPIC_API_KEY=sk-ant-...
+#   GYZA_DEMO_PER_SUBMITTER_QUERIES=10   # optional
+#   GYZA_DEMO_GLOBAL_QUERIES=1000        # optional
+#   GYZA_DEMO_GLOBAL_SPEND_USD=5.0       # optional
+if [[ -f "$REPO_ROOT/scripts/deploy.env" ]]; then
+    # shellcheck disable=SC1091
+    set -a; . "$REPO_ROOT/scripts/deploy.env"; set +a
+fi
+
 # Sanity-check the local repo before we ship anything to the VPS.
 if [[ ! -f "$REPO_ROOT/netd/cmd/gyza-netd/main.go" ]]; then
     echo "ERROR: $REPO_ROOT/netd/cmd/gyza-netd/main.go not found." >&2
@@ -84,7 +100,19 @@ rsync -az --delete \
 # easier error handling.
 # -----------------------------------------------------------------------
 echo "==> Provisioning on target"
-ssh "$SSH_TARGET" "NODE_NAME=$NODE_NAME bash -s" <<'REMOTE_SCRIPT'
+# The demo-agent env vars are threaded through the env prefix on the
+# remote command. The quoted heredoc body below does NOT expand them
+# locally — only NODE_NAME and the GYZA_* / ANTHROPIC_* names set here
+# reach the remote shell's environment. ANTHROPIC_API_KEY is briefly
+# visible in this machine's local `ps` during the deploy; acceptable
+# for a single-operator dev box. It is NOT written to any local log.
+ssh "$SSH_TARGET" "\
+NODE_NAME='$NODE_NAME' \
+ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY:-}' \
+GYZA_DEMO_PER_SUBMITTER_QUERIES='${GYZA_DEMO_PER_SUBMITTER_QUERIES:-}' \
+GYZA_DEMO_GLOBAL_QUERIES='${GYZA_DEMO_GLOBAL_QUERIES:-}' \
+GYZA_DEMO_GLOBAL_SPEND_USD='${GYZA_DEMO_GLOBAL_SPEND_USD:-}' \
+bash -s" <<'REMOTE_SCRIPT'
 set -euo pipefail
 
 # Ensure we have apt updates + base tools.
@@ -227,7 +255,37 @@ fi
 # reason.
 /opt/gyza/agent-venv/bin/pip install -q -e /opt/gyza >/dev/null
 
+# Install the anthropic SDK only when an API key was provided.
+# Without it the demo agent runs the deterministic executor and
+# the SDK would be dead weight.
+if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+    echo "    installing anthropic SDK (ANTHROPIC_API_KEY present)"
+    /opt/gyza/agent-venv/bin/pip install -q anthropic >/dev/null
+fi
+
 chown -R gyza:gyza /opt/gyza/agent-venv
+
+# Build the systemd Environment= block. HOME is always set; the
+# Anthropic vars only when a key was passed. Writing the API key
+# into the unit file is fine — /etc/systemd/system is root-only
+# (0644 but the directory is root-owned and the daemon runs as the
+# unprivileged gyza user which can't read other units' secrets via
+# systemd's credential isolation... actually 0644 IS world-readable;
+# see the chmod note below).
+AGENT_ENV="Environment=HOME=/var/lib/gyza"
+if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+    AGENT_ENV="$AGENT_ENV
+Environment=ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
+fi
+[[ -n "${GYZA_DEMO_PER_SUBMITTER_QUERIES:-}" ]] && \
+    AGENT_ENV="$AGENT_ENV
+Environment=GYZA_DEMO_PER_SUBMITTER_QUERIES=${GYZA_DEMO_PER_SUBMITTER_QUERIES}"
+[[ -n "${GYZA_DEMO_GLOBAL_QUERIES:-}" ]] && \
+    AGENT_ENV="$AGENT_ENV
+Environment=GYZA_DEMO_GLOBAL_QUERIES=${GYZA_DEMO_GLOBAL_QUERIES}"
+[[ -n "${GYZA_DEMO_GLOBAL_SPEND_USD:-}" ]] && \
+    AGENT_ENV="$AGENT_ENV
+Environment=GYZA_DEMO_GLOBAL_SPEND_USD=${GYZA_DEMO_GLOBAL_SPEND_USD}"
 
 # Systemd unit for the demo agent. Depends on gyza-netd.service
 # (the agent connects to the daemon's Unix socket). Restart=always
@@ -243,7 +301,7 @@ After=gyza-netd.service
 Type=simple
 User=gyza
 Group=gyza
-Environment=HOME=/var/lib/gyza
+${AGENT_ENV}
 WorkingDirectory=/var/lib/gyza
 ExecStart=/opt/gyza/agent-venv/bin/gyza demo-agent --socket-path=/var/lib/gyza/.gyza/netd.sock
 Restart=always
@@ -259,7 +317,10 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 UNIT
-chmod 0644 /etc/systemd/system/gyza-demo-agent.service
+# 0600 so the ANTHROPIC_API_KEY in Environment= is not world-readable.
+# systemd reads unit files as root before dropping to User=, so the
+# tighter mode doesn't break the service.
+chmod 0600 /etc/systemd/system/gyza-demo-agent.service
 
 systemctl daemon-reload
 systemctl enable gyza-demo-agent.service

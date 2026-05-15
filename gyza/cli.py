@@ -1282,6 +1282,13 @@ def cmd_submit(args: argparse.Namespace) -> int:
             "intent_id": intent_id,
             "natural_text": args.task,
             "category": "public_demo",
+            # Identify the submitter to the hosted agent. The agent
+            # uses this for per-submitter rate-limit accounting against
+            # its Anthropic API budget. Not load-bearing for protocol
+            # correctness — the envelope signatures are what bind work
+            # to identity — but it's how the demo agents fairly share
+            # their daily quota across users.
+            "compositor_pubkey": compositor.pubkey_hex,
             "actions": [],
             "authorization": {
                 "resources": [],

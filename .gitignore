@@ -31,6 +31,10 @@ gyza-rs/target/
 # Claude Code per-project local state.
 .claude/
 
+# Deploy-time secrets (ANTHROPIC_API_KEY etc) sourced by
+# scripts/deploy-bootstrap.sh. Never commit this.
+scripts/deploy.env
+
 # Editor / OS droppings.
 *.swp
 *.swo
