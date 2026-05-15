@@ -433,7 +433,15 @@ def run_hosted_demo_agent(
     LOG.info("daemon socket: %s", sock)
     LOG.info("demo project:  %s", DEMO_PROJECT_ID)
 
-    compositor = LocalCompositor(key_path=cfg.compositor_key_path)
+    # Use resolved (tilde-expanded) paths. cfg.* attributes are raw
+    # config strings like "~/.gyza/blackboard.db"; resolved_paths()
+    # expands them. Without this the agent creates a literal "~"
+    # directory relative to CWD.
+    rp = cfg.resolved_paths()
+    resolved_bb = rp["blackboard_db_path"]
+    state_dir = Path(resolved_bb).parent
+
+    compositor = LocalCompositor(key_path=rp["compositor_key_path"])
     LOG.info("compositor:    %s", compositor.pubkey_hex)
 
     # Re-use the existing daemon. Both NetdClient and GossipClient
@@ -442,7 +450,7 @@ def run_hosted_demo_agent(
     netd = NetdClient(sock)
     gossip = GossipClient(sock)
 
-    bb = NetworkBlackboard(cfg.blackboard_db_path)
+    bb = NetworkBlackboard(resolved_bb)
 
     cluster = GlobalCluster(
         compositor=compositor,
@@ -499,17 +507,15 @@ def run_hosted_demo_agent(
     spec = SpecializationTracker(
         agent_id=ident.agent_id,
         initial_embedding=spec_seed,
-        db_path=str(Path(cfg.blackboard_db_path).parent / "demo-spec.db"),
+        db_path=str(state_dir / "demo-spec.db"),
     )
     mem = EpisodicMemory(
         agent_id=ident.agent_id,
-        db_path=str(Path(cfg.blackboard_db_path).parent / "demo-mem"),
+        db_path=str(state_dir / "demo-mem"),
     )
     lsh = LSHIndex(seed=42)
 
-    quota_db_path = str(
-        Path(cfg.blackboard_db_path).parent / "demo-agent-quota.db"
-    )
+    quota_db_path = str(state_dir / "demo-agent-quota.db")
     runner = AgentRunner(
         identity=ident,
         blackboard=bb,

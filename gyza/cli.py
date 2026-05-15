@@ -1249,8 +1249,10 @@ def cmd_submit(args: argparse.Namespace) -> int:
         )
         return 2
 
-    compositor = LocalCompositor(key_path=cfg.compositor_key_path)
-    bb = NetworkBlackboard(cfg.blackboard_db_path)
+    # Resolved (tilde-expanded) paths — cfg.* are raw config strings.
+    rp = cfg.resolved_paths()
+    compositor = LocalCompositor(key_path=rp["compositor_key_path"])
+    bb = NetworkBlackboard(rp["blackboard_db_path"])
     netd = NetdClient(sock)
     gossip = GossipClient(sock)
 

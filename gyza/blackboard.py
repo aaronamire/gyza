@@ -166,7 +166,12 @@ def _row_to_artifact(row: sqlite3.Row) -> Artifact:
 
 class Blackboard:
     def __init__(self, db_path: str):
-        self._db_path = Path(db_path)
+        # expanduser() so a config value like "~/.gyza/blackboard.db"
+        # resolves to the user's home instead of creating a literal
+        # "~" directory relative to CWD. No-op on absolute or
+        # relative-without-tilde paths, so existing callers (tests
+        # pass tmp_path; daemons pass resolved paths) are unaffected.
+        self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._tls = threading.local()
         # When set, all mutating operations route through Raft consensus.
