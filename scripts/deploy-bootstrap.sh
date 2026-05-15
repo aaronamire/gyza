@@ -35,14 +35,29 @@
 
 set -euo pipefail
 
-if [[ $# -ne 2 ]]; then
-    echo "Usage: $0 <ssh-target> <node-name>" >&2
-    echo "Example: $0 root@198.51.100.42 eu-bootstrap-1" >&2
+if [[ $# -lt 2 ]]; then
+    echo "Usage: $0 <ssh-target> <node-name> [--demo-agent]" >&2
+    echo "Example: $0 root@198.51.100.42 eu-bootstrap-1 --demo-agent" >&2
+    echo >&2
+    echo "  --demo-agent  Also install + enable the hosted demo agent" >&2
+    echo "                (claims public 'gyza submit' work items). Run" >&2
+    echo "                this on AT MOST ONE bootstrap node — multiple" >&2
+    echo "                demo agents on the same project all claim +" >&2
+    echo "                execute every work item (no cross-node claim" >&2
+    echo "                arbitration in v0.1), which multiplies API" >&2
+    echo "                spend and produces settlement-hash conflicts." >&2
+    echo "                Without the flag the node is bootstrap/relay" >&2
+    echo "                only, and any pre-existing demo agent on it is" >&2
+    echo "                disabled." >&2
     exit 2
 fi
 
 SSH_TARGET="$1"
 NODE_NAME="$2"
+DEPLOY_DEMO_AGENT=0
+if [[ "${3:-}" == "--demo-agent" ]]; then
+    DEPLOY_DEMO_AGENT=1
+fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 # Optional: secrets file (gitignored) that gets sourced and the named
@@ -108,6 +123,7 @@ echo "==> Provisioning on target"
 # for a single-operator dev box. It is NOT written to any local log.
 ssh "$SSH_TARGET" "\
 NODE_NAME='$NODE_NAME' \
+GYZA_DEPLOY_DEMO_AGENT='$DEPLOY_DEMO_AGENT' \
 ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY:-}' \
 GYZA_DEMO_PER_SUBMITTER_QUERIES='${GYZA_DEMO_PER_SUBMITTER_QUERIES:-}' \
 GYZA_DEMO_GLOBAL_QUERIES='${GYZA_DEMO_GLOBAL_QUERIES:-}' \
@@ -233,11 +249,24 @@ if ! systemctl is-active --quiet gyza-netd.service; then
 fi
 
 # -----------------------------------------------------------------------
-# Hosted demo agent (Python). Runs as a sidecar service that claims
-# free-text work items submitted to gyza-demo-public-v1 via `gyza
-# submit ...`. Deterministic executor in v0.1 — no LLM, no shell exec.
-# Installed into a dedicated venv so we don't touch system Python.
+# Hosted demo agent (Python). Opt-in via --demo-agent. Runs on AT
+# MOST ONE bootstrap node — v0.1 has no cross-node claim arbitration,
+# so N demo agents on the same project each claim + execute every
+# work item (N× API spend + settlement-hash conflicts). When the
+# flag is absent we ensure no demo agent is running here (cleans up
+# a node that previously had one).
 # -----------------------------------------------------------------------
+if [[ "${GYZA_DEPLOY_DEMO_AGENT:-0}" != "1" ]]; then
+    if systemctl list-unit-files gyza-demo-agent.service &>/dev/null \
+       && systemctl cat gyza-demo-agent.service &>/dev/null; then
+        echo "    --demo-agent NOT set — disabling pre-existing demo agent"
+        systemctl disable --now gyza-demo-agent.service &>/dev/null || true
+        rm -f /etc/systemd/system/gyza-demo-agent.service
+        systemctl daemon-reload
+    else
+        echo "    --demo-agent NOT set — bootstrap/relay only (no demo agent)"
+    fi
+else
 echo "    installing gyza Python package for demo agent"
 apt-get install -y -qq python3-venv python3-pip build-essential python3-dev >/dev/null
 
@@ -334,6 +363,7 @@ if ! systemctl is-active --quiet gyza-demo-agent.service; then
     journalctl -u gyza-demo-agent.service --since="1 minute ago" --no-pager | tail -20 >&2
     echo "(continuing — bootstrap node is still functional without the agent)" >&2
 fi
+fi  # end: --demo-agent gate
 
 # Output the multiaddr the operator needs to add to DNS.
 MULTIADDR="/ip4/$PUBLIC_IP/udp/7749/quic-v1/p2p/$PEER_ID"
