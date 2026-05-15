@@ -120,11 +120,16 @@ note "pipx = $(pipx --version)"
 say "Downloading gyza-netd daemon"
 
 if [[ "$GYZA_VERSION" == "latest" ]]; then
-    tag_url="https://api.github.com/repos/$GYZA_REPO/releases/latest"
+    # /releases/latest skips prereleases. During alpha (v0.1.0aN /
+    # v0.1.0bN / -rcN tags) every release is a prerelease per the
+    # workflow's auto-detection, so we use /releases (array, sorted
+    # newest-first) instead. grep -m1 takes the first tag_name
+    # which is the most recent published release.
+    tag_url="https://api.github.com/repos/$GYZA_REPO/releases?per_page=10"
     GYZA_VERSION=$(curl -sSf "$tag_url" 2>/dev/null \
         | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || true)
     if [[ -z "$GYZA_VERSION" ]]; then
-        die "could not resolve latest release tag. Network issue? Pass GYZA_VERSION=vX.Y.Z explicitly."
+        die "could not resolve latest release tag. Network issue, or no releases tagged yet at https://github.com/$GYZA_REPO/releases ? Pass GYZA_VERSION=vX.Y.Z explicitly."
     fi
 fi
 note "version = $GYZA_VERSION"
