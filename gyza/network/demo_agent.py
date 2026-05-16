@@ -526,7 +526,12 @@ def run_hosted_demo_agent(
         min_reward_threshold=0.0,
         min_similarity_threshold=min_similarity_threshold,
         poll_interval_s=poll_interval_s,
-        on_envelope_signed=cluster.runner_envelope_hook(),
+        # settle=False: the public demo agent works for free. It
+        # still delivers the signed result to the submitter (that's
+        # the value); it just doesn't open a bilateral ledger entry,
+        # so strangers running `gyza submit` don't accrue compute
+        # debt. Settlement is demonstrated by demo/single_machine_global.
+        on_envelope_signed=cluster.runner_envelope_hook(settle=False),
         hlc=cluster.shared_hlc(),
     )
     runner.start()

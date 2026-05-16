@@ -1215,18 +1215,21 @@ def cmd_submit(args: argparse.Namespace) -> int:
     """
     Submit a free-text task to the public demo project. The user's
     running daemon (started via ``gyza global start``) gossips the
-    task to ``gyza-demo-public-v1``; any hosted demo agent on that
-    topic can claim it. When the work item completes, we verify the
-    envelope chain and print the result.
+    task to ``gyza-demo-public-v1``; a hosted demo agent claims it,
+    runs it, signs an ICP envelope, and pushes the full result back
+    to us over a direct libp2p stream. We verify the Ed25519
+    signature + the artifact hash, then print the result.
 
-    The demo agents run with a deterministic executor in v0.1
-    (no real LLM). The value of this command is the *protocol* —
-    you can cryptographically verify that the result came from a
-    specific peer at a specific timestamp under a specific
-    capability manifest. Real LLM-backed responses land in v0.1.1.
+    The verification is the point: you get cryptographic proof that
+    this exact output was produced by this exact agent identity at
+    this timestamp under this capability manifest — no central
+    server, no trust in us.
     """
+    import threading
     import time as _time
     import uuid as _uuid
+
+    import blake3
 
     from gyza.embeddings import embed_work_description
     from gyza.icp import verify_envelope
@@ -1234,6 +1237,10 @@ def cmd_submit(args: argparse.Namespace) -> int:
     from gyza.network.global_cluster import GlobalCluster
     from gyza.network.netd_client import GossipClient, NetdClient
     from gyza.network.network_blackboard import NetworkBlackboard
+    from gyza.network.result_delivery import (
+        RESULT_DELIVERY_TYPE,
+        decode_delivery,
+    )
     from gyza.schema import WorkItem
 
     cfg = load_config()
@@ -1264,9 +1271,37 @@ def cmd_submit(args: argparse.Namespace) -> int:
         gossip_client=gossip,
     )
 
+    # Result-delivery subscription. The executor pushes the full
+    # signed envelope + result artifact directly to us over the
+    # daemon's point-to-point MessageService — no gossip dependency
+    # for the result. Runs on its own NetdClient (own gRPC channel)
+    # so the blocking Subscribe stream is independent of every other
+    # call. Started BEFORE we post the work item so a fast executor
+    # can't deliver into a void.
+    sub_netd = NetdClient(sock)
+    delivered: dict = {}
+    delivered_evt = threading.Event()
+    wanted: dict[str, str | None] = {"work_item_id": None}
+
+    def _sub_loop() -> None:
+        try:
+            for incoming in sub_netd.subscribe_messages([RESULT_DELIVERY_TYPE]):
+                try:
+                    rd = decode_delivery(incoming.payload)
+                except ValueError:
+                    continue  # malformed frame — skip, don't crash
+                if wanted["work_item_id"] and rd.work_item_id == wanted["work_item_id"]:
+                    delivered["rd"] = rd
+                    delivered_evt.set()
+                    return
+        except Exception:  # noqa: BLE001
+            # Channel closed (we're shutting down) or transport error.
+            pass
+
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    sub_thread: threading.Thread | None = None
     try:
         loop.run_until_complete(cluster.start())
         gossip.join_project(DEMO_PROJECT_ID)
@@ -1274,22 +1309,21 @@ def cmd_submit(args: argparse.Namespace) -> int:
             gossip, DEMO_PROJECT_ID, node_id=compositor.pubkey_hex,
         )
 
+        sub_thread = threading.Thread(target=_sub_loop, daemon=True)
+        sub_thread.start()
+        _time.sleep(0.5)  # let the server-side Subscribe register
+
         # Build the intent + work item. The intent is signed by the
-        # local compositor; the work item is rooted in the intent
-        # and carries an embedding of the task description so that
-        # specialization-matching on the executor side can score
-        # cosine(spec, task_emb).
+        # local compositor; the work item carries an embedding of
+        # the task so the executor's specialization-matching scores
+        # it. The intent embeds our compositor_pubkey so the agent
+        # can (a) rate-limit per submitter and (b) route the result
+        # delivery back to us.
         intent_id = str(_uuid.uuid7())
         bb.post_intent({
             "intent_id": intent_id,
             "natural_text": args.task,
             "category": "public_demo",
-            # Identify the submitter to the hosted agent. The agent
-            # uses this for per-submitter rate-limit accounting against
-            # its Anthropic API budget. Not load-bearing for protocol
-            # correctness — the envelope signatures are what bind work
-            # to identity — but it's how the demo agents fairly share
-            # their daily quota across users.
             "compositor_pubkey": compositor.pubkey_hex,
             "actions": [],
             "authorization": {
@@ -1322,108 +1356,98 @@ def cmd_submit(args: argparse.Namespace) -> int:
             created_at_ns=_time.time_ns(),
             ttl_ns=3600 * 1_000_000_000,
         )
+        wanted["work_item_id"] = wi.id
         bb.post_work_item(wi)
 
         print(f"[submit] posted intent={intent_id[:16]}… work_item={wi.id[:16]}…")
-        print(f"[submit] gossiping to {DEMO_PROJECT_ID} — waiting for a hosted agent to claim…")
+        print(f"[submit] gossiping to {DEMO_PROJECT_ID} — waiting for a hosted agent…")
 
-        # Poll our local blackboard. Once a hosted agent claims +
-        # completes the work item, the completion gossips back to
-        # us with completed_at_ns + output_hash + icp_envelope_hash
-        # populated.
-        deadline = _time.monotonic() + args.timeout
-        last_status = ""
+        # Wait for the result-delivery push. Announce the claim as a
+        # progress signal if we observe it via gossip (best-effort —
+        # the delivery push is the load-bearing path).
+        start = _time.monotonic()
+        deadline = start + args.timeout
+        claim_announced = False
         while _time.monotonic() < deadline:
-            items = bb.get_by_lineage(intent_id)
-            if items:
-                item = items[0]
-                if item.completed_at_ns is not None:
-                    print(f"[submit] completed in "
-                          f"{(_time.monotonic() - (deadline - args.timeout)):.1f}s")
-                    break
-                if item.claimed_by and item.claimed_by != last_status:
-                    print(f"[submit] claimed by {item.claimed_by[:16]}…")
-                    last_status = item.claimed_by
-            _time.sleep(0.5)
-        else:
-            print(f"[submit] timed out after {args.timeout}s waiting for a result.\n"
-                  f"  Possible causes:\n"
-                  f"    - No hosted agents are running on the demo project.\n"
-                  f"    - DHT/gossip mesh hasn't propagated your work item.\n"
-                  f"    - Check `gyza global status` to see peer count.",
-                  file=sys.stderr)
+            if delivered_evt.wait(timeout=0.5):
+                break
+            if not claim_announced:
+                items = bb.get_by_lineage(intent_id)
+                if items and items[0].claimed_by:
+                    print(f"[submit] claimed by {items[0].claimed_by[:16]}…")
+                    claim_announced = True
+
+        rd = delivered.get("rd")
+        bar = "─" * 72
+        if rd is None:
+            print(
+                f"[submit] timed out after {args.timeout}s waiting for a result.\n"
+                f"  - Is a hosted agent running on the demo project? "
+                f"(check `gyza global status` peer count)\n"
+                f"  - The work item may still complete; the delivery "
+                f"push just didn't arrive in time.",
+                file=sys.stderr,
+            )
             return 3
 
-        # Print completion proof. Note: the envelope + artifact bytes
-        # live on the executor's blackboard, not ours — gossip carries
-        # completion HASHES but not the underlying bytes by default
-        # (would balloon wire traffic on a large mesh). The CLI v0.1
-        # surfaces what gossip delivered; v0.1.1 will add a libp2p
-        # ``GetEnvelope`` RPC so the submitter can fetch + verify the
-        # full envelope from the executor by peer ID.
-        items = bb.get_by_lineage(intent_id)
-        item = items[0]
-        env = bb.get_envelope(item.icp_envelope_hash) if item.icp_envelope_hash else None
-        artifact = bb.get_artifact(item.output_hash) if item.output_hash else None
+        # Verify. Two independent checks:
+        #   1. Ed25519 signature over the envelope — proves the agent
+        #      identity that claims to have done this work actually
+        #      signed it.
+        #   2. BLAKE3(artifact) == envelope.output_hash — proves the
+        #      result bytes we're about to print are exactly what the
+        #      envelope commits to (artifact integrity).
+        env = rd.envelope
+        sig_ok = verify_envelope(env, bytes.fromhex(env.agent_pubkey))
+        artifact_hash = blake3.blake3(rd.artifact_bytes).hexdigest()
+        artifact_ok = artifact_hash == env.output_hash
 
-        # If we DO have the envelope locally (which happens when the
-        # executor opted into gossipping it, or when this is a local-
-        # only demo), verify and print the full chain. Otherwise show
-        # what we know from the gossipped completion.
-        sig_ok: bool | None = None
         result_text = ""
-        agent_pubkey = ""
-        model_id = ""
-        duration_ms: int | None = None
-        if env is not None:
-            sig_ok = verify_envelope(env, bytes.fromhex(env.agent_pubkey))
-            agent_pubkey = env.agent_pubkey
-            model_id = env.model_identifier
-            duration_ms = env.duration_ms
-        if artifact is not None:
-            try:
-                payload = json.loads(artifact.data.decode("utf-8"))
-                if isinstance(payload, dict):
-                    result_text = payload.get("text", "")
-            except Exception:  # noqa: BLE001
-                result_text = "<artifact decode failed>"
+        try:
+            payload = json.loads(rd.artifact_bytes.decode("utf-8"))
+            if isinstance(payload, dict):
+                result_text = payload.get("text", "")
+        except Exception:  # noqa: BLE001
+            result_text = "<artifact decode failed>"
 
-        bar = "─" * 72
+        elapsed = _time.monotonic() - start
+        verified = sig_ok and artifact_ok
+
+        print(f"[submit] result delivered + verified in {elapsed:.1f}s")
         print()
         print(bar)
-        if env is not None and result_text:
-            print(f"  RESULT (signed by {agent_pubkey[:16]}…)")
-            print(bar)
-            print(result_text)
-        else:
-            print("  COMPLETION PROOF")
-            print(bar)
-            print(
-                f"  A remote agent claimed and executed your task. The full\n"
-                f"  ICP envelope + result artifact live on that agent's\n"
-                f"  blackboard (we received only the cryptographic hashes\n"
-                f"  over gossip — by design, to keep mesh traffic small).\n"
-                f"\n"
-                f"  v0.1.1 will add a libp2p ``GetEnvelope`` RPC so this\n"
-                f"  CLI can fetch + verify the full chain from the executor.\n"
-                f"  For now, you have:"
-            )
+        print(f"  RESULT")
         print(bar)
-        print(f"  intent:           {intent_id}")
-        print(f"  work item:        {item.id}")
-        print(f"  claimed by:       {item.claimed_by or '?'}")
-        print(f"  envelope hash:    {item.icp_envelope_hash or '(none)'}")
-        print(f"  output hash:      {item.output_hash or '(none)'}")
-        if env is not None:
-            print(f"  signed by:        {agent_pubkey}")
-            print(f"  model:            {model_id}")
-            print(f"  duration:         {duration_ms} ms")
-            print(f"  signature:        {'✓ VALID' if sig_ok else '✗ INVALID'}")
-        else:
-            print(f"  signature:        (envelope not local — v0.1.1 will fetch)")
+        print(result_text or "<no text payload>")
         print(bar)
-        return 0
+        print(f"  PROVENANCE")
+        print(bar)
+        print(f"  intent:        {intent_id}")
+        print(f"  work item:     {env.action_id}")
+        print(f"  signed by:     {env.agent_pubkey}")
+        print(f"  model:         {env.model_identifier}")
+        print(f"  backend:       {env.inference_backend}")
+        print(f"  duration:      {env.duration_ms} ms")
+        print(f"  output hash:   {env.output_hash}")
+        print(f"  signature:     {'✓ VALID' if sig_ok else '✗ INVALID'}")
+        print(f"  artifact hash: {'✓ MATCHES envelope' if artifact_ok else '✗ MISMATCH'}")
+        print(bar)
+        if verified:
+            print("  ✓ cryptographically verified — this output was produced")
+            print("    by the agent identity above, signed, tamper-evident.")
+        else:
+            print("  ✗ VERIFICATION FAILED — do not trust this result.")
+        print(bar)
+        return 0 if verified else 5
     finally:
+        # Close the subscription channel first — that unblocks the
+        # _sub_loop iterator so the thread can exit.
+        try:
+            sub_netd.close()
+        except Exception:  # noqa: BLE001
+            pass
+        if sub_thread is not None:
+            sub_thread.join(timeout=2.0)
         try:
             loop.run_until_complete(cluster.stop())
         except Exception:  # noqa: BLE001

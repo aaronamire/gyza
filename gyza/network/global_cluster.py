@@ -821,11 +821,18 @@ class GlobalCluster:
         """
         return self._blackboard.gossip_hlc()
 
-    def runner_envelope_hook(self) -> Callable[[Any], None]:
+    def runner_envelope_hook(self, *, settle: bool = True) -> Callable[[Any], None]:
         """
         Build a closure for AgentRunner's ``on_envelope_signed`` that
-        submits an earner-signed ledger entry whenever the runner
-        completes work for a remote coordinator's intent.
+        delivers the result to the submitter and (when ``settle`` is
+        True) submits an earner-signed ledger entry for the work.
+
+        ``settle=False`` does result delivery only — no ledger entry,
+        no credit transfer. The public demo agents use this: they
+        work for free, so a stranger running ``gyza submit`` doesn't
+        accrue compute debt and doesn't see a half-completed
+        settlement. Bilateral settlement is demonstrated separately
+        by ``demo/single_machine_global.py``.
 
         Decisions made by the hook:
 
@@ -868,6 +875,52 @@ class GlobalCluster:
         blackboard = self._blackboard
         my_pubkey = self._compositor.pubkey_hex
 
+        netd = self._netd
+
+        def _deliver_result(envelope, peer_id: str) -> None:
+            """
+            Push the full signed envelope + result artifact to the
+            submitter over the daemon's point-to-point MessageService.
+            Without this the submitter only gets gossipped hashes and
+            cannot verify the chain or read the result. Best-effort:
+            a delivery failure is logged, not raised — the work is
+            done and signed regardless.
+            """
+            from gyza.network.result_delivery import (
+                RESULT_DELIVERY_TYPE,
+                encode_delivery,
+            )
+            artifact = blackboard.get_artifact(envelope.output_hash)
+            if artifact is None:
+                LOG.info(
+                    "[global] hook: no artifact for output_hash %s — "
+                    "result delivery skipped for action %s",
+                    envelope.output_hash[:16], envelope.action_id[:16],
+                )
+                return
+            try:
+                payload = encode_delivery(
+                    work_item_id=envelope.action_id,
+                    envelope=envelope,
+                    artifact_bytes=artifact.data,
+                )
+                ok = netd.send_message(
+                    peer_id=peer_id,
+                    message_type=RESULT_DELIVERY_TYPE,
+                    payload=payload,
+                )
+                if not ok:
+                    LOG.warning(
+                        "[global] hook: result delivery send to %s "
+                        "failed for action %s",
+                        peer_id, envelope.action_id[:16],
+                    )
+            except Exception as e:  # noqa: BLE001
+                LOG.warning(
+                    "[global] hook: result delivery raised for action "
+                    "%s: %s", envelope.action_id[:16], e,
+                )
+
         def _hook(envelope) -> None:
             creator = blackboard._intent_creator.get(envelope.intent_id)
             if creator is None or creator == my_pubkey:
@@ -876,9 +929,15 @@ class GlobalCluster:
             if peer_id is None:
                 LOG.info(
                     "[global] hook: no peer_id for creator %s — "
-                    "settlement skipped for action %s",
+                    "settlement + delivery skipped for action %s",
                     creator[:16], envelope.action_id[:16],
                 )
+                return
+            # Deliver the result FIRST. The submitter is typically a
+            # short-lived `gyza submit` waiting on exactly this; getting
+            # the envelope + artifact to it is the user-visible outcome.
+            _deliver_result(envelope, peer_id)
+            if not settle:
                 return
             envelope_hash = compute_envelope_hash(envelope)
             try:
