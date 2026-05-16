@@ -204,9 +204,89 @@ class SandboxConfig:
     backend: SandboxBackend = SandboxBackend.BUBBLEWRAP
 
 
+def sandbox_config_from_manifest(
+    manifest: dict,
+    *,
+    workspace: str | None = None,
+    timeout_s: float = 120.0,
+) -> SandboxConfig:
+    """
+    Derive a SandboxConfig from an agent capability manifest.
+
+    This is the connective tissue of a sound bounds-proof. Today the
+    manifest's ``capabilities.filesystem.read/write`` and a
+    SandboxConfig's ``ro_paths/rw_paths`` are two *independent*
+    declarations — an agent can be issued with one set of authorized
+    paths and then executed under a sandbox bound to a different set,
+    and nothing catches the discrepancy. By making the manifest the
+    single source of truth for the sandbox, "what the manifest
+    declares" becomes, by construction, "what bwrap enforces."
+
+    Enforcement honesty — per dimension:
+
+      * filesystem (read/write): SOUND. bwrap mount namespaces
+        enforce exactly these paths at the kernel level. A bounds-
+        proof over the filesystem dimension is real.
+
+      * network: PARTIAL. bwrap's network control is all-or-nothing
+        (a fresh net namespace with loopback only, or full host
+        networking). It CANNOT enforce a per-host allowlist. So a
+        manifest that lists ``network.allowed_hosts`` only gets the
+        namespace toggled on; the specific host allowlist is
+        DECLARED, not enforced. A bounds-proof must label this
+        dimension accordingly. Enforced per-host network bounds are
+        vNext (a filtering proxy or a TEE-attested runtime).
+
+      * memory: SOUND (RLIMIT_AS inside the sandboxee).
+
+    Args:
+      manifest: an agent manifest as produced by
+        ``LocalCompositor.issue_agent`` — i.e. a dict with a
+        ``capabilities`` sub-dict.
+      workspace: optional host path bound read-write as the
+        sandboxee's CWD (for collecting output files).
+      timeout_s: wall-clock cap (parent-enforced backstop).
+
+    Returns:
+      A SandboxConfig requesting the BUBBLEWRAP backend whose
+      ro_paths / rw_paths / requires_network / max_memory_mb are
+      exactly the manifest's authorization.
+    """
+    caps = manifest.get("capabilities", {})
+    if not isinstance(caps, dict):
+        caps = {}
+    fs = caps.get("filesystem", {}) if isinstance(caps.get("filesystem"), dict) else {}
+    net = caps.get("network", {}) if isinstance(caps.get("network"), dict) else {}
+    spawn = caps.get("spawn", {}) if isinstance(caps.get("spawn"), dict) else {}
+    budget = (
+        spawn.get("resource_budget", {})
+        if isinstance(spawn.get("resource_budget"), dict)
+        else {}
+    )
+
+    read_paths = [str(p) for p in fs.get("read", []) if p]
+    write_paths = [str(p) for p in fs.get("write", []) if p]
+    allowed_hosts = [h for h in net.get("allowed_hosts", []) if h]
+    mem = budget.get("memory_limit_mb")
+
+    return SandboxConfig(
+        ro_paths=read_paths,
+        rw_paths=write_paths,
+        workspace=workspace,
+        # All-or-nothing: any declared host implies the namespace is
+        # opened. The per-host allowlist itself is not enforceable by
+        # bwrap — see the docstring.
+        requires_network=bool(allowed_hosts),
+        max_memory_mb=int(mem) if isinstance(mem, int) and mem > 0 else None,
+        timeout_s=timeout_s,
+        backend=SandboxBackend.BUBBLEWRAP,
+    )
+
+
 __all__ = [
     "SandboxBackend",
     "SandboxConfig",
     "default_system_paths",
+    "sandbox_config_from_manifest",
     "_system_mounts",
 ]

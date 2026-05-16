@@ -15,7 +15,12 @@ Threat model and design choices live in ``runner.py``'s module docstring.
 """
 from __future__ import annotations
 
-from gyza.sandbox.config import SandboxConfig, SandboxBackend, default_system_paths
+from gyza.sandbox.config import (
+    SandboxConfig,
+    SandboxBackend,
+    default_system_paths,
+    sandbox_config_from_manifest,
+)
 from gyza.sandbox.executor import make_sandboxed_executor
 from gyza.sandbox.runner import (
     SandboxResult,
@@ -38,4 +43,5 @@ __all__ = [
     "detect_backend",
     "make_sandboxed_executor",
     "run_sandboxed",
+    "sandbox_config_from_manifest",
 ]

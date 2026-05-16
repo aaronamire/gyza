@@ -371,3 +371,67 @@ def test_config_defaults_are_safe():
     assert cfg.backend == SandboxBackend.BUBBLEWRAP
     assert cfg.ro_paths == []
     assert cfg.rw_paths == []
+
+
+# ----------------------------------------------------------------------
+# sandbox_config_from_manifest — the manifest ≡ sandbox bridge.
+# This is the connective tissue of a sound bounds-proof: the bounds the
+# agent manifest DECLARES must be exactly the bounds bwrap ENFORCES.
+# ----------------------------------------------------------------------
+
+def test_sandbox_config_from_manifest_mirrors_filesystem_authorization(tmp_path):
+    """A manifest's filesystem.read/write becomes ro_paths/rw_paths verbatim."""
+    from gyza.identity import LocalCompositor
+    from gyza.sandbox import sandbox_config_from_manifest
+
+    comp = LocalCompositor(key_path=str(tmp_path / "comp.key"))
+    _seed, manifest = comp.issue_agent(
+        agent_type="test.bounds",
+        model_path="mock",
+        fs_read_paths=["/data/in", "/usr/share/x"],
+        fs_write_paths=["/data/out"],
+        allowed_hosts=["api.anthropic.com"],
+        memory_limit_mb=1024,
+        attestation_tier=1,
+    )
+    cfg = sandbox_config_from_manifest(manifest, workspace="/tmp/ws")
+    # The sandbox config is the manifest's authorization, verbatim — so
+    # "declared" and "enforced" cannot silently diverge.
+    assert cfg.ro_paths == ["/data/in", "/usr/share/x"]
+    assert cfg.rw_paths == ["/data/out"]
+    assert cfg.workspace == "/tmp/ws"
+    assert cfg.max_memory_mb == 1024
+    assert cfg.backend == SandboxBackend.BUBBLEWRAP
+
+
+def test_sandbox_config_from_manifest_network_is_all_or_nothing(tmp_path):
+    """
+    A manifest listing allowed_hosts opens the network namespace; a
+    manifest with none keeps it closed. bwrap can't enforce a per-host
+    allowlist — that's a documented partial-enforcement dimension.
+    """
+    from gyza.identity import LocalCompositor
+    from gyza.sandbox import sandbox_config_from_manifest
+
+    comp = LocalCompositor(key_path=str(tmp_path / "comp.key"))
+    _s1, with_net = comp.issue_agent(
+        agent_type="t", model_path="mock", fs_read_paths=[], fs_write_paths=[],
+        allowed_hosts=["example.com"], attestation_tier=1,
+    )
+    _s2, no_net = comp.issue_agent(
+        agent_type="t", model_path="mock", fs_read_paths=[], fs_write_paths=[],
+        attestation_tier=1,
+    )
+    assert sandbox_config_from_manifest(with_net).requires_network is True
+    assert sandbox_config_from_manifest(no_net).requires_network is False
+
+
+def test_sandbox_config_from_manifest_tolerates_malformed_manifest():
+    """A manifest missing the capabilities sub-dict yields empty bounds,
+    not a crash — the safest possible failure (nothing authorized)."""
+    from gyza.sandbox import sandbox_config_from_manifest
+
+    cfg = sandbox_config_from_manifest({})
+    assert cfg.ro_paths == []
+    assert cfg.rw_paths == []
+    assert cfg.requires_network is False
