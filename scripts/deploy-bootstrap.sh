@@ -268,7 +268,11 @@ if [[ "${GYZA_DEPLOY_DEMO_AGENT:-0}" != "1" ]]; then
     fi
 else
 echo "    installing gyza Python package for demo agent"
-apt-get install -y -qq python3-venv python3-pip build-essential python3-dev >/dev/null
+# bubblewrap is required so the demo agent can execute its inner
+# LLM call inside a kernel-enforced sandbox (the bounds-proof base
+# layer — see sandbox_config_from_manifest). Without it the
+# sandbox falls back to NONE and the bounds-proof is invalid.
+apt-get install -y -qq python3-venv python3-pip build-essential python3-dev bubblewrap >/dev/null
 
 # Re-create the venv idempotently. ``--system-site-packages`` is
 # avoided so the venv pins its own dependency versions.
@@ -278,11 +282,15 @@ fi
 # Upgrade pip first — old pip versions choke on modern wheels.
 /opt/gyza/agent-venv/bin/pip install -q --upgrade pip >/dev/null
 
-# Install gyza editable. Skip the [embeddings] extra — the demo
-# agent uses a stub specialization vector and doesn't need
-# sentence-transformers (~500 MB RAM). Skip [dev] for the same
-# reason.
-/opt/gyza/agent-venv/bin/pip install -q -e /opt/gyza >/dev/null
+# Non-editable install: gyza ends up COPIED into the venv's
+# site-packages (under sys.prefix), which `default_system_paths()`
+# binds ro into bwrap by default. The previous editable install
+# left gyza at /opt/gyza, which is NOT in the default system paths
+# and would not be importable inside the sandbox — breaking
+# sandboxed_anthropic_executor's re-import of `gyza.runner` at
+# call time. Skip the [embeddings] extra (sentence-transformers
+# is ~500 MB and unused — demo agent uses a stub specialization).
+/opt/gyza/agent-venv/bin/pip install -q /opt/gyza >/dev/null
 
 # Install the anthropic SDK only when an API key was provided.
 # Without it the demo agent runs the deterministic executor and

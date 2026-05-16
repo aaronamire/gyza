@@ -59,7 +59,9 @@ from gyza.memory import EpisodicMemory
 from gyza.network.global_cluster import GlobalCluster
 from gyza.network.netd_client import GossipClient, NetdClient
 from gyza.network.network_blackboard import NetworkBlackboard
-from gyza.runner import AgentRunner, make_anthropic_executor
+from gyza.runner import AgentRunner
+from gyza.sandbox.config import sandbox_config_from_manifest
+from gyza.sandbox.executor import sandboxed_anthropic_executor
 from gyza.schema import EMBEDDING_DIM
 
 LOG = logging.getLogger("gyza.demo_agent")
@@ -294,16 +296,38 @@ def _gated_anthropic_response(reason: str) -> str:
     )
 
 
-def _build_anthropic_executor_gated(quota: QuotaTracker, blackboard: NetworkBlackboard):
+def _build_anthropic_executor_gated(
+    quota: QuotaTracker,
+    blackboard: NetworkBlackboard,
+    manifest: dict,
+):
     """
-    Returns an executor that wraps make_anthropic_executor with the
-    three quota gates. Submitter identity is recovered from the work
-    item's lineage_root → intent → compositor_pubkey when available;
-    if the intent isn't in our blackboard (gossip race), the
-    submitter is treated as anonymous (still subject to the global
-    gates).
+    Returns an executor that wraps a SANDBOXED Anthropic executor
+    with the three quota gates.
+
+    The real LLM call runs inside bwrap, bounded by a SandboxConfig
+    derived from this agent's capability manifest
+    (``sandbox_config_from_manifest``). The demo agent's manifest
+    declares no filesystem paths, so the executor runs with zero
+    access to the host's files — kernel-enforced — and network only
+    (it must reach api.anthropic.com). That bound is what the
+    envelope's capability_manifest_hash now truthfully commits to.
+
+    The quota gate stays HOST-side: rate-limit accounting and the
+    spend ledger must not live inside the sandbox (the sandbox is
+    per-call and ephemeral). Only the actual Claude call crosses the
+    sandbox boundary.
+
+    Submitter identity is recovered from the work item's
+    lineage_root → intent → compositor_pubkey when available; if the
+    intent isn't in our blackboard (gossip race), the submitter is
+    treated as anonymous (still subject to the global gates).
     """
-    real_exec = make_anthropic_executor()
+    # Bounded by the manifest: the LLM call executes in bwrap with
+    # exactly the filesystem / network the manifest authorizes.
+    real_exec = sandboxed_anthropic_executor(
+        config=sandbox_config_from_manifest(manifest),
+    )
 
     def _lookup_submitter(lineage_root: str) -> str:
         """
@@ -369,12 +393,20 @@ def _build_anthropic_executor_gated(quota: QuotaTracker, blackboard: NetworkBlac
     return executor
 
 
-def _build_executor(blackboard: NetworkBlackboard, quota_db_path: str):
+def _build_executor(
+    blackboard: NetworkBlackboard,
+    quota_db_path: str,
+    manifest: dict,
+):
     """
     Choose the executor based on environment:
 
-      - ANTHROPIC_API_KEY set → real Claude calls, gated by QuotaTracker
-      - otherwise            → deterministic fallback (no API spend)
+      - ANTHROPIC_API_KEY set → real Claude calls, SANDBOXED under
+        the agent's manifest (sandbox_config_from_manifest), gated
+        by QuotaTracker.
+      - otherwise            → deterministic fallback (no API spend,
+        no sandbox — _demo_response is pure string formatting with
+        no I/O, so there is nothing for a sandbox to bound).
 
     Both produce signed ICP envelopes; only ``model_identifier`` and
     ``inference_backend`` differ.
@@ -394,7 +426,7 @@ def _build_executor(blackboard: NetworkBlackboard, quota_db_path: str):
             global_daily_queries=glob_q,
             global_daily_spend_usd=glob_s,
         )
-        return _build_anthropic_executor_gated(quota, blackboard)
+        return _build_anthropic_executor_gated(quota, blackboard, manifest)
 
     LOG.info("[exec] deterministic mode (no ANTHROPIC_API_KEY)")
     return _build_deterministic_executor()
@@ -482,11 +514,19 @@ def run_hosted_demo_agent(
     # is intentionally generic so cosine(spec, any_task) is
     # nonzero. Combined with min_similarity_threshold=-1.0 this
     # makes the agent willing to claim anything.
+    # Honest capability declaration. fs_read/write empty → the
+    # executor runs with ZERO host filesystem access (kernel-enforced
+    # by bwrap; only the OS/runtime baseline is visible). allowed_hosts
+    # lists api.anthropic.com because the real-LLM executor must reach
+    # it — declared truthfully so the bounds-proof reflects reality.
+    # (bwrap enforces the net namespace on/off, not the per-host
+    # allowlist itself — see sandbox_config_from_manifest docstring.)
     seed, manifest = compositor.issue_agent(
         agent_type="demo.public-agent",
         model_path="deterministic",
         fs_read_paths=[],
         fs_write_paths=[],
+        allowed_hosts=["api.anthropic.com"],
         attestation_tier=1,
     )
     ident = AgentIdentity(seed, manifest)
@@ -522,7 +562,7 @@ def run_hosted_demo_agent(
         memory=mem,
         specialization=spec,
         lsh=lsh,
-        executor=_build_executor(bb, quota_db_path),
+        executor=_build_executor(bb, quota_db_path, manifest),
         min_reward_threshold=0.0,
         min_similarity_threshold=min_similarity_threshold,
         poll_interval_s=poll_interval_s,
