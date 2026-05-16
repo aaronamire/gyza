@@ -1456,6 +1456,146 @@ def cmd_submit(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# watch — live view of the public demo project
+# ---------------------------------------------------------------------------
+
+def cmd_watch(args: argparse.Namespace) -> int:
+    """
+    Live view of the public demo project: stream and pretty-print
+    every work-item-lifecycle event — intent posted, work item
+    posted, claimed, completed — as it happens on the network.
+
+    Scope, honestly: gossip is per-topic, so this shows the project
+    you're watching (``gyza-demo-public-v1`` by default — where all
+    public ``gyza submit`` traffic flows), not "the whole network".
+    Settlement is point-to-point libp2p and is NOT gossiped, so it
+    doesn't appear here. What you see is the work lifecycle.
+
+    Read-only: joining the topic to receive deltas also makes this
+    node a gossip relay for it — which slightly *helps* mesh
+    reliability — but `gyza watch` never posts anything.
+    """
+    import datetime as _dt
+    import time as _time
+
+    from gyza.network.demo_agent import DEMO_PROJECT_ID
+    from gyza.network.netd_client import GossipClient, NetdClient
+
+    use_color = sys.stdout.isatty()
+
+    def c(code: str, s: str) -> str:
+        return f"\033[{code}m{s}\033[0m" if use_color else s
+
+    # A live-streaming tool MUST flush every line. Python block-buffers
+    # stdout when it isn't a tty (piped / redirected / under a process
+    # supervisor), so without an explicit flush nothing appears until
+    # the buffer fills or the process exits cleanly — and a SIGTERM
+    # (e.g. `timeout`, systemd stop) then loses the whole buffer.
+    def out(s: str = "", *, file=None) -> None:
+        print(s, flush=True, file=file or sys.stdout)
+
+    cfg = load_config()
+    sock = str(_resolve(cfg.netd_socket_path))
+    if not Path(sock).exists():
+        out(
+            f"daemon socket not found at {sock}\n"
+            f"start it first with: gyza global start",
+            file=sys.stderr,
+        )
+        return 2
+
+    project = args.project or DEMO_PROJECT_ID
+    netd = NetdClient(sock)
+    gossip = GossipClient(sock)
+
+    def ts(ns: int) -> str:
+        if not ns:
+            ns = _time.time_ns()
+        return _dt.datetime.fromtimestamp(ns / 1e9).strftime("%H:%M:%S")
+
+    try:
+        info = netd.get_node_info()
+        status = netd.get_status()
+    except Exception as e:  # noqa: BLE001
+        out(f"could not query daemon: {e}", file=sys.stderr)
+        return 2
+
+    bar = "─" * 72
+    out(bar)
+    out(f"  gyza watch — live view of {project}")
+    out(f"  daemon {info.peer_id[:20]}…  ·  {status.connected_peers} peers connected")
+    out(bar)
+    out("  shows OTHER peers' activity on this project. The daemon")
+    out("  suppresses self-loops, so your own submits don't appear")
+    out("  here — see `gyza submit`'s own output for those.")
+    out()
+
+    try:
+        gossip.join_project(project)
+    except Exception as e:  # noqa: BLE001
+        out(f"join_project failed: {e}", file=sys.stderr)
+        return 1
+
+    # Bounded dedup — gossipsub can redeliver a delta; we don't want
+    # the same event printed twice. Keyed by (kind, id...).
+    seen: set = set()
+
+    def first_time(key: tuple) -> bool:
+        if key in seen:
+            return False
+        seen.add(key)
+        if len(seen) > 8192:
+            seen.clear()
+        return True
+
+    try:
+        for delta in gossip.subscribe_deltas([project]):
+            for it in delta.new_intents:
+                if not first_time(("intent", it.intent_id)):
+                    continue
+                text = ""
+                try:
+                    spec = json.loads(it.goal_spec_json)
+                    if isinstance(spec, dict):
+                        text = spec.get("natural_text", "")
+                except Exception:  # noqa: BLE001
+                    pass
+                out(f"  {ts(it.created_at_ns)}  {c('36', 'intent    ')} "
+                      f"{it.intent_id[:12]}…  \"{text[:52]}\"")
+            for w in delta.new_items:
+                if not first_time(("item", w.id)):
+                    continue
+                out(f"  {ts(w.created_at_ns)}  {c('36', 'work item ')} "
+                      f"{w.id[:12]}…  tier-{w.required_tier} "
+                      f"reward {w.reward:.2f}  \"{w.description[:40]}\"")
+            for cl in delta.claim_updates:
+                if not first_time(("claim", cl.work_item_id, cl.agent_pubkey)):
+                    continue
+                out(f"  {ts(delta.timestamp_ns)}  {c('33', 'claimed   ')} "
+                      f"{cl.work_item_id[:12]}…  ← agent {cl.agent_pubkey[:12]}…")
+            for cp in delta.completions:
+                if not first_time(("done", cp.work_item_id)):
+                    continue
+                mark = (c('32', '✓ success') if cp.success
+                        else c('31', '✗ failed'))
+                out(f"  {ts(cp.completed_at_ns)}  {c('32', 'completed ')} "
+                      f"{cp.work_item_id[:12]}…  {mark}  "
+                      f"output {cp.output_hash[:12]}…")
+    except KeyboardInterrupt:
+        out("\n  watch stopped.")
+    finally:
+        try:
+            gossip.close()
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            netd.close()
+        except Exception:  # noqa: BLE001
+            pass
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # demo-agent — long-running hosted executor
 # ---------------------------------------------------------------------------
 
@@ -1509,6 +1649,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_submit.add_argument(
         "--timeout", type=float, default=60.0,
         help="max seconds to wait for a hosted agent to complete the work (default 60)",
+    )
+
+    # Live view of the public demo project's work-item lifecycle.
+    p_watch = sub.add_parser(
+        "watch",
+        help="live-stream the public demo project: intents, claims, completions",
+    )
+    p_watch.add_argument(
+        "--project", default=None,
+        help="project topic to watch (default: the public demo project)",
     )
 
     # Long-running hosted agent. Claims public demo work items and
@@ -1668,6 +1818,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_status(args)
     if args.command == "submit":
         return cmd_submit(args)
+    if args.command == "watch":
+        return cmd_watch(args)
     if args.command == "demo-agent":
         return cmd_demo_agent(args)
     if args.command == "network":

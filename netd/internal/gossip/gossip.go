@@ -396,13 +396,17 @@ func (m *Manager) receiveLoop(ctx context.Context, st *topicState) {
 			m.logf("[gossip] %s receive error: %v", st.projectID, err)
 			return
 		}
-		// Self-loop suppression: gossipsub delivers our own messages
-		// back to us. We don't want to push them to subscribers — the
-		// publishing path on the same daemon already informed local
-		// state.
-		if msg.GetFrom() == m.host.ID() {
-			continue
-		}
+		// Self-loops (gossipsub echoes our own publishes back) are NOT
+		// dropped here. NetworkBlackboard has its own self-delta guard
+		// (compares sender_compositor_pubkey to its node_id), so a
+		// blackboard subscriber still ignores its own writes — making
+		// a daemon-side drop redundant for that consumer. Meanwhile a
+		// pure observer (`gyza watch`) genuinely WANTS self-loops:
+		// without them it can never show the activity of the node it
+		// runs on. Letting the loop through here serves the observer
+		// and costs the blackboard only a cheap, already-present
+		// filter. The marginal work (unmarshal + verify of our own
+		// echo) is negligible at our scale.
 
 		d := &pb.BlackboardDelta{}
 		if err := proto.Unmarshal(msg.Data, d); err != nil {
