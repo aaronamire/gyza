@@ -274,6 +274,26 @@ echo "    installing gyza Python package for demo agent"
 # sandbox falls back to NONE and the bounds-proof is invalid.
 apt-get install -y -qq python3-venv python3-pip build-essential python3-dev bubblewrap >/dev/null
 
+# Ubuntu 23.10+ ships with kernel.apparmor_restrict_unprivileged_userns=1
+# by default, which blocks bubblewrap from creating user namespaces
+# unless an AppArmor profile permits it. With it on, bwrap fails
+# with "setting up uid map: Permission denied" and the sandboxed
+# executor falls into the error path. We turn the restriction off
+# system-wide on the bootstrap VPS — defensible because this host
+# runs only gyza-netd + the demo agent (no untrusted local users
+# whose userns escape would matter), and the bwrap mount/network
+# namespaces themselves provide the actual sandbox the bounds-proof
+# rests on. Persistent via sysctl.d.
+if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
+    cat > /etc/sysctl.d/99-gyza-bwrap.conf <<'SYSCTL'
+# Allow gyza-demo-agent's bubblewrap sandbox to create user
+# namespaces without an AppArmor profile. See deploy-bootstrap.sh
+# for the rationale and security envelope.
+kernel.apparmor_restrict_unprivileged_userns = 0
+SYSCTL
+    sysctl --quiet --load=/etc/sysctl.d/99-gyza-bwrap.conf
+fi
+
 # Re-create the venv idempotently. ``--system-site-packages`` is
 # avoided so the venv pins its own dependency versions.
 if [[ ! -x /opt/gyza/agent-venv/bin/python ]]; then

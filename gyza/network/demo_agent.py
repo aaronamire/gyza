@@ -368,8 +368,16 @@ def _build_anthropic_executor_gated(
                 "inference_backend": "deterministic",
             }
 
+        # Scrub the context before it crosses the sandbox boundary.
+        # The runner passes context={"item": WorkItem, "inputs": [...]}
+        # but WorkItem isn't JSON-serializable (numpy embedding), and
+        # `run_sandboxed` JSON-frames everything that goes into bwrap.
+        # The Anthropic executor only reads context["inputs"] for
+        # artifact inlining — demo work items have no inputs, so an
+        # empty context is equivalent and serializes cleanly.
+        sandbox_context: dict = {"inputs": []}
         try:
-            result = real_exec(prompt, context)
+            result = real_exec(prompt, sandbox_context)
         except Exception as e:  # noqa: BLE001
             # Surface API errors as a placeholder rather than blowing
             # up the runner. The signed envelope still chains; the
