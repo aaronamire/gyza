@@ -22,6 +22,7 @@ import logging
 import os
 from typing import Any, Callable
 
+from gyza.release import CURRENT_RELEASE as _CURRENT_RELEASE
 from gyza.sandbox.config import SandboxConfig
 from gyza.sandbox.runner import (
     SandboxExecutionError,
@@ -111,6 +112,19 @@ def make_sandboxed_executor(
                 "max_memory_mb": cfg.max_memory_mb,
                 "max_cpu_seconds": cfg.max_cpu_seconds,
                 "timeout_s": cfg.timeout_s,
+                # Runner release identity (G1a / ADR-0017). This is
+                # the binary that performed the stamp, so the
+                # submitter can check it against a separately-
+                # distributed trusted-release set. It does NOT enter
+                # enforcement_satisfies_manifest — runner identity is
+                # a distinct verification axis from "enforcement ⊆
+                # manifest", and conflating them would let an
+                # untrusted build's bounds pass as long as the
+                # predicate held. Self-reported: a malicious binary
+                # can lie here; trusted-set membership only bounds
+                # *which lie* is accepted. Honest closure is TEE
+                # (vNext L8); see ADR-0017.
+                **_CURRENT_RELEASE.as_dict(),
             }
         return payload
 

@@ -1434,6 +1434,31 @@ def cmd_submit(args: argparse.Namespace) -> int:
                     bounds_within_manifest_ok = False
                     bounds_failure_reason = f"manifest decode error: {_e}"
 
+        # Runner-attestation axis (G1a / ADR-0017). ORTHOGONAL to the
+        # bounds predicate: V4 proves enforcement ⊆ manifest; this
+        # proves *which binary* produced that enforcement record.
+        # An untrusted build does not flip the result to failure —
+        # the bounds are still cryptographically checked — but it
+        # caps the strength of the claim, because a malicious build
+        # could have stamped a fictitious enforcement record that
+        # then trivially satisfies the predicate. Self-reported;
+        # trusted-set membership only bounds which lie is accepted.
+        runner_version = None
+        runner_tree_hash = None
+        runner_trusted: bool | None = None
+        runner_trust_reason = ""
+        if isinstance(enforcement, dict):
+            runner_version = enforcement.get("runner_version")
+            runner_tree_hash = enforcement.get("runner_source_tree_hash")
+            if isinstance(runner_version, str) and isinstance(runner_tree_hash, str):
+                try:
+                    from gyza.release import is_trusted_release
+                    runner_trusted, runner_trust_reason = \
+                        is_trusted_release(runner_version, runner_tree_hash)
+                except Exception as _e:  # noqa: BLE001
+                    runner_trusted = False
+                    runner_trust_reason = f"release lookup error: {_e}"
+
         elapsed = _time.monotonic() - start
         verified = sig_ok and artifact_ok
 
@@ -1494,6 +1519,19 @@ def cmd_submit(args: argparse.Namespace) -> int:
                     else f"✗ violation: {bounds_failure_reason}"
                 )
                 print(f"  bounds check:  {label}")
+            # Runner identity — which binary stamped this enforcement
+            # record (G1a). Orthogonal to the predicate above.
+            if isinstance(runner_version, str):
+                if runner_trusted is True:
+                    rstate = "✓ trusted release"
+                elif runner_trusted is False:
+                    rstate = f"⚠ unverified build — {runner_trust_reason}"
+                else:
+                    rstate = "not reported"
+                short = (runner_tree_hash[:12] + "…") \
+                    if isinstance(runner_tree_hash, str) else "?"
+                print(f"  runner build:  {runner_version} "
+                      f"(tree {short})  {rstate}")
             print(bar)
         # Aggregate verdict — sig + artifact integrity for the
         # provenance proof; manifest hash + bounds predicate for the
@@ -1516,12 +1554,24 @@ def cmd_submit(args: argparse.Namespace) -> int:
             not bounds_claimed or bounds_independently_verified
         )
 
-        if all_ok and bounds_independently_verified:
+        if all_ok and bounds_independently_verified and runner_trusted is True:
+            print("  ✓ cryptographically verified — this output was produced")
+            print("    by the agent identity above, signed, tamper-evident.")
+            print("  ✓ bounded (INDEPENDENTLY VERIFIED + RUNNER ATTESTED) —")
+            print("    you re-hashed the manifest and re-ran the bounds")
+            print("    predicate here, AND the binary that stamped the")
+            print("    enforcement record is a trusted release. This is the")
+            print("    strongest claim the protocol makes.")
+        elif all_ok and bounds_independently_verified:
             print("  ✓ cryptographically verified — this output was produced")
             print("    by the agent identity above, signed, tamper-evident.")
             print("  ✓ bounded (INDEPENDENTLY VERIFIED) — you re-hashed the")
             print("    manifest and re-ran the bounds predicate on this")
-            print("    machine. No trust in the executor's runner needed.")
+            print("    machine. The enforcement record satisfies the")
+            print("    manifest.")
+            print("  ⚠ runner build is NOT a verified release — a malicious")
+            print("    build could have stamped a fictitious enforcement")
+            print(f"    record. {runner_trust_reason}")
         elif verified and bounds_claimed_but_unverifiable:
             print("  ✓ cryptographically verified — this output was produced")
             print("    by the agent identity above, signed, tamper-evident.")

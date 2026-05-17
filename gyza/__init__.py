@@ -10,3 +10,5 @@ the shim is in place by the time any of them dispatch.
 from . import _compat as _compat
 
 _compat.install()
+
+__version__ = "0.1.0-dev"
