@@ -53,6 +53,7 @@ properties are locked by ``tests/test_release.py``.
 """
 from __future__ import annotations
 
+import json
 import struct
 from dataclasses import dataclass
 from pathlib import Path
@@ -139,27 +140,62 @@ CURRENT_RELEASE = ReleaseIdentity(
 
 
 # ---------------------------------------------------------------------------
-# Trusted-release set.
+# Trusted-release set — the SECOND trust root (the first being honest
+# self-report). Loaded from trusted_releases.json, NOT a Python literal.
 #
-# This is the SECOND trust root (the first being honest self-report).
-# It is intentionally a source-pinned literal: a submitter trusts the
-# set that ships in *its own* installed gyza client, not a set fetched
-# from the daemon it is querying. Same model as package signing — you
-# trust the keyring your client was built with.
+# Why a JSON data file and not a dict in this module (ADR-0018):
+# compute_source_tree_hash globs only *.py. If the trusted set lived
+# in release.py, pinning a release's own hash would be a
+# non-convergent fixed point — writing the hash into release.py
+# changes release.py, which changes the tree hash, ad infinitum —
+# making `+ RUNNER ATTESTED` UNREACHABLE for any release. Putting the
+# *data* in a non-.py file dissolves that: editing it cannot perturb
+# the hash. The verification *logic* (this function,
+# compute_source_tree_hash) stays in *.py and so stays hash-covered
+# and tamper-evident. It is also semantically more correct: code
+# identity should be invariant under trust-policy changes — adding a
+# peer release to your trust list must not change your binary's hash.
 #
-# Empty until the first tagged release. Until then every runner is
-# honestly labeled "unknown build": the predicate (V4) still proves
-# enforcement ⊆ manifest, but the runner that stamped it is not a
-# verified release. Cutting a release = add its (version,
-# source_tree_hash) here, in a signed commit, in the client people
-# install. (Foundation-key signing of an out-of-band release
-# manifest is the next step up; see ADR-0017 §"Path forward".)
+# Trust model (unchanged from ADR-0017): a submitter trusts the
+# trusted_releases.json that shipped in *its own* pip install, never
+# one fetched from the daemon it is querying. Keyed by version with
+# exactly one canonical source_tree_hash per version, so a build that
+# claims a known version but presents a different tree is rejected as
+# tampered, not merely "unknown".
+#
+# Fail-safe: a missing / unparseable / malformed file yields {} — the
+# conservative direction (everything "unverified", never falsely
+# trusted). NEVER fail open.
 # ---------------------------------------------------------------------------
-TRUSTED_RELEASES: dict[tuple[str, str], dict[str, str]] = {
-    # ("0.1.0", "<source_tree_hash of the 0.1.0 tag>"): {
-    #     "released": "2026-..", "notes": "first public release",
-    # },
-}
+def _trusted_releases_path() -> Path:
+    return _package_root() / "trusted_releases.json"
+
+
+def _load_trusted_releases() -> dict[str, dict]:
+    try:
+        raw = json.loads(_trusted_releases_path().read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001  missing/corrupt → fail-safe to {}
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    releases = raw.get("releases")
+    if not isinstance(releases, dict):
+        return {}
+    # Keep only well-formed entries: {version: {"source_tree_hash": hex,...}}
+    out: dict[str, dict] = {}
+    for ver, entry in releases.items():
+        if (
+            isinstance(ver, str)
+            and isinstance(entry, dict)
+            and isinstance(entry.get("source_tree_hash"), str)
+            and entry["source_tree_hash"]
+        ):
+            out[ver] = entry
+    return out
+
+
+# Loaded once at import — the trust policy in effect for this client.
+TRUSTED_RELEASES: dict[str, dict] = _load_trusted_releases()
 
 
 def is_trusted_release(version: str, source_tree_hash: str) -> tuple[bool, str]:
@@ -168,7 +204,10 @@ def is_trusted_release(version: str, source_tree_hash: str) -> tuple[bool, str]:
 
     Returns ``(ok, reason)``. ``reason`` is human-readable and is
     surfaced in ``gyza submit`` output, so it must read well to a
-    non-expert.
+    non-expert. Distinguishes three negatives: no releases published
+    at all; this version unknown; version known but tree hash differs
+    (the strongest negative — a build claiming to be a release it is
+    not).
     """
     if not TRUSTED_RELEASES:
         return False, (
@@ -177,12 +216,19 @@ def is_trusted_release(version: str, source_tree_hash: str) -> tuple[bool, str]:
             "checked; the binary that stamped it is just not a "
             "verified release)"
         )
-    if (version, source_tree_hash) in TRUSTED_RELEASES:
-        return True, ""
-    return False, (
-        f"runner {version!r} (tree {source_tree_hash[:12]}…) is not in "
-        f"this client's trusted-release set"
-    )
+    entry = TRUSTED_RELEASES.get(version)
+    if entry is None:
+        return False, (
+            f"runner version {version!r} is not in this client's "
+            f"trusted-release set"
+        )
+    if entry["source_tree_hash"] != source_tree_hash:
+        return False, (
+            f"runner claims version {version!r} but its source-tree "
+            f"hash {source_tree_hash[:12]}… does not match the trusted "
+            f"build for that version (tampered or rebuilt)"
+        )
+    return True, ""
 
 
 __all__ = [

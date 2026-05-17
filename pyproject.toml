@@ -84,6 +84,15 @@ Changelog = "https://github.com/aaronamire/gyza/blob/main/CHANGELOG.md"
 # split: pip install gyza; install.sh fetches the daemon binary.
 packages = ["gyza"]
 
+[tool.hatch.build.targets.wheel.force-include]
+# trusted_releases.json is the runner-attestation trust set
+# (ADR-0018). It is security-relevant and a non-.py file — force its
+# inclusion so a missing-from-wheel bug can't silently downgrade
+# every installed client to "unverified build" (which would make
+# `+ RUNNER ATTESTED` unreachable for pip-installed clients — exactly
+# the failure the JSON refactor exists to prevent).
+"gyza/trusted_releases.json" = "gyza/trusted_releases.json"
+
 [tool.hatch.build.targets.sdist]
 include = [
     "/gyza",

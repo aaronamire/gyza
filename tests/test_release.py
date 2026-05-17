@@ -115,23 +115,95 @@ def test_unknown_release_is_not_trusted_with_dev_message():
     assert "cryptographically" in why
 
 
-def test_trusted_release_lookup_is_exact_tuple_match(monkeypatch):
-    """When the trusted set is populated, membership is by the EXACT
-    (version, hash) tuple — a matching version with a different tree
-    hash (i.e. a tampered build claiming to be a release) is NOT
-    trusted."""
+def test_trusted_release_lookup_is_exact_version_and_hash_match(monkeypatch):
+    """Membership is keyed by version with exactly one canonical hash
+    per version: a matching version with a different tree hash (a
+    tampered build claiming to be a release) is NOT trusted, and the
+    reason distinguishes 'unknown version' from 'tampered'."""
     import gyza.release as rel
 
     good_hash = "a" * 64
     monkeypatch.setattr(
         rel, "TRUSTED_RELEASES",
-        {("0.1.0", good_hash): {"released": "2026-06-01"}},
+        {"0.1.0": {"source_tree_hash": good_hash, "released": "2026-06-01"}},
     )
-    assert rel.is_trusted_release("0.1.0", good_hash)[0] is True
-    # Same version, tampered tree.
-    assert rel.is_trusted_release("0.1.0", "b" * 64)[0] is False
-    # Right tree hash, wrong version label.
-    assert rel.is_trusted_release("0.1.0-evil", good_hash)[0] is False
+    assert rel.is_trusted_release("0.1.0", good_hash) == (True, "")
+
+    ok, why = rel.is_trusted_release("0.1.0", "b" * 64)
+    assert ok is False
+    assert "tampered or rebuilt" in why  # strongest negative
+
+    ok, why = rel.is_trusted_release("0.9.9", good_hash)
+    assert ok is False
+    assert "not in this client's trusted-release set" in why
+
+
+def test_trusted_releases_json_does_not_perturb_source_tree_hash(tmp_path):
+    """THE fixed-point-dissolution property (ADR-0018). The trusted
+    set lives in a non-.py file precisely so that writing a release's
+    own hash into it cannot change the hash. A tree with an arbitrary
+    trusted_releases.json must hash identically to one without it —
+    otherwise pinning a release would be a non-convergent fixed point
+    and `+ RUNNER ATTESTED` would be unreachable in principle."""
+    base = {"release.py": b"# logic lives here\n", "pkg/x.py": b"X=1\n"}
+    a = _tree(tmp_path / "a", base)
+    b = _tree(tmp_path / "b", {
+        **base,
+        "trusted_releases.json": b'{"releases":{"0.1.0":{"source_tree_hash":"deadbeef"}}}',
+    })
+    # Mutating the JSON to a totally different policy must STILL not
+    # move the hash.
+    c = _tree(tmp_path / "c", {
+        **base,
+        "trusted_releases.json": b'{"releases":{"9.9.9":{"source_tree_hash":"ffff"}}}',
+    })
+    assert compute_source_tree_hash(a) == compute_source_tree_hash(b)
+    assert compute_source_tree_hash(a) == compute_source_tree_hash(c)
+
+
+def test_corrupt_or_missing_trusted_releases_fails_safe(tmp_path, monkeypatch):
+    """Fail-safe direction: a missing / unparseable / malformed file
+    yields an empty trust set (everything 'unverified'), NEVER
+    fail-open (everything trusted)."""
+    import gyza.release as rel
+
+    # Missing file.
+    monkeypatch.setattr(rel, "_trusted_releases_path",
+                         lambda: tmp_path / "nope.json")
+    assert rel._load_trusted_releases() == {}
+
+    # Corrupt JSON.
+    bad = tmp_path / "bad.json"
+    bad.write_text("{ not json", encoding="utf-8")
+    monkeypatch.setattr(rel, "_trusted_releases_path", lambda: bad)
+    assert rel._load_trusted_releases() == {}
+
+    # Well-formed JSON, wrong shape (releases not a dict).
+    weird = tmp_path / "weird.json"
+    weird.write_text('{"releases": [1,2,3]}', encoding="utf-8")
+    monkeypatch.setattr(rel, "_trusted_releases_path", lambda: weird)
+    assert rel._load_trusted_releases() == {}
+
+    # Entry missing source_tree_hash is dropped (not trusted-by-omission).
+    partial = tmp_path / "partial.json"
+    partial.write_text('{"releases": {"0.1.0": {"notes": "no hash"}}}',
+                        encoding="utf-8")
+    monkeypatch.setattr(rel, "_trusted_releases_path", lambda: partial)
+    assert rel._load_trusted_releases() == {}
+
+
+def test_shipped_trusted_releases_json_is_valid_and_currently_empty():
+    """The file that actually ships in the package must parse. It is
+    empty until the first tagged release is cut (scripts/cut_release.py);
+    if this starts failing because a release was added, update the
+    assertion — it's a deliberate tripwire."""
+    import gyza.release as rel
+    loaded = rel._load_trusted_releases()
+    assert isinstance(loaded, dict)
+    assert loaded == {}, (
+        "trusted_releases.json is no longer empty — a release was cut. "
+        "Update this tripwire test to assert the expected pinned set."
+    )
 
 
 def test_injectivity_against_real_blake3_shape(tmp_path):
