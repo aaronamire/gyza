@@ -47,7 +47,15 @@ containment. Conflating the two would be a modeling error.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import json
+from dataclasses import asdict, dataclass, field
+
+import blake3
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
 
 # A delegation chain deeper than this is treated as a runaway
 # (goal/agent self-replication without a decreasing budget — the §9
@@ -76,6 +84,29 @@ class CapabilitySpec:
     rw: frozenset[str] = field(default_factory=frozenset)
     network: bool = False
     mem_cap: int | None = None
+
+    def to_canonical(self) -> dict:
+        """Deterministic dict for signing. Paths are SORTED LISTS —
+        frozenset iteration order is not stable, so canonicalization
+        MUST sort or the signature is non-reproducible."""
+        return {
+            "ro": sorted(self.ro),
+            "rw": sorted(self.rw),
+            "network": bool(self.network),
+            "mem_cap": self.mem_cap,
+        }
+
+    @classmethod
+    def from_canonical(cls, d: object) -> "CapabilitySpec":
+        if not isinstance(d, dict):
+            return cls()
+        mem = d.get("mem_cap")
+        return cls(
+            ro=_strset(d.get("ro", [])),
+            rw=_strset(d.get("rw", [])),
+            network=bool(d.get("network")),
+            mem_cap=mem if isinstance(mem, int) and mem > 0 else None,
+        )
 
 
 def _strset(xs) -> frozenset[str]:
@@ -258,12 +289,146 @@ def verify_delegation(
     return True, ""
 
 
+# ---------------------------------------------------------------------------
+# DelegationGrant — the signed wire record of a delegation.
+#
+# Chosen over a new ICPEnvelope field (the schema bump) and over
+# overloading parent_envelope_hash (the modeling error): a separate
+# signed artifact keeps the signed envelope schema UNTOUCHED (honors
+# the §8 forward-compat commitment — no re-sign of existing
+# envelopes) and keeps the two relationships distinct.
+#
+# Authenticity vs. soundness vs. integrity are three orthogonal
+# predicates over the same DAG, deliberately not conflated:
+#   * verify_chain (icp.py)  — the envelope chain is intact (sigs +
+#     hash linkage);
+#   * verify_grant (here)    — the parent really signed THIS grant
+#     of THIS authority for THIS child work-item at THIS point in
+#     its chain;
+#   * verify_delegation      — given the above, the bounds compose
+#     (child.manifest ⊆ delegated ⊆ parent.manifest), no cycle,
+#     bounded depth.
+#
+# Design decision (subtle, deliberate): a grant delegates authority
+# TO A WORK-ITEM, not to a specific agent. Whoever claims the child
+# work-item operates under ≤ delegated_authority; bounds still
+# compose because verify_delegation requires the claimer's manifest
+# ⊆ delegated regardless of who they are. Binding to a fixed child
+# pubkey would break the open subcontract market for no safety gain.
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class DelegationGrant:
+    parent_envelope_hash: str      # anchors to a point in parent's chain
+    parent_agent_pubkey: str       # the granter (sig key + cycle id)
+    parent_manifest_hash: str      # must == parent envelope's manifest hash
+    child_work_item_id: str        # binds the grant to THIS subtask
+    delegated_authority: dict      # CapabilitySpec.to_canonical()
+    created_at_ns: int
+    schema_version: int = 1        # its OWN versioning; ICPEnvelope untouched
+    signature: str = ""
+
+
+def _grant_payload_bytes(g: DelegationGrant) -> bytes:
+    """Canonical JSON of every field except `signature` — IDENTICAL
+    convention to icp._payload_bytes (one canonicalization rule
+    across the codebase)."""
+    d = asdict(g)
+    d.pop("signature", None)
+    return json.dumps(d, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def grant_hash(g: DelegationGrant) -> str:
+    return blake3.blake3(_grant_payload_bytes(g)).hexdigest()
+
+
+def sign_grant(g: DelegationGrant, parent_agent_seed: bytes) -> DelegationGrant:
+    """
+    Sign as the parent agent. Sign-the-hash (BLAKE3 digest), 32-byte
+    Ed25519 seed — exactly icp.sign_envelope's contract. Returns a
+    fresh instance so the caller's original stays unsigned.
+    """
+    if len(parent_agent_seed) != 32:
+        raise ValueError(
+            f"Ed25519 seed must be 32 bytes, got {len(parent_agent_seed)}"
+        )
+    sk = Ed25519PrivateKey.from_private_bytes(parent_agent_seed)
+    sig = sk.sign(blake3.blake3(_grant_payload_bytes(g)).digest()).hex()
+    fields = asdict(g)
+    fields["signature"] = sig
+    return DelegationGrant(**fields)
+
+
+def verify_grant(g: DelegationGrant) -> tuple[bool, str]:
+    """
+    Authenticity only: the embedded ``parent_agent_pubkey`` really
+    signed this exact grant. Does NOT check that the grant binds to a
+    real parent envelope, nor that the bounds compose — those are
+    ``grant_binds_to`` and ``verify_delegation`` respectively, kept
+    separate on purpose.
+    """
+    if not isinstance(g.parent_agent_pubkey, str) or not g.parent_agent_pubkey:
+        return False, "grant missing parent_agent_pubkey"
+    if not isinstance(g.delegated_authority, dict):
+        return False, "grant delegated_authority is not a dict"
+    if not g.signature:
+        return False, "grant is unsigned"
+    try:
+        sig = bytes.fromhex(g.signature)
+        pk = Ed25519PublicKey.from_public_bytes(
+            bytes.fromhex(g.parent_agent_pubkey)
+        )
+    except ValueError:
+        return False, "grant signature or pubkey is not valid hex"
+    try:
+        pk.verify(sig, blake3.blake3(_grant_payload_bytes(g)).digest())
+    except (InvalidSignature, ValueError):
+        return False, "grant signature does not verify"
+    return True, ""
+
+
+def grant_binds_to(
+    g: DelegationGrant,
+    *,
+    parent_envelope_hash: str,
+    parent_agent_pubkey: str,
+    parent_capability_manifest_hash: str,
+    child_work_item_id: str,
+) -> tuple[bool, str]:
+    """
+    Binding: this authenticated grant actually corresponds to the
+    parent envelope / agent / manifest / subtask it claims. Caller
+    passes the primitives off the *actual* parent envelope (kept as
+    primitives so this module stays free of an icp.ICPEnvelope
+    import). Defeats: replay onto another subtask, anchoring to a
+    different parent point, and grant/manifest decoupling (a parent
+    signing a grant referencing a manifest different from the one
+    its envelope binds).
+    """
+    if g.parent_envelope_hash != parent_envelope_hash:
+        return False, "grant is anchored to a different parent envelope"
+    if g.parent_agent_pubkey != parent_agent_pubkey:
+        return False, "grant granter ≠ parent envelope's agent"
+    if g.parent_manifest_hash != parent_capability_manifest_hash:
+        return False, (
+            "grant's parent_manifest_hash ≠ parent envelope's "
+            "capability_manifest_hash (grant/manifest decoupling)"
+        )
+    if g.child_work_item_id != child_work_item_id:
+        return False, "grant is for a different child work-item (replay)"
+    return True, ""
+
+
 __all__ = [
     "MAX_DELEGATION_DEPTH",
     "CapabilitySpec",
+    "DelegationGrant",
     "DelegationHop",
     "capability_subset",
+    "grant_binds_to",
+    "grant_hash",
+    "sign_grant",
     "spec_from_enforcement",
     "spec_from_manifest",
     "verify_delegation",
+    "verify_grant",
 ]

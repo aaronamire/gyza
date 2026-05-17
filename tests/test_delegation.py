@@ -225,3 +225,143 @@ def test_capped_ancestor_forces_descendants_capped_lower():
                             enforcement=S(["/t"], mem=128),
                             delegated=S(["/t"], mem=400))
     assert verify_delegation([root, mid, leaf_ok]) == (True, "")
+
+
+# ----------------------------------------------------------------------
+# DelegationGrant — the signed wire record
+# ----------------------------------------------------------------------
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (  # noqa: E402
+    Ed25519PrivateKey,
+)
+
+from gyza.economy.delegation import (  # noqa: E402
+    DelegationGrant,
+    grant_binds_to,
+    grant_hash,
+    sign_grant,
+    verify_grant,
+)
+
+
+def _key(seed_byte: int):
+    seed = bytes([seed_byte]) * 32
+    pk = (Ed25519PrivateKey.from_private_bytes(seed)
+          .public_key().public_bytes_raw().hex())
+    return seed, pk
+
+
+def _grant(parent_pk, *, auth=None, weh="env-h", mh="man-h",
+           wid="W1", ts=1) -> DelegationGrant:
+    return DelegationGrant(
+        parent_envelope_hash=weh,
+        parent_agent_pubkey=parent_pk,
+        parent_manifest_hash=mh,
+        child_work_item_id=wid,
+        delegated_authority=(auth or S(["/tmp"], mem=256).to_canonical()),
+        created_at_ns=ts,
+    )
+
+
+def test_grant_sign_verify_roundtrip():
+    seed, pk = _key(1)
+    g = sign_grant(_grant(pk), seed)
+    assert g.signature
+    assert verify_grant(g) == (True, "")
+
+
+def test_grant_tamper_any_signed_field_fails():
+    seed, pk = _key(2)
+    g = sign_grant(_grant(pk), seed)
+    from dataclasses import replace
+    for mut in (
+        {"child_work_item_id": "W2"},
+        {"parent_envelope_hash": "other"},
+        {"parent_manifest_hash": "other"},
+        {"created_at_ns": 999},
+        {"delegated_authority": S(["/tmp", "/etc"]).to_canonical()},
+    ):
+        bad = replace(g, **mut)               # signature carried over
+        ok, why = verify_grant(bad)
+        assert not ok, f"tamper {mut} not detected"
+        assert "does not verify" in why
+
+
+def test_grant_signed_by_wrong_key_fails():
+    seed_a, _ = _key(3)
+    _, pk_b = _key(4)
+    g = sign_grant(_grant(pk_b), seed_a)      # claims B, signed by A
+    ok, why = verify_grant(g)
+    assert not ok and "does not verify" in why
+
+
+def test_grant_unsigned_and_malformed_fail():
+    _, pk = _key(5)
+    assert verify_grant(_grant(pk))[0] is False           # unsigned
+    bad = DelegationGrant("e", "nothex", "m", "W", {}, 1, 1, "zz")
+    assert verify_grant(bad)[0] is False                  # non-hex
+
+
+def test_grant_binding_defends_replay_and_decoupling():
+    seed, pk = _key(6)
+    g = sign_grant(_grant(pk, weh="EH", mh="MH", wid="W1"), seed)
+    ok, why = grant_binds_to(
+        g, parent_envelope_hash="EH", parent_agent_pubkey=pk,
+        parent_capability_manifest_hash="MH", child_work_item_id="W1")
+    assert ok, why
+    # each mismatch is its own defense
+    assert not grant_binds_to(
+        g, parent_envelope_hash="OTHER", parent_agent_pubkey=pk,
+        parent_capability_manifest_hash="MH", child_work_item_id="W1")[0]
+    assert not grant_binds_to(
+        g, parent_envelope_hash="EH", parent_agent_pubkey="OTHER",
+        parent_capability_manifest_hash="MH", child_work_item_id="W1")[0]
+    ok, why = grant_binds_to(
+        g, parent_envelope_hash="EH", parent_agent_pubkey=pk,
+        parent_capability_manifest_hash="OTHER", child_work_item_id="W1")
+    assert not ok and "decoupling" in why
+    ok, why = grant_binds_to(
+        g, parent_envelope_hash="EH", parent_agent_pubkey=pk,
+        parent_capability_manifest_hash="MH", child_work_item_id="W2")
+    assert not ok and "replay" in why
+
+
+def test_capability_spec_canonical_roundtrip_and_sort_determinism():
+    s = CapabilitySpec(ro=frozenset(["/b", "/a"]),
+                        rw=frozenset(["/z", "/y"]),
+                        network=True, mem_cap=256)
+    c = s.to_canonical()
+    assert c["ro"] == ["/a", "/b"] and c["rw"] == ["/y", "/z"]  # sorted
+    assert CapabilitySpec.from_canonical(c) == s
+
+    # frozenset order must NOT affect the signed bytes: two logically
+    # equal specs built from different insertion orders sign identically.
+    seed, pk = _key(7)
+    g1 = sign_grant(_grant(pk, auth=CapabilitySpec(
+        ro=frozenset(["/a", "/b", "/c"])).to_canonical()), seed)
+    g2 = sign_grant(_grant(pk, auth=CapabilitySpec(
+        ro=frozenset(["/c", "/a", "/b"])).to_canonical()), seed)
+    assert grant_hash(g1) == grant_hash(g2)
+    assert g1.signature == g2.signature      # Ed25519 deterministic
+
+
+def test_grant_slots_into_proven_delegation_floor():
+    # The wire artifact's delegated_authority feeds DelegationHop.
+    seed, pk = _key(8)
+    delegated = S(["/tmp"], mem=256)
+    g = sign_grant(_grant(pk, auth=delegated.to_canonical()), seed)
+    assert verify_grant(g)[0]
+
+    parent = DelegationHop(pk, manifest=S(["/tmp", "/x"], mem=512),
+                           enforcement=S(["/tmp"], mem=256))
+    granted = CapabilitySpec.from_canonical(g.delegated_authority)
+
+    good_child = DelegationHop(
+        "child", manifest=S(["/tmp"], mem=200),
+        enforcement=S(["/tmp"], mem=128), delegated=granted)
+    assert verify_delegation([parent, good_child]) == (True, "")
+
+    laundering = DelegationHop(
+        "child", manifest=S(["/tmp", "/etc"]),
+        enforcement=S(["/tmp", "/etc"]), delegated=granted)
+    ok, why = verify_delegation([parent, laundering])
+    assert not ok and "capability-laundering blocked" in why
