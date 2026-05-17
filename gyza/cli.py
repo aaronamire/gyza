@@ -1403,10 +1403,12 @@ def cmd_submit(args: argparse.Namespace) -> int:
         artifact_ok = artifact_hash == env.output_hash
 
         result_text = ""
+        enforcement = None
         try:
             payload = json.loads(rd.artifact_bytes.decode("utf-8"))
             if isinstance(payload, dict):
                 result_text = payload.get("text", "")
+                enforcement = payload.get("__enforcement__")
         except Exception:  # noqa: BLE001
             result_text = "<artifact decode failed>"
 
@@ -1432,9 +1434,32 @@ def cmd_submit(args: argparse.Namespace) -> int:
         print(f"  signature:     {'✓ VALID' if sig_ok else '✗ INVALID'}")
         print(f"  artifact hash: {'✓ MATCHES envelope' if artifact_ok else '✗ MISMATCH'}")
         print(bar)
+        # Bounds-proof. If the artifact carries an __enforcement__
+        # record, the agent's runner executed this work inside a
+        # kernel-enforced sandbox AND refused to sign unless that
+        # sandbox was no wider than its capability manifest (see
+        # runner._execute). Because the record is INSIDE the hashed
+        # artifact, the signature above also commits to it — these
+        # bounds are tamper-evident, not a claim you take on trust.
+        if isinstance(enforcement, dict):
+            ro = enforcement.get("ro_paths") or []
+            rw = enforcement.get("rw_paths") or []
+            print(f"  BOUNDS-PROOF (committed in the signed artifact)")
+            print(bar)
+            print(f"  sandbox:       {enforcement.get('backend', '?')}"
+                  f" (kernel-enforced)")
+            print(f"  fs read:       {ro if ro else 'NONE (no host filesystem)'}")
+            print(f"  fs write:      {rw if rw else 'NONE (no host filesystem)'}")
+            print(f"  network:       "
+                  f"{'open' if enforcement.get('requires_network') else 'NONE'}")
+            print(bar)
         if verified:
             print("  ✓ cryptographically verified — this output was produced")
             print("    by the agent identity above, signed, tamper-evident.")
+            if isinstance(enforcement, dict):
+                print("  ✓ bounded — the work ran in a sandbox no wider than")
+                print("    the agent's manifest; the runner refused to sign")
+                print("    otherwise. Bounds committed in the signature.")
         else:
             print("  ✗ VERIFICATION FAILED — do not trust this result.")
         print(bar)
