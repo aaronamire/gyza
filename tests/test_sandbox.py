@@ -435,3 +435,122 @@ def test_sandbox_config_from_manifest_tolerates_malformed_manifest():
     assert cfg.ro_paths == []
     assert cfg.rw_paths == []
     assert cfg.requires_network is False
+
+
+# ----------------------------------------------------------------------
+# enforcement_satisfies_manifest — full predicate completeness tests
+# (added S34). The previous brick-3 tests covered the FS dimension via
+# the runner integration test; here we lock the predicate's behavior
+# on the memory dimension and the asymmetric "no manifest cap = no
+# check" rule, because that distinction is load-bearing for back-compat.
+# ----------------------------------------------------------------------
+
+def _enforcement(*, ro=None, rw=None, net=False, mem=None):
+    """Helper: build a well-formed enforcement record."""
+    return {
+        "backend": "bubblewrap",
+        "ro_paths": list(ro or []),
+        "rw_paths": list(rw or []),
+        "requires_network": bool(net),
+        "max_memory_mb": mem,
+        "max_cpu_seconds": 300,
+        "timeout_s": 60.0,
+    }
+
+
+def _manifest(*, ro=None, rw=None, hosts=None, mem=None):
+    """Helper: build a manifest authorizing the given capabilities."""
+    caps: dict = {
+        "filesystem": {"read": list(ro or []), "write": list(rw or [])},
+        "network": {"allowed_hosts": list(hosts or [])},
+    }
+    if mem is not None:
+        caps["spawn"] = {"resource_budget": {"memory_limit_mb": mem}}
+    return {"capabilities": caps}
+
+
+def test_predicate_memory_within_manifest_passes():
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(mem=512),
+        _manifest(mem=1024),
+    )
+    assert ok, why
+
+
+def test_predicate_memory_equal_to_manifest_passes():
+    """Boundary: equal is allowed (subset semantics include equality)."""
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(mem=1024),
+        _manifest(mem=1024),
+    )
+    assert ok, why
+
+
+def test_predicate_memory_exceeds_manifest_fails():
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(mem=2048),
+        _manifest(mem=1024),
+    )
+    assert not ok
+    assert "exceeds manifest budget" in why
+
+
+def test_predicate_unbounded_enforcement_under_declared_manifest_fails():
+    """Manifest declared a cap; enforcement record has None for memory.
+    Strict rule: "no cap" under a declared cap is a violation, not a
+    no-op. Otherwise an attacker could omit the field to bypass."""
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(mem=None),
+        _manifest(mem=1024),
+    )
+    assert not ok
+    assert "no memory cap" in why
+
+
+def test_predicate_no_manifest_cap_skips_memory_check():
+    """Manifest declared no memory cap → predicate doesn't enforce one.
+    Back-compat with manifests that never had memory_limit_mb."""
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(mem=999999),     # arbitrary; not constrained
+        _manifest(),                  # no memory in manifest
+    )
+    assert ok, why
+
+
+def test_predicate_zero_manifest_cap_is_treated_as_unset():
+    """memory_limit_mb=0 is a misconfiguration — treat as no cap (don't
+    fail-closed against a misconfigured manifest)."""
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(mem=512),
+        _manifest(mem=0),
+    )
+    assert ok, why
+
+
+def test_predicate_invalid_enforcement_memory_value_fails():
+    from gyza.sandbox import enforcement_satisfies_manifest
+    for bad in (0, -1, "1024", 1.5):
+        ok, why = enforcement_satisfies_manifest(
+            {**_enforcement(mem=512), "max_memory_mb": bad},
+            _manifest(mem=1024),
+        )
+        assert not ok, f"predicate accepted bad enforcement memory {bad!r}"
+        assert "positive int" in why or "exceeds" in why
+
+
+def test_predicate_fs_subset_check_still_works_with_resource_fields():
+    """Regression: the existing FS check must still fire even when the
+    resource fields are present and within bounds."""
+    from gyza.sandbox import enforcement_satisfies_manifest
+    ok, why = enforcement_satisfies_manifest(
+        _enforcement(ro=["/tmp", "/etc"], mem=256),
+        _manifest(ro=["/tmp"], mem=1024),
+    )
+    assert not ok
+    assert "read paths beyond manifest" in why

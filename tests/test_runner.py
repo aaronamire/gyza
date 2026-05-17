@@ -343,6 +343,12 @@ def test_runner_refuses_to_sign_when_enforcement_exceeds_manifest(
                 "ro_paths": ["/tmp", "/etc"],
                 "rw_paths": ["/tmp"],
                 "requires_network": False,
+                # Memory bound matches the manifest's default (512MB);
+                # we want the FS violation to be the rejection reason,
+                # not a memory mismatch.
+                "max_memory_mb": 512,
+                "max_cpu_seconds": 300,
+                "timeout_s": 60.0,
             },
         }
 
@@ -375,6 +381,9 @@ def test_runner_signs_and_commits_enforcement_when_within_manifest(
         "ro_paths": [],          # tighter than manifest's ["/tmp"]
         "rw_paths": [],
         "requires_network": False,
+        "max_memory_mb": 256,    # tighter than manifest's 512 default
+        "max_cpu_seconds": 300,
+        "timeout_s": 60.0,
     }
 
     def good(_p, _c):

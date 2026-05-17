@@ -57,7 +57,10 @@ def test_issue_agent_manifest_signature_valid(compositor, tmp_path):
     assert manifest["compositor_pubkey"] == compositor.pubkey_hex
     caps = manifest["capabilities"]
     assert caps["filesystem"]["read"] == ["/home/user/docs"]
-    assert caps["filesystem"]["landlock_enforced"] is True
+    # The dead "landlock_enforced": True self-claim was removed at
+    # S34 — bounds-proof now lives in the enforcement record, not
+    # in an unenforced manifest assertion.
+    assert "landlock_enforced" not in caps["filesystem"]
     assert caps["network"]["allowed_hosts"] == ["api.anthropic.com"]
     assert caps["spawn"]["resource_budget"]["memory_limit_mb"] == 512
     assert manifest["attestation_tier"] == 2

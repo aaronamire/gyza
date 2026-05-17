@@ -55,7 +55,6 @@ CAPABILITY_MANIFEST_SCHEMA: dict[str, Any] = {
         "filesystem": {
             "read": list,
             "write": list,
-            "landlock_enforced": bool,
         },
         "network": {
             "allowed_hosts": list,
@@ -240,7 +239,14 @@ class LocalCompositor:
                 "filesystem": {
                     "read": list(fs_read_paths),
                     "write": list(fs_write_paths),
-                    "landlock_enforced": True,
+                    # The previous schema carried a "landlock_enforced":
+                    # True self-claim here. It was never consulted by
+                    # any predicate and the codebase has no Landlock
+                    # backend — i.e., it asserted enforcement that did
+                    # not exist. The bounds-proof now lives entirely in
+                    # the (signed envelope, manifest, __enforcement__,
+                    # enforcement_satisfies_manifest) chain, not in a
+                    # self-claim field. Removed S34.
                 },
                 "network": {
                     "allowed_hosts": list(allowed_hosts or []),

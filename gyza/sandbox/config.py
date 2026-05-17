@@ -317,6 +317,12 @@ def enforcement_satisfies_manifest(
         caps = {}
     fs = caps.get("filesystem", {}) if isinstance(caps.get("filesystem"), dict) else {}
     net = caps.get("network", {}) if isinstance(caps.get("network"), dict) else {}
+    spawn = caps.get("spawn", {}) if isinstance(caps.get("spawn"), dict) else {}
+    budget = (
+        spawn.get("resource_budget", {})
+        if isinstance(spawn.get("resource_budget"), dict)
+        else {}
+    )
 
     auth_ro = {str(p) for p in fs.get("read", []) if p}
     auth_rw = {str(p) for p in fs.get("write", []) if p}
@@ -338,6 +344,32 @@ def enforcement_satisfies_manifest(
             "sandbox opened the network but the manifest declares "
             "no allowed_hosts"
         )
+
+    # Memory bound. Asymmetric handling on purpose: if the manifest
+    # declares a hard memory cap, the enforcement record MUST also
+    # declare one (refusing "unbounded under declared cap") AND it
+    # must be ≤ the manifest's. If the manifest declares no cap
+    # (None / missing / 0), we don't enforce a bound here — the
+    # manifest itself was permissive. RLIMIT_AS is kernel-enforced
+    # by run_sandboxed; this is the predicate that ties the
+    # enforced value to the declared one.
+    manifest_mem = budget.get("memory_limit_mb")
+    if isinstance(manifest_mem, int) and manifest_mem > 0:
+        enf_mem = enforcement.get("max_memory_mb")
+        if enf_mem is None:
+            return False, (
+                f"manifest declares memory_limit_mb={manifest_mem} but "
+                f"the sandbox enforced no memory cap"
+            )
+        if not isinstance(enf_mem, int) or enf_mem <= 0:
+            return False, (
+                f"sandbox memory bound {enf_mem!r} is not a positive int"
+            )
+        if enf_mem > manifest_mem:
+            return False, (
+                f"sandbox memory bound {enf_mem} MB exceeds manifest "
+                f"budget {manifest_mem} MB"
+            )
     return True, ""
 
 

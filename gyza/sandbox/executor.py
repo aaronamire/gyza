@@ -102,6 +102,15 @@ def make_sandboxed_executor(
                 "ro_paths": sorted(cfg.ro_paths),
                 "rw_paths": sorted(cfg.rw_paths),
                 "requires_network": bool(cfg.requires_network),
+                # Resource bounds — included so the predicate can
+                # also check enforcement.max_memory_mb ≤
+                # manifest.spawn.resource_budget.memory_limit_mb.
+                # int|None preserved as JSON null when unset, so the
+                # predicate distinguishes "no memory cap requested"
+                # from "0 MB" (would be a misconfiguration).
+                "max_memory_mb": cfg.max_memory_mb,
+                "max_cpu_seconds": cfg.max_cpu_seconds,
+                "timeout_s": cfg.timeout_s,
             }
         return payload
 

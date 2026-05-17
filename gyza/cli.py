@@ -1474,6 +1474,12 @@ def cmd_submit(args: argparse.Namespace) -> int:
             print(f"  fs write:      {rw if rw else 'NONE (no host filesystem)'}")
             print(f"  network:       "
                   f"{'open' if enforcement.get('requires_network') else 'NONE'}")
+            mem = enforcement.get("max_memory_mb")
+            if isinstance(mem, int) and mem > 0:
+                print(f"  memory cap:    {mem} MB (RLIMIT_AS)")
+            cpu = enforcement.get("max_cpu_seconds")
+            if isinstance(cpu, int) and cpu > 0:
+                print(f"  cpu cap:       {cpu} s (RLIMIT_CPU)")
             # Show the three independent verification lines whenever
             # the executor delivered the manifest. Each is a distinct
             # cryptographic / predicate check the submitter ran here,
