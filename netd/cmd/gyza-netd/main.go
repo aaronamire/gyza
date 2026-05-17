@@ -83,6 +83,9 @@ func main() {
 		republishInterval = flag.Duration(
 			"republish-interval", 30*time.Minute,
 			"how often to re-publish local agent ads to the DHT; ≤0 disables")
+		rebootstrapInterval = flag.Duration(
+			"rebootstrap-interval", 2*time.Minute,
+			"how often to re-resolve the bootstrap set and re-dial any lost bootstrap peers; ≤0 disables. Without this a daemon that loses every peer (bootstrap restart, NAT churn, sleep) is a permanent DHT island.")
 		holePunch = flag.Bool(
 			"holepunch", true,
 			"enable DCUtR hole-punching (Phase 3 Session 3)")
@@ -230,6 +233,21 @@ func main() {
 	} else {
 		logger.Info("[host] bootstrap: no peers resolved; running as DHT island")
 	}
+
+	// Periodic re-bootstrap. ConnectBootstrap above is one-shot; this
+	// loop is the recovery path that re-resolves the bootstrap set
+	// (DNS + compiled fallback + --bootstrap extras) every tick and
+	// re-dials anything lost. Without it a daemon that drops all
+	// peers stays a permanent DHT island. The resolve closure repeats
+	// the same ResolveWithExtras call so a rotated DNS set is picked
+	// up live, without a daemon restart.
+	host.StartBootstrapLoop(ctx, h, func() []string {
+		ais := bootstrap.ResolveWithExtras(
+			ctx, bootstrap.DefaultResolver(),
+			*bootstrapDomain, bootstrapFlag, nil,
+		)
+		return bootstrap.AsMultiaddrStrings(ais)
+	}, *rebootstrapInterval, logger.Info)
 
 	// Kademlia DHT with /gyza/1.0 protocol prefix — segregated from
 	// public IPFS, even when riding the same wire transport.

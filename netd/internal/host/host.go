@@ -9,11 +9,13 @@ package host
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"gyza/netd/internal/identity"
 
 	libp2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/p2p/muxer/yamux"
 	"github.com/libp2p/go-libp2p/p2p/security/noise"
@@ -104,6 +106,93 @@ func ConnectBootstrap(
 		logf("[bootstrap] connected to %s", info.ID)
 	}
 	return ok
+}
+
+// RebootstrapOnce dials every peer in `addrs` the host is not already
+// connected to. Returns the number newly connected this call.
+//
+// Exposed (not just used by the loop below) so a daemon can also
+// trigger a re-bootstrap on demand — e.g. on a "peer count hit zero"
+// signal — not only on the timer. h.Connect is a cheap no-op for an
+// already-connected peer, but we skip those explicitly so the log
+// line reflects what actually changed.
+func RebootstrapOnce(
+	ctx context.Context, h host.Host, addrs []string,
+	logf func(string, ...any),
+) int {
+	if logf == nil {
+		logf = func(string, ...any) {}
+	}
+	var dialed, already int
+	for _, s := range addrs {
+		ma, err := multiaddr.NewMultiaddr(s)
+		if err != nil {
+			continue
+		}
+		info, err := peer.AddrInfoFromP2pAddr(ma)
+		if err != nil {
+			continue
+		}
+		if info.ID == h.ID() {
+			continue // never dial self — our own multiaddr can appear
+			// in the resolved set (e.g. a bootstrap node re-bootstrapping)
+		}
+		if h.Network().Connectedness(info.ID) == network.Connected {
+			already++
+			continue
+		}
+		if err := h.Connect(ctx, *info); err != nil {
+			logf("[rebootstrap] connect %s: %v", info.ID, err)
+			continue
+		}
+		dialed++
+		logf("[rebootstrap] reconnected to %s", info.ID)
+	}
+	if dialed > 0 {
+		logf("[rebootstrap] re-dialed %d peer(s) (%d already connected)",
+			dialed, already)
+	}
+	return dialed
+}
+
+// StartBootstrapLoop spawns a goroutine that, every `interval`,
+// re-resolves the bootstrap set via resolve() and re-dials any peer
+// the host has lost.
+//
+// This is the recovery path missing from a one-shot ConnectBootstrap.
+// ConnectBootstrap runs once at startup; without this loop a node
+// that subsequently drops every peer — a bootstrap node restarts, a
+// NAT mapping expires, a laptop sleeps — becomes a PERMANENT DHT
+// island, because Kademlia cannot refresh a routing table that has
+// decayed to zero known peers. (Observed live: a 20h-old daemon at
+// dht_peers=0 while a fresh process connected 3/3 in ~1s.)
+//
+// Re-resolving (DNS + compiled fallback) on every tick also means a
+// rotated bootstrap set is picked up without a daemon restart — the
+// rotation story the dnsaddr design promised.
+//
+// interval <= 0 disables the loop (tests, single-shot daemons). The
+// goroutine exits when ctx is cancelled.
+func StartBootstrapLoop(
+	ctx context.Context, h host.Host,
+	resolve func() []string, interval time.Duration,
+	logf func(string, ...any),
+) {
+	if h == nil || resolve == nil || interval <= 0 {
+		return
+	}
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				RebootstrapOnce(ctx, h, resolve(), logf)
+			}
+		}
+	}()
 }
 
 // AddrStrings returns the host's current listen multiaddrs as strings,
