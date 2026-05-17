@@ -371,11 +371,14 @@ from it.
 
 ### The seed (weeks — wiring over existing primitives)
 
-- [ ] **`gyza/economy/wallet.py` — the wallet projection.** Pure
+- [x] **`gyza/economy/wallet.py` — the wallet projection.** ✅ Pure
   read model: `net_balance(pubkey)` / `statement(pubkey)` folded
-  over settled bilateral entries. No new state, no wire change,
-  unit-testable against existing `settlement` fixtures. *The organ
-  that makes an agent economically alive — build this first.*
+  over settled bilateral entries in exact integer micro-credits
+  (never float), idempotent by `entry_id` (a double-count is a
+  silent mint), settled-only spendable, defensively excludes
+  self-dealing / conflicts. `Credits` is a typed, explicitly
+  non-monetary fake unit (`TOKEN_IS_FAKE`). 21 tests. *The organ
+  that makes an agent economically alive — done.*
 - [ ] **Personal-agent mode** — the hosted agent with `settle=True`
   (the earn loop already exists; it's one boolean off the public
   demo).
