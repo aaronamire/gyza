@@ -19,6 +19,7 @@ from gyza.sandbox.config import (
     SandboxConfig,
     SandboxBackend,
     default_system_paths,
+    enforcement_satisfies_manifest,
     sandbox_config_from_manifest,
 )
 from gyza.sandbox.executor import make_sandboxed_executor
@@ -41,6 +42,7 @@ __all__ = [
     "SandboxUnavailableError",
     "default_system_paths",
     "detect_backend",
+    "enforcement_satisfies_manifest",
     "make_sandboxed_executor",
     "run_sandboxed",
     "sandbox_config_from_manifest",

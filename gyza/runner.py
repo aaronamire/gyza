@@ -383,10 +383,43 @@ class AgentRunner:
                 f"executor must return dict with 'text' key; got {type(raw).__name__}"
             )
 
+        # Bounds-proof soundness gate. A sandboxed executor's host-side
+        # wrapper stamps a trustworthy ``__enforcement__`` record. If
+        # one is present, the work was supposed to run bounded — so we
+        # REFUSE to sign unless that enforcement is consistent with
+        # (no wider than) this agent's capability manifest. Raising
+        # here means _complete is never reached: the claim is released
+        # (see _run_loop), and no envelope is ever produced for
+        # execution we can't prove stayed in bounds. A valid signed
+        # envelope therefore IMPLIES bounded execution.
+        #
+        # Back-compat by trigger: plain / mock / deterministic
+        # executors don't stamp __enforcement__, so this is a no-op
+        # for them — the artifact below is byte-identical to before
+        # and the existing test suite is unaffected.
+        enforcement = raw.get("__enforcement__")
+        if enforcement is not None:
+            from gyza.sandbox.config import enforcement_satisfies_manifest
+            ok, why = enforcement_satisfies_manifest(
+                enforcement, self._identity.manifest,
+            )
+            if not ok:
+                raise RuntimeError(
+                    f"refusing to sign — sandbox enforcement is not "
+                    f"consistent with the agent manifest: {why}"
+                )
+
         # Canonical JSON for the output so the BLAKE3 hash is stable
-        # across runs / processes.
+        # across runs / processes. When an enforcement record is
+        # present we fold it into the artifact so the envelope's
+        # output_hash cryptographically commits to the (verified)
+        # bounds the work ran under — the bounds-proof lives inside
+        # the signed bytes, not in trust of the runner's behavior.
+        artifact_obj: dict = {"text": raw.get("text", "")}
+        if enforcement is not None:
+            artifact_obj["__enforcement__"] = enforcement
         canonical = json.dumps(
-            {"text": raw.get("text", "")}, sort_keys=True, separators=(",", ":"),
+            artifact_obj, sort_keys=True, separators=(",", ":"),
         ).encode("utf-8")
         output_hash = blake3.blake3(canonical).hexdigest()
 

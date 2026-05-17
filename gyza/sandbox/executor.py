@@ -85,7 +85,25 @@ def make_sandboxed_executor(
             context=context,
             config=cfg,
         )
-        return result.payload
+        payload = result.payload
+        # Host-side enforcement stamp. This runs in the trusted parent
+        # AFTER run_sandboxed returns — the sandboxed code cannot forge
+        # it (we overwrite any key it set). Soundness: run_sandboxed
+        # RAISES rather than silently degrading a BUBBLEWRAP request to
+        # NONE, so a returned payload under a bubblewrap cfg means
+        # bwrap actually enforced these exact bounds. The runner gates
+        # signing on this record being consistent with the agent's
+        # capability manifest (see runner._execute), and folds it into
+        # the signed artifact so the envelope's output_hash commits to
+        # the enforcement that happened — not merely what was claimed.
+        if isinstance(payload, dict):
+            payload["__enforcement__"] = {
+                "backend": cfg.backend.value,
+                "ro_paths": sorted(cfg.ro_paths),
+                "rw_paths": sorted(cfg.rw_paths),
+                "requires_network": bool(cfg.requires_network),
+            }
+        return payload
 
     # Tag the wrapped callable so debugging knows what's underneath.
     _wrapped.__sandbox_factory__ = factory_qualname  # type: ignore[attr-defined]

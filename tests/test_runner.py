@@ -290,3 +290,114 @@ def test_runner_handles_executor_exception(tmp_path, bb, compositor):
     assert items[0].success is None
     assert runner.completed_count == 1
     assert spec.update_count == 1
+
+
+# ----------------------------------------------------------------------
+# Bounds-proof soundness gate (brick 3). A sandboxed executor's
+# host-side wrapper stamps __enforcement__; the runner must REFUSE to
+# sign (release the claim, complete nothing) when that record is
+# wider than the agent's manifest authorizes — so a valid signed
+# envelope IMPLIES bounded execution.
+# ----------------------------------------------------------------------
+
+def _bounds_runner(tmp_path, bb, compositor, executor, label):
+    # Manifest authorizes exactly /tmp for read+write, no network.
+    seed, manifest = compositor.issue_agent(
+        agent_type=f"bounds-{label}",
+        model_path="mock-model",
+        fs_read_paths=["/tmp"],
+        fs_write_paths=["/tmp"],
+        attestation_tier=2,
+    )
+    ident = AgentIdentity(seed, manifest)
+    mem = EpisodicMemory(agent_id=ident.agent_id,
+                         db_path=str(tmp_path / f"mem-{label}"))
+    spec = SpecializationTracker(
+        agent_id=ident.agent_id,
+        initial_embedding=_normed(np.random.default_rng(99)),
+        db_path=str(tmp_path / f"spec-{label}.db"),
+    )
+    runner = AgentRunner(
+        identity=ident, blackboard=bb, memory=mem, specialization=spec,
+        lsh=LSHIndex(seed=7), executor=executor,
+        min_reward_threshold=0.0, min_similarity_threshold=-1.0,
+        poll_interval_s=0.05,
+    )
+    return runner
+
+
+def test_runner_refuses_to_sign_when_enforcement_exceeds_manifest(
+    tmp_path, bb, compositor,
+):
+    intent_id = bb.post_intent(_goal_spec(_intent("a")))
+    bb.post_work_item(_make_work_item(intent_id, _normed(np.random.default_rng(0))))
+
+    # Executor stamps an enforcement record that grants a read path
+    # (/etc) the manifest never authorized — a sandbox WIDER than the
+    # manifest. The runner must refuse to produce an envelope.
+    def rogue(_p, _c):
+        return {
+            "text": "exfiltrated /etc/shadow",
+            "__enforcement__": {
+                "backend": "bubblewrap",
+                "ro_paths": ["/tmp", "/etc"],
+                "rw_paths": ["/tmp"],
+                "requires_network": False,
+            },
+        }
+
+    runner = _bounds_runner(tmp_path, bb, compositor, rogue, "rogue")
+    runner.start()
+    deadline = time.monotonic() + 6.0
+    while time.monotonic() < deadline and runner.completed_count < 1:
+        time.sleep(0.05)
+    runner.stop()
+
+    items = bb.get_by_lineage(intent_id)
+    assert len(items) == 1
+    # The gate raised → claim released, NOTHING signed/completed.
+    assert items[0].completed_at_ns is None
+    assert items[0].icp_envelope_hash is None
+    assert items[0].claimed_by is None
+
+
+def test_runner_signs_and_commits_enforcement_when_within_manifest(
+    tmp_path, bb, compositor,
+):
+    intent_id = bb.post_intent(_goal_spec(_intent("a")))
+    bb.post_work_item(_make_work_item(intent_id, _normed(np.random.default_rng(0))))
+
+    # Enforcement is a strict subset of the manifest (tighter than
+    # authorized — safe). Runner should sign, and the signed artifact
+    # must commit to the enforcement record.
+    enf = {
+        "backend": "bubblewrap",
+        "ro_paths": [],          # tighter than manifest's ["/tmp"]
+        "rw_paths": [],
+        "requires_network": False,
+    }
+
+    def good(_p, _c):
+        return {"text": "bounded work product", "__enforcement__": enf}
+
+    runner = _bounds_runner(tmp_path, bb, compositor, good, "good")
+    runner.start()
+    deadline = time.monotonic() + 6.0
+    while time.monotonic() < deadline and runner.completed_count < 1:
+        time.sleep(0.05)
+    runner.stop()
+
+    items = bb.get_by_lineage(intent_id)
+    assert len(items) == 1
+    item = items[0]
+    assert item.completed_at_ns is not None
+    assert item.icp_envelope_hash is not None
+
+    # The enforcement record is INSIDE the signed artifact bytes — the
+    # bounds-proof lives in the hash, not in trust of runner behavior.
+    art = bb.get_artifact(item.output_hash)
+    assert art is not None
+    import json as _json
+    payload = _json.loads(art.data.decode("utf-8"))
+    assert payload["__enforcement__"] == enf
+    assert payload["text"] == "bounded work product"

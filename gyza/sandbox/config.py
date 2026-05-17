@@ -283,10 +283,69 @@ def sandbox_config_from_manifest(
     )
 
 
+def enforcement_satisfies_manifest(
+    enforcement: dict,
+    manifest: dict,
+) -> tuple[bool, str]:
+    """
+    Check that a host-stamped ``__enforcement__`` record is consistent
+    with — i.e. no wider than — what an agent's capability manifest
+    authorizes. This is the predicate the runner gates signing on:
+    a valid signed envelope must IMPLY the work executed within the
+    manifest's bounds, so the runner refuses to complete a work item
+    whose enforcement record fails this check.
+
+    The soundness direction is **subset**: the sandbox the work
+    actually ran in must grant ⊆ the paths/network the manifest
+    authorizes. A *tighter* sandbox than the manifest is fine (more
+    restrictive is safe); a *wider* one — or no enforcing sandbox at
+    all — is a violation.
+
+    Returns ``(ok, reason)``. ``reason`` is empty when ok.
+    """
+    if not isinstance(enforcement, dict):
+        return False, "no enforcement record"
+    backend = enforcement.get("backend")
+    if backend != SandboxBackend.BUBBLEWRAP.value:
+        return False, (
+            f"backend {backend!r} is not an enforcing sandbox "
+            f"(need {SandboxBackend.BUBBLEWRAP.value!r})"
+        )
+
+    caps = manifest.get("capabilities", {})
+    if not isinstance(caps, dict):
+        caps = {}
+    fs = caps.get("filesystem", {}) if isinstance(caps.get("filesystem"), dict) else {}
+    net = caps.get("network", {}) if isinstance(caps.get("network"), dict) else {}
+
+    auth_ro = {str(p) for p in fs.get("read", []) if p}
+    auth_rw = {str(p) for p in fs.get("write", []) if p}
+    enf_ro = {str(p) for p in enforcement.get("ro_paths", []) if p}
+    enf_rw = {str(p) for p in enforcement.get("rw_paths", []) if p}
+
+    if not enf_ro <= auth_ro:
+        return False, (
+            f"sandbox granted read paths beyond manifest: "
+            f"{sorted(enf_ro - auth_ro)}"
+        )
+    if not enf_rw <= auth_rw:
+        return False, (
+            f"sandbox granted write paths beyond manifest: "
+            f"{sorted(enf_rw - auth_rw)}"
+        )
+    if enforcement.get("requires_network") and not net.get("allowed_hosts"):
+        return False, (
+            "sandbox opened the network but the manifest declares "
+            "no allowed_hosts"
+        )
+    return True, ""
+
+
 __all__ = [
     "SandboxBackend",
     "SandboxConfig",
     "default_system_paths",
+    "enforcement_satisfies_manifest",
     "sandbox_config_from_manifest",
     "_system_mounts",
 ]
