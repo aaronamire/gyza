@@ -564,6 +564,16 @@ def run_hosted_demo_agent(
     lsh = LSHIndex(seed=42)
 
     quota_db_path = str(state_dir / "demo-agent-quota.db")
+
+    # Canonical manifest bytes — the exact serialization whose
+    # blake3 equals the envelope's capability_manifest_hash. Sent
+    # alongside the result so the submitter can re-verify the
+    # bounds-proof predicate herself (closes the trustless gap on
+    # brick 3: without these bytes, "✓ bounded" was a runner-trust
+    # claim; with them, it's an independently verifiable proof).
+    from gyza.identity import _canon_bytes  # noqa: PLC2701  intentional
+    manifest_bytes = _canon_bytes(manifest)
+
     runner = AgentRunner(
         identity=ident,
         blackboard=bb,
@@ -579,7 +589,9 @@ def run_hosted_demo_agent(
         # the value); it just doesn't open a bilateral ledger entry,
         # so strangers running `gyza submit` don't accrue compute
         # debt. Settlement is demonstrated by demo/single_machine_global.
-        on_envelope_signed=cluster.runner_envelope_hook(settle=False),
+        on_envelope_signed=cluster.runner_envelope_hook(
+            settle=False, manifest_bytes=manifest_bytes,
+        ),
         hlc=cluster.shared_hlc(),
     )
     runner.start()

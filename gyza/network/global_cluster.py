@@ -821,7 +821,12 @@ class GlobalCluster:
         """
         return self._blackboard.gossip_hlc()
 
-    def runner_envelope_hook(self, *, settle: bool = True) -> Callable[[Any], None]:
+    def runner_envelope_hook(
+        self,
+        *,
+        settle: bool = True,
+        manifest_bytes: bytes | None = None,
+    ) -> Callable[[Any], None]:
         """
         Build a closure for AgentRunner's ``on_envelope_signed`` that
         delivers the result to the submitter and (when ``settle`` is
@@ -903,6 +908,7 @@ class GlobalCluster:
                     work_item_id=envelope.action_id,
                     envelope=envelope,
                     artifact_bytes=artifact.data,
+                    manifest_bytes=manifest_bytes,
                 )
                 ok = netd.send_message(
                     peer_id=peer_id,

@@ -1412,6 +1412,28 @@ def cmd_submit(args: argparse.Namespace) -> int:
         except Exception:  # noqa: BLE001
             result_text = "<artifact decode failed>"
 
+        # Independent bounds-proof verification. If the executor
+        # delivered the canonical manifest bytes, we can close the
+        # trustless gap on brick 3: prove the manifest is the one
+        # the envelope commits to (hash match), then re-run
+        # enforcement_satisfies_manifest ourselves. Three distinct
+        # checks; ALL must pass for "INDEPENDENTLY VERIFIED".
+        manifest_hash_ok: bool | None = None
+        bounds_within_manifest_ok: bool | None = None
+        bounds_failure_reason = ""
+        if rd.manifest_bytes is not None:
+            mh = blake3.blake3(rd.manifest_bytes).hexdigest()
+            manifest_hash_ok = (mh == env.capability_manifest_hash)
+            if manifest_hash_ok and isinstance(enforcement, dict):
+                try:
+                    from gyza.sandbox import enforcement_satisfies_manifest
+                    parsed_manifest = json.loads(rd.manifest_bytes.decode("utf-8"))
+                    bounds_within_manifest_ok, bounds_failure_reason = \
+                        enforcement_satisfies_manifest(enforcement, parsed_manifest)
+                except Exception as _e:  # noqa: BLE001
+                    bounds_within_manifest_ok = False
+                    bounds_failure_reason = f"manifest decode error: {_e}"
+
         elapsed = _time.monotonic() - start
         verified = sig_ok and artifact_ok
 
@@ -1452,18 +1474,69 @@ def cmd_submit(args: argparse.Namespace) -> int:
             print(f"  fs write:      {rw if rw else 'NONE (no host filesystem)'}")
             print(f"  network:       "
                   f"{'open' if enforcement.get('requires_network') else 'NONE'}")
+            # Show the three independent verification lines whenever
+            # the executor delivered the manifest. Each is a distinct
+            # cryptographic / predicate check the submitter ran here,
+            # not a value reported by the runner.
+            if manifest_hash_ok is not None:
+                print(f"  manifest hash: "
+                      f"{'✓ MATCHES envelope' if manifest_hash_ok else '✗ MISMATCH'}")
+            if bounds_within_manifest_ok is not None:
+                label = (
+                    "✓ enforcement ⊆ manifest (re-verified here)"
+                    if bounds_within_manifest_ok
+                    else f"✗ violation: {bounds_failure_reason}"
+                )
+                print(f"  bounds check:  {label}")
             print(bar)
-        if verified:
+        # Aggregate verdict — sig + artifact integrity for the
+        # provenance proof; manifest hash + bounds predicate for the
+        # bounds proof (when claimed at all).
+        bounds_claimed = isinstance(enforcement, dict)
+        bounds_independently_verified = (
+            bounds_claimed
+            and manifest_hash_ok is True
+            and bounds_within_manifest_ok is True
+        )
+        bounds_claimed_but_unverifiable = (
+            bounds_claimed and rd.manifest_bytes is None
+        )
+        bounds_claim_failed = (
+            bounds_claimed
+            and rd.manifest_bytes is not None
+            and (manifest_hash_ok is False or bounds_within_manifest_ok is False)
+        )
+        all_ok = verified and (
+            not bounds_claimed or bounds_independently_verified
+        )
+
+        if all_ok and bounds_independently_verified:
             print("  ✓ cryptographically verified — this output was produced")
             print("    by the agent identity above, signed, tamper-evident.")
-            if isinstance(enforcement, dict):
-                print("  ✓ bounded — the work ran in a sandbox no wider than")
-                print("    the agent's manifest; the runner refused to sign")
-                print("    otherwise. Bounds committed in the signature.")
+            print("  ✓ bounded (INDEPENDENTLY VERIFIED) — you re-hashed the")
+            print("    manifest and re-ran the bounds predicate on this")
+            print("    machine. No trust in the executor's runner needed.")
+        elif verified and bounds_claimed_but_unverifiable:
+            print("  ✓ cryptographically verified — this output was produced")
+            print("    by the agent identity above, signed, tamper-evident.")
+            print("  ⚠ bounds CLAIMED but not independently verifiable — the")
+            print("    executor did not deliver the manifest bytes. The")
+            print("    bounds shown are committed in the signature but rely")
+            print("    on trusting the runner's gate.")
+        elif verified and not bounds_claimed:
+            print("  ✓ cryptographically verified — this output was produced")
+            print("    by the agent identity above, signed, tamper-evident.")
+            print("  • no bounds-proof — this envelope makes no claim about")
+            print("    sandbox enforcement (v1 / legacy executor).")
+        elif bounds_claim_failed:
+            print("  ✗ BOUNDS-PROOF FAILED — the executor's claimed bounds do")
+            print("    NOT match its declared manifest. Do not trust this")
+            print("    result as bounded. (Signature itself may still be")
+            print("    valid — see lines above.)")
         else:
             print("  ✗ VERIFICATION FAILED — do not trust this result.")
         print(bar)
-        return 0 if verified else 5
+        return 0 if all_ok else 5
     finally:
         # Close the subscription channel first — that unblocks the
         # _sub_loop iterator so the thread can exit.

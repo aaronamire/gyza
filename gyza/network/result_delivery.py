@@ -54,6 +54,7 @@ def encode_delivery(
     work_item_id: str,
     envelope: ICPEnvelope,
     artifact_bytes: bytes,
+    manifest_bytes: bytes | None = None,
 ) -> bytes:
     """
     Serialize a result-delivery frame. ``envelope`` is the full
@@ -61,13 +62,26 @@ def encode_delivery(
     artifact (canonical-JSON bytes as stored on the executor's
     blackboard). Returns UTF-8 JSON bytes ready for
     ``NetdClient.send_message``.
+
+    ``manifest_bytes`` (optional) is the canonical-JSON
+    serialization of the agent's capability manifest — the exact
+    bytes whose blake3 equals ``envelope.capability_manifest_hash``.
+    Delivering them lets the submitter close the trustless gap on
+    the brick-3 bounds-proof: re-hash to confirm manifest identity,
+    re-run ``enforcement_satisfies_manifest`` against the artifact's
+    ``__enforcement__``, and stamp "✓ INDEPENDENTLY VERIFIED"
+    instead of trusting the runner did the check. Wire change is
+    additive — old decoders simply ignore the field.
     """
-    return json.dumps({
+    obj: dict = {
         "v": _WIRE_VERSION,
         "work_item_id": work_item_id,
         "envelope": dataclasses.asdict(envelope),
         "artifact_b64": base64.b64encode(artifact_bytes).decode("ascii"),
-    }, separators=(",", ":")).encode("utf-8")
+    }
+    if manifest_bytes is not None:
+        obj["manifest_b64"] = base64.b64encode(manifest_bytes).decode("ascii")
+    return json.dumps(obj, separators=(",", ":")).encode("utf-8")
 
 
 @dataclasses.dataclass
@@ -76,6 +90,7 @@ class ResultDelivery:
     work_item_id: str
     envelope: ICPEnvelope
     artifact_bytes: bytes
+    manifest_bytes: bytes | None = None
 
 
 def decode_delivery(payload: bytes) -> ResultDelivery:
@@ -113,8 +128,21 @@ def decode_delivery(payload: bytes) -> ResultDelivery:
     except Exception as e:  # noqa: BLE001
         raise ValueError(f"result-delivery artifact_b64 not valid base64: {e}") from e
 
+    manifest_bytes: bytes | None = None
+    man_b64 = d.get("manifest_b64")
+    if man_b64 is not None:
+        if not isinstance(man_b64, str):
+            raise ValueError("result-delivery manifest_b64 is not a string")
+        try:
+            manifest_bytes = base64.b64decode(man_b64, validate=True)
+        except Exception as e:  # noqa: BLE001
+            raise ValueError(
+                f"result-delivery manifest_b64 not valid base64: {e}",
+            ) from e
+
     return ResultDelivery(
         work_item_id=wid,
         envelope=envelope,
         artifact_bytes=artifact_bytes,
+        manifest_bytes=manifest_bytes,
     )
