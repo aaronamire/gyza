@@ -1,4 +1,10 @@
 {
   "_comment": "Trusted-release set for runner attestation (G1a / ADR-0017 / ADR-0018). NON-.py ON PURPOSE: compute_source_tree_hash globs only *.py, so editing this file does NOT change the source-tree hash \u2014 that dissolves the self-referential fixed point that made `+ RUNNER ATTESTED` unreachable. The verification LOGIC stays in release.py (hash-covered, tamper-evident); this is POLICY DATA. Trust model: a submitter trusts the copy that shipped in its OWN pip install, never one fetched from a queried daemon. Keyed by version; one canonical source_tree_hash per version. Empty until the first tagged release is cut via scripts/cut_release.py.",
-  "releases": {}
+  "releases": {
+    "0.1.0": {
+      "notes": "first public alpha",
+      "released": "2026-05-18",
+      "source_tree_hash": "f307afe7dfc6f345cf2cffdba2774ae979bb8fa075a8a545bfa00f0ead004193"
+    }
+  }
 }
