@@ -92,10 +92,17 @@ packages = ["gyza"]
 # `+ RUNNER ATTESTED` unreachable for pip-installed clients — exactly
 # the failure the JSON refactor exists to prevent).
 "gyza/trusted_releases.json" = "gyza/trusted_releases.json"
+# demo/ ships INTO the wheel as a top-level dir next to gyza/, because
+# `gyza demo <scenario>` resolves its scripts at
+# Path(cli.py).parents[1] / "demo" — i.e. <site-packages>/demo/. Without
+# this, every `gyza demo ...` the README documents fails with
+# "demo script not found" for pip-installed users.
+"demo" = "demo"
 
 [tool.hatch.build.targets.sdist]
 include = [
     "/gyza",
+    "/demo",
     "/README.md",
     "/LICENSE",
     "/pyproject.toml",

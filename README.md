@@ -26,10 +26,13 @@ Everything you need to see Gyza work, in a few commands.
 
 ```bash
 # 1. Install. Linux x86_64 / aarch64, Python 3.10+, pipx required.
+#    (The installer also runs `gyza init` to generate your identity.)
 curl -sSf https://raw.githubusercontent.com/aaronamire/gyza/main/scripts/install.sh | bash
 
-# 2. Generate your identity (~/.gyza/compositor.key, mode 0600).
-gyza init
+# 2. Start your daemon — it joins the public mesh (3 DNS-anchored
+#    bootstrap peers) automatically, no other setup.
+gyza global start
+gyza global status            # dht_peers / connections — give it a few seconds
 
 # 3. THE one that matters: ask the live network a question. A hosted
 #    agent on someone else's machine, somewhere on Earth, answers it
@@ -38,23 +41,18 @@ gyza init
 #    bounds the agent declared. No account. No API key. No bill.
 gyza submit "In one sentence, what is a Merkle tree?"
 
-# 4. Phase-1 local demo: two agents, signed envelope chain, no network.
-gyza demo pipeline
-
-# 5. Phase-3 end-to-end demo: two daemons on loopback complete a
-#    project through bilateral settlement in ~30 s.
-gyza demo global
-
-# 6. Join the live public mesh (3 bootstrap peers at gyza.network).
-gyza global start
-gyza global status
+# 4. Local demos — no network needed.
+gyza demo pipeline            # two agents, signed envelope chain
+gyza demo injection           # tamper-detection: mutates a chain, re-verifies, fails
+gyza demo global              # two daemons on loopback → bilateral settlement (~30s)
 ```
 
-`gyza submit` is the product. The rest is how it works underneath.
-Steps 4–5 run offline; 3 and 6 need internet but no other setup —
-bootstrap peers are DNS-anchored, the daemon dials them
-automatically, and a long-running daemon self-heals back onto the
-mesh if it ever loses every peer (see [Networking](#networking)).
+`gyza submit` is the product — step 2 just brings your node onto
+the mesh first (`submit` talks to the network through your running
+daemon). The demos in step 4 run fully offline. Bootstrap peers are
+DNS-anchored, the daemon dials them automatically, and a
+long-running daemon self-heals back onto the mesh if it ever loses
+every peer (see [Networking](#networking)).
 
 From source:
 

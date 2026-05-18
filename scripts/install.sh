@@ -162,7 +162,7 @@ if ! pipx install --force "gyza==${GYZA_VERSION#v}" 2>/dev/null; then
     # PyPI might not have a release matching this tag yet (open-source
     # alpha workflow ships via GitHub Releases first). Fall back to the
     # sdist or wheel from the release.
-    note "PyPI install failed; trying GitHub Release wheel"
+    note "not on PyPI yet (alpha ships via GitHub Releases) — installing the release wheel"
     wheel_asset="gyza-${GYZA_VERSION#v}-py3-none-any.whl"
     wheel_url="https://github.com/$GYZA_REPO/releases/download/$GYZA_VERSION/$wheel_asset"
     if ! curl -fLs -o "$tmpdir/$wheel_asset" "$wheel_url"; then
