@@ -22,7 +22,7 @@
 # Requirements on the host:
 #   * Linux (x86_64 or aarch64); macOS and Windows are not supported in
 #     alpha. If you need them, file an issue.
-#   * Python 3.14+
+#   * Python 3.10+ (3.14+ uses stdlib uuid.uuid7; older gets a shim)
 #   * pipx (we'll suggest a one-liner if missing)
 #   * curl + tar
 #
@@ -201,8 +201,8 @@ cat <<EOF
     ${DIM}# In another shell, check status${RESET}
     gyza status
 
-    ${DIM}# Run the integration demo (single-machine, two daemons)${RESET}
-    python -m gyza.cli demo single-machine-global
+    ${DIM}# Ask the live network something — verify the bounds-proof${RESET}
+    gyza submit "In one sentence, what is a Merkle tree?"
 
   ${BOLD}Docs:${RESET}    https://github.com/$GYZA_REPO#readme
   ${BOLD}Issues:${RESET}  https://github.com/$GYZA_REPO/issues

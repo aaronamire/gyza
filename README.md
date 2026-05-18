@@ -152,7 +152,12 @@ signature; inserting a fake one breaks the next real
 
 ### Bounded execution — the bounds-proof
 
-The keystone. Shipped and live-verified on the public mesh.
+The keystone. Shipped and exercised end-to-end on the public mesh.
+The hosted demo agent runs behind a funded daily quota; when the
+quota is exhausted `gyza submit` returns a clear "demo quota
+reached" message (not an error) and the protocol/verification path
+is unchanged — you can always reproduce the full bounds-proof
+locally against your own daemon.
 
 1. **Manifest is the single source of truth.**
    `sandbox_config_from_manifest()` derives the bwrap sandbox
@@ -337,7 +342,7 @@ same ~20 lines in the payer-validate path. Full graph-wide credit
 fungibility requires multilateral clearing (L1), which is
 deliberately **not built**.
 
-**Radius 2 — the organism (Skynet, bounded). Further out.**
+**Radius 2 — the organism (a bounded autonomous network). Further out.**
 Self-improvement under economic selection (seeds: `drift.py`,
 `supervisor.py`, `reward.py`), a treasury-funded immune system
 (= the economy turned adversarial), and a governed treasury. Its
@@ -356,10 +361,9 @@ cross it by accident — crossing it is a deliberate, large protocol.
 **Build all three radii; let only radius 0 run free; gate L1 behind
 the legal entity and governance.**
 
-Full reasoning in `CLAUDE.md`. The discipline: ship the cell, sell
-the soul, fund it with a credibly-neutral verifiable-AI oracle
-beachhead, let the economy and organism *emerge* — never faster
-than the bounds that keep it ours.
+The discipline: ship the cell, fund it with a credibly-neutral
+verifiable-AI oracle beachhead, let the economy and organism
+*emerge* — never faster than the bounds that keep it ours.
 
 ---
 
@@ -489,7 +493,7 @@ cd spec && for cfg in Settlement.cfg Reconciliation.cfg \
 done
 ```
 
-Coverage: ~489 Python fast tests + Go suite (incl. bootstrap-
+Coverage: ~560 Python fast tests + Go suite (incl. bootstrap-
 recovery) + 71 Rust tests + 5 TLA+ model checks. `main` is gated on
 the fast slice + Go/Rust suites via GitHub Actions; heavy
 integration runs nightly and on touch of `netd/` or `gyza/network/`.

@@ -12,23 +12,20 @@ B-bucket deployment blockers (operational, user-owned), C-bucket
 structural directions.
 
 C-bucket included an explicit choice: continue retrofitting the
-current architecture, or commit to a vNext rewrite. Sessions 7–8
-of strategic dialogue clarified that the maximalist target (§9 —
-planet-scale beneficial AI coordination) is incompatible with the
-current architecture's structural commitments. The structural
-issues catalogued in §7 (bilateral-only settlement, LSH-only
-discovery, linear ICP chains, blackboard pattern, single-resource
-pricing, Ed25519-only identity, no formal spec, no privacy
-primitives) can't be retrofitted at scale — they have to be
-replaced.
-
-The user asked: "make vNext a commitment, not just an idea."
+current architecture, or commit to a vNext rewrite. The
+long-horizon target (planet-scale beneficial AI coordination) is
+incompatible with the current architecture's structural
+commitments. The structural issues catalogued earlier
+(bilateral-only settlement, LSH-only discovery, linear ICP chains,
+blackboard pattern, single-resource pricing, Ed25519-only
+identity, no formal spec, no privacy primitives) can't be
+retrofitted at scale — they have to be replaced.
 
 ## Decision
 
-vNext (defined in CLAUDE.md §8) is the **committed architectural
-target.** Not one trajectory among several — the architecture
-every future session works toward.
+vNext is the **committed architectural target.** Not one
+trajectory among several — the architecture every future session
+works toward.
 
 **14 layers committed at the architectural level:**
 
@@ -108,18 +105,15 @@ every future session works toward.
 - **Different vNext architecture.** Several coherent alternatives
   exist (process-calculus-first, confidential-computing-first,
   capability-as-channel throughout, blockchain-native L2). vNext
-  as defined in §8 is one defensible portfolio of tradeoffs; not
-  provably optimal. Documented in CLAUDE.md §7 / §8.
+  as defined here is one defensible portfolio of tradeoffs; not
+  provably optimal.
 - **Defer commitment indefinitely.** Rejected: organic evolution
   was producing structural debt faster than it was being paid
   down. Commitment lets the team align around a target.
 
 ## References
 
-- CLAUDE.md §8 (full vNext architecture spec)
-- CLAUDE.md §9 (maximalist target — the strategic frame)
-- CLAUDE.md §7 (architectural critique — necessity argument)
-- CLAUDE.md §6 (priority list — reordered around the commitment)
-- CLAUDE.md §16 (don't-do entries protecting the commitment)
-- ADR-0001 through 0014 (decisions superseded or refined by vNext)
-- ADR-0016 onwards (forward decisions under the commitment)
+- README → "The agentic civilization" (the long-horizon framing
+  + honest gradient).
+- ADR-0001 through 0014 (decisions superseded or refined by vNext).
+- ADR-0016 onwards (forward decisions under the commitment).

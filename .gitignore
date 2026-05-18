@@ -41,3 +41,7 @@ scripts/deploy.env
 *~
 .DS_Store
 Thumbs.db
+
+# Internal working docs — kept locally, not published (launch hygiene)
+CLAUDE.md
+CHANGELOG.md

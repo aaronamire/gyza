@@ -74,7 +74,7 @@ gyza = "gyza.cli:main"
 [project.urls]
 Homepage = "https://github.com/aaronamire/gyza"
 Repository = "https://github.com/aaronamire/gyza"
-Changelog = "https://github.com/aaronamire/gyza/blob/main/CHANGELOG.md"
+Issues = "https://github.com/aaronamire/gyza/issues"
 
 [tool.hatch.build.targets.wheel]
 # Python wheel ships the gyza/ source tree. The gyza-netd Go binary is
@@ -97,7 +97,6 @@ packages = ["gyza"]
 include = [
     "/gyza",
     "/README.md",
-    "/CHANGELOG.md",
     "/LICENSE",
     "/pyproject.toml",
 ]

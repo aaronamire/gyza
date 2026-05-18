@@ -381,10 +381,35 @@ def _build_anthropic_executor_gated(
         except Exception as e:  # noqa: BLE001
             # Surface API errors as a placeholder rather than blowing
             # up the runner. The signed envelope still chains; the
-            # response text is honest about what went wrong.
-            LOG.warning("[anthropic] call failed: %s", e)
+            # response text is honest about what went wrong. Quota /
+            # credit-balance exhaustion gets a clean operator-friendly
+            # message — under a public launch this path WILL fire, and
+            # a raw provider JSON error in `gyza submit` output reads
+            # as broken to a non-expert. The protocol path is unchanged
+            # either way; only the human-readable text differs.
+            err = str(e)
+            LOG.warning("[anthropic] call failed: %s", err)
+            if (
+                "credit balance" in err.lower()
+                or "quota" in err.lower()
+                or "rate_limit" in err.lower()
+                or "rate limit" in err.lower()
+            ):
+                text = (
+                    "[demo quota reached] The public demo agent's daily "
+                    "API quota is exhausted. The protocol and verification "
+                    "path are unchanged — to keep going, run your own node "
+                    "(`gyza global start`) and submit against it, or wait "
+                    "for the quota to reset."
+                )
+            else:
+                text = (
+                    f"[demo-agent: upstream model error] {err} — the "
+                    f"protocol path is unchanged; this is a transient "
+                    f"upstream failure, not a Gyza-level error."
+                )
             return {
-                "text": f"[demo-agent: Anthropic API error] {e}",
+                "text": text,
                 "tokens_in": len(prompt) // 4,
                 "tokens_out": 100,
                 "model_identifier": "gyza-demo-error-v1",
