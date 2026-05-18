@@ -5,6 +5,11 @@
       "notes": "first public alpha",
       "released": "2026-05-18",
       "source_tree_hash": "f307afe7dfc6f345cf2cffdba2774ae979bb8fa075a8a545bfa00f0ead004193"
+    },
+    "0.1.1": {
+      "notes": "cold-install fixes: demos in wheel, run-it order",
+      "released": "2026-05-18",
+      "source_tree_hash": "328f7f0d8c1ead1c9d65039c477a4232d3cf7800c9945c82e90b63e5226d5bd4"
     }
   }
 }
