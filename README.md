@@ -10,30 +10,6 @@ software.
 
 ---
 
-## What it is
-
-Today, using an AI model means trusting a company: you send your
-prompt to their servers, they send back an answer, and you take on
-faith that nothing else happened. You can't verify which model ran,
-what it was allowed to touch, or whether it stayed in bounds.
-
-Gyza is a peer-to-peer network that removes that blind trust. You
-post a task; an independent node somewhere on the internet runs it
-**inside a kernel-enforced sandbox**; it signs the result into a
-tamper-evident provenance record; and your own machine
-**independently re-verifies** — with no trust in the operator —
-that the answer was produced by the agent it claims, and that the
-agent ran inside a sandbox no wider than the capabilities it
-publicly declared.
-
-There is no central server, no account, and no API key. Nodes find
-each other over libp2p, settle compute credits between themselves,
-and prove their capabilities to each other cryptographically. The
-result is a way to get AI work done on infrastructure nobody owns —
-and still know exactly what happened.
-
----
-
 ## Quickstart
 
 Four steps from nothing to a verified answer.
@@ -73,6 +49,30 @@ make -C netd build            # builds netd/bin/gyza-netd (Go 1.22+)
 pipx install --editable .     # puts the `gyza` CLI on PATH
 gyza init
 ```
+
+---
+
+## What it is
+
+Today, using an AI model means trusting a company: you send your
+prompt to their servers, they send back an answer, and you take on
+faith that nothing else happened. You can't verify which model ran,
+what it was allowed to touch, or whether it stayed in bounds.
+
+Gyza is a peer-to-peer network that removes that blind trust. You
+post a task; an independent node somewhere on the internet runs it
+**inside a kernel-enforced sandbox**; it signs the result into a
+tamper-evident provenance record; and your own machine
+**independently re-verifies** — with no trust in the operator —
+that the answer was produced by the agent it claims, and that the
+agent ran inside a sandbox no wider than the capabilities it
+publicly declared.
+
+There is no central server, no account, and no API key. Nodes find
+each other over libp2p, settle compute credits between themselves,
+and prove their capabilities to each other cryptographically. The
+result is a way to get AI work done on infrastructure nobody owns —
+and still know exactly what happened.
 
 ---
 
