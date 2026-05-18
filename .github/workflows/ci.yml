@@ -88,26 +88,6 @@ jobs:
           python -m pytest tests/ -q --tb=line --timeout=90 \
             -k "not netd_client and not phase2_integration and not phase2_hardening and not blackboard_gossip and not attestation_bridge and not verify_on_fetch"
 
-  spec:
-    name: TLA+ Settlement spec
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Run TLC on Settlement.tla (honest model)
-        run: |
-          cd spec
-          java -XX:+UseParallelGC -cp tools/tla2tools.jar tlc2.TLC \
-            -deadlock -workers 4 \
-            -config Settlement.cfg Settlement.tla
-
   rust:
     name: gyza-rs (Rust reference impl)
     runs-on: ubuntu-latest

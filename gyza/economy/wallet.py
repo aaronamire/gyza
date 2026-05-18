@@ -1,14 +1,12 @@
 """
 Wallet — a pure read-projection over settled ledger entries.
 
-This is the seed organ of the agentic civilization (README → L1
-roadmap). An agent's identity (its Ed25519 pubkey) is its account;
-its *wallet* is not a new ledger or new state — it is a
-deterministic fold over the bilateral settled entries that
-``gyza/economy/ledger.py`` already stores. Everything downstream
-(the self-owning agent, the subcontract loop, Proof of Useful
-Cognition) reads from this projection; nothing writes new economic
-state here.
+The foundational economic read-model. An agent's identity (its
+Ed25519 pubkey) is its account; its *wallet* is not a new ledger or
+new state — it is a deterministic fold over the bilateral settled
+entries that ``gyza/economy/ledger.py`` already stores. Everything
+downstream (the subcontract loop, Proof of Useful Cognition) reads
+from this projection; nothing writes new economic state here.
 
 WHY A PROJECTION, NOT A BALANCE TABLE
 -------------------------------------
@@ -26,12 +24,11 @@ PROJECTION IS NOT FUNGIBILITY (the throttle nuance)
 ---------------------------------------------------
 A global net here does NOT mean credits earned from B are spendable
 with C. Spending still requires a bilateral channel; cross-graph
-fungibility is multilateral clearing (L1) and is the deliberately
-**gated** line — simultaneously the technical boundary where
-bilateral L0 stops sufficing, the legal cliff where the unit
-becomes a transferable token, and the governance throttle (README →
-The agentic civilization; §11). The wallet is a *read view*. It
-must never be mistaken for, or quietly grown into, transferability.
+fungibility is multilateral clearing (a later, deliberately-gated
+milestone — it is the technical boundary where bilateral L0 stops
+sufficing and also the legal line where the unit would become a
+transferable token). The wallet is a *read view*. It must never be
+mistaken for, or quietly grown into, transferability.
 
 THE "FAKE TOKEN"
 ----------------

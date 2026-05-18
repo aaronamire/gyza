@@ -45,3 +45,8 @@ Thumbs.db
 # Internal working docs — kept locally, not published (launch hygiene)
 CLAUDE.md
 CHANGELOG.md
+
+# Internal engineering docs — kept locally, not published pre-launch
+docs/
+gyza-rs/MIGRATION.md
+spec/
