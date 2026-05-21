@@ -65,6 +65,20 @@ def _get_model():
 
 
 def _embed(texts: list[str]) -> np.ndarray:
+    # Architectural debt: this module loads SentenceTransformer
+    # independently of ``gyza.embeddings`` — it predates the unified
+    # embedder protocol. When ``GYZA_EMBEDDER=stub`` is set the rest
+    # of the system uses ``StubEmbedder`` but ``_get_model()`` would
+    # still cold-load ST, silently undoing the opt-out and causing a
+    # ~10-15s pause on the first ``retrieve_similar`` with non-empty
+    # memory (e.g. the 2nd round of demo/single_machine_global.py
+    # --fast). Honour the env var explicitly here. The longer-term
+    # fix is to delete ``_get_model`` and route through
+    # ``gyza.embeddings.default_embedder()``; this hop preserves the
+    # existing ``_EmbeddingsUnavailable`` semantics callers depend on.
+    if os.environ.get("GYZA_EMBEDDER", "").strip().lower() == "stub":
+        from gyza.embeddings import default_embedder
+        return default_embedder().embed_batch(texts).astype(np.float32)
     model = _get_model()
     arr = model.encode(texts, show_progress_bar=False)
     return np.asarray(arr, dtype=np.float32)

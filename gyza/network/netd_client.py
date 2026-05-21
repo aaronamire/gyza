@@ -490,6 +490,7 @@ class NetdClient:
         stderr_to_stdout: bool = True,
         dht_mode: str | None = None,
         isolated: bool = False,
+        mdns: bool = True,
     ) -> subprocess.Popen:
         """
         Launch gyza-netd as a subprocess. Block until the socket file
@@ -530,6 +531,12 @@ class NetdClient:
         ]
         if isolated:
             argv += ["--bootstrap-domain=", "--no-fallback-peers"]
+        if not mdns:
+            # Off-switch for the partition-simulation path in the demo:
+            # on loopback, mDNS re-discovers a disconnected peer in
+            # milliseconds and silently re-establishes the link, so any
+            # observable "comms blackout" requires mDNS off.
+            argv += ["--mdns=false"]
         if bootstrap:
             argv += ["--bootstrap", ",".join(bootstrap)]
         if dht_mode:

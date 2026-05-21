@@ -29,10 +29,13 @@ subprocess with explicit FS / network / resource constraints. See
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
 import time
 import traceback
+
+LOG = logging.getLogger("gyza.runner")
 import uuid
 from typing import Any, Callable
 
@@ -306,19 +309,21 @@ class AgentRunner:
         ancestors_chain, missing = self._bb.reconstruct_chain(parent_id)
         if missing:
             if self._strict_chain_verification:
-                print(
-                    f"[{self._identity.agent_id[:8]}] strict-verify: "
-                    f"chain incomplete for {item.id[:8]} "
-                    f"(missing envelope for action {missing[:8]}); skipping",
-                    flush=True,
+                LOG.warning(
+                    "[%s] strict-verify: chain incomplete for %s "
+                    "(missing envelope for action %s); skipping",
+                    self._identity.agent_id[:8],
+                    item.id[:8],
+                    missing[:8],
                 )
                 return False
             # Fail-open: log once per item, accept the claim.
-            print(
-                f"[{self._identity.agent_id[:8]}] verify: chain incomplete "
-                f"for {item.id[:8]} (missing envelope for action "
-                f"{missing[:8]}); proceeding (strict=False)",
-                flush=True,
+            LOG.warning(
+                "[%s] verify: chain incomplete for %s "
+                "(missing envelope for action %s); proceeding (strict=False)",
+                self._identity.agent_id[:8],
+                item.id[:8],
+                missing[:8],
             )
             return True
         if not ancestors_chain:
@@ -338,10 +343,11 @@ class AgentRunner:
         from gyza.icp import verify_chain
         valid, first_bad = verify_chain(ancestors_chain)
         if not valid:
-            print(
-                f"[{self._identity.agent_id[:8]}] verify: chain INVALID "
-                f"for {item.id[:8]} at index {first_bad}",
-                flush=True,
+            LOG.warning(
+                "[%s] verify: chain INVALID for %s at index %d",
+                self._identity.agent_id[:8],
+                item.id[:8],
+                first_bad,
             )
             return False
         return True
@@ -503,10 +509,11 @@ class AgentRunner:
                 pass
 
         self._completed_count += 1
-        print(
-            f"[{self._identity.agent_id[:8]}] ✗ {item.description[:60]} "
-            f"(released) — error: {error}",
-            flush=True,
+        LOG.warning(
+            "[%s] ✗ %s (released) — error: %s",
+            self._identity.agent_id[:8],
+            item.description[:60],
+            error,
         )
 
     # ------------------------------------------------------------------
@@ -641,11 +648,14 @@ class AgentRunner:
 
         mark = "✓" if success else "✗"
         desc = item.description[:60]
-        print(
-            f"[{self._identity.agent_id[:8]}] {mark} {desc} "
-            f"({duration_ms}ms)"
-            + (f" — error: {error}" if error and not success else ""),
-            flush=True,
+        log_fn = LOG.info if success else LOG.warning
+        log_fn(
+            "[%s] %s %s (%dms)%s",
+            self._identity.agent_id[:8],
+            mark,
+            desc,
+            duration_ms,
+            f" — error: {error}" if error and not success else "",
         )
 
 
