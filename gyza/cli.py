@@ -7,6 +7,7 @@ Subcommands:
   demo injection          Run the injection-attack demo
   demo lan                Run the Phase 2 single-machine simulation
   demo global             Run the Phase 3 two-daemon end-to-end demo
+  demo bounds             Run the bounds-proof demo (offline, no API)
   status                  Show blackboard / cluster / artifact stats
   network peers           List discovered + connected LAN peers
   network join HOST:PORT  Manually dial a peer over QUIC
@@ -114,6 +115,8 @@ def cmd_demo(args: argparse.Namespace) -> int:
         return _run_demo_script("single_machine_phase2.py")
     if args.scenario == "global":
         return _run_demo_subprocess("single_machine_global.py")
+    if args.scenario == "bounds":
+        return _run_demo_script("bounds_proof_demo.py")
     return _run_demo_script("two_agent_pipeline.py")
 
 
@@ -1775,7 +1778,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_demo.add_argument(
         "scenario",
         nargs="?",
-        choices=["pipeline", "injection", "lan", "global"],
+        choices=["pipeline", "injection", "lan", "global", "bounds"],
         default="pipeline",
         help=(
             "pipeline (default — Phase-1 two-agent local demo), "
