@@ -1,12 +1,9 @@
 //! Tier-3 capability attestation — canonical-bytes substrate.
 //!
-//! This crate ports the data types and canonical-JSON encodings from
-//! `gyza.network.capability_protocol` (Python) with byte-for-byte parity.
-//! The Validator and Applicant state machines, and the higher-level
-//! `run_attestation` / `verify_attestation_cert` flows, are intentionally
-//! NOT in this crate yet; they will arrive in a follow-up that depends on
-//! `gyza-icp` (for envelope verification) and `gyza-crypto` (for Ed25519
-//! sign/verify of cosigs).
+//! This crate ports `gyza.network.capability_protocol` (Python) to Rust
+//! with byte-for-byte parity. Both the verifying side and the
+//! cryptographic signing operations are present; only the eval-task
+//! execution machinery and the top-level orchestration loop remain.
 //!
 //! What lives here:
 //!
@@ -16,13 +13,17 @@
 //!   - `AttestationCert`                 — payload + ≥k cosigs
 //!   - `EvalResult`                      — one task's eval outcome
 //!   - `ChallengeResponsePayload` / `ChallengeResponse` — applicant → validator
-//!   - `challenge_canonical_bytes(...)`
-//!   - `attestation_payload_canonical_bytes(...)`
-//!   - `response_canonical_bytes(...)`
+//!   - `challenge_canonical_bytes(...)` / `attestation_payload_canonical_bytes(...)`
+//!     / `response_canonical_bytes(...)`
 //!   - `verify_attestation_cert(...)`    — independent consumer-side
 //!     cert verification (schema / applicant / expiry / quorum cosig
 //!     check). Cross-language interop: tests deserialize a
 //!     Python-signed cert and verify it under this Rust function.
+//!   - `Validator` (issue_challenge, cosign) / `Applicant` (sign_response)
+//!     — the signing side. Ed25519 is deterministic (RFC 8032), so a
+//!     Rust validator co-signing a payload produces the BYTE-IDENTICAL
+//!     signature Python produces (tested) — Rust and Python validators
+//!     are interchangeable in a quorum, not just mutually verifiable.
 //!
 //! Recursive canonical-JSON note (relevant to `EvalResult` and
 //! `ChallengeResponse`): the embedded `envelope` and the task-specific
@@ -46,12 +47,17 @@
 //!
 //! What is NOT covered yet (next session):
 //!
-//!   - `Validator` / `Applicant` state machines (the *signing* side
-//!     of the protocol; the *verifying* side is in this crate).
-//!   - `run_attestation` orchestration.
-//!   - The full `EvalTask` ecosystem from `gyza.capability_eval` —
-//!     this crate only ports `EvalResult` (the OUTCOME type the wire
-//!     protocol carries), not the task definitions themselves.
+//!   - `Validator::verify_response`'s eval-OUTPUT checking. The
+//!     signature-verification parts are straightforward (verify the
+//!     applicant_signature + each eval envelope via `gyza-icp`); the
+//!     remaining piece — re-deriving each task's expected output and
+//!     comparing — needs the `EvalTask` port below.
+//!   - The `EvalTask` ecosystem from `gyza.capability_eval` (the six
+//!     deterministic tasks + their expected-output logic). This crate
+//!     ports `EvalResult` (the wire-carried OUTCOME type) but not the
+//!     task definitions.
+//!   - `run_attestation` orchestration (drives a full applicant ⇄
+//!     validators round).
 //!
 //! Cross-references:
 //!
@@ -61,6 +67,7 @@
 
 use std::collections::{BTreeMap, HashSet};
 
+use gyza_crypto::Signer;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -352,6 +359,131 @@ pub fn verify_attestation_cert(
         });
     }
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Signing side — Validator + Applicant.
+//
+// The capability protocol signs the RAW canonical bytes of each
+// structure (NOT a BLAKE3 hash of them — that distinguishes it from
+// gyza-icp envelopes, which sign the hash). Python:
+//   make_seed_signer -> sk.sign(payload).hex()
+//   _verify_with     -> pk.verify(sig, payload)
+// gyza_crypto::Signer::sign / gyza_crypto::verify operate over the raw
+// bytes too, so signatures are interoperable with Python verbatim.
+//
+// Ed25519 (RFC 8032) is DETERMINISTIC — no per-signature nonce. So for
+// a fixed seed and fixed canonical bytes, Rust and Python produce the
+// IDENTICAL signature. The tests assert exactly this against the Python
+// fixture: a Rust validator and a Python validator are interchangeable
+// in a quorum, not merely mutually verifiable.
+// ---------------------------------------------------------------------------
+
+/// A validator identity: holds the Ed25519 signing key and exposes the
+/// two signing operations a validator performs.
+pub struct Validator {
+    signer: Signer,
+    pubkey_hex: String,
+}
+
+impl Validator {
+    /// Build a validator from a 32-byte Ed25519 seed.
+    pub fn from_seed(seed: &[u8; 32]) -> Self {
+        let signer = Signer::from_seed(seed);
+        let pubkey_hex = hex::encode(signer.pubkey_bytes());
+        Self { signer, pubkey_hex }
+    }
+
+    /// This validator's public key, hex-encoded.
+    pub fn pubkey_hex(&self) -> &str {
+        &self.pubkey_hex
+    }
+
+    /// Issue a signed `Challenge` to an applicant. `validator_pubkey` is
+    /// filled from this validator's own key.
+    pub fn issue_challenge(
+        &self,
+        challenge_id: impl Into<String>,
+        eval_version: impl Into<String>,
+        task_ids: Vec<String>,
+        nonce: impl Into<String>,
+        issued_at_ns: i64,
+        expires_at_ns: i64,
+    ) -> Result<Challenge, CapabilityError> {
+        let payload = ChallengePayload {
+            challenge_id: challenge_id.into(),
+            eval_version: eval_version.into(),
+            expires_at_ns,
+            issued_at_ns,
+            nonce: nonce.into(),
+            task_ids,
+            validator_pubkey: self.pubkey_hex.clone(),
+        };
+        let bytes = challenge_canonical_bytes(&payload)?;
+        let signature = self.signer.sign_hex(&bytes);
+        Ok(Challenge { payload, signature })
+    }
+
+    /// Co-sign an `AttestationCertPayload`, contributing one cosig toward
+    /// quorum. Every validator signs the SAME canonical payload bytes —
+    /// that identical-bytes invariant is what lets the quorum aggregate.
+    pub fn cosign(
+        &self,
+        payload: &AttestationCertPayload,
+        cosigned_at_ns: i64,
+    ) -> Result<ValidatorCosig, CapabilityError> {
+        let bytes = attestation_payload_canonical_bytes(payload)?;
+        let signature = self.signer.sign_hex(&bytes);
+        Ok(ValidatorCosig {
+            cosigned_at_ns,
+            signature,
+            validator_pubkey: self.pubkey_hex.clone(),
+        })
+    }
+}
+
+/// An applicant identity: holds the compositor Ed25519 signing key and
+/// signs the `ChallengeResponse` it sends to validators.
+pub struct Applicant {
+    signer: Signer,
+    compositor_pubkey_hex: String,
+}
+
+impl Applicant {
+    /// Build an applicant from its 32-byte compositor Ed25519 seed.
+    pub fn from_compositor_seed(seed: &[u8; 32]) -> Self {
+        let signer = Signer::from_seed(seed);
+        let compositor_pubkey_hex = hex::encode(signer.pubkey_bytes());
+        Self {
+            signer,
+            compositor_pubkey_hex,
+        }
+    }
+
+    /// This applicant's compositor public key, hex-encoded.
+    pub fn compositor_pubkey_hex(&self) -> &str {
+        &self.compositor_pubkey_hex
+    }
+
+    /// Sign a fully-formed `ChallengeResponsePayload` and wrap it into
+    /// the wire-format `ChallengeResponse`. The caller is responsible for
+    /// having set `payload.applicant_compositor_pubkey` to this
+    /// applicant's key; in debug builds we assert it.
+    pub fn sign_response(
+        &self,
+        payload: ChallengeResponsePayload,
+    ) -> Result<ChallengeResponse, CapabilityError> {
+        debug_assert_eq!(
+            payload.applicant_compositor_pubkey, self.compositor_pubkey_hex,
+            "payload compositor pubkey must match the signing applicant",
+        );
+        let bytes = response_canonical_bytes(&payload)?;
+        let signature = self.signer.sign_hex(&bytes);
+        Ok(ChallengeResponse {
+            payload,
+            applicant_signature: signature,
+        })
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -766,6 +898,121 @@ mod tests {
         let json = serde_json::to_string(&resp).unwrap();
         let back: ChallengeResponse = serde_json::from_str(&json).unwrap();
         assert_eq!(resp, back);
+    }
+
+    // ---------------------------------------------------------------
+    // Signing side — Validator / Applicant.
+    // ---------------------------------------------------------------
+
+    /// The cert payload the Python fixture's three validators co-signed
+    /// (matches `cert_payload` in regenerate_capability_fixtures.py's
+    /// signed_attestation_cert block).
+    fn fixture_cosigned_payload() -> AttestationCertPayload {
+        AttestationCertPayload {
+            applicant_compositor_pubkey: "aa".repeat(32),
+            eval_version: "eval-v1".to_string(),
+            expires_at_ns: 1_700_000_300_000_000_000,
+            issued_at_ns: 1_700_000_000_000_000_000,
+            schema: CERT_SCHEMA.to_string(),
+        }
+    }
+
+    /// A validator issues a challenge; the signature verifies under the
+    /// validator's own pubkey (round trip through canonical bytes).
+    #[test]
+    fn validator_issue_challenge_roundtrip() {
+        let v = Validator::from_seed(&[7u8; 32]);
+        let chal = v
+            .issue_challenge(
+                "c1",
+                "eval-v1",
+                vec!["t1".to_string(), "t2".to_string()],
+                "nonce-abc",
+                100,
+                200,
+            )
+            .unwrap();
+        assert_eq!(chal.payload.validator_pubkey, v.pubkey_hex());
+        let bytes = challenge_canonical_bytes(&chal.payload).unwrap();
+        let pk = hex::decode(v.pubkey_hex()).unwrap();
+        let sig = hex::decode(&chal.signature).unwrap();
+        assert!(
+            gyza_crypto::verify(&pk, &bytes, &sig).is_ok(),
+            "validator's own challenge signature must verify",
+        );
+    }
+
+    /// THE strongest cross-language result: a Rust validator co-signing
+    /// the same payload as the Python fixture produces the BYTE-IDENTICAL
+    /// signature (Ed25519 is deterministic, RFC 8032). This means Rust
+    /// and Python validators are *interchangeable* in a quorum, not just
+    /// mutually verifiable.
+    #[test]
+    fn rust_cosig_is_byte_identical_to_python() {
+        let payload = fixture_cosigned_payload();
+        let v1 = Validator::from_seed(&[1u8; 32]);
+        let cosig = v1.cosign(&payload, 1_700_000_100_000_000_000).unwrap();
+
+        // From regenerate_capability_fixtures.py's signed cert, validator 1:
+        let py_pubkey = "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c";
+        let py_signature = concat!(
+            "28337fcb4d2b4576046cd7699b5d0daba22313b465e2679edbcc17bd703e00f1",
+            "839c5fae2a2b2bc9ed0d34c689d32d3740b12c8f1745a9136c6475947f51700b",
+        );
+        assert_eq!(
+            cosig.validator_pubkey, py_pubkey,
+            "Rust pubkey from seed [1;32] must match Python's",
+        );
+        assert_eq!(
+            cosig.signature, py_signature,
+            "Rust Ed25519 cosig must be byte-identical to Python's \
+             (deterministic signing over identical canonical bytes)",
+        );
+    }
+
+    /// A cert assembled entirely from Rust-signed cosigs passes the Rust
+    /// verifier — the signing side feeds the verifying side end to end.
+    #[test]
+    fn rust_signed_cert_passes_rust_verify() {
+        let payload = fixture_cosigned_payload();
+        let v1 = Validator::from_seed(&[1u8; 32]);
+        let v2 = Validator::from_seed(&[2u8; 32]);
+        let cert = AttestationCert {
+            payload: payload.clone(),
+            validator_cosigs: vec![
+                v1.cosign(&payload, 1_700_000_100_000_000_000).unwrap(),
+                v2.cosign(&payload, 1_700_000_100_000_000_001).unwrap(),
+            ],
+        };
+        let r = verify_attestation_cert(
+            &cert,
+            Some(&"aa".repeat(32)),
+            2,
+            None,
+            1_700_000_200_000_000_000,
+        );
+        assert!(r.is_ok(), "Rust-signed cert must pass Rust verify: {r:?}");
+    }
+
+    /// Applicant signs a response; the signature verifies under the
+    /// applicant's compositor pubkey.
+    #[test]
+    fn applicant_sign_response_roundtrip() {
+        // Use a seed whose pubkey we then stamp into the payload so the
+        // debug_assert in sign_response holds.
+        let app = Applicant::from_compositor_seed(&[9u8; 32]);
+        let mut payload = sample_response_payload();
+        payload.applicant_compositor_pubkey = app.compositor_pubkey_hex().to_string();
+        // cert_payload's applicant pubkey is independent; leave as-is.
+        let resp = app.sign_response(payload).unwrap();
+
+        let bytes = response_canonical_bytes(&resp.payload).unwrap();
+        let pk = hex::decode(app.compositor_pubkey_hex()).unwrap();
+        let sig = hex::decode(&resp.applicant_signature).unwrap();
+        assert!(
+            gyza_crypto::verify(&pk, &bytes, &sig).is_ok(),
+            "applicant's own response signature must verify",
+        );
     }
 
     /// Sanity: cert structure roundtrips with multiple cosigs.
