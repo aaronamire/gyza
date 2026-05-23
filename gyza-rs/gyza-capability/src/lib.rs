@@ -19,11 +19,15 @@
 //!     cert verification (schema / applicant / expiry / quorum cosig
 //!     check). Cross-language interop: tests deserialize a
 //!     Python-signed cert and verify it under this Rust function.
-//!   - `Validator` (issue_challenge, cosign) / `Applicant` (sign_response)
-//!     — the signing side. Ed25519 is deterministic (RFC 8032), so a
-//!     Rust validator co-signing a payload produces the BYTE-IDENTICAL
-//!     signature Python produces (tested) — Rust and Python validators
-//!     are interchangeable in a quorum, not just mutually verifiable.
+//!   - `Validator` (issue_challenge, cosign, verify_response) /
+//!     `Applicant` (sign_response) — the signing + decision side.
+//!     Ed25519 is deterministic (RFC 8032), so a Rust validator
+//!     co-signing a payload produces the BYTE-IDENTICAL signature Python
+//!     produces (tested) — Rust and Python validators are
+//!     interchangeable in a quorum, not just mutually verifiable.
+//!     `verify_response` performs all the crypto/sanity checks and
+//!     co-signs on success; the eval-OUTPUT check is a pluggable
+//!     closure (see below).
 //!
 //! Recursive canonical-JSON note (relevant to `EvalResult` and
 //! `ChallengeResponse`): the embedded `envelope` and the task-specific
@@ -45,19 +49,16 @@
 //! produce. Reordering struct fields silently breaks every signature
 //! produced by the Python implementation. DO NOT REORDER.
 //!
-//! What is NOT covered yet (next session):
+//! What is NOT covered yet (the low-differentiation tail):
 //!
-//!   - `Validator::verify_response`'s eval-OUTPUT checking. The
-//!     signature-verification parts are straightforward (verify the
-//!     applicant_signature + each eval envelope via `gyza-icp`); the
-//!     remaining piece — re-deriving each task's expected output and
-//!     comparing — needs the `EvalTask` port below.
-//!   - The `EvalTask` ecosystem from `gyza.capability_eval` (the six
-//!     deterministic tasks + their expected-output logic). This crate
-//!     ports `EvalResult` (the wire-carried OUTCOME type) but not the
-//!     task definitions.
+//!   - The eval-OUTPUT check that `verify_response` takes as a closure.
+//!     Implementing it for real means porting the `EvalTask` ecosystem
+//!     from `gyza.capability_eval` (the six deterministic tasks +
+//!     their expected-output logic) and verifying each eval ICP
+//!     envelope via `gyza-icp`. This crate ports `EvalResult` (the
+//!     wire-carried OUTCOME type) but not the task definitions.
 //!   - `run_attestation` orchestration (drives a full applicant ⇄
-//!     validators round).
+//!     validators round end to end).
 //!
 //! Cross-references:
 //!
@@ -80,6 +81,13 @@ pub const CERT_SCHEMA: &str = "gyza.attestation.tier3/v1";
 
 /// Wire-format major version used by the Python implementation.
 pub const PROTOCOL_VERSION: &str = "v1";
+
+/// Eval-suite version a cert must declare (gyza.capability_eval).
+pub const EVAL_VERSION: &str = "v1";
+
+/// Maximum cert lifetime a validator will co-sign (90 days, in ns) —
+/// a malicious applicant proposing a 100-year cert shouldn't get a cosig.
+pub const MAX_CERT_LIFETIME_NS: i64 = 90 * 24 * 60 * 60 * 1_000_000_000;
 
 /// Default quorum threshold: ≥ k of n validators must co-sign.
 pub const DEFAULT_QUORUM_K: usize = 2;
@@ -277,6 +285,19 @@ pub struct ValidatorCosig {
 pub struct AttestationCert {
     pub payload: AttestationCertPayload,
     pub validator_cosigs: Vec<ValidatorCosig>,
+}
+
+/// Validator → applicant: the result of verifying a `ChallengeResponse`.
+/// `accepted=true` carries a cosig the applicant aggregates into the
+/// cert; `accepted=false` carries a short reason for diagnostics.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChallengeOutcome {
+    pub accepted: bool,
+    pub challenge_id: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub cosig: Option<ValidatorCosig>,
+    #[serde(default)]
+    pub reason: String,
 }
 
 // ---------------------------------------------------------------------------
@@ -483,6 +504,100 @@ impl Applicant {
             payload,
             applicant_signature: signature,
         })
+    }
+}
+
+impl Validator {
+    /// Verify a `ChallengeResponse` against a `Challenge` this validator
+    /// issued and, on success, co-sign the cert payload. Mirrors Python
+    /// `Validator.verify_response`.
+    ///
+    /// `eval_check` is the pluggable eval-output verification step
+    /// (Python's `verify_eval_results`): given the response, it returns
+    /// `Ok(())` if the eval results are valid, or `Err(reason)`. It is a
+    /// parameter rather than baked in because it depends on the
+    /// `EvalTask` definitions + ICP-envelope verification (separate
+    /// ports) — this keeps the crypto-meaningful decision logic here and
+    /// the task scaffolding pluggable. A caller with no eval to check
+    /// passes `|_| Ok(())`.
+    pub fn verify_response<F>(
+        &self,
+        challenge: &Challenge,
+        response: &ChallengeResponse,
+        now_ns: i64,
+        clock_skew_ns: i64,
+        eval_check: F,
+    ) -> ChallengeOutcome
+    where
+        F: FnOnce(&ChallengeResponse) -> Result<(), String>,
+    {
+        let cid = &challenge.payload.challenge_id;
+        let reject = |reason: &str| ChallengeOutcome {
+            accepted: false,
+            challenge_id: cid.clone(),
+            cosig: None,
+            reason: reason.to_string(),
+        };
+
+        let rp = &response.payload;
+        if rp.challenge_id != challenge.payload.challenge_id {
+            return reject("response.challenge_id mismatch");
+        }
+        if rp.nonce_echo != challenge.payload.nonce {
+            return reject("nonce_echo mismatch");
+        }
+        if rp.applicant_compositor_pubkey != rp.cert_payload.applicant_compositor_pubkey {
+            return reject(
+                "response.applicant_compositor_pubkey != cert_payload.applicant_compositor_pubkey",
+            );
+        }
+
+        // Applicant signature over the canonical response bytes.
+        let sig_ok = match (
+            response_canonical_bytes(rp),
+            hex::decode(&rp.applicant_compositor_pubkey),
+            hex::decode(&response.applicant_signature),
+        ) {
+            (Ok(bytes), Ok(pk), Ok(sig)) => gyza_crypto::verify(&pk, &bytes, &sig).is_ok(),
+            _ => false,
+        };
+        if !sig_ok {
+            return reject("applicant signature invalid");
+        }
+
+        // Cert payload sanity.
+        let p = &rp.cert_payload;
+        if p.schema != CERT_SCHEMA {
+            return reject("unsupported cert schema");
+        }
+        if p.eval_version != EVAL_VERSION {
+            return reject("eval_version mismatch");
+        }
+        if p.issued_at_ns.abs_diff(now_ns) > clock_skew_ns.unsigned_abs() {
+            return reject("cert.issued_at_ns outside clock-skew window");
+        }
+        if p.expires_at_ns <= p.issued_at_ns {
+            return reject("cert.expires_at_ns <= issued_at_ns");
+        }
+        if p.expires_at_ns - p.issued_at_ns > MAX_CERT_LIFETIME_NS {
+            return reject("cert lifetime exceeds 90 days");
+        }
+
+        // Pluggable eval-output verification (Python: verify_eval_results).
+        if let Err(reason) = eval_check(response) {
+            return reject(&format!("eval failed: {reason}"));
+        }
+
+        // All checks pass — co-sign the cert payload.
+        match self.cosign(p, now_ns) {
+            Ok(cosig) => ChallengeOutcome {
+                accepted: true,
+                challenge_id: cid.clone(),
+                cosig: Some(cosig),
+                reason: String::new(),
+            },
+            Err(e) => reject(&format!("cosign failed: {e}")),
+        }
     }
 }
 
@@ -1012,6 +1127,121 @@ mod tests {
         assert!(
             gyza_crypto::verify(&pk, &bytes, &sig).is_ok(),
             "applicant's own response signature must verify",
+        );
+    }
+
+    // ---------------------------------------------------------------
+    // Validator::verify_response.
+    // ---------------------------------------------------------------
+
+    /// Build a (validator, applicant, challenge, signed response) tuple
+    /// that should pass verification at `now`. `nonce_echo` and
+    /// `cert_issued_at` are overridable so rejection tests can perturb
+    /// one field at a time.
+    fn verify_fixture(
+        now: i64,
+        nonce_echo: &str,
+        cert_issued_at: i64,
+    ) -> (Validator, Challenge, ChallengeResponse) {
+        let validator = Validator::from_seed(&[5u8; 32]);
+        let applicant = Applicant::from_compositor_seed(&[6u8; 32]);
+        let challenge = validator
+            .issue_challenge(
+                "c1",
+                EVAL_VERSION,
+                vec!["task_a".to_string()],
+                "noncexyz",
+                now,
+                now + 1_000_000,
+            )
+            .unwrap();
+        let app_pk = applicant.compositor_pubkey_hex().to_string();
+        let payload = ChallengeResponsePayload {
+            applicant_agent_pubkey: "ab".repeat(32),
+            applicant_compositor_pubkey: app_pk.clone(),
+            cert_payload: AttestationCertPayload {
+                applicant_compositor_pubkey: app_pk,
+                eval_version: EVAL_VERSION.to_string(),
+                expires_at_ns: cert_issued_at + 1_000_000,
+                issued_at_ns: cert_issued_at,
+                schema: CERT_SCHEMA.to_string(),
+            },
+            challenge_id: "c1".to_string(),
+            eval_results: BTreeMap::new(),
+            nonce_echo: nonce_echo.to_string(),
+        };
+        let response = applicant.sign_response(payload).unwrap();
+        (validator, challenge, response)
+    }
+
+    #[test]
+    fn verify_response_happy_path_cosigns() {
+        let now = 1_700_000_000_000_000_000;
+        let (validator, challenge, response) = verify_fixture(now, "noncexyz", now);
+        let outcome =
+            validator.verify_response(&challenge, &response, now, MAX_CLOCK_SKEW_NS, |_| Ok(()));
+        assert!(outcome.accepted, "rejected: {}", outcome.reason);
+        let cosig = outcome.cosig.expect("accepted outcome must carry a cosig");
+        // The cosig must verify against the cert payload.
+        let bytes = attestation_payload_canonical_bytes(&response.payload.cert_payload).unwrap();
+        let pk = hex::decode(&cosig.validator_pubkey).unwrap();
+        let sig = hex::decode(&cosig.signature).unwrap();
+        assert!(gyza_crypto::verify(&pk, &bytes, &sig).is_ok());
+        assert_eq!(cosig.validator_pubkey, validator.pubkey_hex());
+    }
+
+    #[test]
+    fn verify_response_rejects_nonce_mismatch() {
+        let now = 1_700_000_000_000_000_000;
+        let (validator, challenge, response) = verify_fixture(now, "WRONG-NONCE", now);
+        let outcome =
+            validator.verify_response(&challenge, &response, now, MAX_CLOCK_SKEW_NS, |_| Ok(()));
+        assert!(!outcome.accepted);
+        assert_eq!(outcome.reason, "nonce_echo mismatch");
+        assert!(outcome.cosig.is_none());
+    }
+
+    #[test]
+    fn verify_response_rejects_eval_failure() {
+        let now = 1_700_000_000_000_000_000;
+        let (validator, challenge, response) = verify_fixture(now, "noncexyz", now);
+        let outcome =
+            validator.verify_response(&challenge, &response, now, MAX_CLOCK_SKEW_NS, |_| {
+                Err("task_a output mismatch".to_string())
+            });
+        assert!(!outcome.accepted);
+        assert!(
+            outcome.reason.contains("eval failed")
+                && outcome.reason.contains("task_a output mismatch"),
+            "reason was: {}",
+            outcome.reason,
+        );
+    }
+
+    #[test]
+    fn verify_response_rejects_tampered_applicant_signature() {
+        let now = 1_700_000_000_000_000_000;
+        let (validator, challenge, mut response) = verify_fixture(now, "noncexyz", now);
+        // Flip a byte of the applicant signature.
+        response.applicant_signature.replace_range(0..2, "ff");
+        let outcome =
+            validator.verify_response(&challenge, &response, now, MAX_CLOCK_SKEW_NS, |_| Ok(()));
+        assert!(!outcome.accepted);
+        assert_eq!(outcome.reason, "applicant signature invalid");
+    }
+
+    #[test]
+    fn verify_response_rejects_clock_skew() {
+        let now = 1_700_000_000_000_000_000;
+        // Cert issued 2 hours before "now" — outside the 1h skew window.
+        let cert_issued = now - 2 * 60 * 60 * 1_000_000_000;
+        let (validator, challenge, response) = verify_fixture(now, "noncexyz", cert_issued);
+        let outcome =
+            validator.verify_response(&challenge, &response, now, MAX_CLOCK_SKEW_NS, |_| Ok(()));
+        assert!(!outcome.accepted);
+        assert_eq!(
+            outcome.reason,
+            "cert.issued_at_ns outside clock-skew window"
         );
     }
 
