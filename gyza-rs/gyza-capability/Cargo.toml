@@ -1,0 +1,17 @@
+[package]
+name = "gyza-capability"
+description = "Tier-3 capability attestation types for Gyza. Canonical-JSON over alphabetized fields; byte-for-byte parity with the Python reference implementation (gyza/network/capability_protocol.py)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gyza-crypto = { path = "../gyza-crypto" }
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+hex-literal.workspace = true

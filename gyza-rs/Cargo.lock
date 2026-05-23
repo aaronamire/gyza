@@ -246,6 +246,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "gyza-capability"
+version = "0.1.0-vnext.0"
+dependencies = [
+ "gyza-crypto",
+ "hex",
+ "hex-literal",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "gyza-core"
 version = "0.1.0-vnext.0"
 dependencies = [
