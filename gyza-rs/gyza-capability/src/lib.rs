@@ -14,12 +14,24 @@
 //!   - `AttestationCertPayload`          — the bytes every validator co-signs
 //!   - `ValidatorCosig`                  — one validator's signature
 //!   - `AttestationCert`                 — payload + ≥k cosigs
+//!   - `EvalResult`                      — one task's eval outcome
+//!   - `ChallengeResponsePayload` / `ChallengeResponse` — applicant → validator
 //!   - `challenge_canonical_bytes(...)`
 //!   - `attestation_payload_canonical_bytes(...)`
+//!   - `response_canonical_bytes(...)`
 //!   - `verify_attestation_cert(...)`    — independent consumer-side
 //!     cert verification (schema / applicant / expiry / quorum cosig
 //!     check). Cross-language interop: tests deserialize a
 //!     Python-signed cert and verify it under this Rust function.
+//!
+//! Recursive canonical-JSON note (relevant to `EvalResult` and
+//! `ChallengeResponse`): the embedded `envelope` and the task-specific
+//! `output` dict are typed as `serde_json::Value`. `serde_json::Map`
+//! is `BTreeMap`-backed by default (the `preserve_order` feature is
+//! OFF in this workspace), so its keys serialize in sorted order
+//! recursively. That matches Python's `json.dumps(..., sort_keys=True)`
+//! recursively, which is the byte-parity invariant. Typed map fields
+//! that need sorted keys use `BTreeMap<String, T>` for the same reason.
 //!
 //! Canonical-JSON discipline (mirrors `gyza-icp`):
 //!
@@ -34,13 +46,12 @@
 //!
 //! What is NOT covered yet (next session):
 //!
-//!   - `ChallengeResponse` — depends on porting `EvalResult` from
-//!     `gyza.capability_eval`. Its canonical bytes embed an
-//!     `EvalResult` dict, so we can't byte-parity it until that type
-//!     also ports.
 //!   - `Validator` / `Applicant` state machines (the *signing* side
-//!     of the protocol; the *verifying* side is now in this crate).
+//!     of the protocol; the *verifying* side is in this crate).
 //!   - `run_attestation` orchestration.
+//!   - The full `EvalTask` ecosystem from `gyza.capability_eval` —
+//!     this crate only ports `EvalResult` (the OUTCOME type the wire
+//!     protocol carries), not the task definitions themselves.
 //!
 //! Cross-references:
 //!
@@ -48,9 +59,10 @@
 //!   - `gyza-rs/scripts/regenerate_capability_fixtures.py` — parity fixture
 //!     generator (run before changing any field semantics).
 
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 // ---------------------------------------------------------------------------
 // Protocol constants — mirror gyza/network/capability_protocol.py.
@@ -166,6 +178,72 @@ pub struct AttestationCertPayload {
 /// Python equivalent: `gyza.network.capability_protocol::_payload_canonical_bytes`.
 pub fn attestation_payload_canonical_bytes(
     payload: &AttestationCertPayload,
+) -> Result<Vec<u8>, CapabilityError> {
+    Ok(serde_json::to_vec(payload)?)
+}
+
+// ---------------------------------------------------------------------------
+// EvalResult — one task's outcome carried inside a ChallengeResponse.
+// ---------------------------------------------------------------------------
+
+/// Captured outcome of one eval task during applicant-side execution.
+///
+/// **Field order alphabetical — DO NOT REORDER.** The nested `envelope`
+/// and `output` fields are typed as `serde_json::Value` so their
+/// internal keys serialize sorted (Python `sort_keys=True` recursively).
+/// On the producing side, callers build them via
+/// `serde_json::to_value(&signed_icp_envelope)` or
+/// `serde_json::to_value(&task_specific_output_struct)`. On verifying
+/// side, callers re-deserialize them back to typed structs as needed.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct EvalResult {
+    pub duration_s: f64,
+    /// Optional fully-signed ICP envelope (Python: `ICPEnvelope | None`).
+    /// `None` serializes as `null`, matching Python's behavior.
+    pub envelope: Option<Value>,
+    pub error: String,
+    /// Task-specific output dict (Python: `dict | None`).
+    pub output: Option<Value>,
+    pub output_text: String,
+    pub succeeded: bool,
+    pub task_id: String,
+}
+
+// ---------------------------------------------------------------------------
+// ChallengeResponse — applicant → validator.
+// ---------------------------------------------------------------------------
+
+/// The signed-over portion of a `ChallengeResponse`. Excludes
+/// `applicant_signature`.
+///
+/// **Field order alphabetical — DO NOT REORDER.** `eval_results` uses
+/// `BTreeMap` so task-id keys serialize in sorted order, matching
+/// Python's `sort_keys=True` for the embedded `dict[str, EvalResult]`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChallengeResponsePayload {
+    pub applicant_agent_pubkey: String,
+    pub applicant_compositor_pubkey: String,
+    pub cert_payload: AttestationCertPayload,
+    pub challenge_id: String,
+    pub eval_results: BTreeMap<String, EvalResult>,
+    pub nonce_echo: String,
+}
+
+/// Wire-format `ChallengeResponse` = canonical payload + applicant's
+/// Ed25519 signature. Only the payload is canonicalized for signing.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChallengeResponse {
+    #[serde(flatten)]
+    pub payload: ChallengeResponsePayload,
+    pub applicant_signature: String,
+}
+
+/// Canonical bytes for the applicant's signature on a `ChallengeResponse`.
+///
+/// Python equivalent:
+/// `gyza.network.capability_protocol::_response_canonical_bytes`.
+pub fn response_canonical_bytes(
+    payload: &ChallengeResponsePayload,
 ) -> Result<Vec<u8>, CapabilityError> {
     Ok(serde_json::to_vec(payload)?)
 }
@@ -516,6 +594,178 @@ mod tests {
                 required: 2
             }),
         );
+    }
+
+    // ---------------------------------------------------------------
+    // ChallengeResponse + EvalResult byte-parity.
+    //
+    // Exercises the recursive canonical-JSON paths: BTreeMap key
+    // sorting for eval_results, nested serde_json::Value sorting for
+    // the embedded ICP envelope + task-specific output dicts, and the
+    // Option<Value> → null serialization.
+    // ---------------------------------------------------------------
+
+    fn sample_response_payload() -> ChallengeResponsePayload {
+        // Embedded ICP envelope matching the Python fixture's
+        // ICPEnvelope construction (gyza-rs/scripts/regenerate_capability_fixtures.py).
+        let env = serde_json::json!({
+            "action_id": "act-0001",
+            "agent_pubkey": "bb".repeat(32),
+            "capability_manifest_hash": "cc".repeat(32),
+            "duration_ms": 100,
+            "inference_backend": "mock",
+            "input_hashes": ["0".repeat(64)],
+            "intent_id": "int-0001",
+            "model_identifier": "mock-eval",
+            "output_hash": "dd".repeat(32),
+            "parent_envelope_hash": serde_json::Value::Null,
+            "schema_version": 1,
+            "signature": "ee".repeat(64),
+            "timestamp_ns": 1_700_000_050_000_000_000_i64,
+            "tokens_in": 10,
+            "tokens_out": 20,
+        });
+
+        let mut eval_results: BTreeMap<String, EvalResult> = BTreeMap::new();
+        // Keys deliberately inserted out of sorted order — BTreeMap
+        // re-orders them. The byte-parity test catches any HashMap
+        // regression on this path.
+        eval_results.insert(
+            "task_b".to_string(),
+            EvalResult {
+                duration_s: 0.5,
+                envelope: None,
+                error: String::new(),
+                output: Some(serde_json::json!({
+                    "count": 3,
+                    "extensions": [".py", ".md"],
+                })),
+                output_text: "ok".to_string(),
+                succeeded: true,
+                task_id: "task_b".to_string(),
+            },
+        );
+        eval_results.insert(
+            "task_a".to_string(),
+            EvalResult {
+                duration_s: 1.5,
+                envelope: Some(env),
+                error: String::new(),
+                output: Some(serde_json::json!({
+                    "sum": 44,
+                    "items": [3, 7, 11, 23],
+                })),
+                output_text: "computed".to_string(),
+                succeeded: true,
+                task_id: "task_a".to_string(),
+            },
+        );
+
+        ChallengeResponsePayload {
+            applicant_agent_pubkey: "bb".repeat(32),
+            applicant_compositor_pubkey: "cc".repeat(32),
+            cert_payload: AttestationCertPayload {
+                applicant_compositor_pubkey: "cc".repeat(32),
+                eval_version: "v1".to_string(),
+                expires_at_ns: 1_700_001_000_000_000_000,
+                issued_at_ns: 1_700_000_000_000_000_000,
+                schema: CERT_SCHEMA.to_string(),
+            },
+            challenge_id: "chal-0001".to_string(),
+            eval_results,
+            nonce_echo: "00112233445566778899aabbccddeeff".to_string(),
+        }
+    }
+
+    /// Byte-parity: Rust response_canonical_bytes must match Python
+    /// _response_canonical_bytes output exactly, including
+    /// (a) BTreeMap eval_results sorting, (b) recursive sort_keys on
+    /// the embedded envelope + output dicts, (c) None → null.
+    /// Fixture from regenerate_capability_fixtures.py (1554 bytes).
+    #[test]
+    fn response_canonical_bytes_parity_with_python() {
+        let payload = sample_response_payload();
+        let bytes = response_canonical_bytes(&payload).unwrap();
+        let expected_hex = concat!(
+            "7b226170706c6963616e745f6167656e745f7075626b6579223a226262626262",
+            "6262626262626262626262626262626262626262626262626262626262626262",
+            "626262626262626262626262626262626262626262626262626262222c226170",
+            "706c6963616e745f636f6d706f7369746f725f7075626b6579223a2263636363",
+            "6363636363636363636363636363636363636363636363636363636363636363",
+            "63636363636363636363636363636363636363636363636363636363222c2263",
+            "6572745f7061796c6f6164223a7b226170706c6963616e745f636f6d706f7369",
+            "746f725f7075626b6579223a2263636363636363636363636363636363636363",
+            "6363636363636363636363636363636363636363636363636363636363636363",
+            "63636363636363636363636363222c226576616c5f76657273696f6e223a2276",
+            "31222c22657870697265735f61745f6e73223a31373030303031303030303030",
+            "3030303030302c226973737565645f61745f6e73223a31373030303030303030",
+            "3030303030303030302c22736368656d61223a2267797a612e61747465737461",
+            "74696f6e2e74696572332f7631227d2c226368616c6c656e67655f6964223a22",
+            "6368616c2d30303031222c226576616c5f726573756c7473223a7b227461736b",
+            "5f61223a7b226475726174696f6e5f73223a312e352c22656e76656c6f706522",
+            "3a7b22616374696f6e5f6964223a226163742d30303031222c226167656e745f",
+            "7075626b6579223a226262626262626262626262626262626262626262626262",
+            "6262626262626262626262626262626262626262626262626262626262626262",
+            "626262626262626262222c226361706162696c6974795f6d616e69666573745f",
+            "68617368223a2263636363636363636363636363636363636363636363636363",
+            "6363636363636363636363636363636363636363636363636363636363636363",
+            "63636363636363222c226475726174696f6e5f6d73223a3130302c22696e6665",
+            "72656e63655f6261636b656e64223a226d6f636b222c22696e7075745f686173",
+            "686573223a5b2230303030303030303030303030303030303030303030303030",
+            "3030303030303030303030303030303030303030303030303030303030303030",
+            "30303030303030225d2c22696e74656e745f6964223a22696e742d3030303122",
+            "2c226d6f64656c5f6964656e746966696572223a226d6f636b2d6576616c222c",
+            "226f75747075745f68617368223a226464646464646464646464646464646464",
+            "6464646464646464646464646464646464646464646464646464646464646464",
+            "646464646464646464646464646464222c22706172656e745f656e76656c6f70",
+            "655f68617368223a6e756c6c2c22736368656d615f76657273696f6e223a312c",
+            "227369676e6174757265223a2265656565656565656565656565656565656565",
+            "6565656565656565656565656565656565656565656565656565656565656565",
+            "6565656565656565656565656565656565656565656565656565656565656565",
+            "6565656565656565656565656565656565656565656565656565656565656565",
+            "65656565656565656565656565222c2274696d657374616d705f6e73223a3137",
+            "30303030303035303030303030303030302c22746f6b656e735f696e223a3130",
+            "2c22746f6b656e735f6f7574223a32307d2c226572726f72223a22222c226f75",
+            "74707574223a7b226974656d73223a5b332c372c31312c32335d2c2273756d22",
+            "3a34347d2c226f75747075745f74657874223a22636f6d7075746564222c2273",
+            "7563636565646564223a747275652c227461736b5f6964223a227461736b5f61",
+            "227d2c227461736b5f62223a7b226475726174696f6e5f73223a302e352c2265",
+            "6e76656c6f7065223a6e756c6c2c226572726f72223a22222c226f7574707574",
+            "223a7b22636f756e74223a332c22657874656e73696f6e73223a5b222e707922",
+            "2c222e6d64225d7d2c226f75747075745f74657874223a226f6b222c22737563",
+            "636565646564223a747275652c227461736b5f6964223a227461736b5f62227d",
+            "7d2c226e6f6e63655f6563686f223a2230303131323233333434353536363737",
+            "38383939616162626363646465656666227d",
+        );
+        let expected = hex::decode(expected_hex).expect("test fixture must be valid hex");
+        assert_eq!(
+            bytes.len(),
+            expected.len(),
+            "length mismatch (rust={}, python={})",
+            bytes.len(),
+            expected.len(),
+        );
+        assert_eq!(
+            bytes, expected,
+            "response_canonical_bytes diverged from Python; \
+             regenerate fixtures with scripts/regenerate_capability_fixtures.py",
+        );
+    }
+
+    /// The full ChallengeResponse (payload + applicant_signature) is a
+    /// wire format — its serialization order isn't byte-parity-tested
+    /// (only the canonical payload matters for signing). But it must
+    /// roundtrip cleanly through serde so deserialization works on the
+    /// validator side.
+    #[test]
+    fn challenge_response_wire_roundtrip() {
+        let resp = ChallengeResponse {
+            payload: sample_response_payload(),
+            applicant_signature: "deadbeef".to_string(),
+        };
+        let json = serde_json::to_string(&resp).unwrap();
+        let back: ChallengeResponse = serde_json::from_str(&json).unwrap();
+        assert_eq!(resp, back);
     }
 
     /// Sanity: cert structure roundtrips with multiple cosigs.

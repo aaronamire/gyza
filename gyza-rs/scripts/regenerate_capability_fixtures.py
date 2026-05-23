@@ -31,14 +31,18 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (  # noqa: E402
     Ed25519PrivateKey,
 )
 
+from gyza.icp import ICPEnvelope  # noqa: E402
 from gyza.network.capability_protocol import (  # noqa: E402
     CERT_SCHEMA,
     AttestationCert,
     AttestationCertPayload,
     Challenge,
+    ChallengeResponse,
+    EvalResult,
     ValidatorCosig,
     _challenge_canonical_bytes,
     _payload_canonical_bytes,
+    _response_canonical_bytes,
     make_seed_signer,
 )
 
@@ -142,6 +146,74 @@ def main() -> int:
     print(f"# expires_at_ns              = {cert_payload.expires_at_ns}")
     for i, c in enumerate(cert.validator_cosigs, start=1):
         print(f"# validator_pubkey[{i}]       = {c.validator_pubkey}")
+
+    # ------------------------------------------------------------------
+    # Fixture 4: response_canonical_bytes
+    #
+    # Two EvalResults inside a ChallengeResponse exercise the recursive
+    # canonical-JSON paths:
+    #   - dict[str, EvalResult] key sorting (task_b before task_a alpha)
+    #   - one EvalResult with envelope=None (null serialization)
+    #   - one EvalResult with envelope=ICPEnvelope (nested struct,
+    #     signature in its alphabetical position)
+    #   - output: dict with multiple keys (recursive sort)
+    # ------------------------------------------------------------------
+    env = ICPEnvelope(
+        intent_id="int-0001",
+        action_id="act-0001",
+        agent_pubkey="bb" * 32,
+        capability_manifest_hash="cc" * 32,
+        input_hashes=["00" * 32],
+        output_hash="dd" * 32,
+        parent_envelope_hash=None,
+        timestamp_ns=1_700_000_050_000_000_000,
+        inference_backend="mock",
+        model_identifier="mock-eval",
+        duration_ms=100,
+        tokens_in=10,
+        tokens_out=20,
+        schema_version=1,
+        signature="ee" * 64,
+    )
+    eval_results = {
+        # Keys deliberately NOT in sorted order in the source; Python's
+        # sort_keys=True (and Rust's BTreeMap) will re-sort on output.
+        "task_b": EvalResult(
+            task_id="task_b",
+            succeeded=True,
+            output={"extensions": [".py", ".md"], "count": 3},
+            output_text="ok",
+            envelope=None,
+            duration_s=0.5,
+            error="",
+        ),
+        "task_a": EvalResult(
+            task_id="task_a",
+            succeeded=True,
+            output={"sum": 44, "items": [3, 7, 11, 23]},
+            output_text="computed",
+            envelope=env,
+            duration_s=1.5,
+            error="",
+        ),
+    }
+    response = ChallengeResponse(
+        challenge_id="chal-0001",
+        applicant_compositor_pubkey="cc" * 32,
+        applicant_agent_pubkey="bb" * 32,
+        cert_payload=AttestationCertPayload(
+            schema=CERT_SCHEMA,
+            applicant_compositor_pubkey="cc" * 32,
+            eval_version="v1",
+            issued_at_ns=1_700_000_000_000_000_000,
+            expires_at_ns=1_700_001_000_000_000_000,
+        ),
+        eval_results=eval_results,
+        nonce_echo="00112233445566778899aabbccddeeff",
+        # applicant_signature default "" — _response_canonical_bytes pops it.
+    )
+    rb = _response_canonical_bytes(response)
+    _print_hex("response_canonical_bytes", rb)
 
     print()
     return 0
