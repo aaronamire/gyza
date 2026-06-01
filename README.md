@@ -32,7 +32,15 @@ gyza submit "In one sentence, what is a Merkle tree?"
 # 4. Local demos — no network needed.
 gyza demo pipeline        # two agents, a signed provenance chain
 gyza demo injection       # tamper a chain, re-verify — watch it fail
-gyza demo global          # two nodes settle a job end-to-end (~30s)
+gyza demo global --fast   # two nodes, a real comms blackout, and a
+                          # 2-envelope signed chain that verifies across
+                          # the blackout (~22 s; drop --fast for ~110 s
+                          # with full SentenceTransformer warmup)
+gyza demo bounds          # offline bounds-proof demo: a bubblewrap-
+                          # sandboxed task is signed, an adversary tries
+                          # to forge the enforcement record (caught), and
+                          # a deliberately-wider sandbox is refused.
+                          # No daemon, no network, no API key. ~2 s.
 ```
 
 `gyza submit` is the product; step 2 just brings your node onto the
@@ -181,10 +189,17 @@ result — self-reported tiers are never trusted.
 |---|---|---|
 | **Python** (`gyza/`) | Execution, identity, ICP, ledger, sandbox, CLI | full |
 | **Go** (`netd/`) | The libp2p daemon | full |
-| **Rust** (`gyza-rs/`) | Reference implementation, 6 of ~8 crates | in progress |
+| **Rust** (`gyza-rs/`) | Reference implementation, 7 of ~8 crates | in progress |
 
 Byte-parity is asserted across implementations for hashing,
-signatures, key derivation, canonical encodings, and settlement.
+signatures, key derivation, canonical encodings, settlement entries,
+and the Tier-3 capability protocol — including the recursive
+canonical-JSON of nested arbitrary maps inside `ChallengeResponse`.
+For Ed25519 cosigs on attestation certs the parity is stronger than
+"mutually verifiable": Rust and Python produce **byte-identical
+signatures** for the same seed and payload (RFC 8032 is
+deterministic; the byte parity holds all the way through). A Rust
+validator and a Python validator are interchangeable in a quorum.
 
 ---
 
@@ -246,8 +261,9 @@ cd netd && go test ./... -count=1 -timeout=120s
 cd gyza-rs && cargo test --workspace
 ```
 
-~560 Python fast tests + the Go suite + the Rust workspace. CI
-runs the fast slice and the Go/Rust suites on every push.
+~560 Python fast tests + the Go suite + the Rust workspace
+(~94 tests across 7 crates). CI runs the fast slice and the
+Go/Rust suites on every push.
 
 ---
 
