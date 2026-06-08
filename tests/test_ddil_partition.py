@@ -128,6 +128,17 @@ def test_merge_associativity_on_real_scenario_envelopes():
     assert left.canonical_bytes() == r.converged_canonical
 
 
+def test_unified_audit_passes_on_scenario():
+    r = run_demo(verbose=False, sandbox_mode="construct")
+    assert r.audit_report.valid, r.audit_report.summary
+    # The synthesis + both branches' work are bounded executions; the two
+    # pre-partition actions are coordination.
+    execs = [a for a in r.audit_report.actions if a.is_execution]
+    coords = [a for a in r.audit_report.actions if not a.is_execution]
+    assert len(execs) == 5 and len(coords) == 2
+    assert all(a.ok for a in r.audit_report.actions)
+
+
 def test_verify_delegation_holds_on_scenario():
     r = run_demo(verbose=False, sandbox_mode="construct")
     ok, why = verify_delegation(r.delegation_hops)

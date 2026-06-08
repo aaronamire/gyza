@@ -641,6 +641,30 @@ class Blackboard:
             return None
         return ICPEnvelope(**json.loads(row["payload_json"]))
 
+    def reconstruct_dag(self, intent_id: str) -> "list":
+        """
+        Return every ICP envelope logged under ``intent_id`` — the node
+        set of that workflow's provenance DAG.
+
+        Unlike ``reconstruct_chain`` (which walks ``parent_id`` to a
+        single linear path, one envelope per work item), this returns the
+        full multi-parent graph's nodes so ``gyza.icp.verify_dag`` can
+        rebuild the edges (causal spine + data dependencies) and validate
+        fan-out / fork / fan-in as one structure. Storage only — the
+        caller verifies, keeping storage and verification separate.
+
+        Uses the ``idx_icp_intent`` index. Order is by ``timestamp_ns``
+        for stable iteration; verify_dag re-derives a deterministic
+        content-addressed topological order regardless.
+        """
+        from gyza.icp import ICPEnvelope
+        rows = self._conn().execute(
+            "SELECT payload_json FROM icp_envelopes WHERE intent_id=? "
+            "ORDER BY timestamp_ns ASC",
+            (intent_id,),
+        ).fetchall()
+        return [ICPEnvelope(**json.loads(r["payload_json"])) for r in rows]
+
     def reconstruct_chain(self, work_item_id: str) -> "tuple[list, str]":
         """
         Walk parent_id back from ``work_item_id`` to its lineage_root,

@@ -50,6 +50,7 @@ from dataclasses import dataclass, field
 
 import blake3
 
+from gyza.audit import AuditReport, audit_provenance
 from gyza.demo.control_plane import ControlPlane, QuorumError
 from gyza.demo.coordination_plane import CoordinationState
 from gyza.demo.gossip import GossipNode, Network, run_until_converged
@@ -133,18 +134,23 @@ def _enforcement_record(cfg: SandboxConfig, *, real: bool) -> dict:
     return rec
 
 
-def _fold_artifact(text: str, enforcement: dict | None) -> str:
+def _fold_bytes(text: str, enforcement: dict | None) -> bytes:
     """
     Mirror of ``gyza.runner.AgentRunner._execute`` artifact construction:
     fold the enforcement record INTO the hashed artifact so the
     envelope's ``output_hash`` — and thus its signature — commits to it.
     That is what makes the bounds tamper-evident rather than a side claim.
+    Returns the canonical artifact bytes (the content-addressed object the
+    audit later resolves by ``output_hash``).
     """
     obj: dict = {"text": text}
     if enforcement is not None:
         obj["__enforcement__"] = enforcement
-    canonical = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
-    return blake3.blake3(canonical).hexdigest()
+    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
+
+
+def _fold_artifact(text: str, enforcement: dict | None) -> str:
+    return blake3.blake3(_fold_bytes(text, enforcement)).hexdigest()
 
 
 # ----------------------------------------------------------------------
@@ -155,6 +161,7 @@ def _fold_artifact(text: str, enforcement: dict | None) -> str:
 class DemoResult:
     envelopes: list[ICPEnvelope]
     dag: DagVerification
+    audit_report: AuditReport
     node_states: dict[str, CoordinationState]
     delegation_hops: list[DelegationHop]
     audit: dict[str, tuple[str, dict, dict]]  # action_id -> (text, enf, manifest)
@@ -254,13 +261,22 @@ def run_demo(
         control = {n: ControlPlane(n, net) for n in NODE_IDS}
 
         audit: dict[str, tuple[str, dict, dict]] = {}
+        # Content-addressed artifact + manifest stores, populated as the
+        # workflow runs. These feed the unified audit (section 8): the
+        # resolvers a third party would use to re-verify everything.
+        artifacts: dict[str, bytes] = {}
+        manifests: dict[str, dict] = {
+            coordinator.manifest_hash: coord_manifest,
+            subcontractor.manifest_hash: sub_manifest,
+        }
 
         def sign_exec(
             identity: AgentIdentity, action_id: str,
             parent: ICPEnvelope | None, enforcement: dict, manifest: dict,
             text: str, inputs: list[str] | None = None,
         ) -> ICPEnvelope:
-            out_hash = _fold_artifact(text, enforcement)
+            art = _fold_bytes(text, enforcement)
+            out_hash = blake3.blake3(art).hexdigest()
             # Default data edge is the causal parent's hash; a synthesis
             # action passes explicit ``inputs`` (multiple producers'
             # output_hashes) to express fan-in.
@@ -278,19 +294,23 @@ def run_demo(
                 duration_ms=0, tokens_in=0, tokens_out=0,
             )
             audit[action_id] = (text, enforcement, manifest)
+            artifacts[out_hash] = art
             return env
 
         def sign_coord(action_id: str, parent: ICPEnvelope | None,
                        text: str) -> ICPEnvelope:
             # Pure coordination action (no sandboxed execution).
+            art = _fold_bytes(text, None)
+            out_hash = blake3.blake3(art).hexdigest()
             env = coordinator.get_icp_signer().sign_action(
                 intent_id=INTENT_ID, action_id=action_id,
                 input_hashes=["00" * 32] if parent is None
                 else [compute_envelope_hash(parent)],
-                output_hash=_fold_artifact(text, None), parent_envelope=parent,
+                output_hash=out_hash, parent_envelope=parent,
                 inference_backend="mock", model_identifier="mock",
                 duration_ms=0, tokens_in=0, tokens_out=0,
             )
+            artifacts[out_hash] = art
             return env
 
         # =================================================================
@@ -508,10 +528,29 @@ def run_demo(
                f"signature: {'YES ✓' if per_action_ok else 'NO ✗'}")
         t.line()
 
+        # =================================================================
+        t.head("8.  UNIFIED AUDIT  —  one call, one verdict")
+        # The product surface: a third party with only the envelopes plus
+        # content-addressed resolvers for artifacts and manifests gets a
+        # single forensic verdict (graph intact + every execution within
+        # bounds + tamper-evident binding) — no trust in any node.
+        report = audit_provenance(
+            all_envs,
+            resolve_artifact=artifacts.get,
+            resolve_manifest=manifests.get,
+            require_closed=True,
+        )
+        t.line(f"  audit_provenance(): {report.summary}")
+        for row in report.actions:
+            tag = ("execution" if row.is_execution else "coordination")
+            status = "✓" if row.ok else f"✗ {row.reason}"
+            t.line(f"    [{tag:12}] {row.action_id:24} {status}")
+        t.line()
+
         verdict_ok = (
             all_converged and no_loss and all_chains_ok and dag.valid
-            and deleg_ok and per_action_ok and over_bound_rejected
-            and minority_paused and majority_active
+            and deleg_ok and per_action_ok and report.valid
+            and over_bound_rejected and minority_paused and majority_active
         )
         t.head("VERDICT")
         if verdict_ok:
@@ -532,6 +571,7 @@ def run_demo(
         return DemoResult(
             envelopes=[e0, e1, e2M, e3M, e2m, e3m, e6],
             dag=dag,
+            audit_report=report,
             node_states={n: s.state for n, s in data.items()},
             delegation_hops=[hop0, hop1],
             audit=audit,
@@ -559,6 +599,7 @@ def main(argv: list[str] | None = None) -> int:
     ok = (
         result.all_nodes_converged
         and result.dag.valid
+        and result.audit_report.valid
         and len(result.dag.leaves) == 1
         and result.over_bound_rejected
         and result.minority_control_paused

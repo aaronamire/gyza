@@ -91,6 +91,31 @@ usable in contested or disconnected environments. Authority is
 centralized where accountability demands it; availability is
 decentralized where operations demand it.
 
+## One audit, one verdict
+
+The point of all of the above is a single product surface:
+`gyza.audit.audit_provenance`. Given a workflow's envelopes plus
+content-addressed resolvers for the artifacts and manifests they
+reference — exactly what a third party would have — it returns one
+forensic verdict with no trust in any node:
+
+* the provenance graph is intact (`verify_dag`: signatures, acyclicity,
+  closed linkage);
+* every executed action stayed within the bounds its manifest authorized
+  (`enforcement_satisfies_manifest`);
+* each action's signed `output_hash` actually commits to the artifact
+  audited (content-address binding — a forged enforcement record can't be
+  swapped in after signing), and the manifest it names is the one
+  resolved (`manifest_hash_hex` binding);
+* a *withheld* artifact fails closed rather than passing silently.
+
+It composes the real verifiers; it reimplements none of them. In
+production the resolvers are wired to the SQLite blackboard
+(`Blackboard.reconstruct_dag(intent_id)` returns the workflow's DAG
+nodes from the envelope log; the artifact store resolves the rest), so
+any stored multi-agent workflow can be audited the same way the demo
+audits its in-memory one.
+
 ## The honest claim
 
 This demo proves three things, each with a **real** production function
@@ -153,6 +178,10 @@ picture*.
 | `gossip.py` | `Network` (partition state) + pull-based anti-entropy |
 | `control_plane.py` | Quorum-gated grant authority (the CP half) |
 | `ddil_partition.py` | The five-node scenario + narrated transcript |
+
+Supporting production code (outside this dir): `gyza/icp.py::verify_dag`
+(multi-parent provenance verifier), `gyza/audit.py` (the unified audit),
+`gyza/blackboard.py::reconstruct_dag` (DAG nodes from the envelope log).
 
 Tests: `tests/test_ddil_coordination_plane.py` (CRDT laws),
 `tests/test_ddil_control_plane.py` (quorum + gossip),
