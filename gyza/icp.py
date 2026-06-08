@@ -21,6 +21,7 @@ inserts it after signing. Hashing is BLAKE3 throughout.
 """
 from __future__ import annotations
 
+import heapq
 import json
 import time
 from dataclasses import asdict, dataclass, field
@@ -129,6 +130,160 @@ def verify_chain(envelopes: list[ICPEnvelope]) -> tuple[bool, int]:
             return False, i
 
     return True, -1
+
+
+# ---------------------------------------------------------------------------
+# DAG-native provenance (the multi-parent generalization of verify_chain)
+# ---------------------------------------------------------------------------
+#
+# verify_chain validates a *linear* history. Real agent work is a DAG:
+# fan-out (one task spawns many), fan-in (a synthesis step consumes
+# several results), and concurrent branches (a partition fork, as in
+# gyza.demo.ddil_partition). The ICPEnvelope schema is ALREADY capable
+# of expressing this — `input_hashes` is a list — so DAG provenance
+# needs no schema change and no re-signing: only a verifier that treats
+# the existing fields as a graph. Two edge kinds, both pointing from an
+# envelope to an EARLIER one it depends on:
+#
+#   * causal spine — `parent_envelope_hash` (an agent's own prior
+#     action; single-parent, the verify_chain edge);
+#   * data dependency — each `input_hashes` entry that resolves to a
+#     held envelope's `output_hash` (a cross-agent dependency; this is
+#     how fan-in is expressed).
+#
+# This is deliberately additive: _payload_bytes / sign_envelope /
+# compute_envelope_hash are untouched, so existing signatures and the
+# Rust byte-parity fixtures are unaffected.
+
+
+@dataclass
+class DagVerification:
+    """Outcome of ``verify_dag``.
+
+    ``topo_order`` is a deterministic (Kahn + content-address tie-break)
+    root-first linearization, so two replicas holding the same envelope
+    set produce a byte-identical order. ``roots`` have no held
+    dependency; ``leaves`` are depended upon by nothing held.
+    """
+    valid: bool
+    reason: str
+    topo_order: list["ICPEnvelope"]
+    roots: list[str]
+    leaves: list[str]
+
+
+def _provenance_parents(
+    by_hash: "dict[str, ICPEnvelope]",
+    by_output: "dict[str, str]",
+) -> "dict[str, set[str]]":
+    """The dependency-parent set per envelope hash, unioning the causal
+    spine and the resolved data edges. Self-edges are dropped (an
+    envelope whose input happens to equal its own output)."""
+    parents: dict[str, set[str]] = {h: set() for h in by_hash}
+    for h, env in by_hash.items():
+        p = env.parent_envelope_hash
+        if p is not None and p in by_hash:
+            parents[h].add(p)
+        for ih in env.input_hashes:
+            producer = by_output.get(ih)
+            if producer is not None and producer != h:
+                parents[h].add(producer)
+    return parents
+
+
+def _topo_order(parents: "dict[str, set[str]]") -> "list[str] | None":
+    """Kahn topological sort with a content-address (hash) tie-break for
+    determinism. Returns ``None`` iff the graph has a cycle."""
+    indeg = {h: len(ps) for h, ps in parents.items()}
+    children: dict[str, list[str]] = {h: [] for h in parents}
+    for h, ps in parents.items():
+        for p in ps:
+            children[p].append(h)
+    ready = [h for h, d in indeg.items() if d == 0]
+    heapq.heapify(ready)
+    order: list[str] = []
+    while ready:
+        h = heapq.heappop(ready)
+        order.append(h)
+        for c in sorted(children[h]):
+            indeg[c] -= 1
+            if indeg[c] == 0:
+                heapq.heappush(ready, c)
+    if len(order) != len(parents):
+        return None
+    return order
+
+
+def verify_dag(
+    envelopes: "list[ICPEnvelope]",
+    *,
+    require_closed: bool = False,
+) -> DagVerification:
+    """
+    Verify a provenance DAG — the multi-parent generalization of
+    ``verify_chain``.
+
+    Per envelope (the verify_chain invariants, lifted to a graph): the
+    signature must verify under ``agent_pubkey`` and ``input_hashes``
+    must be non-empty. The union of spine + data edges must be acyclic
+    — a data-dependency cycle (two agents each consuming the other's
+    output) is a mutual-farm corruption, the same class the delegation
+    cycle guard defends, and is reachable with perfectly valid
+    signatures, so the check is load-bearing rather than defensive.
+
+    ``require_closed=True`` demands every non-``None``
+    ``parent_envelope_hash`` resolve to a held envelope. This recovers
+    verify_chain's tamper/loss detection in DAG form: altering a
+    predecessor changes its content address, orphaning its child, which
+    then surfaces as a missing spine parent. With ``require_closed=
+    False`` a dangling spine parent is permitted (the node becomes a
+    root) so partial replicas mid-gossip still verify what they hold.
+
+    A linear chain is the special case of a single spine path with one
+    root and one leaf.
+    """
+    by_hash: dict[str, ICPEnvelope] = {}
+    for env in envelopes:
+        by_hash[compute_envelope_hash(env)] = env
+
+    for h, env in by_hash.items():
+        pk = _pubkey_bytes_of(env)
+        if pk is None or len(pk) != 32:
+            return DagVerification(False, f"{h[:12]}: pubkey not 32-byte hex",
+                                   [], [], [])
+        if not verify_envelope(env, pk):
+            return DagVerification(False, f"{h[:12]}: signature invalid",
+                                   [], [], [])
+        if not env.input_hashes:
+            return DagVerification(False, f"{h[:12]}: input_hashes empty",
+                                   [], [], [])
+        if (require_closed and env.parent_envelope_hash is not None
+                and env.parent_envelope_hash not in by_hash):
+            return DagVerification(
+                False,
+                f"{h[:12]}: spine parent {env.parent_envelope_hash[:12]} "
+                f"not held (DAG not closed — predecessor lost or altered)",
+                [], [], [],
+            )
+
+    # output_hash -> producing envelope hash (first producer wins on the
+    # rare duplicate-output case; deterministic via sorted iteration).
+    by_output: dict[str, str] = {}
+    for h in sorted(by_hash):
+        by_output.setdefault(by_hash[h].output_hash, h)
+
+    parents = _provenance_parents(by_hash, by_output)
+    order = _topo_order(parents)
+    if order is None:
+        return DagVerification(False, "provenance cycle detected", [], [], [])
+
+    consumed: set[str] = set()
+    for ps in parents.values():
+        consumed |= ps
+    roots = sorted(h for h, ps in parents.items() if not ps)
+    leaves = sorted(h for h in by_hash if h not in consumed)
+    return DagVerification(True, "ok", [by_hash[h] for h in order],
+                           roots, leaves)
 
 
 def injection_breaks_chain(
@@ -453,6 +608,8 @@ __all__ = [
     "sign_envelope",
     "verify_envelope",
     "verify_chain",
+    "verify_dag",
+    "DagVerification",
     "verify_chain_multi_compositor",
     "generate_chain_report",
     "injection_breaks_chain",
