@@ -54,6 +54,30 @@ plane, not a defect. Reconciliation keeps *both* branches, each
 independently verifiable, ordered by the ICP parent-hash chain (never
 by wall-clock). The branches share their common prefix exactly.
 
+## Provenance is a DAG, not a chain
+
+Real agent work isn't linear. It fans out (one task spawns many),
+forks (a partition), and **fans in** (a synthesis step consumes several
+results). The provenance model reflects this: an envelope has two kinds
+of dependency edge — its **causal spine** (`parent_envelope_hash`, an
+agent's own prior action) and its **data dependencies** (each
+`input_hashes` entry that resolves to another envelope's `output_hash`).
+Together they form a directed acyclic graph.
+
+`gyza.icp.verify_dag` validates that whole graph as a unit: every
+signature, acyclicity (a data-dependency cycle between two agents is a
+mutual-farm corruption, and is rejected), and a deterministic
+topological order so every replica reconstructs it identically. This is
+the multi-parent generalization of `verify_chain`; a linear chain is
+just the special case with one root and one leaf. No envelope schema
+change was needed — `input_hashes` was already a list.
+
+The demo shows both views after the heal: the **causal-spine view**
+still shows two forked branches, while the coordinator then performs a
+**fan-in synthesis** consuming both branch tips, and `verify_dag`
+re-joins the fork into a single auditable result (one root, one leaf) —
+a shape the linear chain could never express.
+
 ## The trust root is government-controlled — on purpose
 
 The control plane's grant authority is anchored in a trust root that a
@@ -75,8 +99,10 @@ This demo proves three things, each with a **real** production function
 1. **DDIL-native coordination** — the data plane stays available on both
    sides of the partition; the control plane pauses correctly on the
    minority side.
-2. **Forensic auditability** — `gyza.icp.verify_chain` validates the
-   merged history end to end; the envelope count proves zero loss.
+2. **Forensic auditability** — `gyza.icp.verify_chain` validates each
+   forked branch and `gyza.icp.verify_dag` validates the full multi-parent
+   provenance graph (including the fan-in synthesis) end to end; the
+   envelope count proves zero loss.
 3. **Capability-bounds enforcement** — `enforcement_satisfies_manifest`
    (the brick-3 signing gate) refuses an over-budget action *locally,
    with no quorum and no peers*, and
@@ -98,6 +124,9 @@ picture*.
   brick-3 gate `enforcement_satisfies_manifest`; the compositional
   verifier `verify_delegation`; `DelegationGrant` signing/verification;
   agent issuance and manifest signing. None of these were touched.
+  `verify_dag` was *added* to `icp.py` — purely additive, leaving the
+  signing path (`_payload_bytes` / `sign_envelope` /
+  `compute_envelope_hash`) and its Rust byte-parity fixtures untouched.
 * **Real bubblewrap, when present:** in the default (`auto`) mode each
   bounded execution runs in an actual `bwrap` sandbox and the host
   stamps the enforcement record. With `--construct`, the record is

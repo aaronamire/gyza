@@ -65,9 +65,11 @@ from gyza.economy.delegation import (
     verify_grant,
 )
 from gyza.icp import (
+    DagVerification,
     ICPEnvelope,
     compute_envelope_hash,
     verify_chain,
+    verify_dag,
 )
 from gyza.identity import AgentIdentity, LocalCompositor
 from gyza.release import CURRENT_RELEASE as _CURRENT_RELEASE
@@ -152,6 +154,7 @@ def _fold_artifact(text: str, enforcement: dict | None) -> str:
 @dataclass
 class DemoResult:
     envelopes: list[ICPEnvelope]
+    dag: DagVerification
     node_states: dict[str, CoordinationState]
     delegation_hops: list[DelegationHop]
     audit: dict[str, tuple[str, dict, dict]]  # action_id -> (text, enf, manifest)
@@ -255,13 +258,21 @@ def run_demo(
         def sign_exec(
             identity: AgentIdentity, action_id: str,
             parent: ICPEnvelope | None, enforcement: dict, manifest: dict,
-            text: str,
+            text: str, inputs: list[str] | None = None,
         ) -> ICPEnvelope:
             out_hash = _fold_artifact(text, enforcement)
+            # Default data edge is the causal parent's hash; a synthesis
+            # action passes explicit ``inputs`` (multiple producers'
+            # output_hashes) to express fan-in.
+            if inputs is not None:
+                in_hashes = list(inputs)
+            elif parent is None:
+                in_hashes = ["00" * 32]
+            else:
+                in_hashes = [compute_envelope_hash(parent)]
             env = identity.get_icp_signer().sign_action(
                 intent_id=INTENT_ID, action_id=action_id,
-                input_hashes=["00" * 32] if parent is None
-                else [compute_envelope_hash(parent)],
+                input_hashes=in_hashes,
                 output_hash=out_hash, parent_envelope=parent,
                 inference_backend="mock", model_identifier="mock",
                 duration_ms=0, tokens_in=0, tokens_out=0,
@@ -408,11 +419,25 @@ def run_demo(
         t.line()
 
         # =================================================================
-        t.head("6.  HEAL + DETERMINISTIC RECONCILIATION")
+        t.head("6.  HEAL + DETERMINISTIC RECONCILIATION + FAN-IN")
         net.heal()
         rounds = run_until_converged(list(data.values()))
         t.line(f"  partition healed; gossip reconciled in {rounds} rounds.")
-        # Every node converged to byte-identical state?
+
+        # The coordinator can now see BOTH branches, so it synthesizes a
+        # single result that consumes them. This is genuine FAN-IN,
+        # expressed through input_hashes (the two branch tips' outputs) —
+        # the shape a linear chain structurally cannot represent.
+        e6 = sign_exec(
+            coordinator, "W2-synthesize-results", e3M, ec, coord_manifest,
+            "synthesis of both partition branches",
+            inputs=[e3m.output_hash, e3M.output_hash],
+        )
+        data[COORDINATOR_NODE].record(e6)
+        rounds += run_until_converged(list(data.values()))
+        t.line("  coordinator synthesized both branches into one result "
+               "(fan-in via data edges).")
+
         canonicals = {n: s.state.canonical_bytes() for n, s in data.items()}
         ref = canonicals[COORDINATOR_NODE]
         all_converged = all(c == ref for c in canonicals.values())
@@ -423,23 +448,38 @@ def run_demo(
         # =================================================================
         t.head("7.  INDEPENDENT VERIFICATION OF THE MERGED HISTORY")
         merged = data[COORDINATOR_NODE].state
-        chains = merged.linear_chains()
+        all_envs = merged.envelopes()
         total_envs = len(merged)
-        expected = 6  # e0,e1,e2M,e3M,e2m,e3m
+        expected = 7  # e0,e1,e2M,e3M,e2m,e3m,e6
         no_loss = total_envs == expected
         t.line(f"  envelopes after merge: {total_envs} (expected {expected}) "
                f"→ {'0 lost ✓' if no_loss else 'LOSS ✗'}")
-        t.line(f"  partition produced {len(chains)} provenance branch(es) "
-               f"sharing a common prefix:")
+
+        # (a) Causal-spine view: the parent_envelope_hash tree still shows
+        #     the partition fork, each branch linear + verify_chain-valid.
+        chains = merged.linear_chains()
         all_chains_ok = True
+        t.line(f"  causal-spine view: {len(chains)} branch(es) from the "
+               f"partition, each verify_chain-valid:")
         for i, c in enumerate(chains):
             ok, bad = verify_chain(c)
             all_chains_ok = all_chains_ok and ok
-            tip = c[-1].action_id
-            t.line(f"    branch {i + 1} ({len(c)} hops, tip '{tip}'): "
-                   f"{'verify_chain VALID ✓' if ok else f'BROKEN at {bad} ✗'}")
+            t.line(f"    branch {i + 1} ({len(c)} hops, tip '{c[-1].action_id}'): "
+                   f"{'VALID ✓' if ok else f'BROKEN at {bad} ✗'}")
 
-        # Compositional bounds across the delegation chain (the keystone).
+        # (b) Full provenance DAG: data edges re-join the fork at the
+        #     synthesis — one root, one leaf. Fan-in verify_chain can't see.
+        dag = verify_dag(all_envs, require_closed=True)
+        t.line(f"  full provenance DAG (verify_dag): "
+               f"{'VALID ✓' if dag.valid else f'✗ {dag.reason}'}  "
+               f"[{len(dag.roots)} root, {len(dag.leaves)} leaf, "
+               f"{len(dag.topo_order)} nodes in deterministic topo-order]")
+        if dag.valid and len(dag.leaves) == 1:
+            leaf = merged.get(dag.leaves[0])
+            t.line(f"    '{leaf.action_id}' is the sole leaf — the two "
+                   f"partition branches converged into one auditable result.")
+
+        # (c) Compositional bounds across the delegation chain (the keystone).
         hop0 = DelegationHop(
             agent_pubkey=coordinator.pubkey_hex,
             manifest=spec_from_manifest(coord_manifest),
@@ -456,9 +496,9 @@ def run_demo(
         t.line(f"  verify_delegation (bounds compose upward): "
                f"{'VALID ✓' if deleg_ok else f'✗ {deleg_why}'}")
 
-        # Per-action bounds + tamper-evident binding to the signed envelope.
+        # (d) Per-action bounds + tamper-evident binding to the signature.
         per_action_ok = True
-        env_by_action = {e.action_id: e for c in chains for e in c}
+        env_by_action = {e.action_id: e for e in all_envs}
         for action_id, (text, enf, manifest) in audit.items():
             gate_ok, _ = enforcement_satisfies_manifest(enf, manifest)
             bound = env_by_action[action_id]
@@ -469,13 +509,13 @@ def run_demo(
         t.line()
 
         verdict_ok = (
-            all_converged and no_loss and all_chains_ok and deleg_ok
-            and per_action_ok and over_bound_rejected and minority_paused
-            and majority_active
+            all_converged and no_loss and all_chains_ok and dag.valid
+            and deleg_ok and per_action_ok and over_bound_rejected
+            and minority_paused and majority_active
         )
         t.head("VERDICT")
         if verdict_ok:
-            t.line(f"  Chain verified end-to-end: {total_envs} envelopes, "
+            t.line(f"  Provenance verified end-to-end: {total_envs} envelopes, "
                    f"0 lost, all actions within bounds.")
             t.line("  The over-bound action was refused with no connectivity;")
             t.line("  the control plane paused on the minority while the data")
@@ -490,7 +530,8 @@ def run_demo(
         t.line()
 
         return DemoResult(
-            envelopes=[e0, e1, e2M, e3M, e2m, e3m],
+            envelopes=[e0, e1, e2M, e3M, e2m, e3m, e6],
+            dag=dag,
             node_states={n: s.state for n, s in data.items()},
             delegation_hops=[hop0, hop1],
             audit=audit,
@@ -517,6 +558,8 @@ def main(argv: list[str] | None = None) -> int:
     result = run_demo(verbose=True, sandbox_mode=mode)
     ok = (
         result.all_nodes_converged
+        and result.dag.valid
+        and len(result.dag.leaves) == 1
         and result.over_bound_rejected
         and result.minority_control_paused
         and result.majority_control_active
