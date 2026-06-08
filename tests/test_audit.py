@@ -14,7 +14,7 @@ import json
 
 import blake3
 
-from gyza.audit import audit_provenance
+from gyza.audit import audit_from_store, audit_provenance, render_audit_report
 from gyza.blackboard import Blackboard
 from gyza.icp import compute_envelope_hash, verify_dag
 from gyza.identity import AgentIdentity, LocalCompositor
@@ -135,7 +135,7 @@ def test_withheld_artifact_rejected(tmp_path):
     bad = [r for r in report.actions if r.envelope_hash ==
            compute_envelope_hash(exec_env)][0]
     assert not bad.binding_ok
-    assert "withheld" in bad.reason
+    assert "not resolvable" in bad.reason
 
 
 def test_substituted_manifest_rejected(tmp_path):
@@ -193,3 +193,30 @@ def test_blackboard_reconstruct_dag_round_trips(tmp_path):
         recovered, resolve_artifact=artifacts.get, resolve_manifest=manifests.get,
     )
     assert report.valid, report.summary
+
+
+def test_audit_from_store_and_render(tmp_path):
+    # audit_from_store reads artifacts + manifests from one content-
+    # addressed .get() store (manifests stored as their canonical bytes).
+    envs, artifacts, manifests, _ = _honest_workflow(tmp_path)
+    store: dict[str, bytes] = dict(artifacts)
+    for mhash, manifest in manifests.items():
+        store[mhash] = json.dumps(
+            manifest, sort_keys=True, separators=(",", ":")
+        ).encode()
+    report = audit_from_store(envs, store)
+    assert report.valid, report.summary
+    text = render_audit_report(report)
+    assert "VERDICT: VALID" in text
+    assert "Provenance graph: INTACT" in text
+
+
+def test_render_shows_failure_reason(tmp_path):
+    envs, artifacts, manifests, _ = _honest_workflow(tmp_path)
+    del artifacts[envs[1].output_hash]  # drop an artifact
+    report = audit_provenance(
+        envs, resolve_artifact=artifacts.get, resolve_manifest=manifests.get,
+    )
+    text = render_audit_report(report)
+    assert "VERDICT: INVALID" in text
+    assert "not resolvable" in text

@@ -111,7 +111,7 @@ def audit_provenance(
 
         if art is None:
             if require_all_artifacts:
-                reason = "output artifact not resolvable (withheld)"
+                reason = "output artifact not resolvable (not in store)"
         elif not binding_ok:
             reason = "output artifact does not hash to output_hash (tampered)"
         else:
@@ -162,10 +162,82 @@ def audit_provenance(
     return AuditReport(dag=dag, actions=rows, valid=valid, summary=summary)
 
 
+def audit_from_store(
+    envelopes: "list[ICPEnvelope]",
+    store: "object",
+    **kwargs,
+) -> AuditReport:
+    """
+    Convenience wrapper that builds the resolvers from a content-
+    addressed store exposing ``get(hash) -> bytes | None`` (e.g.
+    ``gyza.network.artifact_store.ArtifactStore``, or any dict-like whose
+    values are bytes). Manifests are stored as artifacts too — the same
+    convention ``verify_chain_multi_compositor`` uses — so the manifest
+    resolver decodes the same bytes as JSON. Extra kwargs pass through to
+    ``audit_provenance``.
+    """
+    def _artifact(h: str) -> "bytes | None":
+        return store.get(h)  # type: ignore[attr-defined]
+
+    def _manifest(h: str) -> "dict | None":
+        raw = store.get(h)  # type: ignore[attr-defined]
+        if raw is None:
+            return None
+        try:
+            obj = json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+            return None
+        return obj if isinstance(obj, dict) else None
+
+    return audit_provenance(
+        envelopes, resolve_artifact=_artifact, resolve_manifest=_manifest,
+        **kwargs,
+    )
+
+
+def render_audit_report(
+    report: AuditReport, *, title: str = "GYZA PROVENANCE AUDIT"
+) -> str:
+    """A forensic report readable by a non-engineer evaluator."""
+    bar = "=" * 64
+    thin = "-" * 64
+    d = report.dag
+    lines: list[str] = [bar, title, thin]
+    if d.valid:
+        lines.append("Provenance graph: INTACT")
+        lines.append(
+            f"  {len(d.topo_order)} actions, {len(d.roots)} root / "
+            f"{len(d.leaves)} leaf (deterministic content-addressed order)"
+        )
+    else:
+        lines.append(f"Provenance graph: BROKEN — {d.reason}")
+    lines.append(thin)
+    for r in report.actions:
+        kind = "exec " if r.is_execution else "coord"
+        mark = "OK " if r.ok else "FAIL"
+        lines.append(f"  [{kind}] {mark}  {r.action_id}")
+        if not r.ok:
+            lines.append(f"           reason: {r.reason}")
+    lines.append(thin)
+    if report.valid:
+        lines.append("VERDICT: VALID")
+        lines.append("  Accountable (every action signed + attributable),")
+        lines.append("  contained (every action within its granted bounds),")
+        lines.append("  bounds-compliant (no capability laundering).")
+    else:
+        lines.append("VERDICT: INVALID — see failing rows above.")
+    lines.append("  NOT a claim about output correctness — that needs a "
+                 "human on the loop.")
+    lines.append(bar)
+    return "\n".join(lines)
+
+
 __all__ = [
     "ActionAudit",
     "AuditReport",
     "ArtifactResolver",
     "ManifestResolver",
     "audit_provenance",
+    "audit_from_store",
+    "render_audit_report",
 ]

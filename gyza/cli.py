@@ -235,6 +235,49 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_audit(args: argparse.Namespace) -> int:
+    """Forensically audit a stored workflow: reconstruct its provenance
+    DAG from the envelope log and run the unified bounds + integrity
+    audit, resolving artifacts/manifests from the local artifact store."""
+    from gyza.audit import audit_from_store, render_audit_report
+    from gyza.blackboard import Blackboard
+    from gyza.network.artifact_store import ArtifactStore
+
+    cfg = load_config()
+    rp = cfg.resolved_paths()
+    bb_path = Path(rp["blackboard_db_path"])
+    if not bb_path.exists():
+        print(f"no blackboard at {bb_path} — nothing to audit", file=sys.stderr)
+        return 1
+
+    bb = Blackboard(str(bb_path))
+
+    # No intent given → list intents that have logged envelopes.
+    if not args.intent_id:
+        rows = bb._conn().execute(
+            "SELECT intent_id, COUNT(*) AS n FROM icp_envelopes "
+            "GROUP BY intent_id ORDER BY MAX(timestamp_ns) DESC"
+        ).fetchall()
+        if not rows:
+            print("no logged envelopes to audit yet")
+            return 1
+        print("intents with logged provenance (pass one to audit):")
+        for r in rows:
+            print(f"  {r['intent_id']}   ({r['n']} envelopes)")
+        return 0
+
+    envelopes = bb.reconstruct_dag(args.intent_id)
+    if not envelopes:
+        print(f"no envelopes logged for intent {args.intent_id!r}",
+              file=sys.stderr)
+        return 1
+
+    store = ArtifactStore(base_path="~/.gyza/artifacts")
+    report = audit_from_store(envelopes, store, require_closed=True)
+    print(render_audit_report(report, title=f"GYZA AUDIT — {args.intent_id}"))
+    return 0 if report.valid else 1
+
+
 def _print_global_section(cfg: GyzaConfig) -> None:
     sock = _resolve(cfg.netd_socket_path)
     if not sock.exists():
@@ -1792,6 +1835,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")
 
+    p_audit = sub.add_parser(
+        "audit",
+        help="forensically audit a stored workflow's provenance DAG + bounds",
+    )
+    p_audit.add_argument(
+        "intent_id", nargs="?",
+        help="intent to audit; omit to list intents with logged envelopes",
+    )
+
     # Public demo task submission. Submits a free-text task to the
     # gyza-demo-public-v1 project, waits for a hosted agent on the
     # network to claim it, then verifies + prints the signed result.
@@ -1973,6 +2025,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "audit":
+        return cmd_audit(args)
     if args.command == "submit":
         return cmd_submit(args)
     if args.command == "watch":
