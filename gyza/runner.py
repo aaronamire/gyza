@@ -450,6 +450,15 @@ class AgentRunner:
         if cas is not None:
             try:
                 cas.store(canonical)
+                # Also persist this agent's manifest content-addressed, so
+                # an independent `gyza audit` can later resolve it by the
+                # envelope's capability_manifest_hash (== blake3 of these
+                # exact bytes) and re-run enforcement_satisfies_manifest.
+                # Without this the bounds half of the audit can verify only
+                # the demo's in-memory store, never real on-disk work.
+                # Idempotent (content-addressed dedup); cheap.
+                from gyza.identity import manifest_canonical_bytes
+                cas.store(manifest_canonical_bytes(self._identity.manifest))
             except Exception:
                 pass
 

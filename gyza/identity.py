@@ -85,6 +85,19 @@ def _manifest_payload_hash(manifest: dict) -> bytes:
     return blake3.blake3(_canon_bytes(m)).digest()
 
 
+def manifest_canonical_bytes(manifest: dict) -> bytes:
+    """The exact bytes whose BLAKE3 is ``manifest_hash_hex(manifest)`` —
+    i.e. an envelope's ``capability_manifest_hash``.
+
+    Store these content-addressed (so the store key is, by construction,
+    the manifest hash) and any independent audit can later resolve a
+    manifest by that hash and re-run the bounds predicate. Sharing this
+    one function with ``manifest_hash_hex`` guarantees the stored bytes
+    can never drift from the hash they must address.
+    """
+    return _canon_bytes(manifest)
+
+
 def manifest_hash_hex(manifest: dict) -> str:
     """Hash of the *full* manifest JSON, signature included.
 
@@ -92,7 +105,7 @@ def manifest_hash_hex(manifest: dict) -> str:
     as it was issued. Including the signature locks the manifest's identity
     to its compositor-attested form.
     """
-    return blake3.blake3(_canon_bytes(manifest)).hexdigest()
+    return blake3.blake3(manifest_canonical_bytes(manifest)).hexdigest()
 
 
 def _derive_seed(master: bytes, context: bytes, info: bytes) -> bytes:
@@ -389,6 +402,7 @@ __all__ = [
     "LocalCompositor",
     "AgentIdentity",
     "manifest_hash_hex",
+    "manifest_canonical_bytes",
 ]
 
 # Silence unused-import warnings.
