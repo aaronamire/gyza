@@ -177,6 +177,79 @@ def test_nonexistent_grant_refused_before_any_work(tmp_path, capsys):
     assert "does not exist" in capsys.readouterr().err
 
 
+def test_command_executor_records_command_and_output():
+    # No sandbox needed: the factory's contract is testable in-process.
+    # The command line must be INSIDE the artifact text (the signed
+    # output_hash commits to WHAT ran, not just what it printed).
+    from gyza.runner import make_command_executor
+
+    ex = make_command_executor(["/bin/echo", "hello-receipt"])
+    out = ex("ignored-prompt", {})
+    assert out["text"].startswith("$ /bin/echo hello-receipt\n[exit 0]\n")
+    assert "hello-receipt" in out["text"]
+    assert out["inference_backend"] == "subprocess"
+    assert out["model_identifier"] == "exec:echo"
+
+
+def test_command_executor_nonzero_exit_raises():
+    # A failed command must never produce a signable result — the
+    # invariant "signed envelope implies completed bounded work" holds.
+    import pytest
+
+    from gyza.runner import make_command_executor
+
+    ex = make_command_executor(["/bin/sh", "-c", "echo doomed >&2; exit 3"])
+    with pytest.raises(RuntimeError, match="exited 3.*doomed"):
+        ex("p", {})
+
+
+import shutil as _shutil  # noqa: E402
+
+_REQUIRES_BWRAP = __import__("pytest").mark.skipif(
+    _shutil.which("bwrap") is None, reason="bubblewrap not installed",
+)
+
+
+@_REQUIRES_BWRAP
+def test_exec_flow_end_to_end_sandboxed(tmp_path):
+    # The full `gyza exec` path with a REAL bwrap sandbox: arbitrary
+    # command → signed envelope → audit VALID, command line inside the
+    # signed artifact.
+    import json as _json
+
+    from gyza.blackboard import Blackboard
+    from gyza.network.artifact_store import ArtifactStore
+
+    cfg = _cfg(tmp_path)
+    code, intent_id = run_local_task(
+        "/bin/echo sandboxed-receipt", cfg=cfg,
+        command_argv=["/bin/echo", "sandboxed-receipt"],
+        artifact_store_base=str(tmp_path / "cas"),
+    )
+    assert code == 0
+    bb = Blackboard(str(tmp_path / "bb.db"))
+    (env,) = bb.reconstruct_dag(intent_id)
+    store = ArtifactStore(base_path=str(tmp_path / "cas"))
+    art = _json.loads(store.get(env.output_hash).decode())
+    assert art["text"].startswith("$ /bin/echo sandboxed-receipt")
+    assert "sandboxed-receipt" in art["text"]
+    assert art["__enforcement__"]["backend"] == "bubblewrap"
+
+
+@_REQUIRES_BWRAP
+def test_exec_failing_command_refused(tmp_path, capsys):
+    cfg = _cfg(tmp_path)
+    code, intent_id = run_local_task(
+        "/bin/false", cfg=cfg, command_argv=["/bin/false"],
+        artifact_store_base=str(tmp_path / "cas"),
+    )
+    assert code == 1
+    from gyza.blackboard import Blackboard
+
+    bb = Blackboard(str(tmp_path / "bb.db"))
+    assert bb.reconstruct_dag(intent_id) == []
+
+
 def test_over_bound_run_refused_no_envelope(tmp_path, capsys):
     cfg = _cfg(tmp_path)
     # Executor claims 2048 MB enforcement against a 512 MB manifest —

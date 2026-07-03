@@ -4,6 +4,7 @@ Gyza CLI.
 Subcommands:
   init                    Initialize ~/.gyza, generate compositor key
   run TASK                Execute one task bounded + flight-recorded (local)
+  exec -- CMD [ARGS]      Run YOUR command bounded + flight-recorded
   audit [INTENT]          Forensically audit a stored workflow
   bundle INTENT           Export a workflow as a portable evidence bundle
   verify FILE             Verify an evidence bundle offline (anyone can)
@@ -151,6 +152,8 @@ def run_local_task(
     model: str | None = None,
     read_paths: "list[str] | None" = None,
     write_paths: "list[str] | None" = None,
+    command_argv: "list[str] | None" = None,
+    allow_network: bool = False,
     artifact_store_base: str = "~/.gyza/artifacts",
 ) -> "tuple[int, str]":
     """
@@ -194,8 +197,17 @@ def run_local_task(
     key_path.parent.mkdir(parents=True, exist_ok=True)
 
     api_key = "" if mock else (cfg.anthropic_api_key or "")
-    use_anthropic = executor is None and bool(api_key)
-    allowed_hosts = ["api.anthropic.com"] if use_anthropic else []
+    use_anthropic = (
+        executor is None and command_argv is None and bool(api_key)
+    )
+    if use_anthropic:
+        allowed_hosts = ["api.anthropic.com"]
+    elif allow_network:
+        # bwrap network control is all-or-nothing; "*" declares "any
+        # host" honestly rather than pretending an allowlist exists.
+        allowed_hosts = ["*"]
+    else:
+        allowed_hosts = []
 
     # Filesystem grants resolve to absolute host paths BEFORE entering
     # the manifest, so what the manifest authorizes is exactly what
@@ -239,7 +251,16 @@ def run_local_task(
         # The manifest is the single source of truth for the sandbox:
         # what it declares is, by construction, what bwrap enforces.
         scfg = sandbox_config_from_manifest(ident.manifest)
-        if use_anthropic:
+        if command_argv is not None:
+            executor = make_sandboxed_executor(
+                "gyza.runner:make_command_executor",
+                init_kwargs={"argv": command_argv},
+                config=scfg,
+            )
+            executor_label = (
+                f"command: {' '.join(command_argv)} (sandboxed)"
+            )
+        elif use_anthropic:
             scfg = _dc_replace(scfg, env_set={"ANTHROPIC_API_KEY": api_key})
             executor = make_sandboxed_executor(
                 "gyza.runner:make_anthropic_executor",
@@ -271,7 +292,14 @@ def run_local_task(
             fs_bits.append(f"write {', '.join(write_paths)}")
         print(f"fs:       {' · '.join(fs_bits)}  (kernel-enforced binds)")
     else:
-        print("fs:       none (tmpfs only — grant with --allow-read/--allow-write)")
+        print("fs:       none granted (tmpfs cwd; --allow-read/--allow-write "
+              "to grant)")
+    if command_argv is not None:
+        # Honest scope: the command additionally sees the language runtime
+        # (system dirs + the gyza install path) it needs to boot, but NOT
+        # your home, ~/.ssh, or secrets outside the grants above.
+        print("visible:  Python runtime + system dirs + granted paths only "
+              "(home & secrets hidden)")
     print(f"executor: {executor_label}")
 
     bb = Blackboard(rp["blackboard_db_path"])
@@ -352,6 +380,36 @@ def cmd_run(args: argparse.Namespace) -> int:
         args.task, cfg=cfg, memory_mb=args.memory_mb,
         mock=args.mock, model=args.model,
         read_paths=args.allow_read, write_paths=args.allow_write,
+    )
+    return code
+
+
+def cmd_exec(args: argparse.Namespace) -> int:
+    """Run YOUR command bounded + flight-recorded — the seatbelt for the
+    agent you already use, not gyza's executor."""
+    import shlex
+    import shutil
+
+    argv = list(args.argv)
+    if argv and argv[0] == "--":
+        argv = argv[1:]
+    if not argv:
+        print("usage: gyza exec [flags] -- COMMAND [ARGS...]", file=sys.stderr)
+        return 2
+    # Resolve the binary host-side: the sandbox gets a fresh environment,
+    # so a bare name would not resolve inside — and failing here is a
+    # clearer error than a sandbox exec failure.
+    resolved = shutil.which(argv[0])
+    if resolved is None:
+        print(f"command not found: {argv[0]}", file=sys.stderr)
+        return 1
+    argv[0] = resolved
+
+    cfg = load_config()
+    code, _ = run_local_task(
+        shlex.join(argv), cfg=cfg, memory_mb=args.memory_mb,
+        read_paths=args.allow_read, write_paths=args.allow_write,
+        command_argv=argv, allow_network=args.allow_network,
     )
     return code
 
@@ -2235,6 +2293,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="host path the agent may write (repeatable; use sparingly)",
     )
 
+    p_exec = sub.add_parser(
+        "exec",
+        help="run YOUR command bounded + flight-recorded: "
+             "gyza exec [flags] -- COMMAND [ARGS...]",
+    )
+    p_exec.add_argument(
+        "--memory-mb", type=int, default=512,
+        help="memory bound (RLIMIT_AS) for the command (default 512)",
+    )
+    p_exec.add_argument(
+        "--allow-read", action="append", default=[], metavar="PATH",
+        help="host path the command may read (repeatable)",
+    )
+    p_exec.add_argument(
+        "--allow-write", action="append", default=[], metavar="PATH",
+        help="host path the command may write (repeatable; use sparingly)",
+    )
+    p_exec.add_argument(
+        "--allow-network", action="store_true",
+        help="open the network namespace (all-or-nothing; declared in "
+             "the signed grant)",
+    )
+    p_exec.add_argument(
+        "argv", nargs=argparse.REMAINDER,
+        help="the command to run (prefix with -- to stop flag parsing)",
+    )
+
     p_bundle = sub.add_parser(
         "bundle",
         help="export a stored workflow as a portable evidence bundle "
@@ -2438,6 +2523,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_audit(args)
     if args.command == "run":
         return cmd_run(args)
+    if args.command == "exec":
+        return cmd_exec(args)
     if args.command == "bundle":
         return cmd_bundle(args)
     if args.command == "verify":

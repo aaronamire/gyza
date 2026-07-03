@@ -684,6 +684,58 @@ def make_mock_executor(response: str = "mock output") -> Callable[[str, dict], d
     return _executor
 
 
+def make_command_executor(
+    argv: list[str],
+    max_output_bytes: int = 1_000_000,
+) -> Callable[[str, dict], dict]:
+    """
+    Run one arbitrary command as the agent's action — the `gyza exec`
+    executor. Designed to be instantiated INSIDE the sandbox (via
+    ``make_sandboxed_executor``), so the child process inherits the
+    sandbox's namespaces and rlimits: bwrap's mount/net isolation and
+    RLIMIT_AS/RLIMIT_CPU apply to the command, not just to this wrapper.
+
+    The command line itself is folded into the artifact text (the
+    ``$ ...`` header), so the signed ``output_hash`` commits to WHAT ran,
+    not just what it printed. A non-zero exit raises — surfacing as an
+    execution failure so no envelope is signed: a valid signed envelope
+    keeps implying completed, bounded work.
+
+    ``argv[0]`` should be an absolute path (the sandbox has a fresh
+    environment; the CLI resolves it host-side before entering).
+    """
+    def _executor(_prompt: str, _context: dict) -> dict:
+        import shlex
+        import subprocess
+
+        env = {
+            "PATH": "/usr/local/bin:/usr/bin:/bin",
+            "HOME": os.getcwd(),
+            "LANG": os.environ.get("LANG", "C.UTF-8"),
+        }
+        proc = subprocess.run(
+            argv, capture_output=True, env=env, check=False,
+        )
+        out = proc.stdout[:max_output_bytes]
+        truncated = len(proc.stdout) > max_output_bytes
+        if proc.returncode != 0:
+            tail = proc.stderr[-2000:].decode("utf-8", "replace")
+            raise RuntimeError(
+                f"command exited {proc.returncode}: {tail.strip()}"
+            )
+        text = f"$ {shlex.join(argv)}\n[exit 0]\n" + out.decode("utf-8", "replace")
+        if truncated:
+            text += f"\n[output truncated at {max_output_bytes} bytes]"
+        return {
+            "text": text,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "model_identifier": f"exec:{os.path.basename(argv[0])}",
+            "inference_backend": "subprocess",
+        }
+    return _executor
+
+
 def make_anthropic_executor(
     api_key: str | None = None,
     model: str = "claude-sonnet-4-5",
