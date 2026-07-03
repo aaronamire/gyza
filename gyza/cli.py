@@ -1063,6 +1063,87 @@ def cmd_global_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_global_addr(args: argparse.Namespace) -> int:
+    """
+    Print this node's dialable multiaddrs — the rendezvous primitive
+    that needs no bootstrap mesh. Share one with another operator and
+    they run `gyza global connect <multiaddr>` to reach you directly.
+    Each address is the listen address with `/p2p/<peer_id>` appended
+    (that suffix is what makes it dialable and identity-checked).
+    """
+    netd, _cfg = _open_netd()
+    if not netd.is_running():
+        print("netd not running — start with `gyza global start`",
+              file=sys.stderr)
+        netd.close()
+        return 1
+    info = netd.get_node_info()
+    status = netd.get_status()
+    pid = info.peer_id
+    seen: set[str] = set()
+    addrs: list[str] = []
+    # Prefer the AutoNAT-observed (publicly reachable) address first.
+    if status.observed_addr:
+        base = status.observed_addr.split("/p2p/")[0]
+        full = f"{base}/p2p/{pid}"
+        addrs.append(full)
+        seen.add(full)
+    for a in info.listen_addrs:
+        base = a.split("/p2p/")[0]
+        # Skip unroutable wildcard/loopback-only where a real one exists.
+        full = f"{base}/p2p/{pid}"
+        if full not in seen:
+            addrs.append(full)
+            seen.add(full)
+    netd.close()
+    if not addrs:
+        print("no listen addresses reported by the daemon yet", file=sys.stderr)
+        return 1
+    print("share one of these (pick the one reachable from the other peer:")
+    print("LAN IP for same network, public IP if you've port-forwarded UDP):")
+    for a in addrs:
+        print(f"  {a}")
+    return 0
+
+
+def cmd_global_connect(args: argparse.Namespace) -> int:
+    """
+    Dial a peer directly by multiaddr — mesh-free rendezvous. The
+    `/p2p/<peer_id>` suffix is required; the daemon verifies the peer's
+    identity from it, so a spoofed address that reaches the wrong host
+    fails rather than silently connecting.
+    """
+    netd, _cfg = _open_netd()
+    if not netd.is_running():
+        print("netd not running — start with `gyza global start`",
+              file=sys.stderr)
+        netd.close()
+        return 1
+    if "/p2p/" not in args.multiaddr:
+        print("multiaddr must include the /p2p/<peer_id> suffix "
+              "(get it from `gyza global addr` on the other node)",
+              file=sys.stderr)
+        netd.close()
+        return 1
+    try:
+        result = netd.connect_peer(
+            args.multiaddr, expected_pubkey=args.expect_pubkey or "",
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"connect failed: {e}", file=sys.stderr)
+        netd.close()
+        return 1
+    netd.close()
+    if result.success:
+        print(f"connected to {result.peer_id}")
+        if result.verified_pubkey:
+            print(f"  verified compositor pubkey: {result.verified_pubkey[:32]}…")
+        print("you can now `gyza submit` / delegate work to this peer.")
+        return 0
+    print(f"connect failed: {result.error or 'unknown error'}", file=sys.stderr)
+    return 1
+
+
 def cmd_global_find(args: argparse.Namespace) -> int:
     """
     Search the DHT for agents with embeddings near a query vector.
@@ -2451,6 +2532,24 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     globsub.add_parser("status", help="show netd identity, DHT peers, connections")
+    globsub.add_parser(
+        "addr",
+        help="print this node's dialable multiaddr(s) to share for a "
+             "mesh-free direct connection",
+    )
+    p_connect = globsub.add_parser(
+        "connect",
+        help="dial a peer directly by multiaddr (no bootstrap mesh needed)",
+    )
+    p_connect.add_argument(
+        "multiaddr",
+        help="peer multiaddr incl. /p2p/<peer_id> (from their `gyza global addr`)",
+    )
+    p_connect.add_argument(
+        "--expect-pubkey", default="",
+        help="require the peer's identity to derive from this compositor "
+             "pubkey (guards against a spoofed address)",
+    )
     p_find = globsub.add_parser("find", help="search the DHT for agents")
     p_find.add_argument("query", help="natural-language hint hashed to a query vector")
     p_find.add_argument("--k", type=int, default=10, help="max results (default 10)")
@@ -2586,6 +2685,10 @@ def main(argv: list[str] | None = None) -> int:
             return cmd_global_start(args)
         if args.global_cmd == "status":
             return cmd_global_status(args)
+        if args.global_cmd == "addr":
+            return cmd_global_addr(args)
+        if args.global_cmd == "connect":
+            return cmd_global_connect(args)
         if args.global_cmd == "find":
             return cmd_global_find(args)
         if args.global_cmd == "attest":
