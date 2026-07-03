@@ -86,7 +86,33 @@ from gyza.schema import EMBEDDING_DIM, HLC, WorkItem  # noqa: E402
 
 
 PROJECT_ID = "phase3-single-machine-demo"
-NETD_BIN = REPO_ROOT / "netd" / "bin" / "gyza-netd"
+
+
+def _resolve_netd_bin() -> Path:
+    """Find gyza-netd for the demo the same way a real deployment would:
+    a repo-checkout build, then a gyza-netd on PATH, then the config's
+    netd_binary_path. Keeps the demo runnable from a pip install (no
+    repo tree) as long as the daemon is reachable somehow."""
+    import shutil
+
+    repo_build = REPO_ROOT / "netd" / "bin" / "gyza-netd"
+    if repo_build.exists():
+        return repo_build
+    on_path = shutil.which("gyza-netd")
+    if on_path:
+        return Path(on_path)
+    try:
+        from gyza.config import load_config
+
+        cfg_bin = Path(load_config().netd_binary_path).expanduser()
+        if cfg_bin.exists():
+            return cfg_bin
+    except Exception:
+        pass
+    return repo_build  # non-existent; the exists() check below reports it
+
+
+NETD_BIN = _resolve_netd_bin()
 
 
 # ----------------------------------------------------------------------
@@ -572,8 +598,13 @@ def main() -> int:
 
     if not NETD_BIN.exists():
         print(
-            f"gyza-netd binary not found at {NETD_BIN}.\n"
-            f"build it first: make -C netd build",
+            "gyza-netd (the Go network daemon) not found.\n"
+            "This demo needs it. Get it by either:\n"
+            "  * building from a source checkout: make -C netd build "
+            "(needs Go), or\n"
+            "  * putting a gyza-netd binary on PATH.\n"
+            "The single-node commands (gyza run / exec / audit / bundle "
+            "/ verify) need no daemon.",
             file=sys.stderr,
         )
         return 2

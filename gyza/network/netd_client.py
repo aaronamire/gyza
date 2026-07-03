@@ -516,8 +516,16 @@ class NetdClient:
                 binary = on_path
             else:
                 raise FileNotFoundError(
-                    f"gyza-netd binary not found at {binary_path}; "
-                    f"build it with `make -C netd build`"
+                    f"gyza-netd (the Go network daemon) not found at "
+                    f"{binary_path} and not on PATH.\n"
+                    f"The pip package ships the Python client only. To get "
+                    f"the daemon:\n"
+                    f"  * from a source checkout: make -C netd build "
+                    f"(needs Go)\n"
+                    f"  * or put a gyza-netd binary on PATH, or set "
+                    f"netd_binary_path in ~/.gyza/config.json\n"
+                    f"Local commands (run/exec/audit/bundle/verify) work "
+                    f"without it."
                 )
 
         socket = _resolve(socket_path)

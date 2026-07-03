@@ -430,7 +430,7 @@ def _run_demo_script(name: str) -> int:
     return 0
 
 
-def _run_demo_subprocess(name: str) -> int:
+def _run_demo_subprocess(name: str, extra_args: "list[str] | None" = None) -> int:
     # For demos that own their own argparse and/or spawn subprocesses,
     # run them in a fresh Python interpreter so the parent's sys.argv
     # doesn't leak into the demo's parser and the demo's signal
@@ -440,7 +440,7 @@ def _run_demo_subprocess(name: str) -> int:
     if not script.exists():
         print(f"demo script not found: {script}", file=sys.stderr)
         return 2
-    return subprocess.call([sys.executable, str(script)])
+    return subprocess.call([sys.executable, str(script), *(extra_args or [])])
 
 
 def cmd_demo(args: argparse.Namespace) -> int:
@@ -449,7 +449,8 @@ def cmd_demo(args: argparse.Namespace) -> int:
     if args.scenario == "lan":
         return _run_demo_script("single_machine_phase2.py")
     if args.scenario == "global":
-        return _run_demo_subprocess("single_machine_global.py")
+        extra = ["--fast"] if getattr(args, "fast", False) else []
+        return _run_demo_subprocess("single_machine_global.py", extra)
     if args.scenario == "bounds":
         return _run_demo_script("bounds_proof_demo.py")
     return _run_demo_script("two_agent_pipeline.py")
@@ -934,6 +935,19 @@ def cmd_global_start(args: argparse.Namespace) -> int:
     cfg = load_config()
     socket = _resolve(cfg.netd_socket_path)
 
+    # Unix domain socket paths have a hard OS limit (~107 bytes). gRPC's
+    # failure for an over-long path is a cryptic channel error, so check
+    # up front with an actionable message.
+    if len(str(socket)) > 100:
+        print(
+            f"netd socket path is too long for a unix socket "
+            f"({len(str(socket))} chars, limit ~107):\n  {socket}\n"
+            f"set a shorter netd_socket_path in ~/.gyza/config.json "
+            f"(e.g. /tmp/gyza-netd.sock)",
+            file=sys.stderr,
+        )
+        return 1
+
     # --supervised: long-running foreground supervisor. We block here
     # so the supervisor's heartbeat thread has a host process to live
     # in (CLAUDE.md §11 trip-wire — fire-and-forget supervisors die
@@ -984,15 +998,22 @@ def cmd_global_start(args: argparse.Namespace) -> int:
         return 0
     probe.close()
 
-    proc = NetdClient.start_daemon(
-        socket_path=str(socket),
-        binary_path=cfg.netd_binary_path,
-        listen_port=cfg.netd_listen_port,
-        key_path=cfg.compositor_key_path,
-        bootstrap=cfg.netd_bootstrap_peers,
-        log_level="info",
-        startup_timeout_s=10.0,
-    )
+    # Failures here are environmental (missing binary, port in use,
+    # daemon crashed at boot) — a tester should get the reason, never
+    # a Python traceback.
+    try:
+        proc = NetdClient.start_daemon(
+            socket_path=str(socket),
+            binary_path=cfg.netd_binary_path,
+            listen_port=cfg.netd_listen_port,
+            key_path=cfg.compositor_key_path,
+            bootstrap=cfg.netd_bootstrap_peers,
+            log_level="info",
+            startup_timeout_s=10.0,
+        )
+    except (FileNotFoundError, RuntimeError, OSError) as e:
+        print(f"failed to start gyza-netd:\n{e}", file=sys.stderr)
+        return 1
     print(f"netd started (pid {proc.pid})")
     print(f"  socket:        {socket}")
     with NetdClient(str(socket)) as c:
@@ -2252,6 +2273,10 @@ def build_parser() -> argparse.ArgumentParser:
             "complete a project through bilateral settlement; needs "
             "gyza-netd binary)"
         ),
+    )
+    p_demo.add_argument(
+        "--fast", action="store_true",
+        help="global demo only: use the stub embedder for a faster run",
     )
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")
