@@ -197,17 +197,25 @@ def _build_bwrap_argv(
     # Bwrap layers mounts in argv order — later flags shadow earlier
     # ones at the same path. Order matters here:
     #
-    #   1. System mounts (the merged-/usr trees) and /proc, /dev first
-    #      so the dynamic linker can resolve the python interpreter.
-    #   2. /tmp tmpfs BEFORE user ro_paths, so a user ro_path that
-    #      happens to live under /tmp (e.g., a pytest tmp dir) lands
-    #      ON TOP of the tmpfs and stays visible. If we did this after
-    #      the ro_paths, the tmpfs would shadow them all.
+    #   1. /tmp tmpfs FIRST, before every bind, so that ANY bind whose
+    #      host path lives under /tmp — a pytest tmp-dir ro_path, or
+    #      (the case that bit for real) a virtualenv sys.prefix in
+    #      /tmp, which _system_mounts() emits as a system mount so the
+    #      sandboxee's python can boot — lands ON TOP of the tmpfs and
+    #      stays visible. When the tmpfs came after the system mounts,
+    #      a /tmp-rooted venv was shadowed and bwrap died with
+    #      "execvp .../python: No such file or directory".
+    #   2. System mounts (the merged-/usr trees) so the dynamic linker
+    #      can resolve the python interpreter.
     #   3. User ro_paths and rw_paths.
     #   4. Workspace bind (or tmpfs) — its host path may also live
-    #      under /tmp, so it has to come after the /tmp tmpfs for
-    #      the same reason.
+    #      under /tmp, same reasoning as (1).
     #
+    # The tmpfs is always provided so libraries that drop ephemera
+    # (tokenizer caches, sentence-transformers, importlib bytecode
+    # caches) don't fail.
+    argv += ["--tmpfs", "/tmp"]
+
     # ``_system_mounts`` distinguishes between symlinks and directory
     # binds so merged-/usr distros (/lib64 → symlink) get the right
     # treatment. See _HostMount docstring.
@@ -219,12 +227,6 @@ def _build_bwrap_argv(
 
     # /proc and /dev — fresh views, not the host's.
     argv += ["--proc", "/proc", "--dev", "/dev"]
-
-    # tmpfs for /tmp — always provided so libraries that drop ephemera
-    # (tokenizer caches, sentence-transformers, importlib bytecode
-    # caches) don't fail. Done BEFORE user ro_paths so a tmp-rooted
-    # ro_path lands on top.
-    argv += ["--tmpfs", "/tmp"]
 
     for p in config.ro_paths:
         # User-supplied ro_paths: also distinguish symlinks. We don't

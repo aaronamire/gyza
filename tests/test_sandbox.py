@@ -587,3 +587,38 @@ def test_predicate_fs_subset_check_still_works_with_resource_fields():
     )
     assert not ok
     assert "read paths beyond manifest" in why
+
+
+def test_tmpfs_precedes_tmp_rooted_binds_in_argv():
+    # Regression (beta cold-install): bwrap layers mounts in argv order,
+    # later shadowing earlier at the same path. The /tmp tmpfs must come
+    # BEFORE any bind whose destination lives under /tmp — otherwise a
+    # Python interpreter (sys.prefix) or ro_path physically under /tmp is
+    # shadowed by the tmpfs and bwrap dies with "execvp .../python: No
+    # such file or directory". This bit a venv installed under /tmp.
+    from gyza.sandbox.runner import _build_bwrap_argv
+
+    cfg = SandboxConfig(
+        ro_paths=["/tmp/some/ro/path"],
+        max_memory_mb=256,
+        backend=SandboxBackend.BUBBLEWRAP,
+    )
+    argv = _build_bwrap_argv(cfg, python_bin="/tmp/venv/bin/python")
+
+    tmpfs_idx = None
+    for i in range(len(argv) - 1):
+        if argv[i] == "--tmpfs" and argv[i + 1] == "/tmp":
+            tmpfs_idx = i
+            break
+    assert tmpfs_idx is not None, "no --tmpfs /tmp in argv"
+
+    # Every bind flag targeting a /tmp-rooted DEST must appear after it.
+    bind_flags = {"--ro-bind", "--bind", "--symlink"}
+    for i in range(len(argv) - 2):
+        if argv[i] in bind_flags:
+            dest = argv[i + 2]  # flag, src, dest
+            if dest == "/tmp" or dest.startswith("/tmp/"):
+                assert i > tmpfs_idx, (
+                    f"bind {argv[i]} -> {dest} at {i} precedes the /tmp "
+                    f"tmpfs at {tmpfs_idx}; it would be shadowed"
+                )
