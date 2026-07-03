@@ -3,6 +3,10 @@ Gyza CLI.
 
 Subcommands:
   init                    Initialize ~/.gyza, generate compositor key
+  run TASK                Execute one task bounded + flight-recorded (local)
+  audit [INTENT]          Forensically audit a stored workflow
+  bundle INTENT           Export a workflow as a portable evidence bundle
+  verify FILE             Verify an evidence bundle offline (anyone can)
   demo                    Run the two-agent pipeline demo (Phase 1, local)
   demo injection          Run the injection-attack demo
   demo lan                Run the Phase 2 single-machine simulation
@@ -22,6 +26,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import runpy
 import sqlite3
 import subprocess
@@ -76,7 +81,236 @@ def cmd_init(args: argparse.Namespace) -> int:
     print(f"config:          {config_path}")
     print(f"output dir:      {out_dir}")
     print("ready.")
+    print()
+    print("next: gyza run \"your task\"   (bounded, recorded, auditable)")
     return 0
+
+
+# ---------------------------------------------------------------------------
+# run — bounded, flight-recorded local execution (the single-player product)
+# ---------------------------------------------------------------------------
+
+def _load_or_issue_local_agent(
+    compositor, state_path: Path, *, memory_mb: int, allowed_hosts: list[str],
+):
+    """
+    The local agent persists across runs — one identity accumulating an
+    auditable history — so it's issued once and reloaded thereafter.
+    Reissued only when the requested bounds change, because the manifest
+    IS the authorization: different bounds are a different grant, and
+    reusing the old identity would attribute new work to an authorization
+    it never had.
+    """
+    import json as _json
+
+    from gyza.identity import AgentIdentity
+
+    if state_path.exists():
+        try:
+            saved = _json.loads(state_path.read_text())
+            manifest = saved["manifest"]
+            budget = manifest["capabilities"]["spawn"]["resource_budget"]
+            hosts = manifest["capabilities"]["network"]["allowed_hosts"]
+            if (budget.get("memory_limit_mb") == memory_mb
+                    and sorted(hosts) == sorted(allowed_hosts)):
+                return AgentIdentity(bytes.fromhex(saved["seed_hex"]), manifest)
+            print(f"bounds changed (mem {budget.get('memory_limit_mb')} → "
+                  f"{memory_mb} MB, hosts {hosts} → {allowed_hosts}) — "
+                  f"issuing a fresh agent identity for the new grant")
+        except (KeyError, ValueError, TypeError, OSError):
+            print("local agent state unreadable — issuing a fresh identity")
+
+    seed, manifest = compositor.issue_agent(
+        agent_type="local.worker", model_path="local",
+        fs_read_paths=[], fs_write_paths=[],
+        allowed_hosts=allowed_hosts,
+        memory_limit_mb=memory_mb, attestation_tier=0,
+    )
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(_json.dumps(
+        {"seed_hex": seed.hex(), "manifest": manifest}, indent=2,
+    ))
+    state_path.chmod(0o600)  # the seed is a signing secret
+    return AgentIdentity(seed, manifest)
+
+
+def run_local_task(
+    task: str,
+    *,
+    cfg: GyzaConfig,
+    executor=None,
+    memory_mb: int = 512,
+    mock: bool = False,
+    model: str | None = None,
+    artifact_store_base: str = "~/.gyza/artifacts",
+) -> "tuple[int, str]":
+    """
+    Execute one task through the REAL producer path — the same
+    claim/execute/sign machinery the network uses, pointed at the local
+    blackboard: issue (or reload) a bounded agent, run the task in a
+    manifest-derived bwrap sandbox, sign the ICP envelope, persist the
+    artifact + manifest content-addressed, then audit what was just
+    stored and print the receipt. Returns ``(exit_code, intent_id)``.
+
+    ``executor`` is injectable for tests; ``None`` selects the sandboxed
+    Anthropic executor when a key is available (and ``mock`` is False),
+    else the sandboxed mock — labeled honestly either way.
+    """
+    import shutil
+    import time as _time
+    import uuid as _uuid
+    from dataclasses import replace as _dc_replace
+
+    import numpy as _np
+
+    # Keep the first-run experience instant: local flight-recording does
+    # not need semantic memory, so default the embedder to the stub
+    # (user's explicit GYZA_EMBEDDER always wins — setdefault).
+    os.environ.setdefault("GYZA_EMBEDDER", "stub")
+
+    from gyza.audit import audit_from_store
+    from gyza.blackboard import Blackboard
+    from gyza.demand import LSHIndex
+    from gyza.drift import SpecializationTracker
+    from gyza.identity import LocalCompositor
+    from gyza.memory import EpisodicMemory
+    from gyza.network.artifact_store import ArtifactStore
+    from gyza.runner import AgentRunner
+    from gyza.sandbox.config import sandbox_config_from_manifest
+    from gyza.sandbox.executor import make_sandboxed_executor
+    from gyza.schema import EMBEDDING_DIM, WorkItem
+
+    rp = cfg.resolved_paths()
+    key_path = Path(rp["compositor_key_path"])
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+
+    api_key = "" if mock else (cfg.anthropic_api_key or "")
+    use_anthropic = executor is None and bool(api_key)
+    allowed_hosts = ["api.anthropic.com"] if use_anthropic else []
+
+    compositor = LocalCompositor(key_path=str(key_path))
+    ident = _load_or_issue_local_agent(
+        compositor, key_path.parent / "local-agent.json",
+        memory_mb=memory_mb, allowed_hosts=allowed_hosts,
+    )
+
+    if executor is None:
+        if shutil.which("bwrap") is None:
+            print(
+                "gyza run needs bubblewrap for real enforcement and will "
+                "not fall back to an unenforced sandbox.\n"
+                "install it:  pacman -S bubblewrap  |  apt install bubblewrap",
+                file=sys.stderr,
+            )
+            return 1, ""
+        # The manifest is the single source of truth for the sandbox:
+        # what it declares is, by construction, what bwrap enforces.
+        scfg = sandbox_config_from_manifest(ident.manifest)
+        if use_anthropic:
+            scfg = _dc_replace(scfg, env_set={"ANTHROPIC_API_KEY": api_key})
+            executor = make_sandboxed_executor(
+                "gyza.runner:make_anthropic_executor",
+                init_kwargs={"api_key": api_key,
+                             "model": model or cfg.default_model},
+                config=scfg,
+            )
+            executor_label = f"anthropic {model or cfg.default_model} (sandboxed)"
+        else:
+            executor = make_sandboxed_executor(
+                "gyza.runner:make_mock_executor",
+                init_kwargs={"response": "[mock executor — no AI] "
+                                         f"task acknowledged: {task[:120]}"},
+                config=scfg,
+            )
+            executor_label = "mock — no AI, deterministic placeholder (sandboxed)"
+    else:
+        executor_label = "injected"
+
+    net_note = ("on (host allowlist declared; namespace-enforced only)"
+                if allowed_hosts else "off (fresh namespace, loopback only)")
+    print(f"agent:    {ident.pubkey_hex[:16]}…  (persistent local identity)")
+    print(f"bounds:   memory {memory_mb} MB (RLIMIT_AS) · network {net_note}")
+    print(f"executor: {executor_label}")
+
+    bb = Blackboard(rp["blackboard_db_path"])
+    store = ArtifactStore(base_path=artifact_store_base)
+    bb.attach_artifact_store(store)
+
+    intent_id = str(_uuid.uuid7())
+    bb.post_intent({
+        "intent_id": intent_id, "natural_text": task,
+        "category": "local_task", "actions": [],
+        "authorization": {"resources": [], "preview_required": False,
+                          "reversible": True},
+    })
+    emb = _np.zeros(EMBEDDING_DIM, dtype=_np.float32)
+    emb[0] = 1.0
+    w = WorkItem(
+        id=str(_uuid.uuid7()), lineage_root=intent_id, parent_id=None,
+        description=task, desc_embedding=emb, reward=0.5,
+        reward_updated_ns=_time.time_ns(), required_tier=0,
+        input_hashes=["00" * 32], output_spec={}, streaming_ok=False,
+        claimed_by=None, claimed_at_ns=None,
+        claim_hlc_l=0, claim_hlc_c=0, claim_hlc_node="",
+        completed_at_ns=None, output_hash=None, icp_envelope_hash=None,
+        success=None, created_at_ns=_time.time_ns(),
+        ttl_ns=3600 * 1_000_000_000,
+    )
+    bb.post_work_item(w)
+
+    mem = EpisodicMemory(
+        agent_id=ident.agent_id,
+        db_path=str(Path(rp["memory_db_path"]).parent / "run-memory"),
+    )
+    spec_v = _np.zeros(EMBEDDING_DIM, dtype=_np.float32)
+    spec_v[0] = 1.0
+    spec = SpecializationTracker(
+        agent_id=ident.agent_id, initial_embedding=spec_v,
+        db_path=str(Path(rp["memory_db_path"]).parent / "run-spec.db"),
+    )
+    runner = AgentRunner(
+        identity=ident, blackboard=bb, memory=mem, specialization=spec,
+        lsh=LSHIndex(seed=42), executor=executor,
+        min_reward_threshold=0.0, min_similarity_threshold=-1.0,
+        verify_chain_before_claim=False,
+    )
+
+    # One synchronous execute+sign cycle — the exact producer path the
+    # runner's loop drives, without the loop (one item, one shot). The
+    # brick-3 gate inside _execute refuses to sign anything whose
+    # enforcement record exceeds the manifest.
+    try:
+        result = runner._execute(w)
+        runner._complete(w, result, success=True)
+    except Exception as exc:  # noqa: BLE001 — every refusal must surface
+        print(f"\n✗ REFUSED TO SIGN / execution failed: {exc}", file=sys.stderr)
+        print("no envelope was produced — out-of-bounds or failed work "
+              "never enters the record.", file=sys.stderr)
+        return 1, intent_id
+
+    text = str(result.get("output", ""))
+    print("\n--- result " + "-" * 53)
+    print(text[:400] + ("…" if len(text) > 400 else ""))
+    print("-" * 64)
+
+    # Audit what was actually stored — same verifiers a third party runs.
+    envelopes = bb.reconstruct_dag(intent_id)
+    report = audit_from_store(envelopes, store, require_closed=True)
+    verdict = "VALID" if report.valid else "INVALID"
+    print(f"recorded: {len(envelopes)} signed envelope(s) · audit: {verdict}")
+    print(f"intent:   {intent_id}")
+    print(f"audit:    gyza audit  {intent_id}")
+    print(f"receipt:  gyza bundle {intent_id}   (then anyone: gyza verify <file>)")
+    return (0 if report.valid else 1), intent_id
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    cfg = load_config()
+    code, _ = run_local_task(
+        args.task, cfg=cfg, memory_mb=args.memory_mb,
+        mock=args.mock, model=args.model,
+    )
+    return code
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +509,92 @@ def cmd_audit(args: argparse.Namespace) -> int:
     store = ArtifactStore(base_path="~/.gyza/artifacts")
     report = audit_from_store(envelopes, store, require_closed=True)
     print(render_audit_report(report, title=f"GYZA AUDIT — {args.intent_id}"))
+    return 0 if report.valid else 1
+
+
+def cmd_bundle(args: argparse.Namespace) -> int:
+    """Export a stored workflow as a portable evidence bundle that anyone
+    can check with `gyza verify` — no node, no daemon, no identity.
+    Exports even a failing workflow (shipping proof of a violation is a
+    legitimate act); the verdict is printed either way."""
+    import json as _json
+
+    from gyza.blackboard import Blackboard
+    from gyza.evidence import (
+        bundle_hash,
+        bundle_to_bytes,
+        create_bundle,
+        render_verify_verdict_line,
+        verify_bundle,
+    )
+    from gyza.network.artifact_store import ArtifactStore
+
+    cfg = load_config()
+    rp = cfg.resolved_paths()
+    bb_path = Path(rp["blackboard_db_path"])
+    if not bb_path.exists():
+        print(f"no blackboard at {bb_path} — nothing to bundle", file=sys.stderr)
+        return 1
+
+    bb = Blackboard(str(bb_path))
+    envelopes = bb.reconstruct_dag(args.intent_id)
+    if not envelopes:
+        print(f"no envelopes logged for intent {args.intent_id!r}",
+              file=sys.stderr)
+        return 1
+
+    store = ArtifactStore(base_path="~/.gyza/artifacts")
+
+    def _manifest(h: str) -> "dict | None":
+        raw = store.get(h)
+        if raw is None:
+            return None
+        try:
+            obj = _json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, _json.JSONDecodeError):
+            return None
+        return obj if isinstance(obj, dict) else None
+
+    bundle = create_bundle(
+        envelopes, resolve_artifact=store.get, resolve_manifest=_manifest,
+        intent_id=args.intent_id,
+    )
+    report = verify_bundle(bundle)
+
+    out = Path(args.output or f"gyza-evidence-{args.intent_id[:12]}.json")
+    out.write_bytes(bundle_to_bytes(bundle))
+    print(f"wrote {out}  ({len(envelopes)} envelopes)")
+    print(f"bundle hash: {bundle_hash(bundle)}")
+    print(render_verify_verdict_line(report))
+    if not report.valid:
+        print("note: bundle written anyway — exporting evidence of a "
+              "violation is a legitimate act.")
+    return 0 if report.valid else 1
+
+
+def cmd_verify(args: argparse.Namespace) -> int:
+    """Verify an evidence bundle offline. Pure function of the file:
+    touches no config, no identity, no daemon — a third party's command."""
+    from gyza.audit import render_audit_report
+    from gyza.evidence import (
+        BundleError,
+        bundle_hash,
+        load_bundle,
+        verify_bundle,
+    )
+
+    path = Path(args.bundle)
+    if not path.exists():
+        print(f"no such file: {path}", file=sys.stderr)
+        return 1
+    try:
+        bundle = load_bundle(path.read_bytes())
+        report = verify_bundle(bundle)
+    except BundleError as exc:
+        print(f"not a verifiable evidence bundle: {exc}", file=sys.stderr)
+        return 1
+    title = f"GYZA EVIDENCE VERIFY — bundle {bundle_hash(bundle)[:16]}…"
+    print(render_audit_report(report, title=title))
     return 0 if report.valid else 1
 
 
@@ -1844,6 +2164,43 @@ def build_parser() -> argparse.ArgumentParser:
         help="intent to audit; omit to list intents with logged envelopes",
     )
 
+    p_run = sub.add_parser(
+        "run",
+        help="execute one task bounded + flight-recorded: real sandbox, "
+             "signed envelope, auditable receipt",
+    )
+    p_run.add_argument("task", help="what the agent should do")
+    p_run.add_argument(
+        "--memory-mb", type=int, default=512,
+        help="memory bound for the agent's manifest AND sandbox (default 512)",
+    )
+    p_run.add_argument(
+        "--mock", action="store_true",
+        help="force the mock executor (no AI call) even if an API key is set",
+    )
+    p_run.add_argument(
+        "--model", default=None,
+        help="model for the anthropic executor (default: config default_model)",
+    )
+
+    p_bundle = sub.add_parser(
+        "bundle",
+        help="export a stored workflow as a portable evidence bundle "
+             "(verifiable by anyone via 'gyza verify')",
+    )
+    p_bundle.add_argument("intent_id", help="intent whose provenance to export")
+    p_bundle.add_argument(
+        "-o", "--output", default=None,
+        help="output path (default: gyza-evidence-<intent12>.json)",
+    )
+
+    p_verify = sub.add_parser(
+        "verify",
+        help="verify an evidence bundle offline — no node, daemon, or "
+             "identity required",
+    )
+    p_verify.add_argument("bundle", help="path to a gyza-evidence-bundle file")
+
     # Public demo task submission. Submits a free-text task to the
     # gyza-demo-public-v1 project, waits for a hosted agent on the
     # network to claim it, then verifies + prints the signed result.
@@ -2027,6 +2384,12 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_status(args)
     if args.command == "audit":
         return cmd_audit(args)
+    if args.command == "run":
+        return cmd_run(args)
+    if args.command == "bundle":
+        return cmd_bundle(args)
+    if args.command == "verify":
+        return cmd_verify(args)
     if args.command == "submit":
         return cmd_submit(args)
     if args.command == "watch":

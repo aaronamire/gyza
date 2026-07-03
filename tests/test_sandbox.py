@@ -75,6 +75,39 @@ def test_make_sandboxed_executor_matches_runner_protocol():
     assert out["text"] == "abc"
 
 
+@_REQUIRES_BWRAP
+def test_sandboxed_executor_accepts_runner_context():
+    # The runner's real context carries the WorkItem OBJECT (with a numpy
+    # embedding) — not JSON-serializable. The sandbox wrapper must project
+    # it to a JSON-safe form at the process boundary instead of blowing up
+    # (the A3 production-wiring gap: caught live by `gyza run`).
+    import time
+    import uuid
+
+    import numpy as np
+
+    from gyza.schema import EMBEDDING_DIM, WorkItem
+
+    item = WorkItem(
+        id=str(uuid.uuid7()), lineage_root="intent-x", parent_id=None,
+        description="d", desc_embedding=np.zeros(EMBEDDING_DIM, dtype=np.float32),
+        reward=0.5, reward_updated_ns=time.time_ns(), required_tier=0,
+        input_hashes=["00" * 32], output_spec={}, streaming_ok=False,
+        claimed_by=None, claimed_at_ns=None,
+        claim_hlc_l=0, claim_hlc_c=0, claim_hlc_node="",
+        completed_at_ns=None, output_hash=None, icp_envelope_hash=None,
+        success=None, created_at_ns=time.time_ns(), ttl_ns=10**12,
+    )
+    fn = make_sandboxed_executor(
+        "gyza.runner:make_mock_executor",
+        init_kwargs={"response": "ok"},
+        config=SandboxConfig(timeout_s=15.0),
+    )
+    out = fn("prompt", {"item": item, "inputs": [{"text": "prior"}]})
+    assert out["text"] == "ok"
+    assert "__enforcement__" in out
+
+
 # ----------------------------------------------------------------------
 # Filesystem isolation — POSITIVE
 # ----------------------------------------------------------------------

@@ -34,6 +34,35 @@ from gyza.sandbox.runner import (
 LOG = logging.getLogger("gyza.sandbox.executor")
 
 
+def _json_safe_context(context: dict) -> dict:
+    """
+    Project the runner's executor context onto what can cross the
+    sandbox process boundary (it travels as JSON).
+
+    The runner passes ``{"item": WorkItem, "inputs": [...]}`` — the rich
+    ``WorkItem`` object (with a numpy embedding) is fine for in-process
+    executors but not serializable. Sandboxed executors get the fields
+    an executor can legitimately act on; ``inputs`` (parsed artifact
+    dicts) pass through unchanged. Anything else the caller put in the
+    context is forwarded as-is — if it isn't JSON-safe, ``run_sandboxed``
+    raises, which is the honest outcome for an unserializable contract.
+    """
+    safe = dict(context)
+    item = safe.get("item")
+    if item is not None and not isinstance(
+        item, (dict, str, int, float, bool, list)
+    ):
+        safe["item"] = {
+            "id": getattr(item, "id", None),
+            "lineage_root": getattr(item, "lineage_root", None),
+            "description": getattr(item, "description", None),
+            "required_tier": getattr(item, "required_tier", None),
+            "input_hashes": list(getattr(item, "input_hashes", None) or []),
+            "output_spec": getattr(item, "output_spec", None),
+        }
+    return safe
+
+
 def make_sandboxed_executor(
     factory_qualname: str,
     *,
@@ -83,7 +112,7 @@ def make_sandboxed_executor(
             factory_qualname=factory_qualname,
             init_kwargs=init,
             prompt=prompt,
-            context=context,
+            context=_json_safe_context(context),
             config=cfg,
         )
         payload = result.payload
