@@ -1,61 +1,93 @@
 # Gyza
 
-**Run an AI task on a machine you don't own — and get back a
-cryptographic proof of who ran it and that it stayed inside safe,
-declared bounds.** No account, no API key, no bill.
+**Run an AI agent — or any command — inside a real sandbox, and get
+back a cryptographic receipt of exactly what it did and that it
+stayed inside the bounds you granted.** A seatbelt and a flight
+recorder for the agents you already run. No account, no API key, no
+bill.
 
-**Status:** alpha. Linux only (x86_64 / aarch64). The protocol is
-whole, tested, and live on a public mesh; treat it as early
-software.
+**Status:** alpha, Linux only (x86_64 / aarch64), needs bubblewrap
+(`bwrap`) for the sandbox. The single-node product below works from
+a plain `pip install` with no daemon and no network. The
+peer-to-peer layer (join a mesh, delegate work to a stranger's
+machine) is real and tested but experimental, and the public
+bootstrap mesh is currently offline — see
+[Experimental: the network](#experimental-the-network).
 
 ---
 
-## Quickstart
-
-Four steps from nothing to a verified answer.
+## Quickstart — local, no network, ~1 minute
 
 ```bash
-# 1. Install (Linux x86_64/aarch64, Python 3.10+, pipx).
-#    Also generates your identity key (~/.gyza/compositor.key).
-curl -sSf https://raw.githubusercontent.com/aaronamire/gyza/main/scripts/install.sh | bash
+# 1. Install (Linux x86_64/aarch64, Python 3.10+, plus bubblewrap).
+pip install gyza          # or: pipx install gyza
+#   Debian/Ubuntu: sudo apt install bubblewrap
+#   Arch:          sudo pacman -S bubblewrap
 
-# 2. Start your node — it joins the public mesh automatically
-#    (3 DNS-anchored bootstrap peers, no other setup).
-gyza global start
-gyza global status        # give it a few seconds: dht_peers / connections
+# 2. Set up your identity key (~/.gyza/compositor.key).
+gyza init
 
-# 3. Ask the network a question. A hosted agent somewhere on Earth
-#    runs it in a sandbox and pushes back a signed result; your
-#    machine verifies it locally.
-gyza submit "In one sentence, what is a Merkle tree?"
+# 3. Run YOUR command inside a bounded sandbox — get a signed receipt.
+gyza exec --allow-read . -- ls -la
+#   → runs in a bwrap sandbox that can see only what you granted,
+#     signs the result, and prints an intent id + audit verdict.
 
-# 4. Local demos — no network needed.
-gyza demo pipeline        # two agents, a signed provenance chain
-gyza demo injection       # tamper a chain, re-verify — watch it fail
-gyza demo global --fast   # two nodes, a real comms blackout, and a
-                          # 2-envelope signed chain that verifies across
-                          # the blackout (~22 s; drop --fast for ~110 s
-                          # with full SentenceTransformer warmup)
-gyza demo bounds          # offline bounds-proof demo: a bubblewrap-
-                          # sandboxed task is signed, an adversary tries
-                          # to forge the enforcement record (caught), and
-                          # a deliberately-wider sandbox is refused.
-                          # No daemon, no network, no API key. ~2 s.
+# 4. Turn the run into a portable receipt anyone can check — with no
+#    node, no daemon, no identity, and no trust in you.
+gyza bundle <intent-id> -o receipt.json
+gyza verify receipt.json         # a third party runs exactly this
 ```
 
-`gyza submit` is the product; step 2 just brings your node onto the
-mesh first. If the public demo agent's daily quota is exhausted you
-get a clear "demo quota reached" message — the protocol path is
-identical, and you can always reproduce the full result against
-your own node.
+`gyza exec -- <command>` and `gyza run "<task>"` both execute inside a
+manifest-derived bwrap sandbox (memory cap, filesystem allowlist,
+fresh network namespace), fold a tamper-evident enforcement record
+into a signed provenance envelope, and end in a receipt you can hand
+to someone else. What it proves: **accountability** (every action
+signed and attributable) and **containment** (the run provably stayed
+within the bounds you granted — it can't touch your home or secrets).
+What it does *not* prove: that the output is *correct* — that's still
+a human call.
+
+### Local demos — no network, no API key
+
+```bash
+gyza demo bounds          # a sandboxed task is signed; an adversary
+                          # forges the enforcement record (caught) and
+                          # a wider sandbox is refused. ~2 s.
+gyza demo pipeline        # two agents, a signed provenance chain
+gyza demo injection       # tamper a chain, re-verify — watch it fail
+```
 
 Install from source instead:
 
 ```bash
 git clone https://github.com/aaronamire/gyza && cd gyza
-make -C netd build            # builds netd/bin/gyza-netd (Go 1.22+)
-pipx install --editable .     # puts the `gyza` CLI on PATH
+pip install -e .              # puts the `gyza` CLI on PATH
 gyza init
+make -C netd build            # OPTIONAL: the Go network daemon (Go 1.22+)
+```
+
+---
+
+## Experimental: the network
+
+Gyza's larger aim is to let you delegate an agent task to a machine
+you don't own and get back the same signed, bounded receipt. That
+peer-to-peer layer is implemented and tested (two daemons on
+loopback complete a project through a real comms blackout and
+bilateral settlement — `gyza demo global --fast`), but it is
+experimental and needs the Go daemon (`gyza-netd`), which is **not**
+shipped in the pip package — build it from a source checkout with
+`make -C netd build`, or put a `gyza-netd` binary on PATH.
+
+The public bootstrap mesh (`gyza.network`) is **currently offline**,
+so `gyza global start` / `gyza submit` won't reach live peers right
+now. The commands still work against your own daemons:
+
+```bash
+gyza demo global --fast   # two local daemons, a real blackout, a
+                          # 2-envelope chain that verifies across it (~22 s)
+gyza global start         # start a local daemon (needs gyza-netd)
 ```
 
 ---
