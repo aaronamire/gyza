@@ -277,13 +277,22 @@ class AuditAcceptancePolicy:
     the judgment is a pure function of what the payer independently
     holds.
 
-    Three-valued on purpose:
+    Three-valued on purpose, and the split between DEFER and DECLINE is
+    load-bearing: the payer must first hold every piece of evidence the
+    audit will consult, THEN judge. Anything not yet held is DEFER
+    (gossip/settlement lag is not the peer's fault — reconciliation
+    retries); only a complete set of evidence that still fails the audit
+    is DECLINE (provable misbehavior — tampered artifact, out-of-bounds
+    execution).
 
-      * envelope / artifact / manifest not held locally → DEFER (the
-        payer cannot pass judgment on evidence it doesn't have; failing
-        closed here would punish honest gossip lag with a dispute);
-      * held and audit INVALID → DECLINE (provable misbehavior);
-      * held and audit VALID → ACCEPT.
+      * envelope not held → DEFER;
+      * output artifact not held → DEFER;
+      * artifact is an *execution* (carries an ``__enforcement__``
+        record) but its manifest isn't held → DEFER (a coordination
+        artifact needs no manifest, so we only require one once we know
+        the work claimed to run bounded);
+      * everything the audit needs is held and it passes → ACCEPT;
+      * everything is held and it fails → DECLINE.
 
     ``require_closed=False`` because settlement is per-work-item: the
     envelope's spine parent legitimately lives elsewhere in the DAG and
@@ -303,8 +312,22 @@ class AuditAcceptancePolicy:
         artifact = self._store.get(env.output_hash)
         if artifact is None:
             return AcceptanceVerdict.DEFER, "output artifact not held locally yet"
-        manifest_raw = self._store.get(env.capability_manifest_hash)
-        if manifest_raw is None:
+
+        # Only an execution (artifact carrying a folded __enforcement__
+        # record) is bounds-checked against a manifest; a coordination
+        # artifact is content-address-bound only. So require the manifest
+        # to be held ONLY when this artifact is an execution — otherwise
+        # a manifest we legitimately don't have would wrongly stall (or,
+        # worse, decline) an honest coordination payment.
+        is_execution = False
+        try:
+            obj = json.loads(artifact.decode("utf-8"))
+            is_execution = isinstance(obj, dict) and isinstance(
+                obj.get("__enforcement__"), dict
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            is_execution = False
+        if is_execution and self._store.get(env.capability_manifest_hash) is None:
             return AcceptanceVerdict.DEFER, "agent manifest not held locally yet"
 
         def _manifest(h: str) -> "dict | None":
@@ -357,6 +380,7 @@ class LedgerSettlementService:
         envelope_resolver: EnvelopeResolver,
         reputation_store=None,
         acceptance_policy: "AcceptancePolicy | None" = None,
+        evidence_store=None,
     ):
         self._ledger = ledger
         self._netd = netd
@@ -367,6 +391,17 @@ class LedgerSettlementService:
         # refuse payment for work that doesn't audit clean from this
         # node's own stores.
         self._acceptance_policy = acceptance_policy
+        # Optional content-addressed store (``.store(bytes)->hash``,
+        # ``.get(hash)->bytes|None``). The earner reads it to attach the
+        # evidence (output artifact + agent manifest) an entry settles;
+        # the payer writes received evidence into it so the acceptance
+        # policy can audit the work from bytes it now independently
+        # holds. Content-addressing makes this safe: the store keys by
+        # the true BLAKE3 of the bytes, and the audit re-derives the
+        # binding, so a peer that sends bytes not matching the claimed
+        # hash simply fails to satisfy the audit (unpaid), never
+        # poisons anything.
+        self._evidence_store = evidence_store
         # Optional reputation store. When provided, every protocol-level
         # rejection (forged signature, envelope-hash mismatch, amount
         # outside tolerance, misrouted entry) bumps DOWN the offending
@@ -427,6 +462,7 @@ class LedgerSettlementService:
         tokens_out: int,
         duration_ms: int,
         amount: float | None = None,
+        evidence_hashes: "list[str] | None" = None,
     ) -> LedgerEntry:
         """
         Build, earner-sign, and send a ledger entry to ``payer_peer_id``.
@@ -435,6 +471,17 @@ class LedgerSettlementService:
         Callers can override (e.g. to claim a smaller amount as
         goodwill); the payer applies the ±20% tolerance against its
         OWN recompute regardless of what we passed.
+
+        ``evidence_hashes`` are content-addresses (the envelope's
+        ``output_hash`` and ``capability_manifest_hash``) whose bytes
+        this node holds in ``evidence_store``. When both are provided and
+        resolvable, their bytes ride along with the entry so the payer
+        can audit the work before paying — the loop's "pay only for
+        verified bounded work" property. Gossip already carries the
+        signed envelope to the payer; only these two blobs need to
+        travel with settlement. Omitted (or unresolvable) evidence just
+        means the payer's audit gate, if any, will defer — never a
+        silent unaudited payment.
 
         Returns the unsettled entry — the to_signature is populated,
         from_signature is empty, settled is False. The full settlement
@@ -464,7 +511,13 @@ class LedgerSettlementService:
         # comparison would be a footgun.
         _obs_settle_start(entry.entry_id, time.monotonic())
 
-        payload = json.dumps(entry.to_dict()).encode("utf-8")
+        wire = entry.to_dict()
+        evidence = self._collect_evidence(evidence_hashes)
+        if evidence:
+            # Sidecar key: LedgerEntry.from_dict tolerates extra keys, so
+            # the signed entry bytes the payer verifies are unchanged.
+            wire["__evidence__"] = evidence
+        payload = json.dumps(wire).encode("utf-8")
         ok = self._netd.send_message(
             peer_id=payer_peer_id,
             message_type=EARNER_SIGNED_TYPE,
@@ -524,6 +577,53 @@ class LedgerSettlementService:
     # ------------------------------------------------------------------
     # Handlers
     # ------------------------------------------------------------------
+
+    def _collect_evidence(
+        self, hashes: "list[str] | None"
+    ) -> "dict[str, str]":
+        """Read each hash's bytes from the local evidence store and
+        base64-encode them for the wire. Missing store or missing bytes
+        yield an empty map (the payer's gate then defers, never pays
+        unaudited)."""
+        import base64
+
+        if not hashes or self._evidence_store is None:
+            return {}
+        out: dict[str, str] = {}
+        for h in hashes:
+            if not h or h in out:
+                continue
+            try:
+                raw = self._evidence_store.get(h)
+            except Exception:  # noqa: BLE001
+                raw = None
+            if raw is not None:
+                out[h] = base64.b64encode(raw).decode("ascii")
+        return out
+
+    def _absorb_evidence(self, payload: bytes) -> None:
+        """Store any evidence blobs an incoming earner_signed carried, so
+        the acceptance policy can audit the work from bytes we now hold.
+        Content-addressed: the store keys by the true hash of the bytes,
+        so a mismatched claim simply isn't resolvable later (defer/decline),
+        never a poisoned entry."""
+        import base64
+
+        if self._evidence_store is None:
+            return
+        try:
+            d = json.loads(payload.decode("utf-8"))
+        except Exception:  # noqa: BLE001
+            return
+        evidence = d.get("__evidence__") if isinstance(d, dict) else None
+        if not isinstance(evidence, dict):
+            return
+        for _claimed_hash, b64 in evidence.items():
+            try:
+                raw = base64.b64decode(b64, validate=True)
+                self._evidence_store.store(raw)
+            except Exception:  # noqa: BLE001
+                continue
 
     def _decode_entry(self, payload: bytes) -> LedgerEntry | None:
         try:
@@ -591,6 +691,13 @@ class LedgerSettlementService:
                 self._bump_dispute(entry.to_compositor)
                 _obs_dispute("forged_earner_sig")
                 return
+
+            # Earner signature is valid, so this entry really came from
+            # the claimed earner: absorb any evidence it carried into our
+            # local store so the acceptance policy below can audit the
+            # work. Done after sig-verify (never store bytes from a
+            # forged entry) and before the gate.
+            self._absorb_evidence(incoming.payload)
 
             # Envelope hash must match a known completed work item.
             expected = self._resolve_envelope(entry.work_item_id)

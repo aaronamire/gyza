@@ -828,3 +828,174 @@ def test_audit_acceptance_policy_verdicts(tmp_path):
     verdict, why = policy(_entry_for(bad_env))
     assert verdict is AcceptanceVerdict.DECLINE
     assert "out of bounds" in why
+
+
+# ======================================================================
+# THE LOOP — audit-before-cosign end to end (evidence transfer + gate)
+#
+# These prove the mechanism actually closes: the payer independently
+# audits the delivered work from evidence the earner shipped, and pays
+# ONLY when that audit passes. Honest bounded work settles; over-bound
+# work is declined + disputed + never paid; withheld evidence defers
+# (unpaid, but no dispute).
+# ======================================================================
+
+def _loop_rig(tmp_path, *, mem_budget_mb, enforcement_mb):
+    """Build a payer+earner rig where the earner has produced a real
+    signed execution envelope (artifact carries an __enforcement__
+    record) and holds artifact+manifest in its CAS. The payer runs the
+    AuditAcceptancePolicy over evidence the earner ships with the entry.
+    Returns everything a test needs plus the work_item_id / envelope."""
+    import blake3
+
+    from gyza.blackboard import Blackboard
+    from gyza.economy.settlement import AuditAcceptancePolicy
+    from gyza.icp import compute_envelope_hash
+    from gyza.identity import AgentIdentity, manifest_canonical_bytes
+    from gyza.network.artifact_store import ArtifactStore
+
+    payer = _compositor(tmp_path, "payer")
+    earner = _compositor(tmp_path, "earner")
+    payer_l = _ledger(tmp_path, payer, "payer")
+    earner_l = _ledger(tmp_path, earner, "earner")
+    payer_bus = _FakeBus("peer-payer", payer.pubkey_hex)
+    earner_bus = _FakeBus("peer-earner", earner.pubkey_hex)
+    payer_bus.connect(earner_bus)
+
+    payer_store = ArtifactStore(base_path=str(tmp_path / "payer-cas"))
+    earner_store = ArtifactStore(base_path=str(tmp_path / "earner-cas"))
+    payer_bb = Blackboard(str(tmp_path / "payer-bb.db"))
+    earner_bb = Blackboard(str(tmp_path / "earner-bb.db"))
+
+    # The earner does bounded work: issue an agent, build an artifact
+    # with a folded enforcement record, sign the envelope.
+    seed, manifest = earner.issue_agent(
+        agent_type="loop.worker", model_path="mock",
+        fs_read_paths=[], fs_write_paths=[], allowed_hosts=[],
+        memory_limit_mb=mem_budget_mb, attestation_tier=0,
+    )
+    ident = AgentIdentity(seed, manifest)
+    artifact = json.dumps(
+        {"text": "the work", "__enforcement__": {
+            "backend": "bubblewrap", "ro_paths": [], "rw_paths": [],
+            "requires_network": False, "max_memory_mb": enforcement_mb}},
+        sort_keys=True, separators=(",", ":"),
+    ).encode()
+    out_hash = blake3.blake3(artifact).hexdigest()
+    work_item_id = "loop-work-1"
+    env = ident.get_icp_signer().sign_action(
+        intent_id="loop-intent", action_id=work_item_id,
+        input_hashes=["00" * 32], output_hash=out_hash, parent_envelope=None,
+        inference_backend="mock", model_identifier="mock",
+        duration_ms=1000, tokens_in=0, tokens_out=1000,
+    )
+    env_hash = compute_envelope_hash(env)
+    manifest_bytes = manifest_canonical_bytes(manifest)
+
+    # Earner holds the evidence in its CAS; both nodes hold the envelope
+    # (gossip carries envelopes — only the artifact+manifest bytes need
+    # to ride with settlement).
+    earner_store.store(artifact)
+    earner_store.store(manifest_bytes)
+    earner_bb.store_envelope(env)
+    payer_bb.store_envelope(env)
+
+    payer_svc = LedgerSettlementService(
+        ledger=payer_l, netd=payer_bus,
+        envelope_resolver={work_item_id: env_hash}.get,
+        reputation_store=_RecordingReputation(),
+        acceptance_policy=AuditAcceptancePolicy(payer_bb, payer_store),
+        evidence_store=payer_store,
+    )
+    earner_svc = LedgerSettlementService(
+        ledger=earner_l, netd=earner_bus,
+        envelope_resolver={work_item_id: env_hash}.get,
+        evidence_store=earner_store,
+    )
+    payer_svc.start()
+    earner_svc.start()
+
+    return {
+        "payer": payer, "earner": earner, "payer_l": payer_l,
+        "earner_l": earner_l, "payer_bus": payer_bus, "earner_bus": earner_bus,
+        "payer_svc": payer_svc, "earner_svc": earner_svc,
+        "work_item_id": work_item_id, "env_hash": env_hash,
+        "out_hash": out_hash, "manifest_hash": ident.manifest_hash,
+        "payer_rep": payer_svc._reputation_store,
+    }
+
+
+def _submit_with_evidence(rig):
+    return rig["earner_svc"].submit_earned(
+        payer_compositor=rig["payer"].pubkey_hex,
+        payer_peer_id=rig["payer_bus"].peer_id,
+        work_item_id=rig["work_item_id"],
+        icp_envelope_hash=rig["env_hash"],
+        model_identifier="mock", tokens_out=1000, duration_ms=1000,
+        evidence_hashes=[rig["out_hash"], rig["manifest_hash"]],
+    )
+
+
+def test_loop_honest_bounded_work_settles(tmp_path):
+    # 512MB enforcement under a 512MB budget → audit VALID → paid.
+    rig = _loop_rig(tmp_path, mem_budget_mb=512, enforcement_mb=512)
+    try:
+        entry = _submit_with_evidence(rig)
+        assert _wait_until(
+            lambda: (e := rig["payer_l"].get_entry(entry.entry_id)) is not None
+            and e.settled,
+            timeout_s=3.0,
+        ), "honest bounded work never settled"
+        assert rig["payer_rep"].successes == [rig["earner"].pubkey_hex]
+        assert rig["payer_rep"].disputes == []
+    finally:
+        rig["payer_svc"].stop(); rig["earner_svc"].stop()
+        rig["payer_bus"].close(); rig["earner_bus"].close()
+
+
+def test_loop_over_bound_work_declined_and_disputed(tmp_path):
+    # 2048MB enforcement against a 512MB budget → audit INVALID (out of
+    # bounds) → DECLINE: disputed and never paid, even though the entry
+    # is perfectly signed and the amount is honest.
+    rig = _loop_rig(tmp_path, mem_budget_mb=512, enforcement_mb=2048)
+    try:
+        entry = _submit_with_evidence(rig)
+        # Give the handler time to absorb evidence + audit + decline.
+        settled = _wait_until(
+            lambda: (e := rig["payer_l"].get_entry(entry.entry_id)) is not None
+            and e.settled,
+            timeout_s=1.5,
+        )
+        assert not settled, "over-bound work must NOT settle"
+        assert rig["payer_rep"].disputes == [rig["earner"].pubkey_hex]
+        assert rig["payer_rep"].successes == []
+    finally:
+        rig["payer_svc"].stop(); rig["earner_svc"].stop()
+        rig["payer_bus"].close(); rig["earner_bus"].close()
+
+
+def test_loop_withheld_evidence_defers_unpaid(tmp_path):
+    # Earner sends NO evidence. The payer cannot audit → DEFER → not
+    # paid, and (crucially) NOT disputed: absence of evidence is lag, not
+    # provable misbehavior.
+    rig = _loop_rig(tmp_path, mem_budget_mb=512, enforcement_mb=512)
+    try:
+        entry = rig["earner_svc"].submit_earned(
+            payer_compositor=rig["payer"].pubkey_hex,
+            payer_peer_id=rig["payer_bus"].peer_id,
+            work_item_id=rig["work_item_id"],
+            icp_envelope_hash=rig["env_hash"],
+            model_identifier="mock", tokens_out=1000, duration_ms=1000,
+            # no evidence_hashes — nothing ships, and the payer's CAS is a
+            # distinct store that does not already hold the artifact.
+        )
+        settled = _wait_until(
+            lambda: (e := rig["payer_l"].get_entry(entry.entry_id)) is not None
+            and e.settled,
+            timeout_s=1.0,
+        )
+        assert not settled, "must not pay without auditable evidence"
+        assert rig["payer_rep"].disputes == []  # absence of evidence is lag
+    finally:
+        rig["payer_svc"].stop(); rig["earner_svc"].stop()
+        rig["payer_bus"].close(); rig["earner_bus"].close()
