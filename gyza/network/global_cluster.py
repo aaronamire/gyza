@@ -269,10 +269,28 @@ class GlobalCluster:
             self._gossip = GossipClient(socket_path)
 
         self._registry = PeerRegistry(self._netd)
+        # Audit-before-cosign: active only when the blackboard has a
+        # content-addressed store to hold evidence AND the config opts in
+        # (default True). Where no store is present (pure-coordination
+        # nodes, legacy tests), settlement keeps its historical behavior
+        # — the protocol checks alone — so this is additive, not a
+        # behavior change for anyone without an artifact store.
+        evidence_store = getattr(self._blackboard, "_artifact_store", None)
+        acceptance_policy = None
+        if evidence_store is not None and getattr(
+            self._config, "settlement_audit_before_cosign", True
+        ):
+            from gyza.economy.settlement import AuditAcceptancePolicy
+            acceptance_policy = AuditAcceptancePolicy(
+                self._blackboard, evidence_store,
+            )
+            LOG.info("[global] settlement audit-before-cosign: ENABLED")
         self._settlement = LedgerSettlementService(
             ledger=self._ledger,
             netd=self._netd,
             envelope_resolver=self._envelope_resolver,
+            acceptance_policy=acceptance_policy,
+            evidence_store=evidence_store,
         )
         self._settlement.start()
 
@@ -955,6 +973,13 @@ class GlobalCluster:
                     model_identifier=envelope.model_identifier,
                     tokens_out=envelope.tokens_out,
                     duration_ms=envelope.duration_ms,
+                    # Ship the evidence the payer needs to audit before
+                    # paying: the output artifact and the agent manifest.
+                    # No-op when this node has no evidence store.
+                    evidence_hashes=[
+                        envelope.output_hash,
+                        envelope.capability_manifest_hash,
+                    ],
                 )
             except Exception as e:  # noqa: BLE001
                 LOG.warning(

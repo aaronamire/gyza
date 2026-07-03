@@ -49,6 +49,13 @@ class GyzaConfig:
     # the offending peer until reconciliation/settlement clears the gap.
     # Pure local guidance — peers compute their own thresholds.
     max_compute_debt_credits: float = 100.0
+    # When True (and a content-addressed artifact store is attached), the
+    # payer independently audits the delivered work — from evidence the
+    # earner ships with settlement — before cosigning, and declines to
+    # pay for work that doesn't audit clean. The mechanism that makes a
+    # credit certify verified bounded labor rather than a mere claim.
+    # Has no effect where no artifact store is present (legacy path).
+    settlement_audit_before_cosign: bool = True
 
     def resolved_paths(self) -> dict[str, str]:
         return {
