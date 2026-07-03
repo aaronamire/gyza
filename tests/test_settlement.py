@@ -639,3 +639,192 @@ def test_lifecycle_start_stop_idempotent(tmp_path):
 _ = canonical_sign_bytes
 _ = compute_task_cost
 _ = pytest
+
+
+# ======================================================================
+# Acceptance policy — the L0 gate (audit-before-cosign)
+# ======================================================================
+
+class _RecordingReputation:
+    def __init__(self):
+        self.disputes: list[str] = []
+        self.successes: list[str] = []
+
+    def record_dispute(self, peer: str) -> None:
+        self.disputes.append(peer)
+
+    def record_success(self, peer: str) -> None:
+        self.successes.append(peer)
+
+
+def _submit_one(rig, work_id: str = "work-acc"):
+    envelope_hash = "ab" * 32
+    rig.payer_envelopes[work_id] = envelope_hash
+    return rig.earner_svc.submit_earned(
+        payer_compositor=rig.payer_compositor.pubkey_hex,
+        payer_peer_id=rig.payer_bus.peer_id,
+        work_item_id=work_id,
+        icp_envelope_hash=envelope_hash,
+        model_identifier="mock", tokens_out=1000, duration_ms=1000,
+    )
+
+
+def test_acceptance_accept_settles(tmp_path):
+    from gyza.economy.settlement import AcceptanceVerdict
+
+    rig = _make_pair(tmp_path)
+    try:
+        rig.payer_svc._acceptance_policy = (
+            lambda e: (AcceptanceVerdict.ACCEPT, "")
+        )
+        entry = _submit_one(rig)
+        assert _wait_until(
+            lambda: (
+                (e := rig.payer_ledger.get_entry(entry.entry_id)) is not None
+                and e.settled
+            ),
+        )
+    finally:
+        rig.stop()
+
+
+def test_acceptance_defer_no_cosign_no_dispute(tmp_path):
+    # DEFER = "cannot judge yet" — mirrors the unknown-work-item path:
+    # no cosign, and crucially NO dispute (gossip lag is not misbehavior).
+    from gyza.economy.settlement import AcceptanceVerdict
+
+    rig = _make_pair(tmp_path)
+    try:
+        rep = _RecordingReputation()
+        rig.payer_svc._reputation_store = rep
+        rig.payer_svc._acceptance_policy = (
+            lambda e: (AcceptanceVerdict.DEFER, "evidence not held yet")
+        )
+        entry = _submit_one(rig)
+        assert not _wait_until(
+            lambda: (
+                (e := rig.payer_ledger.get_entry(entry.entry_id)) is not None
+                and e.settled
+            ),
+            timeout_s=0.5,
+        )
+        assert rep.disputes == []
+    finally:
+        rig.stop()
+
+
+def test_acceptance_decline_disputes_and_blocks(tmp_path):
+    # DECLINE = the payer HOLDS the evidence and it is provably bad —
+    # no cosign AND a dispute against the earner.
+    from gyza.economy.settlement import AcceptanceVerdict
+
+    rig = _make_pair(tmp_path)
+    try:
+        rep = _RecordingReputation()
+        rig.payer_svc._reputation_store = rep
+        rig.payer_svc._acceptance_policy = (
+            lambda e: (AcceptanceVerdict.DECLINE, "audit INVALID: out of bounds")
+        )
+        entry = _submit_one(rig)
+        assert not _wait_until(
+            lambda: (
+                (e := rig.payer_ledger.get_entry(entry.entry_id)) is not None
+                and e.settled
+            ),
+            timeout_s=0.5,
+        )
+        assert rep.disputes == [rig.earner_compositor.pubkey_hex]
+        assert rep.successes == []
+    finally:
+        rig.stop()
+
+
+def test_audit_acceptance_policy_verdicts(tmp_path):
+    # The real policy, judged purely from the payer's OWN stores:
+    # not-held → DEFER; held + within bounds → ACCEPT; held + over-bound
+    # enforcement → DECLINE. Composes the production audit — no stubs.
+    import json as _json
+
+    import blake3 as _blake3
+
+    from gyza.blackboard import Blackboard
+    from gyza.economy.settlement import AcceptanceVerdict, AuditAcceptancePolicy
+    from gyza.icp import compute_envelope_hash
+    from gyza.identity import (
+        AgentIdentity,
+        LocalCompositor,
+        manifest_canonical_bytes,
+    )
+    from gyza.network.artifact_store import ArtifactStore
+
+    comp = LocalCompositor(key_path=str(tmp_path / "acc.key"))
+    seed, manifest = comp.issue_agent(
+        agent_type="acc.worker", model_path="mock",
+        fs_read_paths=[], fs_write_paths=[], allowed_hosts=[],
+        memory_limit_mb=512, attestation_tier=0,
+    )
+    ident = AgentIdentity(seed, manifest)
+
+    def _artifact(mem_mb: int) -> bytes:
+        return _json.dumps(
+            {"text": "result", "__enforcement__": {
+                "backend": "bubblewrap", "ro_paths": [], "rw_paths": [],
+                "requires_network": False, "max_memory_mb": mem_mb}},
+            sort_keys=True, separators=(",", ":"),
+        ).encode()
+
+    def _entry_for(env) -> LedgerEntry:
+        return LedgerEntry(
+            entry_id="e-1", from_compositor="payer", to_compositor="earner",
+            amount_credits=1.0, work_item_id="w-1",
+            icp_envelope_hash=compute_envelope_hash(env),
+            model_identifier="mock", tokens_out=0, duration_ms=1,
+            created_at_ns=0,
+        )
+
+    bb = Blackboard(str(tmp_path / "acc-bb.db"))
+    store = ArtifactStore(base_path=str(tmp_path / "acc-cas"))
+    policy = AuditAcceptancePolicy(bb, store)
+
+    # Within-bounds envelope, everything held → ACCEPT.
+    good_art = _artifact(512)
+    good_env = ident.get_icp_signer().sign_action(
+        intent_id="i-1", action_id="a-good", input_hashes=["00" * 32],
+        output_hash=_blake3.blake3(good_art).hexdigest(),
+        parent_envelope=None, inference_backend="mock",
+        model_identifier="mock", duration_ms=1, tokens_in=0, tokens_out=0,
+    )
+
+    # Not held at all yet → DEFER (envelope missing).
+    verdict, why = policy(_entry_for(good_env))
+    assert verdict is AcceptanceVerdict.DEFER and "envelope" in why
+
+    # Envelope held, artifact not → DEFER.
+    bb.store_envelope(good_env)
+    verdict, why = policy(_entry_for(good_env))
+    assert verdict is AcceptanceVerdict.DEFER and "artifact" in why
+
+    # Artifact held, manifest not → DEFER.
+    store.store(good_art)
+    verdict, why = policy(_entry_for(good_env))
+    assert verdict is AcceptanceVerdict.DEFER and "manifest" in why
+
+    # Everything held and clean → ACCEPT.
+    store.store(manifest_canonical_bytes(manifest))
+    verdict, why = policy(_entry_for(good_env))
+    assert verdict is AcceptanceVerdict.ACCEPT, why
+
+    # Over-bound enforcement (2048 > 512 manifest budget), fully held →
+    # DECLINE: provable misbehavior, not lag.
+    bad_art = _artifact(2048)
+    bad_env = ident.get_icp_signer().sign_action(
+        intent_id="i-1", action_id="a-bad", input_hashes=["00" * 32],
+        output_hash=_blake3.blake3(bad_art).hexdigest(),
+        parent_envelope=None, inference_backend="mock",
+        model_identifier="mock", duration_ms=1, tokens_in=0, tokens_out=0,
+    )
+    bb.store_envelope(bad_env)
+    store.store(bad_art)
+    verdict, why = policy(_entry_for(bad_env))
+    assert verdict is AcceptanceVerdict.DECLINE
+    assert "out of bounds" in why

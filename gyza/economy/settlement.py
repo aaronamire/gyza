@@ -19,6 +19,8 @@ local node owns the bilateral state machine:
                                          verify earner sig
                                          verify icp envelope hash
                                          verify amount within ±20%
+                                         acceptance policy (optional):
+                                           ACCEPT / DEFER / DECLINE
                                          sign_as_payer  → settled
                                          _handle_earner_signed sends back
     _handle_payer_cosigned ◄── "ledger.entry.payer_cosigned"
@@ -53,6 +55,11 @@ THREAT MODEL — what this layer trusts and verifies:
       about (via the caller-supplied resolver).
     - amount_credits is within ±20% of our independent recompute.
     - We are the entry's from_compositor (i.e. this entry is for us).
+    - When an acceptance policy is wired: the payer's own judgment of
+      the delivered work (AuditAcceptancePolicy = the unified audit run
+      from the payer's own stores) — ACCEPT cosigns, DEFER waits without
+      dispute (evidence lag), DECLINE refuses with a dispute (provable
+      misbehavior).
 
   Verified before earner-apply:
     - Both signatures present and valid (verify_entry).
@@ -66,6 +73,7 @@ references the key valid at the moment of signing).
 """
 from __future__ import annotations
 
+import enum
 import json
 import logging
 import threading
@@ -235,6 +243,93 @@ class ReconcileResult:
         }
 
 
+class AcceptanceVerdict(enum.Enum):
+    """
+    The payer's judgment on an earner-signed entry, distinct from the
+    protocol checks (signature, envelope hash, amount) that precede it.
+
+    ACCEPT   — cosign: the payer is satisfied with what was delivered.
+    DEFER    — do not cosign, do NOT dispute: the payer cannot judge yet
+               (evidence not held — gossip lag is not the peer's fault).
+               The earner discovers the unsettled entry via
+               reconciliation and may retry.
+    DECLINE  — do not cosign, DO dispute: the payer holds the evidence
+               and it is provably bad (tampered artifact, out-of-bounds
+               execution). This is misbehavior, not lag.
+    """
+    ACCEPT = "accept"
+    DEFER = "defer"
+    DECLINE = "decline"
+
+
+# entry -> (verdict, human-readable reason; empty when ACCEPT).
+AcceptancePolicy = Callable[[LedgerEntry], "tuple[AcceptanceVerdict, str]"]
+
+
+class AuditAcceptancePolicy:
+    """
+    Cosign only what audits clean from the payer's OWN stores.
+
+    The L0 gate of the settlement economics: before paying, run the real
+    unified audit (``gyza.audit.audit_provenance``) over the envelope the
+    entry settles, resolving the artifact and manifest from the payer's
+    local content-addressed store. Nothing the earner sent is trusted —
+    the judgment is a pure function of what the payer independently
+    holds.
+
+    Three-valued on purpose:
+
+      * envelope / artifact / manifest not held locally → DEFER (the
+        payer cannot pass judgment on evidence it doesn't have; failing
+        closed here would punish honest gossip lag with a dispute);
+      * held and audit INVALID → DECLINE (provable misbehavior);
+      * held and audit VALID → ACCEPT.
+
+    ``require_closed=False`` because settlement is per-work-item: the
+    envelope's spine parent legitimately lives elsewhere in the DAG and
+    its absence from this single-envelope audit is not evidence loss.
+    """
+
+    def __init__(self, blackboard, artifact_store):
+        self._bb = blackboard
+        self._store = artifact_store
+
+    def __call__(self, entry: LedgerEntry) -> "tuple[AcceptanceVerdict, str]":
+        from gyza.audit import audit_provenance
+
+        env = self._bb.get_envelope(entry.icp_envelope_hash)
+        if env is None:
+            return AcceptanceVerdict.DEFER, "envelope not held locally yet"
+        artifact = self._store.get(env.output_hash)
+        if artifact is None:
+            return AcceptanceVerdict.DEFER, "output artifact not held locally yet"
+        manifest_raw = self._store.get(env.capability_manifest_hash)
+        if manifest_raw is None:
+            return AcceptanceVerdict.DEFER, "agent manifest not held locally yet"
+
+        def _manifest(h: str) -> "dict | None":
+            raw = self._store.get(h)
+            if raw is None:
+                return None
+            try:
+                obj = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                return None
+            return obj if isinstance(obj, dict) else None
+
+        report = audit_provenance(
+            [env],
+            resolve_artifact=self._store.get,
+            resolve_manifest=_manifest,
+            require_closed=False,
+        )
+        if not report.valid:
+            bad = next((r for r in report.actions if not r.ok), None)
+            why = bad.reason if bad is not None else report.summary
+            return AcceptanceVerdict.DECLINE, f"audit INVALID: {why}"
+        return AcceptanceVerdict.ACCEPT, ""
+
+
 class LedgerSettlementService:
     """
     Bilateral ledger settlement. One instance per node.
@@ -261,10 +356,17 @@ class LedgerSettlementService:
         netd: _MessageBus,
         envelope_resolver: EnvelopeResolver,
         reputation_store=None,
+        acceptance_policy: "AcceptancePolicy | None" = None,
     ):
         self._ledger = ledger
         self._netd = netd
         self._resolve_envelope = envelope_resolver
+        # Optional acceptance judgment, run AFTER the protocol checks and
+        # BEFORE sign_as_payer. None preserves the historical behavior
+        # (protocol checks alone). Wire AuditAcceptancePolicy here to
+        # refuse payment for work that doesn't audit clean from this
+        # node's own stores.
+        self._acceptance_policy = acceptance_policy
         # Optional reputation store. When provided, every protocol-level
         # rejection (forged signature, envelope-hash mismatch, amount
         # outside tolerance, misrouted entry) bumps DOWN the offending
@@ -533,6 +635,29 @@ class LedgerSettlementService:
                 self._bump_dispute(entry.to_compositor)
                 _obs_dispute("amount_tolerance")
                 return
+
+            # Acceptance judgment — the L0 gate. Protocol checks above
+            # established the entry is well-formed and honestly priced;
+            # this establishes the payer is willing to PAY for what was
+            # actually delivered. DEFER mirrors the unknown-work-item
+            # path (not the peer's fault; reconciliation retries);
+            # DECLINE is provable misbehavior and disputes.
+            if self._acceptance_policy is not None:
+                verdict, why = self._acceptance_policy(entry)
+                if verdict is AcceptanceVerdict.DEFER:
+                    LOG.info(
+                        "[settlement] acceptance deferred for entry %s: %s",
+                        entry.entry_id, why,
+                    )
+                    return
+                if verdict is AcceptanceVerdict.DECLINE:
+                    LOG.warning(
+                        "[settlement] acceptance DECLINED for entry %s: %s",
+                        entry.entry_id, why,
+                    )
+                    self._bump_dispute(entry.to_compositor)
+                    _obs_dispute("acceptance_declined")
+                    return
 
             try:
                 cosigned = self._ledger.sign_as_payer(entry)
