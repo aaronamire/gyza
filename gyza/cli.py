@@ -92,37 +92,44 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 def _load_or_issue_local_agent(
     compositor, state_path: Path, *, memory_mb: int, allowed_hosts: list[str],
+    read_paths: "list[str] | None" = None,
+    write_paths: "list[str] | None" = None,
 ):
     """
     The local agent persists across runs — one identity accumulating an
     auditable history — so it's issued once and reloaded thereafter.
-    Reissued only when the requested bounds change, because the manifest
-    IS the authorization: different bounds are a different grant, and
-    reusing the old identity would attribute new work to an authorization
-    it never had.
+    Reissued only when the requested bounds change (memory, hosts, OR
+    filesystem paths), because the manifest IS the authorization:
+    different bounds are a different grant, and reusing the old identity
+    would attribute new work to an authorization it never had.
     """
     import json as _json
 
     from gyza.identity import AgentIdentity
 
+    read_paths = read_paths or []
+    write_paths = write_paths or []
     if state_path.exists():
         try:
             saved = _json.loads(state_path.read_text())
             manifest = saved["manifest"]
-            budget = manifest["capabilities"]["spawn"]["resource_budget"]
-            hosts = manifest["capabilities"]["network"]["allowed_hosts"]
+            caps = manifest["capabilities"]
+            budget = caps["spawn"]["resource_budget"]
+            hosts = caps["network"]["allowed_hosts"]
+            fs = caps["filesystem"]
             if (budget.get("memory_limit_mb") == memory_mb
-                    and sorted(hosts) == sorted(allowed_hosts)):
+                    and sorted(hosts) == sorted(allowed_hosts)
+                    and sorted(fs.get("read", [])) == sorted(read_paths)
+                    and sorted(fs.get("write", [])) == sorted(write_paths)):
                 return AgentIdentity(bytes.fromhex(saved["seed_hex"]), manifest)
-            print(f"bounds changed (mem {budget.get('memory_limit_mb')} → "
-                  f"{memory_mb} MB, hosts {hosts} → {allowed_hosts}) — "
-                  f"issuing a fresh agent identity for the new grant")
+            print("bounds changed — issuing a fresh agent identity for "
+                  "the new grant")
         except (KeyError, ValueError, TypeError, OSError):
             print("local agent state unreadable — issuing a fresh identity")
 
     seed, manifest = compositor.issue_agent(
         agent_type="local.worker", model_path="local",
-        fs_read_paths=[], fs_write_paths=[],
+        fs_read_paths=read_paths, fs_write_paths=write_paths,
         allowed_hosts=allowed_hosts,
         memory_limit_mb=memory_mb, attestation_tier=0,
     )
@@ -142,6 +149,8 @@ def run_local_task(
     memory_mb: int = 512,
     mock: bool = False,
     model: str | None = None,
+    read_paths: "list[str] | None" = None,
+    write_paths: "list[str] | None" = None,
     artifact_store_base: str = "~/.gyza/artifacts",
 ) -> "tuple[int, str]":
     """
@@ -188,10 +197,34 @@ def run_local_task(
     use_anthropic = executor is None and bool(api_key)
     allowed_hosts = ["api.anthropic.com"] if use_anthropic else []
 
+    # Filesystem grants resolve to absolute host paths BEFORE entering
+    # the manifest, so what the manifest authorizes is exactly what
+    # bwrap will bind — no relative-path ambiguity between the grant
+    # and the enforcement. A nonexistent path is refused up front
+    # (bwrap would fail the bind anyway; failing early is clearer).
+    def _resolve_grants(paths: "list[str] | None") -> "list[str]":
+        out = []
+        for p in paths or []:
+            rp_ = Path(p).expanduser().resolve()
+            if not rp_.exists():
+                raise FileNotFoundError(
+                    f"granted path does not exist: {p}"
+                )
+            out.append(str(rp_))
+        return out
+
+    try:
+        read_paths = _resolve_grants(read_paths)
+        write_paths = _resolve_grants(write_paths)
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1, ""
+
     compositor = LocalCompositor(key_path=str(key_path))
     ident = _load_or_issue_local_agent(
         compositor, key_path.parent / "local-agent.json",
         memory_mb=memory_mb, allowed_hosts=allowed_hosts,
+        read_paths=read_paths, write_paths=write_paths,
     )
 
     if executor is None:
@@ -230,6 +263,15 @@ def run_local_task(
                 if allowed_hosts else "off (fresh namespace, loopback only)")
     print(f"agent:    {ident.pubkey_hex[:16]}…  (persistent local identity)")
     print(f"bounds:   memory {memory_mb} MB (RLIMIT_AS) · network {net_note}")
+    if read_paths or write_paths:
+        fs_bits = []
+        if read_paths:
+            fs_bits.append(f"read {', '.join(read_paths)}")
+        if write_paths:
+            fs_bits.append(f"write {', '.join(write_paths)}")
+        print(f"fs:       {' · '.join(fs_bits)}  (kernel-enforced binds)")
+    else:
+        print("fs:       none (tmpfs only — grant with --allow-read/--allow-write)")
     print(f"executor: {executor_label}")
 
     bb = Blackboard(rp["blackboard_db_path"])
@@ -309,6 +351,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     code, _ = run_local_task(
         args.task, cfg=cfg, memory_mb=args.memory_mb,
         mock=args.mock, model=args.model,
+        read_paths=args.allow_read, write_paths=args.allow_write,
     )
     return code
 
@@ -2181,6 +2224,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument(
         "--model", default=None,
         help="model for the anthropic executor (default: config default_model)",
+    )
+    p_run.add_argument(
+        "--allow-read", action="append", default=[], metavar="PATH",
+        help="host path the agent may read (repeatable; kernel-enforced "
+             "read-only bind; becomes part of the signed grant)",
+    )
+    p_run.add_argument(
+        "--allow-write", action="append", default=[], metavar="PATH",
+        help="host path the agent may write (repeatable; use sparingly)",
     )
 
     p_bundle = sub.add_parser(

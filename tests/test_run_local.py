@@ -124,6 +124,59 @@ def test_changed_bounds_reissue_identity(tmp_path):
     assert e1.capability_manifest_hash != e2.capability_manifest_hash
 
 
+def test_fs_grants_enter_the_manifest(tmp_path):
+    # --allow-read paths must land in the SIGNED grant (the manifest),
+    # resolved absolute — so what was authorized is provable later, and
+    # sandbox_config_from_manifest binds exactly these paths.
+    cfg = _cfg(tmp_path)
+    grant = tmp_path / "data"
+    grant.mkdir()
+    _, intent_id = run_local_task(
+        "read the data", cfg=cfg, executor=_bounded_executor(512),
+        read_paths=[str(grant)],
+        artifact_store_base=str(tmp_path / "cas"),
+    )
+    saved = json.loads((tmp_path / "local-agent.json").read_text())
+    fs = saved["manifest"]["capabilities"]["filesystem"]
+    assert fs["read"] == [str(grant.resolve())]
+    assert fs["write"] == []
+
+
+def test_changed_fs_grants_reissue_identity(tmp_path):
+    cfg = _cfg(tmp_path)
+    grant = tmp_path / "data"
+    grant.mkdir()
+    _, i1 = run_local_task(
+        "no grants", cfg=cfg, executor=_bounded_executor(512),
+        artifact_store_base=str(tmp_path / "cas"),
+    )
+    # Same memory, same hosts — but a new read path is a WIDER grant,
+    # so the identity must not be reused.
+    _, i2 = run_local_task(
+        "with grant", cfg=cfg, executor=_bounded_executor(512),
+        read_paths=[str(grant)],
+        artifact_store_base=str(tmp_path / "cas"),
+    )
+    from gyza.blackboard import Blackboard
+
+    bb = Blackboard(str(tmp_path / "bb.db"))
+    (e1,) = bb.reconstruct_dag(i1)
+    (e2,) = bb.reconstruct_dag(i2)
+    assert e1.agent_pubkey != e2.agent_pubkey
+
+
+def test_nonexistent_grant_refused_before_any_work(tmp_path, capsys):
+    cfg = _cfg(tmp_path)
+    code, intent_id = run_local_task(
+        "task", cfg=cfg, executor=_bounded_executor(512),
+        read_paths=[str(tmp_path / "no-such-dir")],
+        artifact_store_base=str(tmp_path / "cas"),
+    )
+    assert code == 1
+    assert intent_id == ""  # refused before an intent was even posted
+    assert "does not exist" in capsys.readouterr().err
+
+
 def test_over_bound_run_refused_no_envelope(tmp_path, capsys):
     cfg = _cfg(tmp_path)
     # Executor claims 2048 MB enforcement against a 512 MB manifest —
