@@ -138,6 +138,33 @@ def test_withheld_artifact_rejected(tmp_path):
     assert "not resolvable" in bad.reason
 
 
+def test_withheld_artifact_skipped_when_not_required(tmp_path):
+    # With require_all_artifacts=False, an envelope whose artifact this
+    # replica does not hold is *skipped* (not-yet-auditable), not failed —
+    # while every row it CAN resolve is still fully checked. binding_ok stays
+    # honest (False for the missing one); the verdict stays VALID because the
+    # missing row is skipped rather than counted against it.
+    envs, artifacts, manifests, _ = _honest_workflow(tmp_path)
+    exec_env = envs[1]
+    del artifacts[exec_env.output_hash]  # this replica simply hasn't got it
+    report = audit_provenance(
+        envs, resolve_artifact=artifacts.get, resolve_manifest=manifests.get,
+        require_all_artifacts=False,
+    )
+    assert report.valid, report.summary
+    skipped = [r for r in report.actions if r.envelope_hash ==
+               compute_envelope_hash(exec_env)][0]
+    assert not skipped.binding_ok  # honest: nothing was bound
+    assert skipped.ok              # but the row is not held against the audit
+    # And the same withheld artifact under the strict default still fails,
+    # so the concession is opt-in, not a silent weakening.
+    strict = audit_provenance(
+        envs, resolve_artifact=artifacts.get, resolve_manifest=manifests.get,
+        require_all_artifacts=True,
+    )
+    assert not strict.valid
+
+
 def test_substituted_manifest_rejected(tmp_path):
     envs, artifacts, manifests, agents = _honest_workflow(tmp_path)
     exec_env = envs[1]

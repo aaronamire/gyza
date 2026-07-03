@@ -82,11 +82,16 @@ def audit_provenance(
     ``require_closed`` is forwarded to ``verify_dag`` (every non-root
     spine parent must be held — DAG-form tamper/loss detection).
 
-    ``require_all_artifacts`` closes the hide-the-evidence hole: if an
-    envelope's output artifact cannot be resolved, the row fails rather
-    than silently passing. (A withheld artifact could otherwise conceal
-    an over-bound execution, since execution-vs-coordination is decided
-    by inspecting the artifact for an ``__enforcement__`` record.)
+    ``require_all_artifacts`` (default) closes the hide-the-evidence hole:
+    if an envelope's output artifact cannot be resolved, the row fails
+    rather than silently passing. (A withheld artifact could otherwise
+    conceal an over-bound execution, since execution-vs-coordination is
+    decided by inspecting the artifact for an ``__enforcement__`` record.)
+    Turned off, an unresolvable row is instead *skipped* — treated as
+    not-yet-auditable, not failed — so a partial replica mid-gossip can
+    still audit the envelopes whose artifacts it does hold (the same
+    partial-view concession ``require_closed=False`` makes for spine
+    parents). Only turn it off when auditing a known-partial replica.
 
     An envelope is a *coordination* action if its resolved artifact has
     no ``__enforcement__`` record; such rows are not bounds-checked
@@ -141,7 +146,15 @@ def audit_provenance(
                     if not within_bounds:
                         reason = f"out of bounds: {why}"
 
-        row_ok = binding_ok and manifest_bound_ok and within_bounds
+        # A missing artifact fails closed under require_all_artifacts (a
+        # withheld artifact could conceal an over-bound execution); with the
+        # flag off, an unresolvable row is *skipped* — treated as not-yet-
+        # auditable rather than failed — so a partial replica mid-gossip can
+        # still audit the envelopes whose artifacts it does hold. binding_ok
+        # itself stays honest: it is True only for an artifact that resolved
+        # AND hashed to output_hash.
+        binding_satisfied = binding_ok or (art is None and not require_all_artifacts)
+        row_ok = binding_satisfied and manifest_bound_ok and within_bounds
         if not row_ok and not reason:
             reason = "binding failed"
         rows.append(ActionAudit(

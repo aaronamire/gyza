@@ -19,7 +19,6 @@ from gyza.release import (
     CURRENT_RELEASE,
     ReleaseIdentity,
     compute_source_tree_hash,
-    is_trusted_release,
 )
 
 
@@ -105,11 +104,23 @@ def test_release_identity_as_dict_shape():
     }
 
 
-def test_unknown_release_is_not_trusted_with_dev_message():
-    """No tagged releases yet → every build is honestly 'unverified',
-    and the reason explains the bounds are still cryptographically
-    checked (so the message reads correctly to a non-expert)."""
-    ok, why = is_trusted_release("0.0.0-dev", "ff" * 32)
+def test_unknown_release_is_not_trusted_with_dev_message(monkeypatch):
+    """Two honest negatives, each with a message that reads correctly to a
+    non-expert. Against the real (now-populated) shipped set, an unknown dev
+    build is reported as outside the trusted set. With NO releases published
+    (empty set), every build is honestly 'unverified' and the reason explains
+    the bounds are still cryptographically checked."""
+    import gyza.release as rel
+
+    # Real shipped set is non-empty (0.1.x cut): an unknown version is
+    # outside the trusted set, not trusted.
+    ok, why = rel.is_trusted_release("0.0.0-dev", "ff" * 32)
+    assert ok is False
+    assert "not in this client's trusted-release set" in why
+
+    # Empty set (no releases published): the dev-build wording applies.
+    monkeypatch.setattr(rel, "TRUSTED_RELEASES", {})
+    ok, why = rel.is_trusted_release("0.0.0-dev", "ff" * 32)
     assert ok is False
     assert "development build" in why
     assert "cryptographically" in why
@@ -192,18 +203,28 @@ def test_corrupt_or_missing_trusted_releases_fails_safe(tmp_path, monkeypatch):
     assert rel._load_trusted_releases() == {}
 
 
-def test_shipped_trusted_releases_json_is_valid_and_currently_empty():
-    """The file that actually ships in the package must parse. It is
-    empty until the first tagged release is cut (scripts/cut_release.py);
-    if this starts failing because a release was added, update the
-    assertion — it's a deliberate tripwire."""
+def test_shipped_trusted_releases_json_pins_the_cut_releases():
+    """The file that actually ships in the package must parse, and it pins
+    exactly the releases cut so far (scripts/cut_release.py). This is a
+    deliberate tripwire: when a release is added or removed, update the
+    expected set below so the pin stays an honest record of what shipped."""
     import gyza.release as rel
     loaded = rel._load_trusted_releases()
     assert isinstance(loaded, dict)
-    assert loaded == {}, (
-        "trusted_releases.json is no longer empty — a release was cut. "
-        "Update this tripwire test to assert the expected pinned set."
+    assert set(loaded) == {"0.1.0", "0.1.1"}, (
+        "trusted_releases.json membership changed — a release was cut or "
+        "removed. Update this tripwire to assert the new pinned set."
     )
+    assert loaded["0.1.0"]["source_tree_hash"] == (
+        "f307afe7dfc6f345cf2cffdba2774ae979bb8fa075a8a545bfa00f0ead004193"
+    )
+    assert loaded["0.1.1"]["source_tree_hash"] == (
+        "328f7f0d8c1ead1c9d65039c477a4232d3cf7800c9945c82e90b63e5226d5bd4"
+    )
+    # Every pinned entry carries a 64-hex BLAKE3 tree hash.
+    for entry in loaded.values():
+        assert len(entry["source_tree_hash"]) == 64
+        int(entry["source_tree_hash"], 16)  # raises if not hex
 
 
 def test_injectivity_against_real_blake3_shape(tmp_path):
