@@ -79,7 +79,7 @@ import logging
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Iterator, Protocol
 
 from gyza.economy.ledger import (
@@ -381,10 +381,18 @@ class LedgerSettlementService:
         reputation_store=None,
         acceptance_policy: "AcceptancePolicy | None" = None,
         evidence_store=None,
+        blackboard=None,
     ):
         self._ledger = ledger
         self._netd = netd
         self._resolve_envelope = envelope_resolver
+        # Optional blackboard. The payer needs the FULL signed envelope
+        # to audit the work, but gossip only carries the work-item
+        # completion (hash) to the payer, not the envelope body. So the
+        # earner ships the envelope with settlement and we store it here
+        # via store_envelope, making the acceptance policy's get_envelope
+        # self-contained rather than racing gossip.
+        self._settle_bb = blackboard
         # Optional acceptance judgment, run AFTER the protocol checks and
         # BEFORE sign_as_payer. None preserves the historical behavior
         # (protocol checks alone). Wire AuditAcceptancePolicy here to
@@ -463,6 +471,7 @@ class LedgerSettlementService:
         duration_ms: int,
         amount: float | None = None,
         evidence_hashes: "list[str] | None" = None,
+        envelope=None,
     ) -> LedgerEntry:
         """
         Build, earner-sign, and send a ledger entry to ``payer_peer_id``.
@@ -517,6 +526,11 @@ class LedgerSettlementService:
             # Sidecar key: LedgerEntry.from_dict tolerates extra keys, so
             # the signed entry bytes the payer verifies are unchanged.
             wire["__evidence__"] = evidence
+        if envelope is not None:
+            # Ship the full signed envelope so the payer can audit without
+            # waiting for gossip to deliver the envelope body (it only
+            # delivers the completion hash).
+            wire["__envelope__"] = asdict(envelope)
         payload = json.dumps(wire).encode("utf-8")
         ok = self._netd.send_message(
             peer_id=payer_peer_id,
@@ -625,6 +639,29 @@ class LedgerSettlementService:
             except Exception:  # noqa: BLE001
                 continue
 
+    def _absorb_envelope(self, payload: bytes) -> None:
+        """Store a full signed envelope shipped with settlement into the
+        local blackboard, so the acceptance policy's get_envelope works
+        without depending on gossip having delivered the envelope body.
+        A mismatched/forged envelope self-defeats: it is content-
+        addressed by its own hash, so get_envelope(entry.icp_envelope_hash)
+        only finds it when it is the genuine envelope for that entry, and
+        the audit re-verifies its signature regardless."""
+        if self._settle_bb is None:
+            return
+        try:
+            d = json.loads(payload.decode("utf-8"))
+        except Exception:  # noqa: BLE001
+            return
+        env_d = d.get("__envelope__") if isinstance(d, dict) else None
+        if not isinstance(env_d, dict):
+            return
+        try:
+            from gyza.icp import ICPEnvelope
+            self._settle_bb.store_envelope(ICPEnvelope(**env_d))
+        except Exception:  # noqa: BLE001
+            return
+
     def _decode_entry(self, payload: bytes) -> LedgerEntry | None:
         try:
             d = json.loads(payload.decode("utf-8"))
@@ -698,9 +735,19 @@ class LedgerSettlementService:
             # work. Done after sig-verify (never store bytes from a
             # forged entry) and before the gate.
             self._absorb_evidence(incoming.payload)
+            self._absorb_envelope(incoming.payload)
 
             # Envelope hash must match a known completed work item.
             expected = self._resolve_envelope(entry.work_item_id)
+            if expected is None and self._settle_bb is not None:
+                # Gossip may not have delivered the completion to us, but
+                # the earner shipped the full envelope with settlement.
+                # Trust it iff it is the genuine envelope for this
+                # work item (its content-address matches the entry AND it
+                # is signed for this exact action).
+                shipped = self._settle_bb.get_envelope(entry.icp_envelope_hash)
+                if shipped is not None and shipped.action_id == entry.work_item_id:
+                    expected = entry.icp_envelope_hash
             if expected is None:
                 LOG.warning(
                     "[settlement] unknown work_item_id %s — "

@@ -291,6 +291,7 @@ class GlobalCluster:
             envelope_resolver=self._envelope_resolver,
             acceptance_policy=acceptance_policy,
             evidence_store=evidence_store,
+            blackboard=self._blackboard,
         )
         self._settlement.start()
 
@@ -980,6 +981,9 @@ class GlobalCluster:
                         envelope.output_hash,
                         envelope.capability_manifest_hash,
                     ],
+                    # Ship the full envelope too — gossip only delivers
+                    # its hash to the payer, but the audit needs the body.
+                    envelope=envelope,
                 )
             except Exception as e:  # noqa: BLE001
                 LOG.warning(

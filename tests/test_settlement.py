@@ -840,7 +840,7 @@ def test_audit_acceptance_policy_verdicts(tmp_path):
 # (unpaid, but no dispute).
 # ======================================================================
 
-def _loop_rig(tmp_path, *, mem_budget_mb, enforcement_mb):
+def _loop_rig(tmp_path, *, mem_budget_mb, enforcement_mb, payer_has_envelope=True):
     """Build a payer+earner rig where the earner has produced a real
     signed execution envelope (artifact carries an __enforcement__
     record) and holds artifact+manifest in its CAS. The payer runs the
@@ -892,25 +892,31 @@ def _loop_rig(tmp_path, *, mem_budget_mb, enforcement_mb):
     env_hash = compute_envelope_hash(env)
     manifest_bytes = manifest_canonical_bytes(manifest)
 
-    # Earner holds the evidence in its CAS; both nodes hold the envelope
-    # (gossip carries envelopes — only the artifact+manifest bytes need
-    # to ride with settlement).
+    # Earner holds the evidence in its CAS and the envelope. The payer
+    # holds the envelope too by default (simulating gossip having
+    # delivered it); tests of the shipping path set payer_has_envelope
+    # False so the payer must rely on the envelope riding with settlement.
     earner_store.store(artifact)
     earner_store.store(manifest_bytes)
     earner_bb.store_envelope(env)
-    payer_bb.store_envelope(env)
+    if payer_has_envelope:
+        payer_bb.store_envelope(env)
 
     payer_svc = LedgerSettlementService(
         ledger=payer_l, netd=payer_bus,
-        envelope_resolver={work_item_id: env_hash}.get,
+        # Resolve only via the payer's own blackboard, so the shipping
+        # path is genuinely exercised when the payer lacks the envelope.
+        envelope_resolver=(lambda wid: env_hash if payer_bb.get_envelope(env_hash) else None),
         reputation_store=_RecordingReputation(),
         acceptance_policy=AuditAcceptancePolicy(payer_bb, payer_store),
         evidence_store=payer_store,
+        blackboard=payer_bb,
     )
     earner_svc = LedgerSettlementService(
         ledger=earner_l, netd=earner_bus,
         envelope_resolver={work_item_id: env_hash}.get,
         evidence_store=earner_store,
+        blackboard=earner_bb,
     )
     payer_svc.start()
     earner_svc.start()
@@ -919,7 +925,7 @@ def _loop_rig(tmp_path, *, mem_budget_mb, enforcement_mb):
         "payer": payer, "earner": earner, "payer_l": payer_l,
         "earner_l": earner_l, "payer_bus": payer_bus, "earner_bus": earner_bus,
         "payer_svc": payer_svc, "earner_svc": earner_svc,
-        "work_item_id": work_item_id, "env_hash": env_hash,
+        "work_item_id": work_item_id, "env_hash": env_hash, "env": env,
         "out_hash": out_hash, "manifest_hash": ident.manifest_hash,
         "payer_rep": payer_svc._reputation_store,
     }
@@ -996,6 +1002,36 @@ def test_loop_withheld_evidence_defers_unpaid(tmp_path):
         )
         assert not settled, "must not pay without auditable evidence"
         assert rig["payer_rep"].disputes == []  # absence of evidence is lag
+    finally:
+        rig["payer_svc"].stop(); rig["earner_svc"].stop()
+        rig["payer_bus"].close(); rig["earner_bus"].close()
+
+
+def test_loop_settles_when_payer_lacks_envelope_via_ship(tmp_path):
+    # The real-daemon gap the two-node demo caught: gossip delivers the
+    # completion *hash* to the payer but not the envelope *body*, which
+    # the audit needs. The earner ships the full envelope with settlement;
+    # the payer stores it and audits self-containedly. Here the payer's
+    # blackboard starts WITHOUT the envelope — only the shipped copy lets
+    # it resolve + audit + pay.
+    rig = _loop_rig(tmp_path, mem_budget_mb=512, enforcement_mb=512,
+                    payer_has_envelope=False)
+    try:
+        entry = rig["earner_svc"].submit_earned(
+            payer_compositor=rig["payer"].pubkey_hex,
+            payer_peer_id=rig["payer_bus"].peer_id,
+            work_item_id=rig["work_item_id"],
+            icp_envelope_hash=rig["env_hash"],
+            model_identifier="mock", tokens_out=1000, duration_ms=1000,
+            evidence_hashes=[rig["out_hash"], rig["manifest_hash"]],
+            envelope=rig["env"],  # ship the body
+        )
+        assert _wait_until(
+            lambda: (e := rig["payer_l"].get_entry(entry.entry_id)) is not None
+            and e.settled,
+            timeout_s=3.0,
+        ), "shipped-envelope settlement never completed"
+        assert rig["payer_rep"].successes == [rig["earner"].pubkey_hex]
     finally:
         rig["payer_svc"].stop(); rig["earner_svc"].stop()
         rig["payer_bus"].close(); rig["earner_bus"].close()
