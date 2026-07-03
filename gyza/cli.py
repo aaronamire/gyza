@@ -959,6 +959,15 @@ def cmd_global_start(args: argparse.Namespace) -> int:
         )
         return 1
 
+    # --bootstrap points this node at a specific mesh (e.g. a bootstrap
+    # box you run yourself), merged with any configured peers. This is
+    # the mesh-free-of-the-public-VPSes path: one reachable box restores
+    # discovery for everyone who points at it.
+    bootstrap_peers = list(cfg.netd_bootstrap_peers)
+    for b in getattr(args, "bootstrap", None) or []:
+        if b and b not in bootstrap_peers:
+            bootstrap_peers.append(b)
+
     # --supervised: long-running foreground supervisor. We block here
     # so the supervisor's heartbeat thread has a host process to live
     # in (CLAUDE.md §11 trip-wire — fire-and-forget supervisors die
@@ -971,7 +980,7 @@ def cmd_global_start(args: argparse.Namespace) -> int:
             binary_path=cfg.netd_binary_path,
             listen_port=cfg.netd_listen_port,
             key_path=cfg.compositor_key_path,
-            bootstrap=cfg.netd_bootstrap_peers,
+            bootstrap=bootstrap_peers,
             log_level="info",
         )
         sup.start()
@@ -1018,7 +1027,7 @@ def cmd_global_start(args: argparse.Namespace) -> int:
             binary_path=cfg.netd_binary_path,
             listen_port=cfg.netd_listen_port,
             key_path=cfg.compositor_key_path,
-            bootstrap=cfg.netd_bootstrap_peers,
+            bootstrap=bootstrap_peers,
             log_level="info",
             startup_timeout_s=10.0,
         )
@@ -2530,6 +2539,12 @@ def build_parser() -> argparse.ArgumentParser:
             "watch for crashes, respawn with backoff. Blocks until SIGINT. "
             "Without this flag, the command is one-shot (default)."
         ),
+    )
+    p_gstart.add_argument(
+        "--bootstrap", action="append", default=[], metavar="MULTIADDR",
+        help="bootstrap peer multiaddr to join (repeatable); merged with "
+             "configured peers. Point at a box running `gyza global start` "
+             "to form a private mesh without the public bootstrap nodes.",
     )
     globsub.add_parser("status", help="show netd identity, DHT peers, connections")
     globsub.add_parser(

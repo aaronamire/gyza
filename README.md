@@ -81,14 +81,31 @@ shipped in the pip package — build it from a source checkout with
 `make -C netd build`, or put a `gyza-netd` binary on PATH.
 
 The public bootstrap mesh (`gyza.network`) is **currently offline**,
-so `gyza global start` / `gyza submit` won't reach live peers right
-now. The commands still work against your own daemons:
+so it won't reach live peers right now. You don't need it: the mesh is
+just discovery, and **one reachable box restores it**. Two ways to
+connect without the public mesh:
 
 ```bash
-gyza demo global --fast   # two local daemons, a real blackout, a
-                          # 2-envelope chain that verifies across it (~22 s)
-gyza global start         # start a local daemon (needs gyza-netd)
+# A) Direct — no bootstrap at all. On node A:
+gyza global start
+gyza global addr                 # prints A's dialable multiaddr(s)
+# On node B, dial A directly:
+gyza global connect /ip4/<A-ip>/udp/7749/quic-v1/p2p/<A-peer-id>
+
+# B) Your own bootstrap — one box everyone points at:
+#   On the box (public IP or forwarded UDP 7749):
+gyza global start
+gyza global addr                 # note its multiaddr
+#   On every other node:
+gyza global start --bootstrap /ip4/<box-ip>/udp/7749/quic-v1/p2p/<box-peer-id>
+#   nodes then discover each other through it via the DHT.
+
+gyza demo global --fast          # or just: two local daemons, a real
+                                 # blackout, a chain that verifies across it
 ```
+
+Restoring the *public* `gyza.network` mesh needs a reachable host and a
+DNS update — see `scripts/deploy-bootstrap.sh`.
 
 ---
 
