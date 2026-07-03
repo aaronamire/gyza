@@ -687,6 +687,7 @@ def make_mock_executor(response: str = "mock output") -> Callable[[str, dict], d
 def make_command_executor(
     argv: list[str],
     max_output_bytes: int = 1_000_000,
+    cwd: str | None = None,
 ) -> Callable[[str, dict], dict]:
     """
     Run one arbitrary command as the agent's action — the `gyza exec`
@@ -703,18 +704,26 @@ def make_command_executor(
 
     ``argv[0]`` should be an absolute path (the sandbox has a fresh
     environment; the CLI resolves it host-side before entering).
+
+    ``cwd`` is the directory to run the command in. It must be a path
+    that is visible (bound) inside the sandbox — the CLI passes the host
+    working directory only when that directory is among the granted
+    paths, so a relative-path command (``cat notes.txt``) works exactly
+    where the user launched it. ``None`` runs in the fresh /workspace
+    tmpfs.
     """
     def _executor(_prompt: str, _context: dict) -> dict:
         import shlex
         import subprocess
 
+        run_cwd = cwd if cwd and os.path.isdir(cwd) else None
         env = {
             "PATH": "/usr/local/bin:/usr/bin:/bin",
-            "HOME": os.getcwd(),
+            "HOME": run_cwd or os.getcwd(),
             "LANG": os.environ.get("LANG", "C.UTF-8"),
         }
         proc = subprocess.run(
-            argv, capture_output=True, env=env, check=False,
+            argv, capture_output=True, env=env, check=False, cwd=run_cwd,
         )
         out = proc.stdout[:max_output_bytes]
         truncated = len(proc.stdout) > max_output_bytes

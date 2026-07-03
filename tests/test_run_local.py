@@ -177,6 +177,18 @@ def test_nonexistent_grant_refused_before_any_work(tmp_path, capsys):
     assert "does not exist" in capsys.readouterr().err
 
 
+def test_command_executor_runs_in_given_cwd(tmp_path):
+    # A relative-path command must resolve against the provided cwd, so
+    # `gyza exec` runs where the user launched it (when that dir is
+    # granted). cwd=None would run in the process cwd and fail to find it.
+    from gyza.runner import make_command_executor
+
+    (tmp_path / "note.txt").write_text("in-cwd")
+    ex = make_command_executor(["/bin/cat", "note.txt"], cwd=str(tmp_path))
+    out = ex("p", {})
+    assert "in-cwd" in out["text"]
+
+
 def test_command_executor_records_command_and_output():
     # No sandbox needed: the factory's contract is testable in-process.
     # The command line must be INSIDE the artifact text (the signed

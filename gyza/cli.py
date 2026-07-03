@@ -252,13 +252,24 @@ def run_local_task(
         # what it declares is, by construction, what bwrap enforces.
         scfg = sandbox_config_from_manifest(ident.manifest)
         if command_argv is not None:
+            # Run the command in the user's current directory when that
+            # directory is among the granted paths (so it's bound and
+            # visible inside the sandbox). This makes a relative-path
+            # command work where the user launched it — without silently
+            # widening the grant: if the cwd wasn't granted, the command
+            # runs in an empty tmpfs and relative paths simply aren't
+            # found, which is the honest outcome.
+            host_cwd = os.getcwd()
+            granted = {str(Path(p).resolve()) for p in read_paths + write_paths}
+            cmd_cwd = host_cwd if str(Path(host_cwd).resolve()) in granted else None
             executor = make_sandboxed_executor(
                 "gyza.runner:make_command_executor",
-                init_kwargs={"argv": command_argv},
+                init_kwargs={"argv": command_argv, "cwd": cmd_cwd},
                 config=scfg,
             )
             executor_label = (
-                f"command: {' '.join(command_argv)} (sandboxed)"
+                f"command: {' '.join(command_argv)} (sandboxed"
+                + (f", cwd {host_cwd}" if cmd_cwd else ", cwd tmpfs") + ")"
             )
         elif use_anthropic:
             scfg = _dc_replace(scfg, env_set={"ANTHROPIC_API_KEY": api_key})
