@@ -107,6 +107,26 @@ gyza demo global --fast          # or just: two local daemons, a real
 Restoring the *public* `gyza.network` mesh needs a reachable host and a
 DNS update — see `scripts/deploy-bootstrap.sh`.
 
+### See the loop across two machines
+
+A coordinator delegates a bounded task to a second machine, which runs
+it in a real sandbox; the coordinator then **audits the returned work
+itself and pays only if it passes**. On the host:
+
+```bash
+gyza demo loop-host          # prints an address to share
+```
+
+On the other machine (same LAN, or a public IP with UDP forwarded):
+
+```bash
+gyza demo loop-join /ip4/<host-ip>/udp/<port>/quic-v1/p2p/<peer-id>
+```
+
+The host prints its independent audit and the settled credit; the
+joiner shows the work it ran. To see the whole thing in one process
+first: `gyza demo loop`.
+
 ---
 
 ## What it is

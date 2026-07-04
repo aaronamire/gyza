@@ -464,6 +464,17 @@ def cmd_demo(args: argparse.Namespace) -> int:
         return _run_demo_subprocess("single_machine_global.py", extra)
     if args.scenario == "bounds":
         return _run_demo_script("bounds_proof_demo.py")
+    if args.scenario == "loop":
+        return _run_demo_subprocess("two_node_loop.py")
+    if args.scenario == "loop-host":
+        return _run_demo_subprocess("loop_node.py", ["host"])
+    if args.scenario == "loop-join":
+        if not getattr(args, "addr", None):
+            print("gyza demo loop-join needs the host's address:\n"
+                  "  gyza demo loop-join <multiaddr from `gyza demo loop-host`>",
+                  file=sys.stderr)
+            return 2
+        return _run_demo_subprocess("loop_node.py", ["join", args.addr])
     return _run_demo_script("two_agent_pipeline.py")
 
 
@@ -2364,16 +2375,23 @@ def build_parser() -> argparse.ArgumentParser:
     p_demo.add_argument(
         "scenario",
         nargs="?",
-        choices=["pipeline", "injection", "lan", "global", "bounds"],
+        choices=["pipeline", "injection", "lan", "global", "bounds",
+                 "loop", "loop-host", "loop-join"],
         default="pipeline",
         help=(
             "pipeline (default — Phase-1 two-agent local demo), "
             "injection (tamper attack on the envelope chain), "
             "lan (Phase-2 single-machine cluster sim), "
-            "global (Phase-3 end-to-end: two daemons on loopback "
-            "complete a project through bilateral settlement; needs "
-            "gyza-netd binary)"
+            "global (Phase-3 two daemons on loopback through settlement), "
+            "bounds (offline bounds-proof), "
+            "loop (two-node audited delegation on loopback), "
+            "loop-host / loop-join (the same across TWO machines: run "
+            "loop-host on one, loop-join <addr> on the other)"
         ),
+    )
+    p_demo.add_argument(
+        "addr", nargs="?", default=None,
+        help="loop-join only: the host's multiaddr from `gyza demo loop-host`",
     )
     p_demo.add_argument(
         "--fast", action="store_true",
