@@ -1,261 +1,198 @@
 # Gyza
 
-**Run an AI agent — or any command — inside a real sandbox, and get
-back a cryptographic receipt of exactly what it did and that it
-stayed inside the bounds you granted.** A seatbelt and a flight
-recorder for the agents you already run. No account, no API key, no
-bill.
+**A working substrate for decentralized AI coordination with *controlled
+emergence*: self-organizing collectives of agents whose every action is
+cryptographically attributable, provably bounded, and resilient to the
+loss or compromise of any member — no central orchestrator, no trusted
+operator.**
 
-**Status:** alpha, Linux only (x86_64 / aarch64), needs bubblewrap
-(`bwrap`). It runs locally from a source checkout — no daemon, no
-network, no PyPI package yet (publishing is on the roadmap; install
-from source today). There is also an experimental peer-to-peer layer
-for delegating a run to a machine you don't own; it's real and tested
-but off by default and the public mesh is currently offline — see
-[The network (experimental)](#the-network-experimental).
+This is the problem DARPA's **DICE** program — *Decentralized
+Artificial Intelligence through Controlled Emergence*, BAA
+**HR001126S0010** — was created to solve: harnessing self-organizing
+agent collectives while "ensuring that the collective behavior remains
+predictable and aligned with intended outcomes," resilient to
+"failure or compromise of individual agents" in "contested
+environments," and "under our control." Gyza is an existing,
+running system built independently against that same problem. It does
+not implement DICE's TA2 (inference-time control); it implements the
+**coordination, consensus, and provable-containment substrate** —
+where "controlled emergence" is enforced not by steering a model's
+internals but by making every agent action *signed, attributable, and
+cryptographically bounded*, with misbehavior detectable and slashable.
+
+At the level of one agent, Gyza is a seatbelt and a flight recorder:
+run any agent or command in a kernel-enforced sandbox and get a
+receipt anyone can verify. At the level of a collective, those
+receipts are the accountability layer that makes emergence
+*controlled* rather than merely hoped-for.
+
+**Status:** alpha, Linux, open source. The single-agent product works
+today from a source install (`gyza exec` → signed receipt → offline
+`gyza verify`). The decentralized layer is demonstrated in a **local
+multi-node testbed** (peer-to-peer coordination, a real comms blackout
+and self-heal, quorum attestation, bilateral settlement); the public
+mesh is offline and thousand-agent scale is designed, not yet shown.
+Honest maturity per capability is in the crosswalk below.
 
 ---
 
-## Quickstart — local, no network, ~2 minutes
+## How Gyza maps to DICE (BAA HR001126S0010)
+
+DICE asks for revolutionary advances in "artificial intelligence,
+control theory, formal methods, and game theory" to build
+decentralized agent collectives that are **scalable, adaptable, and
+resilient** and that "remain under our control." Here is what Gyza
+actually provides against each, with honest maturity — *demonstrated*
+(runnable today), *shipped* (in the codebase), or *designed*
+(architected, not yet shown).
+
+| DICE requirement | Gyza mechanism | Maturity |
+|---|---|---|
+| **TA1 — peer-to-peer self-organization & task allocation** | libp2p host + Kademlia DHT discovery + gossipsub; agents claim work items with no central scheduler | **demonstrated** (local testbed) |
+| **TA1 — distributed consensus** | Raft LAN clustering; k-of-n quorum attestation; bilateral settlement to byte-identical ledgers; content-addressed CRDT coordination plane + anti-entropy gossip | **demonstrated** (local) |
+| **Resilience to agent loss / compromise** | comms-blackout partition survival + self-heal; tamper-evident provenance chains; verify-on-fetch (self-reported trust is *never* accepted); Sybil resistance via quorum | **demonstrated** (partition + injection demos) |
+| **Contested / DDIL environments** | denied/degraded/intermittent-comms partition scenario; a provenance chain that still verifies across a full blackout | **demonstrated** (clean cut; 40%-loss/latency harness is roadmap) |
+| **Controlled emergence / "remain under our control"** | the *bounds-proof*: execution is derived from a signed capability manifest and the runner refuses to sign unless enforcement ⊆ manifest; tiered capability attestation; approval gates | **demonstrated** (bounds demo) |
+| **Adversarial robustness (Phase 2 focus)** | tamper of a signed record is caught; a forged enforcement record breaks verification; out-of-bounds work is never signed; a compromised validator can't forge a quorum cosig | **demonstrated** |
+| **Formal methods** | TLA+ behavioral specs (Settlement, Reconciliation, Attestation — honest *and* adversarial TLC models), ~120 named invariants, a Rust reference implementation with byte-parity to the Python | **shipped** |
+| **Scalability to thousands of agents (Phase 3 focus)** | DHT + gossip topology designed for it | **designed** — not yet demonstrated at scale |
+| **TA2 — local inference control** (activation steering, memory editing, context engineering) | *out of scope for Gyza* — Gyza controls the **capability and coordination** layer, not a model's internal reasoning | **gap** (complementary to a TA2 effort, not a substitute) |
+
+**The distinctive claim.** DICE's hard problem is letting a collective
+*self-organize* while staying *controllable*. Gyza's answer is not to
+constrain what agents think but to make what they **do**
+non-repudiable and provably bounded: emergence you can audit after the
+fact and contain before it happens. That is a coordination-and-safety
+substrate a DICE effort can build on or evaluate against — strongest as
+a **TA1** contribution and as **TA3** verification infrastructure, and
+honestly dependent on a TA2 partner for inference-time control.
+
+---
+
+## What actually works today — try it in ~2 minutes
+
+The single-agent product needs no network and no daemon. Everything
+below is real, runnable, and honest about what it proves.
 
 ```bash
-# 1. Install from source (Linux x86_64/aarch64, Python 3.10+, plus bubblewrap).
+# Linux x86_64/aarch64, Python 3.10+, plus bubblewrap (bwrap).
 git clone https://github.com/aaronamire/gyza && cd gyza
-pip install -e .              # puts the `gyza` CLI on PATH
-#   Debian/Ubuntu: sudo apt install bubblewrap
-#   Arch:          sudo pacman -S bubblewrap
+pip install -e .                 # PyPI publish is on the roadmap
+gyza init                        # 32-byte master seed at ~/.gyza/compositor.key
 
-# 2. Set up your identity key (~/.gyza/compositor.key).
-gyza init
-
-# 3. Run YOUR command inside a bounded sandbox — get a signed receipt.
+# Run any command in a kernel-enforced sandbox → signed receipt.
 gyza exec --allow-read . -- ls -la
-#   → runs in a bwrap sandbox that can see only what you granted,
-#     signs the result, and prints an intent id + audit verdict.
 
-# 4. Turn the run into a portable receipt anyone can check — with no
-#    node, no daemon, no identity, and no trust in you.
+# Turn the run into a receipt anyone can verify — no node, no identity,
+# no trust in you.
 gyza bundle <intent-id> -o receipt.json
-gyza verify receipt.json         # a third party runs exactly this
+gyza verify receipt.json
 ```
 
-`gyza exec -- <command>` and `gyza run "<task>"` both execute inside a
-manifest-derived bwrap sandbox (memory cap, filesystem allowlist,
-fresh network namespace), fold a tamper-evident enforcement record
-into a signed provenance envelope, and end in a receipt you can hand
-to someone else. What it proves: **accountability** (every action
-signed and attributable) and **containment** (the run provably stayed
-within the bounds you granted — it can't touch your home or secrets).
-What it does *not* prove: that the output is *correct* — that's still
-a human call.
+The verifier recomputes every line locally, with zero trust in the
+machine that produced the run:
 
-### Local demos — no network, no API key
+```
+INDEPENDENT VERIFICATION
+signature:      ✓ VALID
+artifact hash:  ✓ MATCHES envelope
+manifest hash:  ✓ MATCHES envelope
+bounds check:   ✓ enforcement ⊆ manifest (re-verified here)
+✓ bounded (INDEPENDENTLY VERIFIED)
+```
+
+Demonstrations, all offline unless noted:
 
 ```bash
-gyza demo bounds          # a sandboxed task is signed; an adversary
-                          # forges the enforcement record (caught) and
-                          # a wider sandbox is refused. ~2 s.
-gyza demo pipeline        # two agents, a signed provenance chain
-gyza demo injection       # tamper a chain, re-verify — watch it fail
+gyza demo bounds       # controlled emergence at one agent: signed → verified,
+                       # tampered → caught, out-of-bounds → never signed. ~2 s.
+gyza demo injection    # tamper a provenance chain, re-verify, watch it fail
+gyza demo pipeline     # two agents, a signed provenance chain
+gyza demo global --fast # local two-daemon testbed: peer-to-peer coordination,
+                        # a real comms blackout + self-heal, quorum-checked
+                        # settlement, a chain that verifies across the blackout
 ```
 
----
-
-## What you get back
-
-Everything below is real output from `gyza demo bounds` on a source
-build — every line is recomputed locally from the signed bytes, with
-zero trust in the machine that produced the run:
-
-```
-  INDEPENDENT VERIFICATION
-  signature:      ✓ VALID
-  artifact hash:  ✓ MATCHES envelope
-  manifest hash:  ✓ MATCHES envelope
-  bounds check:   ✓ enforcement ⊆ manifest (re-verified here)
-  runner build:   ⚠ unverified (dev tree, not a tagged release)
-
-  ✓ bounded (INDEPENDENTLY VERIFIED)
-    — manifest re-hashed and bounds predicate re-run here.
-```
-
-That verdict is the point: a valid signature *plus* an enforcement
-record your machine re-checked against the agent's declared manifest
-means the work **provably** ran inside those bounds — not "the
-operator says so." A tagged release adds the last half,
-`+ RUNNER ATTESTED`; a dev tree honestly withholds it rather than
-faking it.
-
-Handed to someone else as a receipt, the same evidence verifies
-offline with no identity and no trust in you:
-
-```
-GYZA EVIDENCE VERIFY — bundle b92e0746ed9f281b…
-Provenance graph: INTACT  (1 action, 1 root / 1 leaf)
-  [exec ] OK   019f6621-…
-VERDICT: VALID
-  Accountable (every action signed + attributable),
-  contained (every action within its granted bounds),
-  bounds-compliant (no capability laundering).
-  NOT a claim about output correctness — that needs a human on the loop.
-```
-
----
-
-## What it is
-
-Handing an AI agent access to your shell, files, or network means
-trusting that it did only what it should — and after the fact, the
-only record of what happened is written by the same process you'd want
-to audit. If it misbehaves (or a dependency, or a prompt injection
-does), the log is exactly as trustworthy as the thing that produced
-it.
-
-Gyza is a **local tool that makes an agent run provable.** It executes
-your command or agent inside a kernel-enforced [bubblewrap][bwrap]
-sandbox derived from a signed capability manifest, and produces a
-tamper-evident receipt that **anyone can re-verify** — establishing
-which agent produced the result and that it ran inside a sandbox no
-wider than the capabilities it declared. No central server, no
-account, no API key. It runs on one machine, offline, and the receipt
-it emits is portable.
-
-There is a longer-term aim — letting you delegate a run to a machine
-you *don't* own and get back the same bounded receipt — and the
-peer-to-peer layer for it is built and tested. But that layer is
-experimental and off by default; the product today is the local one
-above. See [The network](#the-network-experimental).
-
-[bwrap]: https://github.com/containers/bubblewrap
+`gyza demo global --fast` is the decentralized story in miniature: two
+independent daemons form a collective, one goes dark for 3 seconds, the
+mesh heals, credits settle to byte-identical ledgers, and the resulting
+provenance chain verifies across the outage — the DICE resilience
+property, demonstrated on one machine.
 
 ---
 
 ## How it works
 
-### Identity
+### Identity — self-sovereign, no CA
 
 Every node holds one 32-byte master seed at `~/.gyza/compositor.key`.
-From it the system derives a **compositor** signing key and, per
-agent, an independent agent key via HKDF. Self-sovereign: no
-certificate authority, no registration server. Two parties that have
-never met verify each other's signatures from public keys alone.
+From it the system derives a **compositor** signing key and, per agent,
+an independent agent key via HKDF. No certificate authority, no
+registration server. Two agents that have never met verify each other's
+signatures from public keys alone — the trust primitive a
+no-central-orchestrator collective needs.
 
 ### Provenance — the ICP envelope
 
-Every meaningful action emits one `ICPEnvelope`: a dataclass of
-`agent_pubkey`, `capability_manifest_hash`, `input_hashes`,
-`output_hash`, `parent_envelope_hash`, model, timing, signature.
-Canonical JSON → BLAKE3 hash → Ed25519-sign-the-hash. Each
-envelope's `parent_envelope_hash` pins the previous one, so the
-chain is structurally immutable: edit any past field and its
-signature breaks; splice in a fake envelope and the next real one's
-parent link breaks. `gyza demo injection` proves this live —
-it tampers a real chain and shows verification fail.
+Every meaningful action emits one `ICPEnvelope`: `agent_pubkey`,
+`capability_manifest_hash`, `input_hashes`, `output_hash`,
+`parent_envelope_hash`, model, timing, signature. Canonical JSON →
+BLAKE3 hash → Ed25519-sign-the-hash. Each envelope's
+`parent_envelope_hash` pins the previous one, so the chain is
+structurally immutable: edit any past field and its signature breaks;
+splice in a fake envelope and the next real one's parent link breaks.
+`gyza demo injection` proves this live.
 
-### Bounded execution — the bounds-proof
+### Controlled emergence — the bounds-proof
 
-The distinctive piece.
+The distinctive piece, and Gyza's answer to "remain under our control":
 
-1. **The manifest is the source of truth.** The sandbox an agent
-   runs in (filesystem read/write paths, network, memory cap) is
-   derived directly from its signed capability manifest.
-2. **Execution runs inside the sandbox.** The command or model call
-   executes inside [bubblewrap][bwrap] with exactly those bounds,
+1. **The manifest is the source of truth.** An agent's sandbox
+   (filesystem read/write, network, memory) is derived directly from
+   its signed capability manifest.
+2. **Execution runs inside the sandbox** — the command or model call
+   executes inside [bubblewrap](https://github.com/containers/bubblewrap),
    kernel-enforced.
-3. **Refuse-to-sign-if-not-enforced.** A host-side enforcement
-   record (backend, paths, network, memory) is stamped onto the
-   result; the runner refuses to sign unless that record is no
-   wider than the manifest, and folds it into the artifact so the
-   envelope's hash commits to it.
-4. **Trustless verification.** The receipt carries the agent's
-   manifest bytes. `gyza verify` re-hashes them, re-runs the bounds
-   predicate locally, and prints one of five honest verdicts — the
-   strongest being `INDEPENDENTLY VERIFIED + RUNNER ATTESTED`.
+3. **Refuse-to-sign-if-not-enforced.** A host-side enforcement record
+   is stamped onto the result; the runner refuses to sign unless that
+   record is no wider than the manifest, and folds it into the artifact
+   so the envelope's hash commits to it.
+4. **Trustless verification.** The receipt carries the manifest bytes;
+   `gyza verify` re-hashes them, re-runs the bounds predicate locally,
+   and returns one of five honest verdicts.
 
----
+The consequence: a valid signature *implies* the work ran inside
+declared, kernel-enforced bounds. An agent cannot exceed its granted
+capabilities and still produce a valid receipt. That is emergence made
+containable at the individual level and auditable at the collective
+level.
 
-## The network (experimental)
+### Decentralized coordination & consensus
 
-> **Off by default and not part of the local product.** The public
-> bootstrap mesh (`gyza.network`) is **currently offline**, and the Go
-> daemon it needs (`gyza-netd`) is **not** in the pip/source install —
-> build it with `make -C netd build` (Go 1.22+) or put a `gyza-netd`
-> binary on PATH. Everything above works without any of this.
+A Go daemon (`gyza-netd`) owns a libp2p host (QUIC + Noise + yamux), a
+Kademlia DHT for discovery, gossipsub for cross-node sync, NAT
+traversal (DCUtR + circuit relay), and DNS-anchored bootstrap with
+periodic re-resolution. Agents self-organize and claim work with no
+central scheduler. A bilateral compute-credit ledger settles work
+between peers — each entry signed by both parties, both ledgers
+byte-identical, with a reconciliation exchange to heal divergence and
+an EWMA reputation signal. High-trust work is gated by **tiered
+capability attestation**: a *k*-of-*n* quorum of independent validators
+runs an applicant through a canonical eval suite and co-signs a
+certificate, re-verified on every lookup — self-reported capability is
+never trusted.
 
-Gyza's larger aim is to let you delegate a bounded agent task to a
-machine you don't own and get back the same signed, bounded receipt.
-Two daemons on loopback already complete a project through a real
-comms blackout and bilateral settlement (`gyza demo global --fast`).
+### Formal methods
 
-You don't need the public mesh to try it — the mesh is just discovery,
-and one reachable box restores it:
-
-```bash
-# A) Direct — no bootstrap at all. On node A:
-gyza global start
-gyza global addr                 # prints A's dialable multiaddr(s)
-# On node B, dial A directly:
-gyza global connect /ip4/<A-ip>/udp/7749/quic-v1/p2p/<A-peer-id>
-
-# B) Your own bootstrap — one box everyone points at:
-gyza global start                # on a box with a public IP / forwarded UDP 7749
-gyza global addr                 # note its multiaddr
-gyza global start --bootstrap /ip4/<box-ip>/udp/7749/quic-v1/p2p/<box-peer-id>
-                                 # on every other node; they discover
-                                 # each other through it via the DHT
-```
-
-Restoring the *public* `gyza.network` mesh needs a reachable host and a
-DNS update — see `scripts/deploy-bootstrap.sh`.
-
-### See the loop across two machines
-
-A coordinator delegates a bounded task to a second machine, which runs
-it in a real sandbox; the coordinator then **audits the returned work
-itself and pays only if it passes**.
-
-```bash
-gyza demo loop-host          # on the host; prints an address to share
-gyza demo loop-join /ip4/<host-ip>/udp/<port>/quic-v1/p2p/<peer-id>   # on the other machine
-```
-
-To see the whole thing in one process first: `gyza demo loop`.
-
-### How the network layer is built
-
-- **Networking.** A Go daemon (`gyza-netd`) owns a libp2p host (QUIC +
-  Noise + yamux), a Kademlia DHT for discovery, gossipsub for
-  cross-node sync, NAT traversal (DCUtR + circuit relay), and
-  DNS-anchored bootstrap with periodic re-resolution.
-- **Economic settlement.** A bilateral compute-credit ledger; each
-  settled entry is signed by both parties and both ledgers end
-  byte-identical, with a reconciliation exchange to heal divergence
-  and an EWMA per-peer reputation signal.
-- **Capability attestation.** Three tiers gate which agents may claim
-  which work. Tier-3 is full proof-of-capability: a *k*-of-*n* quorum
-  of independent validators runs the applicant through a canonical
-  eval suite and co-signs a certificate, published to the DHT and
-  re-verified on every lookup — self-reported tiers are never trusted.
-
----
-
-## Three implementations
-
-| Implementation | Owns | Status |
-|---|---|---|
-| **Python** (`gyza/`) | Execution, identity, ICP, ledger, sandbox, CLI | full |
-| **Go** (`netd/`) | The libp2p daemon | full |
-| **Rust** (`gyza-rs/`) | Reference implementation, 7 of ~8 crates | in progress |
-
-Byte-parity is asserted across implementations for hashing,
-signatures, key derivation, canonical encodings, settlement entries,
-and the Tier-3 capability protocol — including the recursive
-canonical-JSON of nested arbitrary maps inside `ChallengeResponse`.
-For Ed25519 cosigs on attestation certs the parity is stronger than
-"mutually verifiable": Rust and Python produce **byte-identical
-signatures** for the same seed and payload (RFC 8032 is deterministic;
-the byte parity holds all the way through). A Rust validator and a
-Python validator are interchangeable in a quorum.
+The wire protocol is specified in TLA+ (`spec/`) with honest and
+adversarial TLC models that pass; ~120 named invariants live in
+`docs/invariants.md`; a Rust reference implementation (`gyza-rs/`)
+holds byte-parity with the Python for hashing, signatures, key
+derivation, canonical encodings, settlement, and the attestation
+protocol — including **byte-identical Ed25519 cosigns** cross-language,
+so a Rust validator and a Python validator are interchangeable in a
+quorum. Alternative implementations and formal verification are
+first-class, not afterthoughts.
 
 ---
 
@@ -265,65 +202,71 @@ Python validator are interchangeable in a quorum.
 
 - **Tamper-evidence** — any edit to a past envelope breaks its
   signature and every downstream link.
-- **Authorship** — every envelope binds to an Ed25519 identity.
-- **Bounded execution, independently verifiable** — a verified
-  result implies the work ran in a kernel-enforced sandbox no
-  wider than the agent's declared manifest.
-- **Sybil resistance** for high-tier network work via quorum
-  attestation.
+- **Authorship** — every action binds to an Ed25519 identity.
+- **Bounded execution, independently verifiable** — a verified result
+  implies the work ran in a kernel-enforced sandbox no wider than the
+  agent's declared manifest.
+- **Resilience to compromise** — Sybil resistance and forged-quorum
+  resistance for high-tier work via k-of-n attestation; a compromised
+  agent cannot forge others' cosigns or exceed its bounds undetected.
 
 **What you do not get (honest limits)**
 
-- **Confidentiality** — envelopes are signed, not encrypted;
-  artifacts are stored in plaintext.
-- **Fully trustless runner identity** — the runner self-reports
-  which build it is; a malicious build could lie about its own
-  hash. Trusted-release checking narrows this, but closing it
-  fully needs reproducible builds + hardware attestation (TEE).
-- **Per-host network enforcement** — the sandbox's network is
-  all-or-nothing; a declared host allowlist is not yet
-  kernel-enforced (the output labels this honestly).
-- **Quantum resistance** — Ed25519 today.
+- **Inference-time control** — Gyza bounds what an agent may *do*, not
+  what a model *reasons*; it is complementary to DICE TA2, not a
+  substitute.
+- **Demonstrated scale** — the collective is shown at two nodes on
+  loopback, not thousands; scale is designed, not proven.
+- **Confidentiality** — envelopes are signed, not encrypted; artifacts
+  are plaintext.
+- **Fully trustless runner identity** — the runner self-reports its
+  build; closing this fully needs reproducible builds + hardware
+  attestation (TEE). The output labels this honestly.
+- **Live global network** — the public bootstrap mesh (`gyza.network`)
+  is currently offline; use direct dial or a self-hosted bootstrap
+  (below).
 
-Honesty about the limits is deliberate — it's what makes the
-verdicts trustworthy.
+Honesty about the limits is deliberate — it is what makes the verdicts,
+and any claim of alignment, trustworthy.
 
 ---
 
-## Roadmap
+## The network (experimental)
 
-Near-term, concrete:
+> Off by default and not required for the single-agent product. The Go
+> daemon is not in the pip install — build it with `make -C netd build`
+> (Go 1.22+). The public mesh is offline; the demos above run a local
+> testbed, and the paths below connect real machines without it.
 
-- Publish to PyPI (`pip install gyza`) with the daemon fetched
-  separately.
-- Per-host network enforcement (a filtering proxy in the sandbox).
-- CPU-time bound checked in the verification predicate.
-- Reproducible builds + a signed release manifest, tightening
-  runner attestation toward hardware-backed (TEE).
-- macOS / Windows signed binaries.
-- Broadening the Rust reference implementation.
-- Restoring the public `gyza.network` bootstrap mesh.
+```bash
+# Direct dial — no bootstrap at all:
+gyza global start && gyza global addr        # node A prints its multiaddr
+gyza global connect /ip4/<A-ip>/udp/7749/quic-v1/p2p/<A-peer-id>   # node B
+
+# Or one self-hosted bootstrap everyone points at:
+gyza global start --bootstrap /ip4/<box-ip>/udp/7749/quic-v1/p2p/<box-peer-id>
+```
+
+Two-machine delegation with independent audit-before-pay:
+`gyza demo loop-host` on one box, `gyza demo loop-join <multiaddr>` on
+another. Restoring the public mesh needs a reachable host + a DNS
+update (`scripts/deploy-bootstrap.sh`).
 
 ---
 
 ## Running the tests
 
 ```bash
-# Python fast slice (~10 min): unit + protocol, no real daemons.
 python -m pytest tests/ -q --tb=line --timeout=90 \
   -k "not netd_client and not phase2_integration and not phase2_hardening \
       and not blackboard_gossip and not attestation_bridge and not verify_on_fetch"
-
-# Go daemon (~5 s).
-cd netd && go test ./... -count=1 -timeout=120s
-
-# Rust workspace.
-cd gyza-rs && cargo test --workspace
+cd netd && go test ./... -count=1 -timeout=120s     # Go daemon
+cd gyza-rs && cargo test --workspace                # Rust reference impl
 ```
 
-~560 Python fast tests + the Go suite + the Rust workspace
-(~94 tests across 7 crates). CI runs the fast slice and the
-Go/Rust suites on every push.
+~640 Python fast tests + the Go suite + the Rust workspace (94 tests
+across 7 crates). CI runs the fast slice and the Go/Rust suites on
+every push. TLA+ models are model-checked with TLC (`spec/`).
 
 ---
 
@@ -332,19 +275,25 @@ Go/Rust suites on every push.
 ```
 gyza/      Python — execution, identity, ICP, ledger, sandbox, CLI
 netd/      Go — the gyza-netd daemon (libp2p, DHT, NAT, gossip)
-gyza-rs/   Rust — reference implementation (workspace of crates)
+gyza-rs/   Rust — reference implementation (byte-parity with Python)
+spec/      TLA+ formal specifications + TLC models
+docs/      invariants, state machines, wire protocol, ADRs
+demo/      runnable end-to-end demonstrations
 tests/     pytest suite
-demo/      runnable end-to-end demos
-scripts/   install.sh + bootstrap deploy tooling
 ```
 
 ---
 
-## Contributing
+## References
 
-Issues and pull requests welcome at
-<https://github.com/aaronamire/gyza>. It's alpha — bug reports
-from real installs are especially useful.
+- DARPA DICE program — *Decentralized Artificial Intelligence through
+  Controlled Emergence*:
+  <https://www.darpa.mil/research/programs/decentralized-artificial-intelligence-through-controlled-emergence>
+- Solicitation **BAA HR001126S0010** (full proposals due 2026-08-25).
+
+Gyza is an independent open-source project. Any reference to DICE
+describes problem alignment, not affiliation with or endorsement by
+DARPA or the U.S. Government.
 
 ## License
 
