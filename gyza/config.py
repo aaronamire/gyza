@@ -39,7 +39,10 @@ class GyzaConfig:
     max_artifact_store_gb: float = 10.0
     # Phase-3 networking — gyza-netd lifecycle and global participation.
     netd_socket_path: str = "~/.gyza/netd.sock"
-    netd_binary_path: str = "~/dev/gyza/netd/bin/gyza-netd"
+    # Bare name → resolved on PATH, else auto-detected from a source
+    # checkout (<repo>/netd/bin/gyza-netd) by NetdClient.start_daemon.
+    # Set an absolute path here to override.
+    netd_binary_path: str = "gyza-netd"
     netd_listen_port: int = 7749
     netd_bootstrap_peers: list[str] = field(default_factory=list)
     netd_ledger_db_path: str = "~/.gyza/ledger.db"

@@ -38,6 +38,70 @@ def _resolve(p: str) -> str:
     return os.path.expanduser(p)
 
 
+def _daemon_not_found_error(tried: list[str]) -> FileNotFoundError:
+    tried_lines = "\n".join(f"    - {t}" for t in tried if t)
+    return FileNotFoundError(
+        "gyza-netd (the Go network daemon) was not found. Tried:\n"
+        f"{tried_lines}\n"
+        "The pip package ships the Python client only. To get the daemon:\n"
+        "  * from a source checkout: make -C netd build (needs Go), then\n"
+        "    its default location is auto-detected, or\n"
+        "  * put a gyza-netd binary on PATH, or\n"
+        "  * set netd_binary_path in ~/.gyza/config.json.\n"
+        "Local commands (run/exec/audit/bundle/verify) work without it."
+    )
+
+
+def _resolve_daemon_binary(binary_path: str | None) -> str:
+    """
+    Locate the gyza-netd binary, in priority order:
+
+      1. an explicit ``binary_path`` (a real path, tilde/relative
+         expanded) if it points at an existing file; a bare name
+         (no path separator) is looked up on PATH instead;
+      2. ``gyza-netd`` on PATH;
+      3. a source-checkout build at ``<repo>/netd/bin/gyza-netd``,
+         resolved relative to this file — so an editable install
+         (``pip install -e .``) + ``make -C netd build`` is found
+         regardless of where the repo was cloned.
+
+    Raises a FileNotFoundError with actionable guidance if none hit.
+    """
+    tried: list[str] = []
+    if binary_path and (os.sep in binary_path or binary_path.startswith("~")):
+        # An explicit path is a hard requirement — if the caller named a
+        # specific file, honor it or fail; don't silently substitute a
+        # different binary found elsewhere.
+        resolved = _resolve(binary_path)
+        if os.path.isfile(resolved):
+            return resolved
+        raise _daemon_not_found_error([resolved])
+
+    if binary_path:
+        # Bare name (e.g. the "gyza-netd" default) → PATH lookup.
+        on_path = shutil.which(binary_path)
+        tried.append(f"{binary_path} (on PATH)")
+        if on_path:
+            return on_path
+
+    on_path = shutil.which("gyza-netd")
+    tried.append("gyza-netd (on PATH)")
+    if on_path:
+        return on_path
+
+    # <repo>/netd/bin/gyza-netd — netd_client.py lives at
+    # <repo>/gyza/network/netd_client.py, so parents[2] is <repo>.
+    repo_root = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+    source_build = os.path.join(repo_root, "netd", "bin", "gyza-netd")
+    tried.append(source_build)
+    if os.path.isfile(source_build):
+        return source_build
+
+    raise _daemon_not_found_error(tried)
+
+
 # ---------------------------------------------------------------------------
 # Plain-Python views of the gRPC types. Callers don't need to deal with
 # protobuf-message instances unless they want to; these dataclasses keep
@@ -481,12 +545,13 @@ class NetdClient:
     @staticmethod
     def start_daemon(
         socket_path: str = "~/.gyza/netd.sock",
-        binary_path: str = "~/dev/gyza/netd/bin/gyza-netd",
+        binary_path: str | None = None,
         listen_port: int = 7749,
         key_path: str = "~/.gyza/compositor.key",
         bootstrap: list[str] | None = None,
         log_level: str = "info",
         startup_timeout_s: float = 5.0,
+        startup_attempts: int = 3,
         stderr_to_stdout: bool = True,
         dht_mode: str | None = None,
         isolated: bool = False,
@@ -497,9 +562,18 @@ class NetdClient:
         appears (up to startup_timeout_s) so callers can immediately
         use the returned client without sleeping.
 
-        binary_path / socket_path / key_path are tilde-expanded. We
-        validate the binary exists up front (clearer error than
-        FileNotFoundError from execve).
+        binary_path is resolved via ``_resolve_daemon_binary`` —
+        explicit path, else PATH, else the source-checkout build.
+        Passing ``None`` (the default) auto-detects. socket_path /
+        key_path are tilde-expanded.
+
+        Startup is retried up to ``startup_attempts`` times: on
+        loopback, two daemons launched back-to-back occasionally lose
+        a port/socket race and one exits immediately. A single
+        transient failure is retried rather than surfaced as a
+        traceback; only after every attempt fails do we raise, with an
+        actionable message. Each attempt waits up to
+        ``startup_timeout_s``.
 
         ``isolated`` (default False) — when True, passes
         ``--bootstrap-domain=""`` and ``--no-fallback-peers`` so the
@@ -508,25 +582,7 @@ class NetdClient:
         Phase 3) should set this; production daemons (gyza global
         start) leave it False so they join the live mesh.
         """
-        binary = _resolve(binary_path)
-        if not os.path.isfile(binary):
-            # Fall back to PATH lookup (e.g. an installed `gyza-netd`).
-            on_path = shutil.which("gyza-netd")
-            if on_path:
-                binary = on_path
-            else:
-                raise FileNotFoundError(
-                    f"gyza-netd (the Go network daemon) not found at "
-                    f"{binary_path} and not on PATH.\n"
-                    f"The pip package ships the Python client only. To get "
-                    f"the daemon:\n"
-                    f"  * from a source checkout: make -C netd build "
-                    f"(needs Go)\n"
-                    f"  * or put a gyza-netd binary on PATH, or set "
-                    f"netd_binary_path in ~/.gyza/config.json\n"
-                    f"Local commands (run/exec/audit/bundle/verify) work "
-                    f"without it."
-                )
+        binary = _resolve_daemon_binary(binary_path)
 
         socket = _resolve(socket_path)
         key = _resolve(key_path)
@@ -555,64 +611,74 @@ class NetdClient:
             # adapts to real reachability.
             argv += ["--dht-mode", dht_mode]
 
-        # Make sure a stale socket from a previous crashed daemon doesn't
-        # masquerade as "ready". The daemon itself unlinks before bind,
-        # but our wait loop polls existence — we want existence to mean
-        # the new daemon has bound.
-        try:
-            if os.path.exists(socket):
-                # Only remove if it's really a socket file.
-                import stat as _stat
-                mode = os.stat(socket).st_mode
-                if _stat.S_ISSOCK(mode):
-                    os.unlink(socket)
-        except OSError:
-            pass
+        attempts = max(1, startup_attempts)
+        last_reason = ""
+        for attempt in range(attempts):
+            # Make sure a stale socket from a previous crashed daemon (or a
+            # prior attempt) doesn't masquerade as "ready". The daemon
+            # itself unlinks before bind, but our wait loop polls existence
+            # — we want existence to mean the new daemon has bound.
+            try:
+                if os.path.exists(socket):
+                    import stat as _stat
+                    if _stat.S_ISSOCK(os.stat(socket).st_mode):
+                        os.unlink(socket)
+            except OSError:
+                pass
 
-        LOG.info("[netd_client] launching %s", " ".join(argv))
-        # Detach the daemon so it survives the parent CLI's exit.
-        # Pre-fix this used subprocess.PIPE for stdout but never read
-        # from it; the daemon's stdout buffer eventually filled, the
-        # daemon blocked on write, and when the parent exited the
-        # daemon got SIGPIPE on its next log line. Now: stdout/stderr
-        # → DEVNULL (production logs go through journald via the
-        # systemd unit anyway), and start_new_session=True puts the
-        # daemon in its own session so a parent SIGHUP doesn't reach
-        # it. stderr_to_stdout is retained for API compatibility but
-        # is effectively a no-op when the parent is short-lived.
-        proc = subprocess.Popen(
-            argv,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            text=True,
-            start_new_session=True,
-        )
+            LOG.info(
+                "[netd_client] launching %s (attempt %d/%d)",
+                " ".join(argv), attempt + 1, attempts,
+            )
+            # Detach the daemon so it survives the parent CLI's exit.
+            # stdout/stderr → DEVNULL: an earlier version used a PIPE it
+            # never read, so the daemon's buffer filled, it blocked on
+            # write, and it took SIGPIPE when the parent exited.
+            # start_new_session=True puts the daemon in its own session so
+            # a parent SIGHUP doesn't reach it.
+            proc = subprocess.Popen(
+                argv,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                start_new_session=True,
+            )
 
-        deadline = time.monotonic() + startup_timeout_s
-        while time.monotonic() < deadline:
-            if proc.poll() is not None:
-                # Daemon died during startup. Surface what it said.
-                out = proc.stdout.read() if proc.stdout else ""
-                raise RuntimeError(
-                    f"gyza-netd exited during startup (rc={proc.returncode}): {out}"
+            deadline = time.monotonic() + startup_timeout_s
+            while time.monotonic() < deadline:
+                rc = proc.poll()
+                if rc is not None:
+                    # Exited during startup — usually a transient loopback
+                    # port/socket race. Retry rather than surface a
+                    # traceback. (stdout is DEVNULL, so there's nothing to
+                    # read back; the return code is the signal.)
+                    last_reason = f"exited during startup (rc={rc})"
+                    break
+                if os.path.exists(socket):
+                    try:
+                        with NetdClient(socket) as c:
+                            if c.is_running():
+                                return proc
+                    except Exception:  # noqa: BLE001
+                        pass
+                time.sleep(0.05)
+            else:
+                # Never bound within the deadline. Kill and retry.
+                last_reason = (
+                    f"did not bind {socket} within {startup_timeout_s}s"
                 )
-            if os.path.exists(socket):
-                # Quick readiness check via gRPC.
-                try:
-                    with NetdClient(socket) as c:
-                        if c.is_running():
-                            return proc
-                except Exception:  # noqa: BLE001
-                    pass
-            time.sleep(0.05)
 
-        # Time out: kill the partially-started daemon to keep the test
-        # environment clean.
-        proc.kill()
-        out = proc.stdout.read() if proc.stdout else ""
-        raise TimeoutError(
-            f"gyza-netd did not bind {socket} within {startup_timeout_s}s. "
-            f"Output:\n{out}"
+            if proc.poll() is None:
+                proc.kill()
+            if attempt + 1 < attempts:
+                time.sleep(0.25)
+
+        raise RuntimeError(
+            f"gyza-netd failed to start after {attempts} attempt(s): "
+            f"{last_reason}. This is usually a port conflict on "
+            f"{listen_port} (another daemon already running?) or a stale "
+            f"socket at {socket}. Check for a running gyza-netd, or pass a "
+            f"different listen_port."
         )
 
 

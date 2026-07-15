@@ -71,7 +71,7 @@ class DaemonSupervisor:
     Use:
         sup = DaemonSupervisor(
             socket_path="~/.gyza/netd.sock",
-            binary_path="~/dev/gyza/netd/bin/gyza-netd",
+            binary_path="gyza-netd",
             listen_port=7749,
             key_path="~/.gyza/compositor.key",
         )
@@ -92,7 +92,7 @@ class DaemonSupervisor:
     def __init__(
         self,
         socket_path: str = "~/.gyza/netd.sock",
-        binary_path: str = "~/dev/gyza/netd/bin/gyza-netd",
+        binary_path: str = "gyza-netd",
         listen_port: int = 7749,
         key_path: str = "~/.gyza/compositor.key",
         bootstrap: list[str] | None = None,
@@ -230,6 +230,9 @@ class DaemonSupervisor:
             bootstrap=self._args.bootstrap or None,
             log_level=self._args.log_level,
             startup_timeout_s=self._args.startup_timeout_s,
+            # The supervisor owns respawn/backoff, so a single launch
+            # attempt here — the inner retry is for one-shot demo callers.
+            startup_attempts=1,
         )
 
     def _terminate(self, proc: subprocess.Popen, timeout_s: float = 5.0) -> None:
