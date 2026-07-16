@@ -22,6 +22,9 @@ order nodes are visited.
 """
 from __future__ import annotations
 
+import random
+from collections import defaultdict
+
 from gyza.demo.coordination_plane import CoordinationState
 from gyza.icp import ICPEnvelope
 
@@ -115,6 +118,42 @@ class GossipNode:
                     gained += 1
         return gained
 
+    def _pull_from(self, peer: "GossipNode") -> int:
+        missing = peer.state.event_hashes() - self.state.event_hashes()
+        gained = 0
+        for h in missing:
+            env = peer.state.get(h)
+            if env is not None:
+                self.state.add(env)
+                gained += 1
+        return gained
+
+    def pull_sample(self, fanout: int, rng: "random.Random") -> tuple[int, int]:
+        """
+        Bounded-fanout anti-entropy: pull missing events from a random
+        sample of up to ``fanout`` reachable peers, not all of them.
+
+        Returns ``(contacts, gained)``. This is the O(N)-per-round
+        epidemic step: the all-pairs ``pull_round`` costs O(N) contacts
+        per node (O(N^2) network-wide) and converges in ~1 round; this
+        costs ``fanout`` contacts per node (O(N*fanout) network-wide) and
+        converges in O(log N) rounds — the standard message/latency
+        trade the harness is here to quantify. A zero-``gained`` round no
+        longer implies convergence (the missing holder may simply not
+        have been sampled), so termination MUST use ``component_converged``
+        rather than watching ``gained``.
+        """
+        peers = [
+            pid for pid in self._peers
+            if pid != self.node_id and self._net.can_reach(self.node_id, pid)
+        ]
+        if len(peers) > fanout:
+            peers = rng.sample(peers, fanout)
+        gained = 0
+        for pid in peers:
+            gained += self._pull_from(self._peers[pid])
+        return len(peers), gained
+
 
 def run_until_converged(
     nodes: "list[GossipNode]", *, max_rounds: int = 50
@@ -132,4 +171,58 @@ def run_until_converged(
     return max_rounds
 
 
-__all__ = ["Network", "GossipNode", "run_until_converged"]
+def component_converged(nodes: "list[GossipNode]", net: Network) -> bool:
+    """
+    True iff every node holds the exact event set of its connected
+    component — the real fixpoint. Nodes that can reach each other (same
+    ``reachable`` set) must hold identical histories; different
+    components may legitimately differ (a live partition). This is the
+    termination predicate for bounded-fanout gossip, where a zero-gain
+    round does not imply convergence.
+    """
+    groups: dict[frozenset[str], list[GossipNode]] = defaultdict(list)
+    for n in nodes:
+        groups[frozenset(net.reachable(n.node_id))].append(n)
+    for members in groups.values():
+        ref = members[0].state.event_hashes()
+        if any(m.state.event_hashes() != ref for m in members[1:]):
+            return False
+    return True
+
+
+def epidemic_converge(
+    nodes: "list[GossipNode]",
+    net: Network,
+    *,
+    fanout: int,
+    rng: random.Random,
+    max_rounds: int = 500,
+) -> tuple[int, int]:
+    """
+    Drive bounded-fanout anti-entropy to the true fixpoint. Returns
+    ``(rounds, contacts)`` where ``contacts`` is the total number of
+    peer pulls issued — the message count to compare against all-pairs.
+
+    Terminates on ``component_converged`` (exact), with ``max_rounds`` as
+    a safety net; within a connected component an epidemic converges in
+    O(log N) rounds with high probability, so the net is generous.
+    """
+    rounds = 0
+    contacts = 0
+    while rounds < max_rounds:
+        for n in nodes:
+            c, _ = n.pull_sample(fanout, rng)
+            contacts += c
+        rounds += 1
+        if component_converged(nodes, net):
+            break
+    return rounds, contacts
+
+
+__all__ = [
+    "Network",
+    "GossipNode",
+    "run_until_converged",
+    "component_converged",
+    "epidemic_converge",
+]
