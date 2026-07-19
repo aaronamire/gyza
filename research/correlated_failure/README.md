@@ -100,6 +100,50 @@ the pipeline and gives a first, directionally-positive signal — it does
 not yet establish that real collectives sit above ρ*, because ρ* isn't
 built yet (needs minimal Stages 1–4).
 
+## Sharpened metrics + what validation revealed (`test_sharpened.py`)
+
+Per the Stage-0-review sharpening, the instrument now measures the
+*strong* signal (same **specific** wrong answer, above a base-rate null),
+not mere co-failure — validated on synthetic ground truth. Three results,
+one of them self-critical:
+
+1. **The base-rate null works, with a hard limit.** A purely *attractive
+   distractor* (independent errors) yields ~0 excess — good. But a blind
+   spot shared **uniformly** by the whole pool is *observationally
+   identical* to an attractive distractor, so it also yields ~0 excess.
+   **Only *differential* correlation is identifiable** — a sub-pool (e.g.
+   a family) correlating more than the rest. The confound-robust statistic
+   is therefore the **within − cross excess gap**, not absolute correlation.
+2. **Diversity must decorrelate the *blind spot*, not just error timing
+   (intervention arm).** At fixed ensemble size and per-model competence,
+   splitting into groups with *different* blind spots raises majority-vote
+   accuracy monotonically: mono 0.60 → diverse 0.81 (3 groups) → 0.86
+   (5 groups). This is the empirical basis for the diversity-invariant.
+3. **The 3-model pilot is underpowered for the sharpened metrics** —
+   discovered by re-analysis, reported plainly:
+   - Difficulty-filtering on the same 3 models flips correlations negative
+     (cross φ +0.33 → −0.48) — a **selection artifact**: conditioning on
+     "pool accuracy 1/3 or 2/3" *is* conditioning on disagreement.
+     Difficulty must be estimated from a **held-out** pool.
+   - The cross-family pair is **capability-confounded** (Qwen-0.5B 0.47 vs
+     SmolLM 0.26/0.32) — confound #4; families must be capability-matched.
+   - `same_wrong_excess` is **underpowered** at m=3 (leave-pair-out = 1).
+
+**Design consequence for the real gate:** need ~10–15 models, **matched
+capability across families**, with **item difficulty estimated from a
+held-out reference pool** — not 3 mismatched tiny models. The pilot proved
+the pipeline; the sharpening proved the pilot can't carry the claim.
+
+## Narrowed claim (honest, per Ladha)
+
+Not "aggregate worse than a single agent" (Ladha's correlated-Condorcet
+results are direct evidence against it in voting settings — not fought).
+The defended claim: **above a correlation threshold, robust/trimming
+aggregation loses its advantage over naive aggregation and discards the
+correct minority; the fix is decorrelating the blind spot (mixed
+families), which improves collective accuracy at fixed compute.** Regimes
+where it does *not* hold are to be reported, not hidden.
+
 ## Status
 
 Stage 0 (prior art) ✅ · instrument + correctness anchor ✅ · real backend

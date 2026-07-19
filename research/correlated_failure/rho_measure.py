@@ -230,6 +230,182 @@ def measure(preds: np.ndarray, families: list[str],
 
 
 # ======================================================================
+# Sharpened metrics (per Stage-0 review — the four confounds)
+# ======================================================================
+#
+# (1) Co-failure is not correlation. We measure the SAME SPECIFIC WRONG
+#     ANSWER, above what independence predicts — the Knight-Leveson move.
+# (2) Distractor attractiveness confounds raw agreement. The null below
+#     accounts for per-question option base rates (a leave-pair-out pool
+#     attractiveness profile), so a merely-seductive distractor produces
+#     ZERO excess.
+# (3) Difficulty selection biases both ways. `difficulty_filter` keeps
+#     intermediate-difficulty items with real outcome variance.
+# (4) Capability confounds family. `within_cross` on the EXCESS matrix is
+#     confound-robust to attractiveness; capability must still be matched
+#     at the experiment-design level (see run configs / notes).
+
+
+def difficulty_filter(preds: np.ndarray, questions: list[Question],
+                      lo: float = 0.2, hi: float = 0.8,
+                      reference: "np.ndarray | None" = None) -> list[int]:
+    """
+    Indices of questions whose pool accuracy is in [lo, hi] — items with
+    real outcome variance (not all-pass, not all-fail).
+
+    ⚠ SELECTION ARTIFACT: estimate difficulty from a pool DIFFERENT from
+    the models you then correlate. Filtering on the SAME small pool
+    conditions on "the models disagreed", which mechanically induces
+    negative error correlation (observed in the 3-model pilot: cross-φ
+    went +0.33 → −0.48 purely from this). Pass ``reference`` (a held-out
+    pool's predictions) to estimate difficulty independently, or use a
+    large pool so difficulty and any given pair's agreement decouple.
+    """
+    ref = preds if reference is None else reference
+    answers = np.array([q.answer_idx for q in questions])
+    acc = (ref == answers[None, :]).mean(axis=0)
+    return [q for q in range(len(questions)) if lo <= acc[q] <= hi]
+
+
+def same_wrong_excess(preds: np.ndarray,
+                      questions: list[Question]) -> np.ndarray:
+    """
+    Pairwise EXCESS same-specific-wrong-answer rate over a base-rate null.
+
+    Observed(i,j) = fraction of questions where i and j are BOTH wrong and
+    picked the SAME wrong option. Null(i,j) = expected collision if both
+    drew their option independently from the per-question pool
+    distribution estimated from the OTHER models (leave-pair-out), so a
+    question-level attractive distractor contributes equally to observed
+    and null and cancels. Excess = Observed - Null: correlation in the
+    *specific wrong answer* beyond distractor attractiveness.
+
+    Needs a non-trivial pool to estimate attractiveness (leave-pair-out
+    leaves m-2 models); underpowered for m<=3. NaN on the diagonal.
+    """
+    answers = np.array([q.answer_idx for q in questions])
+    m, n = preds.shape
+    E = np.full((m, m), np.nan)
+    for i in range(m):
+        for j in range(i + 1, m):
+            others = [k for k in range(m) if k != i and k != j]
+            s_obs = 0.0
+            e_null = 0.0
+            for q in range(n):
+                ans = answers[q]
+                if (preds[i, q] != ans and preds[j, q] != ans
+                        and preds[i, q] == preds[j, q]):
+                    s_obs += 1.0
+                if others:
+                    counts: dict[int, int] = {}
+                    for k in others:
+                        counts[int(preds[k, q])] = counts.get(int(preds[k, q]), 0) + 1
+                    tot = len(others)
+                    e_null += sum((c / tot) ** 2
+                                  for o, c in counts.items() if o != ans)
+            E[i, j] = E[j, i] = (s_obs - e_null) / n
+    return E
+
+
+# ======================================================================
+# Synthetic ground truth for validating the null + the intervention arm
+# ======================================================================
+
+def synth_answers(*, n_models: int, n_questions: int, k: int,
+                  competence: float, rho: float, attract_gamma: float,
+                  seed: int, blind_offset: int = 1,
+                  answers: "np.ndarray | None" = None
+                  ) -> tuple[np.ndarray, list[Question]]:
+    """
+    Ground-truth generator. ``rho`` correlates *whether* models err
+    (shared latent factor); ``attract_gamma`` is the chance an erring
+    model picks THIS pool's blind-spot option, ``(answer+blind_offset)%k``.
+
+    Two things this deliberately makes distinguishable:
+    - rho=0 ⇒ errors independent; any same-answer collisions are pure
+      attractiveness, which the base-rate null must absorb (excess ~ 0).
+    - Different pools with DIFFERENT ``blind_offset`` fail toward different
+      wrong answers — the ingredient that makes diversity actually help.
+    Note (a real limitation, asserted in tests): a *uniform* blind spot
+    shared by the whole pool is observationally identical to an attractive
+    distractor; only DIFFERENTIAL correlation (a sub-pool more correlated
+    than the rest) is identifiable from same-answer statistics.
+    """
+    if answers is None:
+        answers = np.random.default_rng(seed).integers(0, k, n_questions)
+    else:
+        answers = np.asarray(answers, dtype=int)
+        n_questions = len(answers)
+    off = (blind_offset % (k - 1)) + 1               # in [1, k-1] ⇒ attract != answer
+    attract = (answers + off) % k
+    shared = np.random.default_rng(seed + 1).standard_normal(n_questions)  # error timing
+    thresh = _competence_threshold(competence)
+    preds = np.empty((n_models, n_questions), dtype=int)
+    for mi in range(n_models):
+        eps = np.random.default_rng(seed + 100 + mi).standard_normal(n_questions)
+        latent = np.sqrt(rho) * shared + np.sqrt(1.0 - rho) * eps
+        err = latent > thresh
+        r = np.random.default_rng(seed + 5000 + mi)
+        for q in range(n_questions):
+            if not err[q]:
+                preds[mi, q] = answers[q]
+            elif r.random() < attract_gamma:
+                preds[mi, q] = attract[q]
+            else:
+                o = r.integers(0, k)
+                while o == answers[q]:
+                    o = r.integers(0, k)
+                preds[mi, q] = o
+    questions = [Question(f"q{q}", "", tuple(str(x) for x in range(k)),
+                          int(answers[q])) for q in range(n_questions)]
+    return preds, questions
+
+
+def majority_accuracy(preds: np.ndarray, questions: list[Question]) -> float:
+    """Plurality-vote accuracy of the ensemble."""
+    answers = np.array([q.answer_idx for q in questions])
+    correct = 0
+    for q in range(preds.shape[1]):
+        vals, counts = np.unique(preds[:, q], return_counts=True)
+        if vals[np.argmax(counts)] == answers[q]:
+            correct += 1
+    return correct / preds.shape[1]
+
+
+def diverse_vs_monoculture(*, ensemble_size: int, n_groups: int,
+                           n_questions: int, k: int, competence: float,
+                           rho: float, seed: int) -> dict:
+    """
+    The intervention arm (synthetic). Same ensemble size, same per-model
+    competence, same within-group correlation ρ. A MONOCULTURE draws all
+    members from one correlated world; a DIVERSE ensemble splits them
+    across ``n_groups`` independent worlds (low cross-group correlation).
+    Returns majority-vote accuracy of each — the claim is diverse > mono
+    at fixed compute.
+    """
+    # Monoculture: one world, one blind spot. Diverse: independent groups
+    # with DIFFERENT blind spots (they fail toward different wrong answers)
+    # — decorrelating the blind spot, not merely the error timing.
+    answers = np.random.default_rng(seed).integers(0, k, n_questions)  # ONE shared key
+    mono, qs = synth_answers(n_models=ensemble_size, n_questions=n_questions,
+                             k=k, competence=competence, rho=rho, attract_gamma=0.7,
+                             seed=seed, blind_offset=0, answers=answers)
+    per = max(1, ensemble_size // n_groups)
+    blocks = []
+    for g in range(n_groups):
+        p, _ = synth_answers(n_models=per, n_questions=n_questions, k=k,
+                             competence=competence, rho=rho, attract_gamma=0.7,
+                             seed=seed + 900 * (g + 1), blind_offset=g, answers=answers)
+        blocks.append(p)
+    diverse = np.vstack(blocks)[:ensemble_size]
+    return {
+        "monoculture_acc": round(majority_accuracy(mono, qs), 4),
+        "diverse_acc": round(majority_accuracy(diverse, qs), 4),
+        "ensemble_size": ensemble_size, "n_groups": n_groups, "rho": rho,
+    }
+
+
+# ======================================================================
 # Real backend — HuggingFace causal LM, CPU, multiple-choice by logprob
 # ======================================================================
 
