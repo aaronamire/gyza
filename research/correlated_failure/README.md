@@ -74,8 +74,35 @@ m = HFCausalBackend('HuggingFaceTB/SmolLM2-135M-Instruct','smollm')
 print(m.predict([Question('q','2+2=',('3','4','5','6'),1)]))"
 ```
 
+## First real signal (pilot — `pilot_result.json`)
+
+3 tiny ungated models, 2 families, 120 ARC-Easy questions, seed 0, CPU:
+
+| metric | value |
+|---|---|
+| within-family error corr (SmolLM 135M↔360M), φ | **0.54** |
+| cross-family error corr (SmolLM↔Qwen), φ | **0.33** |
+| shared-wrong-answer rate | **0.51** |
+| per-model error rate | 0.74 / 0.68 / 0.53 |
+
+Read: even across genuinely different families (different orgs,
+architectures, training data), errors correlate (φ≈0.33; the tetrachoric
+latent correlation is *higher* — φ on binary indicators attenuates), and
+on **half** of all questions a majority of the erring models converged on
+the *same specific wrong answer* (the sharp categorical blind-spot signal
+that most damages trimming). Within-family > cross-family, as the family
+model predicts.
+
+**Caveats (load-bearing).** Tiny 135M–0.5B models with high error rates
+(0.53–0.74) plausibly *inflate* correlation vs. frontier models; 3 models
+/ 2 families / one benchmark is thin; not the decision gate. This proves
+the pipeline and gives a first, directionally-positive signal — it does
+not yet establish that real collectives sit above ρ*, because ρ* isn't
+built yet (needs minimal Stages 1–4).
+
 ## Status
 
 Stage 0 (prior art) ✅ · instrument + correctness anchor ✅ · real backend
-proven ✅ · **next: the cross-family ρ̂ decision-gate run** (backend choice
-pending — local-slow vs. free-API-fast).
+proven ✅ · **first cross-family ρ̂ pilot ✅ (positive signal)** · next:
+(a) proper gate on stronger cross-family models (free API tiers), and
+(b) minimal Stages 1–4 to establish ρ* to compare ρ̂ against.

@@ -1,0 +1,50 @@
+{
+  "config": {
+    "seed": 0,
+    "n_questions": 120,
+    "models": [
+      "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "HuggingFaceTB/SmolLM2-360M-Instruct",
+      "Qwen/Qwen2.5-0.5B-Instruct"
+    ],
+    "families": [
+      "smollm",
+      "smollm",
+      "qwen"
+    ],
+    "benchmark": "ARC-Easy"
+  },
+  "result": {
+    "families": [
+      "smollm",
+      "smollm",
+      "qwen"
+    ],
+    "mean_within_family_rho": 0.5396,
+    "mean_cross_family_rho": 0.3281,
+    "shared_wrong_rate": 0.5083,
+    "per_model_error_rate": [
+      0.7417,
+      0.6833,
+      0.5333
+    ]
+  },
+  "pairwise_corr": [
+    [
+      1.0,
+      0.5396,
+      0.2875
+    ],
+    [
+      0.5396,
+      1.0,
+      0.3687
+    ],
+    [
+      0.2875,
+      0.3687,
+      1.0
+    ]
+  ],
+  "wall_seconds": 724.6
+}
