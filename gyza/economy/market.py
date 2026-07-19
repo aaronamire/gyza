@@ -243,6 +243,33 @@ class BondedMarket:
     def total_capital(self) -> float:
         return sum(self._capital.values())
 
+    # -- open-task introspection (for the resolution layer) ------------------
+
+    def open_task_ids(self) -> list[str]:
+        return list(self._open)
+
+    def assertions_on(self, task_id: str) -> list[Assertion]:
+        return list(self._open.get(task_id, []))
+
+    def contested_stake(self, task_id: str) -> float:
+        """
+        Stake that would *change hands* if this task settled — the total
+        escrowed minus the stake on the plurality claim. High when a lot
+        of capital is bet against the leading answer; zero when unanimous.
+        The resolution layer targets high-contested-stake tasks so the
+        scarce ground-truth budget is spent where it moves the most.
+        """
+        escrow = self._escrow.get(task_id, {})
+        if not escrow:
+            return 0.0
+        by_claim: dict[str, float] = {}
+        for a in self._open.get(task_id, []):
+            by_claim[a.claim] = by_claim.get(a.claim, 0.0) + escrow.get(
+                a.agent_pubkey, 0.0
+            )
+        total = sum(by_claim.values())
+        return total - max(by_claim.values()) if by_claim else 0.0
+
     # -- submission ----------------------------------------------------------
 
     def submit(self, a: Assertion) -> bool:
