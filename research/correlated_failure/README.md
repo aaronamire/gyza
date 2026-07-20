@@ -179,6 +179,35 @@ an unusable model can never masquerade as signal again. A valid
 detectability check needs ≥1.5B models (local download, blocked by a
 ~10-min background cap) or free API tiers.
 
+## Task class: measure training-data misconceptions, not arithmetic
+
+Arithmetic (the multiplication pilot) is the WRONG task class. Its errors
+come from tokenization and raw capability limits, not shared training
+data — so it measures the wrong mechanism and yields either null (noise)
+or spurious tokenization-artifact correlation. The hypothesis is about
+**training-data-induced** blind spots: the causal path from overlapping
+corpora to the same *confident, specific, plausible* wrong answer — the
+internally-consistent-liar mode that defeats every detection mechanism.
+Tokenization error is noisy and easy to catch; misconception error is the
+dangerous kind, and it is what we must measure.
+
+Three right task classes: **common misconceptions** (TruthfulQA — nearly
+purpose-built; larger models are *less* truthful because they absorbed
+human falsehoods), **code with common-but-wrong idioms** (HumanEval/MBPP
+by unit tests — same specific bug in an ~infinite wrong-program space),
+and **cognitive-reflection items** (bat-and-ball; the intuitive wrong
+answer is all over the corpus).
+
+`truthful.py` implements the TruthfulQA measurement, fully local: a model
+answers open-ended; the cached MiniLM embedder matches its answer to the
+nearest reference; the wrong-answer identity is *which listed
+misconception* it matched, so `same_wrong_convergence` and a
+`shared_misconception_rate` measure whether models give the SAME
+known-false answer. No distractor confound — the misconception IS the
+mechanism. Validated on real TruthfulQA (`test_truthful.py`): exact +
+paraphrased misconceptions classify correctly, and the metric separates
+shared-misconception pools from independent ones.
+
 ## Finding in its own right: how they fail, not how often
 
 The instrument check showed decorrelating error *timing* does nothing
