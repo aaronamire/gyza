@@ -208,6 +208,49 @@ mechanism. Validated on real TruthfulQA (`test_truthful.py`): exact +
 paraphrased misconceptions classify correctly, and the metric separates
 shared-misconception pools from independent ones.
 
+### First real detectability result (`truthful_result_cached.json`)
+
+3 small models, 2 families (SmolLM 135M/360M + Qwen 0.5B), 60 TruthfulQA
+items, seed 1. Unlike arithmetic, these models are USABLE here — they
+produce coherent answers (only 3–8% "other") and fall into misconceptions
+on **53–75%** of items.
+
+| metric | value |
+|---|---|
+| shared-misconception rate (≥2 models, same known-false answer) | **0.58** |
+| absolute same-misconception convergence | **0.64** |
+| permutation null | **0.28** |
+| convergence − null | **+0.36** |
+| within-family | 0.63 |
+| cross-family | **0.64** |
+
+**Read (with caveats first-class):**
+
+1. **The signal is real and detectable.** Convergence 0.64 is 2.3× the
+   permutation null; on 58% of questions ≥2 models give the *same specific
+   known-false answer*. First real evidence the phenomenon exists on
+   actual models, with the right task class. The obs−null gap is
+   classifier-robust (both use the same MiniLM matching).
+2. **Cross-family ≈ within-family (0.64 vs 0.63).** Genuinely different
+   families converge on the same misconceptions *as much as* same-family
+   models do — the **universal-blind-spot signature**: the correlation is
+   not family-specific. This is the most dangerous regime for Gyza (no
+   pool diversity saves you), and it is exactly the case the within−cross
+   statistic reads as ~zero — **so this is the empirical payoff of the
+   free-form absolute-convergence switch: it reveals what within−cross
+   misses.**
+3. **Honest limit on the null.** It is 0.28, NOT ~0, because classifying
+   each answer to the nearest *listed* misconception collapses the huge
+   free-form space back to a small categorical one (a handful of
+   misconceptions per item). The signal survives (0.64 ≫ 0.28), but this
+   is "2.3× chance", not "chance ≈ 0". A stricter design would key
+   convergence on verbatim/near-verbatim wrong answers, not nearest-listed.
+4. **Not the gate.** 3 weak, capability-mismatched models, 2 families, one
+   within-pair. The universal-blind-spot reading is *suggestive*; the
+   capability-matched multi-family run (API tiers via `APIBackend`, or Q4
+   GGUF) is decisive — but the cheap local probe came back POSITIVE, which
+   is the green light for it.
+
 ## Finding in its own right: how they fail, not how often
 
 The instrument check showed decorrelating error *timing* does nothing

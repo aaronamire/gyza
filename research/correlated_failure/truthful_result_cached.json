@@ -1,0 +1,42 @@
+{
+  "config": {
+    "seed": 1,
+    "n_items": 60,
+    "task": "TruthfulQA-generation",
+    "models": [
+      "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "HuggingFaceTB/SmolLM2-360M-Instruct",
+      "Qwen/Qwen2.5-0.5B-Instruct"
+    ],
+    "families": [
+      "smollm",
+      "smollm",
+      "qwen"
+    ]
+  },
+  "per_model": {
+    "HuggingFaceTB/SmolLM2-135M-Instruct": {
+      "correct": 0.317,
+      "misconception": 0.6,
+      "other": 0.083
+    },
+    "HuggingFaceTB/SmolLM2-360M-Instruct": {
+      "correct": 0.217,
+      "misconception": 0.75,
+      "other": 0.033
+    },
+    "Qwen/Qwen2.5-0.5B-Instruct": {
+      "correct": 0.417,
+      "misconception": 0.533,
+      "other": 0.05
+    }
+  },
+  "convergence": {
+    "shared_misconception_rate": 0.5833,
+    "abs_convergence": 0.6367,
+    "permutation_null": 0.2787,
+    "within_family": 0.6316,
+    "cross_family": 0.6392
+  },
+  "wall_seconds": 838.0
+}
