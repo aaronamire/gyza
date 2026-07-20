@@ -318,7 +318,16 @@ where it does *not* hold are to be reported, not hidden.
 
 ## Status
 
-Stage 0 (prior art) ✅ · instrument + correctness anchor ✅ · real backend
-proven ✅ · **first cross-family ρ̂ pilot ✅ (positive signal)** · next:
-(a) proper gate on stronger cross-family models (free API tiers), and
-(b) minimal Stages 1–4 to establish ρ* to compare ρ̂ against.
+Stage 0 (prior art) ✅ · instrument + correctness anchor ✅ · MC pilot ✅
+(null; caught sentinel bug) · task-class switch to TruthfulQA ✅ · first
+real result ✅ **then REVISED** — the nearest-listed headline was
+substantially a forced-collision artifact; tightened (verbatim/semantic)
+re-analysis shows a ~5% family-specific verbatim floor and a topic-inflated
+ceiling, not an established universal blind spot · **code battery
+instrument built + validated** (`codebench.py`, confound-free same-bug
+convergence) · next: the capability-matched / API run of BOTH the
+tightened TruthfulQA metric and the code battery, using `APIBackend`.
+
+The decisive claim rests on the code battery (no curated list, no topic
+similarity) plus tightened TruthfulQA on capability-matched families — both
+need models that can code / are strong enough, i.e. the API run.
