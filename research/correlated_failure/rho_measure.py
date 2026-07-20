@@ -308,7 +308,99 @@ def same_wrong_excess(preds: np.ndarray,
 
 
 # ======================================================================
-# Synthetic ground truth for validating the null + the intervention arm
+# Free-form / verifiable-ground-truth measurement (recovers ABSOLUTE
+# correlation — makes the universal blind spot visible)
+# ======================================================================
+#
+# The identifiability trap in `same_wrong_excess` is an artifact of the
+# multiple-choice FORMAT, not the phenomenon: with k options there is no
+# reference class, so a blind spot shared by the whole pool is
+# indistinguishable from an attractive distractor. Switch to free-form
+# answers with a huge space (a specific number, a program's output) and
+# chance collision → 0, so two models producing the SAME specific wrong
+# answer is a strong, ABSOLUTE signal. This is the regime that matters
+# most for Gyza: a UNIVERSAL blind spot that no pool diversity can fix and
+# that the within−cross statistic reads as zero.
+
+
+def same_wrong_convergence(preds: np.ndarray, answers: np.ndarray, *,
+                           n_perms: int = 20, seed: int = 0
+                           ) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Pairwise ABSOLUTE same-wrong-answer convergence for free-form answers.
+
+    Obs(i,j) = P(pred_i == pred_j | both wrong) — among questions both got
+    wrong, how often did they give the IDENTICAL wrong answer. In a large
+    answer space the chance value is ~0, so Obs itself is the signal (no
+    attractiveness reference class needed). Null(i,j) is a permutation
+    baseline: model j's answers shuffled across questions (preserving its
+    marginal + error rate), which destroys question-level alignment — it
+    estimates the chance collision empirically. Report Obs and Obs−Null.
+    """
+    rng = np.random.default_rng(seed)
+    answers = np.asarray(answers)
+    m, n = preds.shape
+    wrong = preds != answers[None, :]
+    Obs = np.full((m, m), np.nan)
+    Null = np.full((m, m), np.nan)
+    for i in range(m):
+        for j in range(i + 1, m):
+            bw = wrong[i] & wrong[j]
+            d = int(bw.sum())
+            Obs[i, j] = Obs[j, i] = (
+                float(((preds[i] == preds[j]) & bw).sum()) / d if d else np.nan)
+            vals = []
+            for _ in range(n_perms):
+                pj = preds[j][rng.permutation(n)]
+                wj = pj != answers
+                bwp = wrong[i] & wj
+                dp = int(bwp.sum())
+                if dp:
+                    vals.append(float(((preds[i] == pj) & bwp).sum()) / dp)
+            Null[i, j] = Null[j, i] = float(np.mean(vals)) if vals else np.nan
+    return Obs, Null
+
+
+def synth_freeform(*, n_models: int, n_questions: int, answer_space: int,
+                   competence: float, seductive_gamma: float, universal: bool,
+                   seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Ground truth for the free-form regime. Errors occur INDEPENDENTLY
+    across models (no shared error timing); the question is whether, WHEN
+    they err, they converge on the same specific wrong answer.
+
+    ``universal=True``: every model's blind spot points at the SAME
+    seductive wrong answer (a shared miscalculation) — the dangerous
+    universal case. ``universal=False``: each model has its OWN seductive
+    wrong answer (they fail in different directions). ``seductive_gamma``
+    is the chance an erring model takes its seductive answer vs. a random
+    wrong one from the large space.
+    """
+    rng = np.random.default_rng(seed)
+    answers = rng.integers(0, answer_space, n_questions)
+    thresh = _competence_threshold(competence)
+    preds = np.empty((n_models, n_questions), dtype=np.int64)
+    for mi in range(n_models):
+        eps = np.random.default_rng(seed + 100 + mi).standard_normal(n_questions)
+        err = eps > thresh                                  # independent error timing
+        seductive = ((answers + 1) if universal
+                     else (answers + (mi + 2))) % answer_space
+        r = np.random.default_rng(seed + 5000 + mi)
+        for q in range(n_questions):
+            if not err[q]:
+                preds[mi, q] = answers[q]
+            elif r.random() < seductive_gamma:
+                preds[mi, q] = seductive[q]
+            else:
+                v = int(r.integers(0, answer_space))
+                while v == answers[q]:
+                    v = int(r.integers(0, answer_space))
+                preds[mi, q] = v
+    return preds, answers
+
+
+# ======================================================================
+# Synthetic ground truth (MC) for validating the null + a pipeline check
 # ======================================================================
 
 def synth_answers(*, n_models: int, n_questions: int, k: int,
@@ -456,6 +548,27 @@ class HFCausalBackend:
                       for c in q.choices]
             preds[i] = int(np.argmax(scores))
         return preds
+
+    def generate(self, prompt: str, *, max_new_tokens: int = 16) -> str:
+        """Greedy (deterministic) free-form generation of the continuation."""
+        torch = self._torch
+        ids = self._tok(prompt, return_tensors="pt").to(self._device)
+        with torch.no_grad():
+            out = self._model.generate(
+                **ids, max_new_tokens=max_new_tokens, do_sample=False,
+                pad_token_id=self._tok.eos_token_id,
+            )
+        return self._tok.decode(out[0][ids["input_ids"].shape[1]:],
+                                skip_special_tokens=True)
+
+
+def parse_int(text: str) -> "int | None":
+    """The LAST integer appearing in ``text`` (models often restate then
+    answer). Returns None if there is no integer — a distinct 'no answer'
+    outcome, not silently coerced."""
+    import re
+    matches = re.findall(r"-?\d+", text.replace(",", ""))
+    return int(matches[-1]) if matches else None
 
 
 __all__ = [

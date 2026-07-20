@@ -134,6 +134,50 @@ capability across families**, with **item difficulty estimated from a
 held-out reference pool** — not 3 mismatched tiny models. The pilot proved
 the pipeline; the sharpening proved the pilot can't carry the claim.
 
+## The format switch: free-form verifiable ground truth (identifiability recovered)
+
+The identifiability trap above is an artifact of the multiple-choice
+FORMAT, not the phenomenon. With free-form answers checked against a
+verifier (a symbolic solver, unit tests, a SAT solver, exact numeric
+match) two things change: there are no distractors, so "attractive wrong
+option" stops being a competing explanation; and the wrong-answer space
+becomes huge, so two models producing the *same specific wrong answer* is
+overwhelmingly unlikely by chance. This recovers **absolute** same-wrong
+convergence, not just the within−cross gap — which matters because the
+**universal blind spot** (every model shares a failure mode; no pool
+diversity saves you; within−cross reads zero) is the most dangerous
+regime for Gyza, and MC renders it invisible.
+
+Validated on synthetic ground truth (`test_freeform_...`): the SAME
+universal blind spot yields `same_wrong_excess ≈ 0` in multiple choice
+(hidden) but `same_wrong_convergence > 0.4` with a permutation null `< 0.02`
+free-form (revealed). `rho_measure.same_wrong_convergence` +
+`synth_freeform` implement and validate this; `run_freeform_pilot.py` runs
+it on real models (2-digit × 2-digit multiplication, exact check).
+
+**Report both** absolute convergence AND the within−cross gap.
+
+## Finding in its own right: how they fail, not how often
+
+The instrument check showed decorrelating error *timing* does nothing
+while decorrelating error *direction* is everything. Two agents that
+disagree constantly but fail identically *when* they fail buy the
+collective nothing. **Architectural consequence for Gyza:** the diversity
+invariant (the signing precondition that refuses to certify a low-diversity
+collective decision) must NOT be measured by disagreement rate. It must be
+conditional on error — diversity in the *direction* of failure, not the
+*frequency* of it. That is a sharper, more implementable spec than
+"disagreement threshold", and it came out of this experiment.
+
+## On the intervention arm (demoted to instrument check)
+
+"Decorrelating blind spots raises accuracy 0.60 → 0.86" on a generator
+*built* to have decorrelated blind spots is Condorcet restating itself —
+an instrument check, not empirical evidence for the diversity invariant.
+Whether *real* families have sufficiently different blind spots that
+mixing helps is exactly what the free-form real-model measurement must
+answer; the synthetic result will not be presented as that evidence.
+
 ## Narrowed claim (honest, per Ladha)
 
 Not "aggregate worse than a single agent" (Ladha's correlated-Condorcet

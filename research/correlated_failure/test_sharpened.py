@@ -12,10 +12,17 @@ import numpy as np
 from rho_measure import (
     difficulty_filter,
     diverse_vs_monoculture,
+    same_wrong_convergence,
     same_wrong_excess,
     synth_answers,
+    synth_freeform,
     within_cross,
 )
+
+
+def _offdiag_mean(M):
+    m = M.shape[0]
+    return float(np.nanmean([M[i, j] for i in range(m) for j in range(i + 1, m)]))
 
 
 # ----------------------------------------------------------------------
@@ -44,8 +51,48 @@ def test_uniform_correlation_is_absorbed_by_the_null():
     # by the whole pool is observationally identical to an attractive
     # distractor. A per-question base-rate null cannot (and must not)
     # separate them -> excess stays ~ 0 even at high uniform rho. Only
-    # DIFFERENTIAL correlation is identifiable (next test).
+    # DIFFERENTIAL correlation is identifiable. Free-form measurement
+    # (below) escapes this trap.
     assert abs(_mean_excess(rho=0.6, attract_gamma=0.9, seed=1)) < 0.03
+
+
+# ----------------------------------------------------------------------
+# Free-form measurement recovers ABSOLUTE correlation — the escape hatch
+# ----------------------------------------------------------------------
+
+def test_freeform_reveals_universal_blind_spot_that_MC_hides():
+    """
+    The core argument for switching formats. A UNIVERSAL blind spot (every
+    model, when it errs, converges on the same specific wrong answer) is:
+      - INVISIBLE in multiple choice: same_wrong_excess ~ 0 (absorbed as
+        'attractive distractor');
+      - VISIBLE free-form: absolute same-wrong convergence is high and its
+        permutation null is ~0, because chance collision in a large answer
+        space is negligible.
+    """
+    # (a) MC form of a universal blind spot -> excess hides it
+    mc_excess = _mean_excess(rho=0.0, attract_gamma=0.9, seed=1)
+    assert abs(mc_excess) < 0.02
+
+    # (b) free-form, SAME universal blind spot, independent error timing
+    preds, ans = synth_freeform(n_models=8, n_questions=3000, answer_space=10000,
+                                competence=0.5, seductive_gamma=0.8,
+                                universal=True, seed=1)
+    Obs, Null = same_wrong_convergence(preds, ans, seed=1)
+    conv, null = _offdiag_mean(Obs), _offdiag_mean(Null)
+    assert conv > 0.4          # the universal blind spot is now DETECTED
+    assert null < 0.02         # chance collision in a huge space is ~0
+    assert conv - null > 0.4
+
+
+def test_freeform_convergence_low_when_failures_differ():
+    # Each model has its OWN seductive wrong answer -> they fail in
+    # different directions -> convergence ~ 0 (this is the SAFE regime).
+    preds, ans = synth_freeform(n_models=8, n_questions=3000, answer_space=10000,
+                                competence=0.5, seductive_gamma=0.8,
+                                universal=False, seed=2)
+    Obs, _ = same_wrong_convergence(preds, ans, seed=2)
+    assert _offdiag_mean(Obs) < 0.1
 
 
 # ----------------------------------------------------------------------
@@ -85,9 +132,17 @@ def test_within_beats_cross_on_excess_under_family_structure():
 # The intervention arm: reducing correlation improves collective accuracy
 # ----------------------------------------------------------------------
 
-def test_diversity_intervention_improves_accuracy_at_fixed_size():
+def test_intervention_pipeline_check_NOT_an_empirical_result():
+    """
+    INSTRUMENT CHECK ONLY — not evidence for the diversity invariant.
+
+    The generator is constructed to have decorrelated blind spots, so
+    'mixing them helps' is Condorcet restating itself; this only confirms
+    the pipeline measures the effect it claims to. Whether REAL model
+    families have sufficiently different blind spots for mixing to help is
+    exactly what synthetic data cannot answer — it needs the free-form
+    real-model measurement.
+    """
     r = diverse_vs_monoculture(ensemble_size=15, n_groups=5, n_questions=2000,
                                k=4, competence=0.55, rho=0.8, seed=7)
-    # Same size, same competence, same within-group rho: splitting across
-    # independent groups beats the monoculture.
     assert r["diverse_acc"] > r["monoculture_acc"] + 0.03
