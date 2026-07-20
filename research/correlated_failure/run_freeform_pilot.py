@@ -30,14 +30,27 @@ from rho_measure import (  # noqa: E402
 )
 
 SEED = 0
-N_PROBLEMS = 60
-MODELS = [
+# --cached: the detectability pilot on already-downloaded tiny models
+# (no download; NOT capability-matched — that is for the gate run below).
+CACHED_MODELS = [
+    ("HuggingFaceTB/SmolLM2-135M-Instruct", "smollm"),
+    ("HuggingFaceTB/SmolLM2-360M-Instruct", "smollm"),
+    ("Qwen/Qwen2.5-0.5B-Instruct", "qwen"),
+]
+# default: capability-matched ~1.5-1.7B cross-family pair (needs download)
+MATCHED_MODELS = [
     ("Qwen/Qwen2.5-1.5B-Instruct", "qwen"),
     ("HuggingFaceTB/SmolLM2-1.7B-Instruct", "smollm"),
     ("Qwen/Qwen2.5-0.5B-Instruct", "qwen"),
 ]
+if "--cached" in sys.argv:
+    MODELS, N_PROBLEMS = CACHED_MODELS, 40
+else:
+    MODELS, N_PROBLEMS = MATCHED_MODELS, 60
 NO_ANSWER = -999999  # sentinel: a distinct 'no integer produced' outcome
-OUT = Path(__file__).parent / "freeform_result.json"
+OUT = Path(__file__).parent / (
+    "freeform_result_cached.json" if "--cached" in sys.argv
+    else "freeform_result.json")
 
 
 def make_problems(n: int, seed: int):
@@ -82,20 +95,33 @@ def main() -> int:
         gc.collect()
 
     preds = np.vstack(rows)
-    Obs, Null = same_wrong_convergence(preds, answers, seed=SEED)
-    w_o, c_o = within_cross(Obs, families)
     m = preds.shape[0]
-    conv = float(np.nanmean([Obs[i, j] for i in range(m) for j in range(i + 1, m)]))
-    null = float(np.nanmean([Null[i, j] for i in range(m) for j in range(i + 1, m)]))
+    # Diagnostics that catch the failure modes the pilot exposed: a model
+    # that emits no parseable answer, or degenerate low-entropy output,
+    # cannot carry the measurement — surface it, never silently score it.
+    parse_rate = [round(float((rows[i] != NO_ANSWER).mean()), 3) for i in range(m)]
+    distinct = [int(len(np.unique(rows[i][rows[i] != NO_ANSWER]))) for i in range(m)]
+    Obs, Null = same_wrong_convergence(preds, answers, seed=SEED, invalid=NO_ANSWER)
+    w_o, c_o = within_cross(Obs, families)
+
+    def _od(M):
+        v = [M[i, j] for i in range(m) for j in range(i + 1, m)]
+        return float(np.nanmean(v)) if not all(np.isnan(v)) else float("nan")
+    conv, null = _od(Obs), _od(Null)
+    usable = all(p > 0.5 for p in parse_rate) and all(d > N_PROBLEMS // 4 for d in distinct)
     out = {
         "config": {"seed": SEED, "n_problems": N_PROBLEMS,
                    "task": "2-digit x 2-digit multiplication",
                    "models": [r for r, _ in MODELS], "families": families},
+        "usable": usable,
+        "parse_rate": parse_rate,
+        "distinct_outputs": distinct,
         "per_model_acc": [round(float((rows[i] == answers).mean()), 3)
                           for i in range(m)],
-        "abs_convergence_mean": round(conv, 4),
-        "permutation_null_mean": round(null, 4),
-        "convergence_minus_null": round(conv - null, 4),
+        "abs_convergence_mean": None if np.isnan(conv) else round(conv, 4),
+        "permutation_null_mean": None if np.isnan(null) else round(null, 4),
+        "convergence_minus_null": None if (np.isnan(conv) or np.isnan(null))
+        else round(conv - null, 4),
         "within_family_convergence": None if np.isnan(w_o) else round(w_o, 4),
         "cross_family_convergence": None if np.isnan(c_o) else round(c_o, 4),
         "obs_matrix": [[None if np.isnan(x) else round(float(x), 3) for x in r]

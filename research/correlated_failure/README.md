@@ -157,6 +157,28 @@ it on real models (2-digit × 2-digit multiplication, exact check).
 
 **Report both** absolute convergence AND the within−cross gap.
 
+### Local free-form pilot: inconclusive, and it earned its keep
+
+The cheap detectability pilot (cached tiny models, 2-digit × 2-digit
+multiplication) came back **null — and caught a real metric bug**:
+- Per-model **parse rate [0.0, 0.0, 1.0]**: SmolLM2-135M/360M emitted NO
+  parseable integer; only Qwen-0.5B produced numbers (all wrong, 0% acc).
+- The two SmolLMs showed a spurious **within-family convergence of 1.0** —
+  an artifact of both hitting the "no answer" sentinel, which the metric
+  wrongly counted as agreement. `same_wrong_convergence` now takes an
+  ``invalid`` sentinel and drops those; the "signal" then vanishes
+  (within = None). That bug would have produced false positives in the
+  real run — the pilot paid for itself by catching it.
+
+Lesson (a design requirement, not a torture of parameters): the free-form
+study needs models that (a) actually attempt the task and (b) emit
+parseable answers, at INTERMEDIATE difficulty. Sub-1B models on
+multiplication fail all three. The harness now applies chat templates and
+reports parse-rate + distinct-output diagnostics and a ``usable`` flag, so
+an unusable model can never masquerade as signal again. A valid
+detectability check needs ≥1.5B models (local download, blocked by a
+~10-min background cap) or free API tiers.
+
 ## Finding in its own right: how they fail, not how often
 
 The instrument check showed decorrelating error *timing* does nothing

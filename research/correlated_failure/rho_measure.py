@@ -324,7 +324,8 @@ def same_wrong_excess(preds: np.ndarray,
 
 
 def same_wrong_convergence(preds: np.ndarray, answers: np.ndarray, *,
-                           n_perms: int = 20, seed: int = 0
+                           n_perms: int = 20, seed: int = 0,
+                           invalid: "int | None" = None
                            ) -> tuple[np.ndarray, np.ndarray]:
     """
     Pairwise ABSOLUTE same-wrong-answer convergence for free-form answers.
@@ -336,24 +337,32 @@ def same_wrong_convergence(preds: np.ndarray, answers: np.ndarray, *,
     baseline: model j's answers shuffled across questions (preserving its
     marginal + error rate), which destroys question-level alignment — it
     estimates the chance collision empirically. Report Obs and Obs−Null.
+
+    ``invalid`` excludes a 'no answer produced' sentinel: a model that
+    failed to emit a parseable answer did not converge on a wrong ANSWER,
+    so counting two such failures as agreement is an artifact (it inflated
+    within-family convergence to a spurious 1.0 in the tiny-model pilot).
+    Questions where either model's answer is ``invalid`` are dropped.
     """
     rng = np.random.default_rng(seed)
     answers = np.asarray(answers)
     m, n = preds.shape
     wrong = preds != answers[None, :]
+    ok = np.ones_like(preds, dtype=bool) if invalid is None else (preds != invalid)
     Obs = np.full((m, m), np.nan)
     Null = np.full((m, m), np.nan)
     for i in range(m):
         for j in range(i + 1, m):
-            bw = wrong[i] & wrong[j]
+            bw = wrong[i] & wrong[j] & ok[i] & ok[j]
             d = int(bw.sum())
             Obs[i, j] = Obs[j, i] = (
                 float(((preds[i] == preds[j]) & bw).sum()) / d if d else np.nan)
             vals = []
             for _ in range(n_perms):
-                pj = preds[j][rng.permutation(n)]
-                wj = pj != answers
-                bwp = wrong[i] & wj
+                perm = rng.permutation(n)
+                pj = preds[j][perm]
+                okj = ok[j][perm]
+                bwp = wrong[i] & (pj != answers) & ok[i] & okj
                 dp = int(bwp.sum())
                 if dp:
                     vals.append(float(((preds[i] == pj) & bwp).sum()) / dp)
@@ -549,10 +558,22 @@ class HFCausalBackend:
             preds[i] = int(np.argmax(scores))
         return preds
 
-    def generate(self, prompt: str, *, max_new_tokens: int = 16) -> str:
-        """Greedy (deterministic) free-form generation of the continuation."""
+    def generate(self, prompt: str, *, max_new_tokens: int = 16,
+                 chat: bool = True) -> str:
+        """
+        Greedy (deterministic) free-form generation. ``chat`` applies the
+        model's chat template — instruct models need it to emit a clean
+        answer instead of continuing the prompt (sub-1B models produced NO
+        parseable integer without it in the pilot).
+        """
         torch = self._torch
-        ids = self._tok(prompt, return_tensors="pt").to(self._device)
+        if chat and getattr(self._tok, "chat_template", None):
+            text = self._tok.apply_chat_template(
+                [{"role": "user", "content": prompt}],
+                tokenize=False, add_generation_prompt=True)
+        else:
+            text = prompt
+        ids = self._tok(text, return_tensors="pt").to(self._device)
         with torch.no_grad():
             out = self._model.generate(
                 **ids, max_new_tokens=max_new_tokens, do_sample=False,
