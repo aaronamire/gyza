@@ -251,6 +251,40 @@ on **53–75%** of items.
    GGUF) is decisive — but the cheap local probe came back POSITIVE, which
    is the green light for it.
 
+### Tightened re-analysis: the headline was substantially an artifact
+
+The caution was right, and it changes the reading. Re-keying convergence
+on the models' OWN answer strings (list-free) instead of nearest-listed
+misconception:
+
+| metric | convergence | null | within | cross |
+|---|---|---|---|---|
+| nearest-listed (suspect) | 0.64 | **0.28** | 0.63 | 0.64 |
+| verbatim (clean floor) | **0.055** | 0.002 | **0.13** | **0.017** |
+| semantic (loose ceiling) | 0.72 | 0.015 | 0.76 | 0.70 |
+
+- **The 0.28 null was the forced-collision artifact** — nearest-listed
+  matching collapses the answer space to a few curated misconceptions.
+  List-free, the null drops to ~0, as it should in an open space.
+- **Verbatim is modest AND family-specific** (within 0.13 ≫ cross 0.017).
+  At the strict level the "universal blind spot (cross≈within)" reading
+  does NOT hold — family matters, and same-string convergence is only
+  ~5%. The previous headline was substantially measurement-induced.
+- **Semantic is high but topic-confounded**: two answers to the same
+  question are similar whether or not they assert the same false claim,
+  and the permutation null (which breaks topic) can't isolate claim-
+  sharing. So 0.72 is a loose upper bound, not a clean signal.
+- **Diffuse, not a few famous falsehoods**: 37/60 items convergent, top
+  10% of items = 25% of convergences. A general property, if real.
+
+Net: the true effect is bracketed between a ~5% verbatim floor (real,
+family-specific) and a topic-inflated semantic ceiling — and the clean
+"universal" claim is not established. The version with NEITHER confound
+(no curated list, no topic similarity) is the **code battery**: same
+specific bug across families in an ~infinite wrong-program space,
+verified by unit tests. That is the decisive test, and it needs models
+that can code (the API / capability-matched run).
+
 ## Finding in its own right: how they fail, not how often
 
 The instrument check showed decorrelating error *timing* does nothing

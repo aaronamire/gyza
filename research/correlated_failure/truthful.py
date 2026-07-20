@@ -126,5 +126,127 @@ def measure_misconception_convergence(preds: np.ndarray, answers: np.ndarray,
     }
 
 
+# ======================================================================
+# Tightened convergence — list-free, to rule out the forced-collision
+# confound (nearest-listed matching collapses the answer space to a few
+# curated misconceptions, inflating collision regardless of real sharing).
+# Verbatim = conservative floor; semantic-equivalence = ceiling. Both key
+# on the models' OWN answers to each other, never on the curated list.
+# ======================================================================
+
+def _norm_answer(s: str) -> str:
+    s = re.sub(r"[^a-z0-9 ]", " ", s.lower())
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _jac(a: str, b: str) -> float:
+    sa, sb = set(a.split()), set(b.split())
+    return len(sa & sb) / len(sa | sb) if sa and sb else 0.0
+
+
+def tightened_convergence(model_answers: list[list[str]], items: list[dict],
+                          embedder: Embedder, families: list[str], *,
+                          jac_thresh: float = 0.8, sem_thresh: float = 0.7,
+                          n_perms: int = 30, seed: int = 0) -> dict:
+    """
+    Convergence keyed on the answer STRINGS, not the curated list.
+      - verbatim: normalized-identical OR token-Jaccard >= jac_thresh (a
+        near-identical wrong string) — the conservative FLOOR.
+      - semantic: MiniLM cosine between the two models' answers >=
+        sem_thresh (same proposition, different wording) — the CEILING.
+    Wrongness (is this a wrong answer at all?) still uses the correct
+    references; convergence never snaps to the incorrect list. If the
+    earlier signal was forced collision, verbatim convergence and its null
+    both fall toward zero.
+    """
+    m, n = len(model_answers), len(items)
+    norm = [[_norm_answer(a) for a in row] for row in model_answers]
+    embs = [embedder.encode(row) for row in model_answers]
+    wrong = np.zeros((m, n), dtype=bool)
+    for mi in range(m):
+        for q in range(n):
+            wrong[mi, q] = classify_code(model_answers[mi][q], items[q], embedder) != "C"
+
+    def pair_rates(i, j, perm):
+        vb = sem = d = 0
+        for q in range(n):
+            qj = perm[q]
+            if wrong[i, q] and wrong[j, qj]:
+                d += 1
+                ni, nj = norm[i][q], norm[j][qj]
+                if ni and nj and (ni == nj or _jac(ni, nj) >= jac_thresh):
+                    vb += 1
+                if float(embs[i][q] @ embs[j][qj]) >= sem_thresh:
+                    sem += 1
+        return (vb / d, sem / d, d) if d else (np.nan, np.nan, 0)
+
+    rng = np.random.default_rng(seed)
+    ident = np.arange(n)
+    VB = np.full((m, m), np.nan)
+    SEM = np.full((m, m), np.nan)
+    vb_null, sem_null = [], []
+    for i in range(m):
+        for j in range(i + 1, m):
+            v, s, _ = pair_rates(i, j, ident)
+            VB[i, j] = VB[j, i] = v
+            SEM[i, j] = SEM[j, i] = s
+            for _ in range(n_perms):
+                pv, ps, _ = pair_rates(i, j, rng.permutation(n))
+                if not np.isnan(pv):
+                    vb_null.append(pv)
+                    sem_null.append(ps)
+
+    def od(M):
+        v = [M[i, j] for i in range(m) for j in range(i + 1, m)]
+        return float(np.nanmean(v)) if not all(np.isnan(v)) else float("nan")
+    vw, vc = within_cross(VB, families)
+    sw, sc = within_cross(SEM, families)
+
+    def r(x):
+        return None if (x is None or np.isnan(x)) else round(float(x), 4)
+    return {
+        "verbatim": {"convergence": r(od(VB)),
+                     "null": r(np.mean(vb_null) if vb_null else np.nan),
+                     "within": r(vw), "cross": r(vc)},
+        "semantic": {"convergence": r(od(SEM)),
+                     "null": r(np.mean(sem_null) if sem_null else np.nan),
+                     "within": r(sw), "cross": r(sc)},
+    }
+
+
+def per_item_concentration(model_answers: list[list[str]], items: list[dict],
+                           embedder: Embedder, *, sem_thresh: float = 0.7
+                           ) -> dict:
+    """Is convergence diffuse (a general property) or concentrated in a few
+    famous falsehoods? Per item, count converging model pairs (semantic);
+    report how concentrated the total is."""
+    m, n = len(model_answers), len(items)
+    embs = [embedder.encode(row) for row in model_answers]
+    wrong = np.zeros((m, n), dtype=bool)
+    for mi in range(m):
+        for q in range(n):
+            wrong[mi, q] = classify_code(model_answers[mi][q], items[q], embedder) != "C"
+    per_item = []
+    for q in range(n):
+        c = 0
+        for i in range(m):
+            for j in range(i + 1, m):
+                if wrong[i, q] and wrong[j, q] and float(embs[i][q] @ embs[j][q]) >= sem_thresh:
+                    c += 1
+        per_item.append(c)
+    per_item = np.array(per_item)
+    total = int(per_item.sum())
+    order = np.argsort(per_item)[::-1]
+    top10 = int(per_item[order[:max(1, n // 10)]].sum())
+    return {
+        "total_converging_pairs": total,
+        "items_with_any_convergence": int((per_item > 0).sum()),
+        "share_from_top_10pct_items": round(top10 / total, 3) if total else None,
+        "top_items": [(items[int(q)]["question"][:70], int(per_item[q]))
+                      for q in order[:5]],
+    }
+
+
 __all__ = ["load_truthfulqa", "Embedder", "classify_code", "code_matrix",
-           "shared_misconception_rate", "measure_misconception_convergence"]
+           "shared_misconception_rate", "measure_misconception_convergence",
+           "tightened_convergence", "per_item_concentration"]
