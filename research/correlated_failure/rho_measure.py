@@ -583,6 +583,46 @@ class HFCausalBackend:
                                 skip_special_tokens=True)
 
 
+class APIBackend:
+    """
+    Free-form backend over an OpenAI-compatible chat-completions API — the
+    path to capability-matched cross-family models via free tiers (Groq,
+    Google AI Studio, OpenRouter, Together, Cerebras all speak this). Zero
+    new deps (stdlib urllib). Deterministic (temperature 0).
+
+    Example:
+        APIBackend("llama-3.1-8b-instant", "llama",
+                   base_url="https://api.groq.com/openai/v1",
+                   api_key=os.environ["GROQ_API_KEY"])
+    """
+
+    def __init__(self, model: str, family: str, *, base_url: str,
+                 api_key: str, name: str | None = None):
+        self.name = name or model
+        self.family = family
+        self._model = model
+        self._url = base_url.rstrip("/") + "/chat/completions"
+        self._key = api_key
+
+    def generate(self, prompt: str, *, max_new_tokens: int = 64,
+                 chat: bool = True) -> str:
+        import json as _json
+        import urllib.request
+
+        body = _json.dumps({
+            "model": self._model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0, "max_tokens": max_new_tokens,
+        }).encode()
+        req = urllib.request.Request(
+            self._url, data=body, method="POST",
+            headers={"Authorization": f"Bearer {self._key}",
+                     "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = _json.loads(r.read())
+        return data["choices"][0]["message"]["content"]
+
+
 def parse_int(text: str) -> "int | None":
     """The LAST integer appearing in ``text`` (models often restate then
     answer). Returns None if there is no integer — a distinct 'no answer'
@@ -595,5 +635,7 @@ def parse_int(text: str) -> "int | None":
 __all__ = [
     "Question", "ModelBackend", "SyntheticBackend", "SyntheticWorld",
     "error_matrix", "error_correlation", "within_cross", "shared_wrong_rate",
-    "measure", "RhoResult", "HFCausalBackend",
+    "measure", "RhoResult", "HFCausalBackend", "APIBackend",
+    "same_wrong_excess", "difficulty_filter", "same_wrong_convergence",
+    "synth_freeform", "parse_int",
 ]
