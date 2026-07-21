@@ -614,13 +614,25 @@ class APIBackend:
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0, "max_tokens": max_new_tokens,
         }).encode()
-        req = urllib.request.Request(
-            self._url, data=body, method="POST",
-            headers={"Authorization": f"Bearer {self._key}",
-                     "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=60) as r:
-            data = _json.loads(r.read())
-        return data["choices"][0]["message"]["content"]
+        import time
+        import urllib.error
+        for attempt in range(6):
+            req = urllib.request.Request(
+                self._url, data=body, method="POST",
+                headers={"Authorization": f"Bearer {self._key}",
+                         "Content-Type": "application/json",
+                         # some providers sit behind Cloudflare, which blocks
+                         # the default urllib User-Agent (403 error 1010).
+                         "User-Agent": "gyza-research/0.1"})
+            try:
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    return _json.loads(r.read())["choices"][0]["message"]["content"]
+            except urllib.error.HTTPError as e:
+                if e.code in (429, 500, 502, 503) and attempt < 5:
+                    time.sleep(2 ** attempt)          # backoff on rate limit / transient
+                    continue
+                raise
+        raise RuntimeError("API request failed after retries")
 
 
 def parse_int(text: str) -> "int | None":

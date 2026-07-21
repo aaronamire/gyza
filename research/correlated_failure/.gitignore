@@ -1,4 +1,8 @@
 preds_cache/
-pilot.log
+ff_cache/
+tq_cache/
+code_cache/
+*.log
+.env
 __pycache__/
 .pytest_cache/
