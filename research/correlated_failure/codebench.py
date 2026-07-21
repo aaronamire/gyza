@@ -48,6 +48,21 @@ def load_mbpp(n: "int | None" = None, seed: int = 0) -> list[dict]:
     return items
 
 
+def entry_point(test_list: list[str]) -> "str | None":
+    """The function name the tests call — models MUST use it or every
+    assertion errors with NameError (a harness artifact, not a bug)."""
+    for t in test_list:
+        try:
+            node = ast.parse(t.strip()).body[0]
+            if (isinstance(node, ast.Assert) and isinstance(node.test, ast.Compare)
+                    and isinstance(node.test.left, ast.Call)
+                    and isinstance(node.test.left.func, ast.Name)):
+                return node.test.left.func.id
+        except SyntaxError:
+            continue
+    return None
+
+
 def extract_calls(test_list: list[str]) -> list[tuple[str, str]]:
     """From each ``assert <call> == <expected>`` return (call_src, expected_src)."""
     out = []

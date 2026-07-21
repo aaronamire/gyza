@@ -27,7 +27,7 @@ from truthful import (  # noqa: E402
     Embedder, classify_code, load_truthfulqa, tightened_convergence,
 )
 from codebench import (  # noqa: E402
-    expected_signature, extract_calls, load_mbpp, run_signature,
+    entry_point, expected_signature, extract_calls, load_mbpp, run_signature,
     same_bug_convergence,
 )
 
@@ -83,8 +83,10 @@ def main() -> int:
         def gen_code():
             sigs = []
             for p, c in zip(mbpp, calls):
+                fn = entry_point(p["test_list"])
+                name = f" named `{fn}`" if fn else ""
                 code = _extract_code(_safe(
-                    b, f"Write a Python function.\n{p['prompt']}\n"
+                    b, f"Write a Python function{name} for this task:\n{p['prompt']}\n"
                        f"Respond with ONLY the code in a python code block.", 400))
                 sigs.append(run_signature(code, c) if c else [])
             return sigs

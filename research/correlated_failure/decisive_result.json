@@ -1,0 +1,86 @@
+{
+  "config": {
+    "seed": 1,
+    "n_tqa": 80,
+    "n_code": 50,
+    "band": 0.1,
+    "models": [
+      "llama-3.1-8b-instant",
+      "llama-3.3-70b-versatile",
+      "qwen/qwen3.6-27b",
+      "allam-2-7b",
+      "openai/gpt-oss-20b",
+      "openai/gpt-oss-120b"
+    ],
+    "families": [
+      "llama",
+      "llama",
+      "qwen",
+      "allam",
+      "gptoss",
+      "gptoss"
+    ]
+  },
+  "capability": {
+    "tqa_accuracy": {
+      "llama-3.1-8b-instant": 0.487,
+      "llama-3.3-70b-versatile": 0.45,
+      "qwen/qwen3.6-27b": 0.438,
+      "allam-2-7b": 0.463,
+      "openai/gpt-oss-20b": 0.037,
+      "openai/gpt-oss-120b": 0.05
+    },
+    "code_pass_rate": {
+      "llama-3.1-8b-instant": 0.24,
+      "llama-3.3-70b-versatile": 0.1,
+      "qwen/qwen3.6-27b": 0.28,
+      "allam-2-7b": 0.2,
+      "openai/gpt-oss-20b": 0.38,
+      "openai/gpt-oss-120b": 0.42
+    },
+    "tqa_band": [
+      "llama-3.1-8b-instant",
+      "llama-3.3-70b-versatile",
+      "qwen/qwen3.6-27b",
+      "allam-2-7b"
+    ],
+    "code_band": [
+      "openai/gpt-oss-20b",
+      "openai/gpt-oss-120b"
+    ]
+  },
+  "truthfulqa_tightened": {
+    "verbatim": {
+      "convergence": 0.0208,
+      "null": 0.0005,
+      "within": 0.0938,
+      "cross": 0.0063
+    },
+    "semantic": {
+      "convergence": 0.4263,
+      "null": 0.0046,
+      "within": 0.625,
+      "cross": 0.3865
+    }
+  },
+  "code_battery": {
+    "overall": {
+      "same_bug_convergence": 0.6552,
+      "permutation_null": 0.1822
+    },
+    "per_pair": [
+      {
+        "pair": [
+          "openai/gpt-oss-20b",
+          "openai/gpt-oss-120b"
+        ],
+        "same_family": true,
+        "same_bug_convergence": 0.6552,
+        "null": 0.1822
+      }
+    ]
+  },
+  "within_family_pairs": 1,
+  "cross_family_pairs": 0,
+  "wall_seconds": 757.9
+}
