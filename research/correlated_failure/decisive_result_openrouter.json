@@ -1,0 +1,307 @@
+{
+  "config": {
+    "seed": 1,
+    "n_tqa": 80,
+    "n_code": 50,
+    "band": 0.1,
+    "provider": "openrouter",
+    "models": [
+      "meta-llama/llama-3.1-70b-instruct",
+      "meta-llama/llama-3.3-70b-instruct",
+      "google/gemma-2-27b-it",
+      "google/gemma-3-27b-it",
+      "mistralai/mistral-small-24b-instruct-2501",
+      "mistralai/mistral-small-3.1-24b-instruct",
+      "mistralai/mistral-small-3.2-24b-instruct",
+      "qwen/qwen-2.5-72b-instruct",
+      "microsoft/phi-4"
+    ],
+    "families": [
+      "llama",
+      "llama",
+      "gemma",
+      "gemma",
+      "mistral",
+      "mistral",
+      "mistral",
+      "qwen",
+      "phi"
+    ]
+  },
+  "capability": {
+    "tqa_accuracy": {
+      "meta-llama/llama-3.1-70b-instruct": 0.525,
+      "meta-llama/llama-3.3-70b-instruct": 0.463,
+      "google/gemma-2-27b-it": 0.613,
+      "google/gemma-3-27b-it": 0.525,
+      "mistralai/mistral-small-24b-instruct-2501": 0.45,
+      "mistralai/mistral-small-3.1-24b-instruct": 0.438,
+      "mistralai/mistral-small-3.2-24b-instruct": 0.512,
+      "qwen/qwen-2.5-72b-instruct": 0.3,
+      "microsoft/phi-4": 0.55
+    },
+    "code_pass_rate": {
+      "meta-llama/llama-3.1-70b-instruct": 0.4,
+      "meta-llama/llama-3.3-70b-instruct": 0.08,
+      "google/gemma-2-27b-it": 0.38,
+      "google/gemma-3-27b-it": 0.4,
+      "mistralai/mistral-small-24b-instruct-2501": 0.32,
+      "mistralai/mistral-small-3.1-24b-instruct": 0.18,
+      "mistralai/mistral-small-3.2-24b-instruct": 0.36,
+      "qwen/qwen-2.5-72b-instruct": 0.12,
+      "microsoft/phi-4": 0.38
+    },
+    "tqa_band": [
+      "meta-llama/llama-3.1-70b-instruct",
+      "google/gemma-2-27b-it",
+      "google/gemma-3-27b-it",
+      "microsoft/phi-4"
+    ],
+    "code_band": [
+      "meta-llama/llama-3.1-70b-instruct",
+      "google/gemma-2-27b-it",
+      "google/gemma-3-27b-it",
+      "mistralai/mistral-small-24b-instruct-2501",
+      "mistralai/mistral-small-3.2-24b-instruct",
+      "microsoft/phi-4"
+    ]
+  },
+  "design": {
+    "within_pairs_code": 2,
+    "cross_pairs_code": 13,
+    "within_pairs_tqa": 1,
+    "cross_pairs_tqa": 5
+  },
+  "code_battery_PRIMARY": {
+    "within_conv_mean_ci": [
+      0.6027,
+      0.5625,
+      0.6429
+    ],
+    "cross_conv_mean_ci": [
+      0.5602,
+      0.533,
+      0.5856
+    ],
+    "within_null_mean": 0.0437,
+    "cross_null_mean": 0.0442,
+    "per_pair": [
+      {
+        "pair": [
+          "meta-llama/llama-3.1-70b-instruct",
+          "google/gemma-2-27b-it"
+        ],
+        "same_family": false,
+        "conv": 0.5556,
+        "null": 0.0443
+      },
+      {
+        "pair": [
+          "meta-llama/llama-3.1-70b-instruct",
+          "google/gemma-3-27b-it"
+        ],
+        "same_family": false,
+        "conv": 0.6071,
+        "null": 0.0475
+      },
+      {
+        "pair": [
+          "meta-llama/llama-3.1-70b-instruct",
+          "mistralai/mistral-small-24b-instruct-2501"
+        ],
+        "same_family": false,
+        "conv": 0.4483,
+        "null": 0.0387
+      },
+      {
+        "pair": [
+          "meta-llama/llama-3.1-70b-instruct",
+          "mistralai/mistral-small-3.2-24b-instruct"
+        ],
+        "same_family": false,
+        "conv": 0.5357,
+        "null": 0.0412
+      },
+      {
+        "pair": [
+          "meta-llama/llama-3.1-70b-instruct",
+          "microsoft/phi-4"
+        ],
+        "same_family": false,
+        "conv": 0.4815,
+        "null": 0.0424
+      },
+      {
+        "pair": [
+          "google/gemma-2-27b-it",
+          "google/gemma-3-27b-it"
+        ],
+        "same_family": true,
+        "conv": 0.6429,
+        "null": 0.0459
+      },
+      {
+        "pair": [
+          "google/gemma-2-27b-it",
+          "mistralai/mistral-small-24b-instruct-2501"
+        ],
+        "same_family": false,
+        "conv": 0.6129,
+        "null": 0.048
+      },
+      {
+        "pair": [
+          "google/gemma-2-27b-it",
+          "mistralai/mistral-small-3.2-24b-instruct"
+        ],
+        "same_family": false,
+        "conv": 0.5333,
+        "null": 0.046
+      },
+      {
+        "pair": [
+          "google/gemma-2-27b-it",
+          "microsoft/phi-4"
+        ],
+        "same_family": false,
+        "conv": 0.5926,
+        "null": 0.0431
+      },
+      {
+        "pair": [
+          "google/gemma-3-27b-it",
+          "mistralai/mistral-small-24b-instruct-2501"
+        ],
+        "same_family": false,
+        "conv": 0.5667,
+        "null": 0.0417
+      },
+      {
+        "pair": [
+          "google/gemma-3-27b-it",
+          "mistralai/mistral-small-3.2-24b-instruct"
+        ],
+        "same_family": false,
+        "conv": 0.5862,
+        "null": 0.0424
+      },
+      {
+        "pair": [
+          "google/gemma-3-27b-it",
+          "microsoft/phi-4"
+        ],
+        "same_family": false,
+        "conv": 0.5556,
+        "null": 0.0443
+      },
+      {
+        "pair": [
+          "mistralai/mistral-small-24b-instruct-2501",
+          "mistralai/mistral-small-3.2-24b-instruct"
+        ],
+        "same_family": true,
+        "conv": 0.5625,
+        "null": 0.0416
+      },
+      {
+        "pair": [
+          "mistralai/mistral-small-24b-instruct-2501",
+          "microsoft/phi-4"
+        ],
+        "same_family": false,
+        "conv": 0.6,
+        "null": 0.0445
+      },
+      {
+        "pair": [
+          "mistralai/mistral-small-3.2-24b-instruct",
+          "microsoft/phi-4"
+        ],
+        "same_family": false,
+        "conv": 0.6071,
+        "null": 0.0503
+      }
+    ]
+  },
+  "truthfulqa_verbatim": {
+    "within_ci": [
+      0.0833,
+      0.0833,
+      0.0833
+    ],
+    "cross_ci": [
+      0.0167,
+      0.0,
+      0.05
+    ]
+  },
+  "truthfulqa_semantic": {
+    "within_ci": [
+      0.6667,
+      0.6667,
+      0.6667
+    ],
+    "cross_ci": [
+      0.7362,
+      0.6719,
+      0.8006
+    ]
+  },
+  "tqa_per_pair": [
+    {
+      "pair": [
+        "meta-llama/llama-3.1-70b-instruct",
+        "google/gemma-2-27b-it"
+      ],
+      "same_family": false,
+      "verbatim": 0.0833,
+      "semantic": 0.8333
+    },
+    {
+      "pair": [
+        "meta-llama/llama-3.1-70b-instruct",
+        "google/gemma-3-27b-it"
+      ],
+      "same_family": false,
+      "verbatim": 0.0,
+      "semantic": 0.7
+    },
+    {
+      "pair": [
+        "meta-llama/llama-3.1-70b-instruct",
+        "microsoft/phi-4"
+      ],
+      "same_family": false,
+      "verbatim": 0.0,
+      "semantic": 0.6897
+    },
+    {
+      "pair": [
+        "google/gemma-2-27b-it",
+        "google/gemma-3-27b-it"
+      ],
+      "same_family": true,
+      "verbatim": 0.0833,
+      "semantic": 0.6667
+    },
+    {
+      "pair": [
+        "google/gemma-2-27b-it",
+        "microsoft/phi-4"
+      ],
+      "same_family": false,
+      "verbatim": 0.0,
+      "semantic": 0.8182
+    },
+    {
+      "pair": [
+        "google/gemma-3-27b-it",
+        "microsoft/phi-4"
+      ],
+      "same_family": false,
+      "verbatim": 0.0,
+      "semantic": 0.64
+    }
+  ],
+  "wall_seconds": 303.1
+}
