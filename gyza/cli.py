@@ -36,6 +36,7 @@ from pathlib import Path
 
 from gyza.config import GyzaConfig, load_config
 from gyza.identity import LocalCompositor
+from gyza.sandbox.runner import _SANDBOX_ENTRY_SENTINEL
 
 
 def _resolve(p: str) -> Path:
@@ -2699,6 +2700,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Frozen-binary self-re-exec hook. When run_sandboxed launches the
+    # enforced path inside a PyInstaller binary it re-execs THIS binary
+    # with the sandbox sentinel as argv[0]; that invocation must run the
+    # in-sandbox entrypoint (framed stdin/stdout protocol), NOT argparse.
+    # It never stamps an enforcement record — the trusted parent does that
+    # — so a direct invocation outside bwrap can only yield backend=none.
+    raw_argv = sys.argv[1:] if argv is None else argv
+    if raw_argv and raw_argv[0] == _SANDBOX_ENTRY_SENTINEL:
+        from gyza.sandbox._entrypoint import main as _sandbox_entry_main
+        return _sandbox_entry_main()
+
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "init":
