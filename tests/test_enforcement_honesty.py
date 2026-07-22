@@ -11,7 +11,12 @@ from __future__ import annotations
 
 import pytest
 
-from gyza.demo.ddil_partition import _enforcement_record, run_demo
+import gyza.demo.ddil_partition as ddil
+from gyza.demo.ddil_partition import (
+    SandboxRequiredError,
+    _enforcement_record,
+    run_demo,
+)
 from gyza.sandbox.config import (
     SandboxBackend,
     SandboxConfig,
@@ -81,4 +86,36 @@ def test_demo_construct_mode_does_not_fabricate():
     assert res.over_bound_rejected
     execed = [enf for (_t, enf, _m) in res.audit.values() if enf is not None]
     assert execed, "expected some executed (sandboxed) actions"
+    assert all(e["backend"] == SandboxBackend.NONE.value for e in execed)
+
+
+def test_disclosed_over_bound_rejection_comes_from_delegation_logic():
+    # In disclosed mode the over-bound refusal is NOT the OS gate (which
+    # would just fail-closed on backend=none) — it is the LOGICAL
+    # delegation bound: a 1024 MB claim against a 512 MB grant. The
+    # reason string must name the delegated authority, so a reader can
+    # see the rejection holds with no OS sandbox and no connectivity.
+    res = run_demo(verbose=False, sandbox_mode="construct")
+    assert res.over_bound_rejected
+    assert "delegated" in res.over_bound_reason
+    assert "not an enforcing sandbox" not in res.over_bound_reason
+
+
+def test_require_sandbox_refuses_rather_than_disclosing(monkeypatch):
+    # The third mode of the trichotomy: with --require-sandbox and no
+    # bwrap, the demo REFUSES (raises) instead of silently running the
+    # disclosed path. No DemoResult is produced.
+    monkeypatch.setattr(ddil.shutil, "which", lambda _name: None)
+    with pytest.raises(SandboxRequiredError):
+        run_demo(verbose=False, sandbox_mode="auto", require_sandbox=True)
+
+
+def test_auto_without_bwrap_discloses_not_refuses(monkeypatch):
+    # Same host (no bwrap) but WITHOUT --require-sandbox: it runs the
+    # disclosed path (backend=none), it does not refuse — the refusal is
+    # opt-in, so the default zero-config demo still works everywhere.
+    monkeypatch.setattr(ddil.shutil, "which", lambda _name: None)
+    res = run_demo(verbose=False, sandbox_mode="auto", require_sandbox=False)
+    assert res.over_bound_rejected
+    execed = [enf for (_t, enf, _m) in res.audit.values() if enf is not None]
     assert all(e["backend"] == SandboxBackend.NONE.value for e in execed)
