@@ -2,7 +2,18 @@
 
 Write-up per the pre-registration. No new methodology thread follows.
 
-## DECISIVE RESULT (wider menu, capable models) — H2 FALSIFIED: universal blind spot
+## DECISIVE RESULT (wider menu, capable models) — H2 FALSIFIED: family-invariant failure
+
+> **Mechanism corrected (conditional-independence null, FINDINGS_CI_NULL.md).**
+> Against the *right* null — the leave-pair-out per-problem wrong-answer
+> distribution — cross-family excess is −0.024 [−0.052, +0.001] and
+> within-family excess is +0.026 [−0.013, +0.065]: both include 0 (Case A).
+> The convergence is **problem-structural**, not a shared cognitive blind
+> spot. Median distinct wrong answers per problem = 1 (Simpson 0.60). Read
+> "universal blind spot" below as **constrained wrong-answer space**: the
+> family-invariance of failure stands; the "shared cognition" reading does
+> not. The ~13× permutation null cannot see pair-specificity and overstates
+> the effect.
 
 Re-run of the **unchanged** protocol on 9 capable models across 5 families
 via OpenRouter, capability-banded exactly as pre-registered. On the
@@ -23,9 +34,13 @@ code, not degenerate errors):
   emphatically above null.**
 - **within ≈ cross**: R = 0.603/0.560 = **1.08**, CIs overlap heavily.
 - Pre-registered decision rule: *0.8 ≤ R ≤ 1.2 and both > null ⇒ H2
-  FALSIFIED, universal blind spot.* R = 1.08, both ~13× null ⇒
-  **H2 is FALSIFIED. The blind spot is UNIVERSAL.** Mixing families does
-  **not** decorrelate failure on the confound-free test.
+  FALSIFIED.* R = 1.08 ⇒ **H2 is FALSIFIED: mixing families does not
+  decorrelate failure.** But the correct null (conditional-independence,
+  not permutation) shows the shared failure is a **constrained wrong-answer
+  space**, not a shared blind spot — family-invariant because it is
+  problem-driven. Diversity still cannot help; the reason is the small
+  answer space, and only external resolution breaks it. See
+  FINDINGS_CI_NULL.md.
 
 Code-band capability (±0.10, code pass rate): llama-3.1-70b 0.40, gemma-2
 0.38, gemma-3 0.40, mistral-2501 0.32, mistral-3.2 0.36, phi-4 0.38 — six
