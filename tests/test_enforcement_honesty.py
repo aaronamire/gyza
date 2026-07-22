@@ -50,6 +50,29 @@ def test_no_bubblewrap_record_producible_without_bwrap(monkeypatch):
             config=SandboxConfig(backend=SandboxBackend.BUBBLEWRAP))
 
 
+def test_no_source_fixture_fabricates_a_bubblewrap_record():
+    # Category closer (not just the instance): a `backend: bubblewrap`
+    # record may ONLY come from the post-run executor stamp — never a
+    # hardcoded literal, which would be a latent fabrication the moment a
+    # future caller checks enforcement SUCCESS instead of rejection.
+    import pathlib
+    import re
+    root = pathlib.Path(__file__).resolve().parents[1] / "gyza"
+    pat = re.compile(r'["\']backend["\']\s*:\s*["\']bubblewrap["\']')
+    offenders = [
+        f"{py.relative_to(root.parent)}:{i}"
+        for py in root.rglob("*.py")
+        for i, line in enumerate(py.read_text().splitlines(), 1)
+        if pat.search(line)
+    ]
+    assert not offenders, (
+        "hardcoded bubblewrap enforcement record(s) found — a fabrication "
+        "primitive. Only the post-run executor stamp (cfg.backend.value after "
+        "run_sandboxed, which raises without bwrap) may yield "
+        "backend=bubblewrap: " + ", ".join(offenders)
+    )
+
+
 def test_demo_construct_mode_does_not_fabricate():
     # The demo runs end-to-end under disclosed no-sandbox WITHOUT
     # fabricating: every executed action's folded enforcement is
