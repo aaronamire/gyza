@@ -75,6 +75,7 @@ from gyza.icp import (
 from gyza.identity import AgentIdentity, LocalCompositor
 from gyza.release import CURRENT_RELEASE as _CURRENT_RELEASE
 from gyza.sandbox.config import (
+    SandboxBackend,
     SandboxConfig,
     enforcement_satisfies_manifest,
     sandbox_config_from_manifest,
@@ -107,12 +108,16 @@ def _enforcement_record(cfg: SandboxConfig, *, real: bool) -> dict:
     The host-stamped ``__enforcement__`` record for a sandbox config.
 
     When ``real`` and bubblewrap is present, we run the *actual*
-    production sandbox (``sandboxed_mock_executor``) and use the record
-    it stamps. Otherwise we construct the identical record from the
-    config — a verbatim mirror of the stamp in
-    ``gyza.sandbox.executor.make_sandboxed_executor`` (cited so it
-    cannot drift silently). Either way the record is then judged by the
-    REAL ``enforcement_satisfies_manifest`` gate.
+    production sandbox (``sandboxed_mock_executor``), which stamps
+    ``backend=bubblewrap`` ONLY because bwrap actually executed.
+
+    When bwrap did NOT run (``real`` is False, or bwrap was unavailable
+    mid-run), the record honestly reports ``backend=none`` — it is NEVER
+    stamped with a backend that did not run. ``enforcement_satisfies_
+    manifest`` fails closed on ``backend=none`` (config.py), so an
+    unenforced run can never yield "within bounds". This removes the
+    fabrication primitive: a signed enforcement record now reflects what
+    actually executed, not what was requested.
     """
     if real:
         from gyza.sandbox.executor import sandboxed_mock_executor
@@ -120,9 +125,9 @@ def _enforcement_record(cfg: SandboxConfig, *, real: bool) -> dict:
         enf = raw.get("__enforcement__")
         if isinstance(enf, dict):
             return enf
-        # bwrap unexpectedly unavailable mid-run — fall back to constructed.
+        # bwrap unavailable mid-run — fall through to an HONEST none record.
     rec = {
-        "backend": cfg.backend.value,
+        "backend": SandboxBackend.NONE.value,   # no OS enforcement ran; never fabricate
         "ro_paths": sorted(cfg.ro_paths),
         "rw_paths": sorted(cfg.rw_paths),
         "requires_network": bool(cfg.requires_network),
@@ -390,7 +395,11 @@ def run_demo(
         # Majority side: coordinator executes within its own 1024 MB manifest.
         ec = _enforcement_record(sandbox_config_from_manifest(coord_manifest),
                                  real=use_real)
-        assert enforcement_satisfies_manifest(ec, coord_manifest)[0]
+        # Only assert OS-enforcement passes when it ACTUALLY ran. Under
+        # disclosed no-sandbox (backend=none) the gate fails closed — that
+        # is correct, not an error; Stage-2 disclosed mode narrates it.
+        if use_real:
+            assert enforcement_satisfies_manifest(ec, coord_manifest)[0]
         e2M = sign_exec(coordinator, "W0-step-a", e1, ec, coord_manifest,
                         "coordinator work A")
         e3M = sign_exec(coordinator, "W0-step-b", e2M, ec, coord_manifest,
@@ -405,7 +414,8 @@ def run_demo(
         # Minority side: subcontractor executes WITHIN its 256 MB grant.
         es = _enforcement_record(sandbox_config_from_manifest(sub_manifest),
                                  real=use_real)
-        assert enforcement_satisfies_manifest(es, sub_manifest)[0]
+        if use_real:
+            assert enforcement_satisfies_manifest(es, sub_manifest)[0]
         e2m = sign_exec(subcontractor, "W1-step-a", e1, es, sub_manifest,
                         "subcontractor work A")
         e3m = sign_exec(subcontractor, "W1-step-b", e2m, es, sub_manifest,
