@@ -1,0 +1,30 @@
+# Keep the Docker build context small + safe. Without this, `docker build`
+# uploads the entire repo — including spec/states/ (TLC output, can be tens
+# of GB), git history, and Rust/Go build trees — as build context.
+
+.git
+.github
+
+# TLC model-checking output — can be enormous (see deploy_script excludes).
+spec/states
+spec/**/*.out
+
+# Build + cache trees.
+gyza-rs/target
+netd/bin
+dist
+build
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Research + secrets — never in an image.
+research
+**/.env
+scripts/deploy.env
+
+# Local editor / OS cruft.
+.venv
+*.egg-info

@@ -1,208 +1,172 @@
 #!/usr/bin/env bash
-# install.sh — one-liner Linux installer for Gyza.
+# install.sh — one-command installer for the self-contained `gyza` binary.
 #
-# Usage:
 #   curl -sSf https://gyza.network/install.sh | bash
+#   then: gyza demo
 #
-# Or, from a local checkout:
-#   ./scripts/install.sh
+# This installs the ONEDIR self-contained build: a single directory tree
+# that carries its own Python + native deps. No system Python, no pipx, no
+# virtualenv. The tree is required (not a lone file) because the enforced
+# sandbox re-execs the binary against its own `_internal/` bundle — see
+# packaging/gyza.spec. The Go daemon (gyza-netd, for `gyza global`) ships
+# separately and is NOT needed for `gyza demo` or the core provenance CLI.
 #
-# Or, with explicit version:
-#   GYZA_VERSION=v0.1.0a1 curl -sSf https://gyza.network/install.sh | bash
+# Tamper-evidence, end to end (on-brand for a provenance tool):
+#   * SHA256 of the release tarball is verified — MANDATORY, always, and
+#     aborts on mismatch. sha256 covers the whole onedir tree transitively.
+#   * A minisign signature over the same tarball is verified BEFORE
+#     extraction when release signing is configured (see GYZA_MINISIGN_PUBKEY
+#     below) and `minisign` is on PATH. Set GYZA_REQUIRE_SIG=1 to make a
+#     missing/te unverifiable signature a hard failure.
 #
-# What this script does:
-#   1. Detects glibc + arch (linux x86_64 / aarch64 only for now)
-#   2. Downloads the gyza-netd binary from GitHub Releases into
-#      ~/.local/bin/ (or /usr/local/bin/ if root)
-#   3. Installs the `gyza` Python package via pipx (creates an isolated
-#      venv; works without contaminating system Python)
-#   4. Runs `gyza init` to generate the compositor key + config
-#   5. Prints next steps
+# Env knobs:
+#   GYZA_VERSION=vX.Y.Z     install a specific release (default: latest)
+#   GYZA_REPO=owner/name    source repo (default: aaronamire/gyza)
+#   INSTALL_PREFIX=/path     install root (default: ~/.local, or /usr/local as root)
+#   GYZA_REQUIRE_SIG=1       fail unless the signature verifies
 #
-# Requirements on the host:
-#   * Linux (x86_64 or aarch64); macOS and Windows are not supported in
-#     alpha. If you need them, file an issue.
-#   * Python 3.10+ (3.14+ uses stdlib uuid.uuid7; older gets a shim)
-#   * pipx (we'll suggest a one-liner if missing)
-#   * curl + tar
-#
-# Idempotent: re-running upgrades the daemon binary and reinstalls the
-# Python package without nuking ~/.gyza.
+# Idempotent: re-running installs the requested version alongside any
+# existing one and repoints the `gyza` symlink; ~/.gyza is untouched.
 
 set -euo pipefail
 
-# Customizable via env.
 GYZA_VERSION="${GYZA_VERSION:-latest}"
 GYZA_REPO="${GYZA_REPO:-aaronamire/gyza}"
-INSTALL_PREFIX="${INSTALL_PREFIX:-}"   # auto-detected below if empty
+INSTALL_PREFIX="${INSTALL_PREFIX:-}"
+GYZA_REQUIRE_SIG="${GYZA_REQUIRE_SIG:-0}"
 
-# Pretty colors (only when stdout is a TTY).
+# Release signing public key (minisign). PUBLIC — safe to embed. Empty
+# until the maintainer generates a keypair (`minisign -G`), commits the
+# public key here + into packaging/gyza-release.pub, and adds the secret
+# key to the CI signing secret. While empty, install verifies the SHA256
+# checksum only and says so plainly. USER-OWNED step (see CLAUDE.md §11).
+GYZA_MINISIGN_PUBKEY=""
+
 if [[ -t 1 ]]; then
     BOLD=$'\033[1m'; DIM=$'\033[2m'; RED=$'\033[31m'
     GREEN=$'\033[32m'; YEL=$'\033[33m'; RESET=$'\033[0m'
 else
     BOLD=''; DIM=''; RED=''; GREEN=''; YEL=''; RESET=''
 fi
-
 say()  { printf '%s==>%s %s\n' "$BOLD$GREEN" "$RESET" "$*"; }
 note() { printf '    %s%s%s\n' "$DIM" "$*" "$RESET"; }
 warn() { printf '%s!!  %s%s\n' "$YEL" "$*" "$RESET" >&2; }
 die()  { printf '%sERROR:%s %s\n' "$RED" "$RESET" "$*" >&2; exit 1; }
 
-# -----------------------------------------------------------------------
-# Step 1: platform check
-# -----------------------------------------------------------------------
+# ---------------------------------------------------------------- platform
 say "Checking platform"
-os="$(uname -s)"
-arch="$(uname -m)"
-
-if [[ "$os" != "Linux" ]]; then
-    die "$os is not supported in alpha. Linux only. File an issue if you need macOS/Windows."
-fi
-
+os="$(uname -s)"; arch="$(uname -m)"
+[[ "$os" == "Linux" ]] || die "$os is not supported. The self-contained binary is Linux-only (bubblewrap enforcement is Linux). On macOS/Windows, use Docker: docker run --rm ghcr.io/$GYZA_REPO gyza demo"
 case "$arch" in
-    x86_64|amd64) arch_tag="amd64" ;;
+    x86_64|amd64)  arch_tag="amd64" ;;
     aarch64|arm64) arch_tag="arm64" ;;
     *) die "unsupported arch: $arch (expected x86_64 or aarch64)" ;;
 esac
 note "platform = linux/$arch_tag"
 
-# -----------------------------------------------------------------------
-# Step 2: install prefix
-# -----------------------------------------------------------------------
+# ------------------------------------------------------------------ prefix
 if [[ -z "$INSTALL_PREFIX" ]]; then
-    if [[ "$(id -u)" == "0" ]]; then
-        INSTALL_PREFIX=/usr/local
-    else
-        INSTALL_PREFIX="$HOME/.local"
-    fi
+    if [[ "$(id -u)" == "0" ]]; then INSTALL_PREFIX=/usr/local; else INSTALL_PREFIX="$HOME/.local"; fi
 fi
 note "install prefix = $INSTALL_PREFIX"
-mkdir -p "$INSTALL_PREFIX/bin"
-
-# Check that the bin dir is on PATH.
+mkdir -p "$INSTALL_PREFIX/bin" "$INSTALL_PREFIX/lib/gyza"
 case ":$PATH:" in
     *":$INSTALL_PREFIX/bin:"*) ;;
-    *) warn "$INSTALL_PREFIX/bin is not on your PATH. Add this to your shell rc:"
+    *) warn "$INSTALL_PREFIX/bin is not on your PATH. Add to your shell rc:"
        warn "    export PATH=\"$INSTALL_PREFIX/bin:\$PATH\"" ;;
 esac
 
-# -----------------------------------------------------------------------
-# Step 3: required tools
-# -----------------------------------------------------------------------
-say "Checking required tools"
-for tool in curl tar python3; do
-    if ! command -v "$tool" &>/dev/null; then
+# ------------------------------------------------------------------- tools
+for tool in curl tar sha256sum; do
+    command -v "$tool" &>/dev/null || {
+        # macOS-style shasum fallback for sha256; but we're Linux-only, so
+        # sha256sum should exist. Keep the check honest.
+        [[ "$tool" == "sha256sum" ]] && command -v shasum &>/dev/null && continue
         die "missing required tool: $tool"
-    fi
+    }
 done
+sha256_cmd() { if command -v sha256sum &>/dev/null; then sha256sum "$@"; else shasum -a 256 "$@"; fi; }
 
-# Python 3.10+ is supported. uuid.uuid7 is stdlib in 3.14+; older
-# interpreters get a compliant fallback shim that gyza installs at
-# package-import time (see gyza/_compat.py).
-py_version=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-if ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
-    die "Python 3.10+ required (you have $py_version). Ubuntu 22.04 / Debian 12 / Fedora 38+ ship a compatible interpreter by default; older systems can use \`pyenv install 3.12\` or similar. https://www.python.org/downloads/"
-fi
-note "python = $py_version"
-
-# pipx is the recommended Python installer for CLI tools.
-if ! command -v pipx &>/dev/null; then
-    warn "pipx not found. Install it with:"
-    warn "    python3 -m pip install --user pipx && python3 -m pipx ensurepath"
-    die "re-run install.sh after pipx is on PATH"
-fi
-note "pipx = $(pipx --version)"
-
-# -----------------------------------------------------------------------
-# Step 4: download gyza-netd binary
-# -----------------------------------------------------------------------
-say "Downloading gyza-netd daemon"
-
+# ----------------------------------------------------------------- version
+say "Resolving release"
 if [[ "$GYZA_VERSION" == "latest" ]]; then
-    # /releases/latest skips prereleases. During alpha (v0.1.0aN /
-    # v0.1.0bN / -rcN tags) every release is a prerelease per the
-    # workflow's auto-detection, so we use /releases (array, sorted
-    # newest-first) instead. grep -m1 takes the first tag_name
-    # which is the most recent published release.
-    tag_url="https://api.github.com/repos/$GYZA_REPO/releases?per_page=10"
-    GYZA_VERSION=$(curl -sSf "$tag_url" 2>/dev/null \
-        | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || true)
-    if [[ -z "$GYZA_VERSION" ]]; then
-        die "could not resolve latest release tag. Network issue, or no releases tagged yet at https://github.com/$GYZA_REPO/releases ? Pass GYZA_VERSION=vX.Y.Z explicitly."
-    fi
+    api="https://api.github.com/repos/$GYZA_REPO/releases?per_page=10"
+    GYZA_VERSION=$(curl -sSf "$api" 2>/dev/null | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || true)
+    [[ -n "$GYZA_VERSION" ]] || die "could not resolve latest release. Pass GYZA_VERSION=vX.Y.Z, or check https://github.com/$GYZA_REPO/releases"
 fi
 note "version = $GYZA_VERSION"
 
-asset="gyza-netd-$GYZA_VERSION-linux-$arch_tag.tar.gz"
-url="https://github.com/$GYZA_REPO/releases/download/$GYZA_VERSION/$asset"
-tmpdir=$(mktemp -d)
-trap 'rm -rf "$tmpdir"' EXIT
+asset="gyza-$GYZA_VERSION-linux-$arch_tag.tar.gz"
+base="https://github.com/$GYZA_REPO/releases/download/$GYZA_VERSION"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
-note "downloading $url"
-if ! curl -fL --progress-bar -o "$tmpdir/$asset" "$url"; then
-    die "download failed. Check that $GYZA_VERSION exists at https://github.com/$GYZA_REPO/releases"
+# --------------------------------------------------------------- download
+say "Downloading $asset"
+curl -fL --progress-bar -o "$tmp/$asset" "$base/$asset" \
+    || die "download failed — does $GYZA_VERSION ship a linux-$arch_tag onedir tarball? See https://github.com/$GYZA_REPO/releases"
+curl -fLs -o "$tmp/$asset.sha256" "$base/$asset.sha256" \
+    || die "checksum file missing for $asset — refusing to install unverified. (Checksum is mandatory.)"
+
+# --------------------------------------------------- MANDATORY sha256 gate
+say "Verifying checksum (mandatory)"
+expected=$(awk '{print $1}' "$tmp/$asset.sha256")
+actual=$(sha256_cmd "$tmp/$asset" | awk '{print $1}')
+[[ -n "$expected" ]] || die "checksum file is empty/malformed — aborting"
+if [[ "$expected" != "$actual" ]]; then
+    die "CHECKSUM MISMATCH — the download does not match its published SHA256. Someone may have tampered with it, or the download is corrupt. Aborting. expected=$expected got=$actual"
 fi
+note "sha256 OK ($actual)"
 
-tar -xzf "$tmpdir/$asset" -C "$tmpdir"
-if [[ ! -f "$tmpdir/gyza-netd" ]]; then
-    die "release tarball is malformed (no gyza-netd binary inside)"
-fi
-
-install -m 0755 "$tmpdir/gyza-netd" "$INSTALL_PREFIX/bin/gyza-netd"
-note "installed gyza-netd to $INSTALL_PREFIX/bin/gyza-netd"
-
-# -----------------------------------------------------------------------
-# Step 5: install gyza Python CLI via pipx
-# -----------------------------------------------------------------------
-say "Installing gyza Python CLI"
-# Use `--force` so re-runs upgrade in place. pipx default Python is
-# whatever `python3` points to.
-if ! pipx install --force "gyza==${GYZA_VERSION#v}" 2>/dev/null; then
-    # PyPI might not have a release matching this tag yet (open-source
-    # alpha workflow ships via GitHub Releases first). Fall back to the
-    # sdist or wheel from the release.
-    note "not on PyPI yet (alpha ships via GitHub Releases) — installing the release wheel"
-    wheel_asset="gyza-${GYZA_VERSION#v}-py3-none-any.whl"
-    wheel_url="https://github.com/$GYZA_REPO/releases/download/$GYZA_VERSION/$wheel_asset"
-    if ! curl -fLs -o "$tmpdir/$wheel_asset" "$wheel_url"; then
-        die "could not fetch wheel from $wheel_url"
+# ------------------------------------------------- signature (whole tree)
+# Verify the signature over the SAME tarball, BEFORE extraction, so a
+# tampered tarball is never unpacked. Signing the tarball covers the whole
+# onedir tree transitively.
+if [[ -n "$GYZA_MINISIGN_PUBKEY" ]]; then
+    if command -v minisign &>/dev/null; then
+        say "Verifying release signature"
+        if curl -fLs -o "$tmp/$asset.minisig" "$base/$asset.minisig"; then
+            if minisign -Vm "$tmp/$asset" -P "$GYZA_MINISIGN_PUBKEY" -x "$tmp/$asset.minisig" >/dev/null 2>&1; then
+                note "signature OK — tarball is authentic and untampered"
+            else
+                die "SIGNATURE VERIFICATION FAILED — refusing to install. The tarball's checksum matched but its minisign signature did not verify against the pinned key."
+            fi
+        else
+            [[ "$GYZA_REQUIRE_SIG" == "1" ]] && die "no signature published for $asset and GYZA_REQUIRE_SIG=1"
+            warn "no signature file published for this release; checksum-verified only"
+        fi
+    else
+        [[ "$GYZA_REQUIRE_SIG" == "1" ]] && die "minisign not installed and GYZA_REQUIRE_SIG=1. Install it: https://jedisct1.github.io/minisign/"
+        warn "minisign not installed — verified checksum only. For signature verification: install minisign, then re-run (or set GYZA_REQUIRE_SIG=1 to enforce)."
     fi
-    pipx install --force "$tmpdir/$wheel_asset"
-fi
-
-# pipx puts the script in ~/.local/bin by default. Verify.
-if ! command -v gyza &>/dev/null; then
-    die "gyza CLI not on PATH after pipx install (expected ~/.local/bin to be on PATH)"
-fi
-note "installed gyza CLI"
-
-# -----------------------------------------------------------------------
-# Step 6: gyza init
-# -----------------------------------------------------------------------
-if [[ ! -f "$HOME/.gyza/compositor.key" ]]; then
-    say "Generating compositor identity"
-    gyza init
 else
-    note "compositor.key already exists; skipping init"
+    [[ "$GYZA_REQUIRE_SIG" == "1" ]] && die "release signing is not configured in this installer but GYZA_REQUIRE_SIG=1 was set"
+    note "release signing not yet configured; verified SHA256 checksum only"
 fi
 
-# -----------------------------------------------------------------------
-# Done.
-# -----------------------------------------------------------------------
+# -------------------------------------------------------------- extract
+say "Installing"
+dest="$INSTALL_PREFIX/lib/gyza/$GYZA_VERSION"
+rm -rf "$dest"; mkdir -p "$dest"
+tar -xzf "$tmp/$asset" -C "$dest"
+# The tarball contains a top-level `gyza/` onedir tree.
+bin="$dest/gyza/gyza"
+[[ -x "$bin" ]] || die "release tarball is malformed (no executable gyza/gyza inside)"
+ln -sfn "$bin" "$INSTALL_PREFIX/bin/gyza"
+note "installed to $dest"
+note "symlinked $INSTALL_PREFIX/bin/gyza -> $bin"
+
+# ---------------------------------------------------------------- verify
+"$INSTALL_PREFIX/bin/gyza" --help >/dev/null 2>&1 || die "installed binary failed to run — the artifact may not match this host's glibc. Report at https://github.com/$GYZA_REPO/issues"
+
 echo
 say "Install complete."
 cat <<EOF
 
-  ${BOLD}Next:${RESET}
-    ${DIM}# Start the daemon (joins the public bootstrap network)${RESET}
-    gyza global start
+  ${BOLD}Try it now (offline, ~seconds, zero config):${RESET}
+    gyza demo
 
-    ${DIM}# In another shell, check status${RESET}
-    gyza status
-
-    ${DIM}# Ask the live network something — verify the bounds-proof${RESET}
-    gyza submit "In one sentence, what is a Merkle tree?"
+  ${DIM}On Linux with bubblewrap installed you'll see OS-enforced containment;${RESET}
+  ${DIM}otherwise the disclosed no-sandbox path (it says which, honestly).${RESET}
 
   ${BOLD}Docs:${RESET}    https://github.com/$GYZA_REPO#readme
   ${BOLD}Issues:${RESET}  https://github.com/$GYZA_REPO/issues

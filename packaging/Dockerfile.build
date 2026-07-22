@@ -1,0 +1,49 @@
+# Shippable onedir build for the self-contained `gyza` binary.
+#
+# Built inside manylinux_2_28 so the system libs PyInstaller collects
+# (libstdc++, libz, libffi, ...) carry a GLIBC_2.28 floor — the artifact
+# then runs on Ubuntu 20.04+, Debian 10+, RHEL/Rocky 8+.
+#
+# manylinux's own CPython is STATIC (no libpython.so) and PyInstaller needs
+# a SHARED libpython, so we bring a python-build-standalone interpreter:
+# shared-lib + low-glibc, and real CPython 3.14 (gyza's target — no uuid7
+# shim). Shared libpython from PBS + glibc-2.28 system libs from manylinux
+# => a bundle whose floor stays <= 2.28. check_glibc_floor.sh asserts it
+# INSIDE the build, so a too-new floor fails here before any artifact ships.
+#
+# Build + extract the tree:
+#   docker build -f packaging/Dockerfile.build -t gyza-onedir-build .
+#   id=$(docker create gyza-onedir-build)
+#   docker cp "$id:/out/dist/gyza" ./dist/gyza
+#   docker rm "$id"
+
+FROM quay.io/pypa/manylinux_2_28_x86_64
+
+# python-build-standalone: shared-lib CPython. Override PBS_ASSET for arm64
+# (…-aarch64-unknown-linux-gnu-install_only.tar.gz) from the same PBS_TAG.
+# Use the *_stripped* variant: PBS's unstripped libpython carries ~230MB
+# of debug symbols. Stripped drops the tree to ~75MB with identical
+# behavior. Override PBS_ASSET for arm64 (…-aarch64-…_stripped.tar.gz).
+ARG PBS_TAG=20260718
+ARG PBS_ASSET=cpython-3.14.6+20260718-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz
+RUN curl -fL "https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_TAG}/${PBS_ASSET}" \
+      -o /tmp/py.tgz \
+    && mkdir -p /opt/pbs && tar -xzf /tmp/py.tgz -C /opt/pbs \
+    && /opt/pbs/python/bin/python3 --version
+ENV PATH="/opt/pbs/python/bin:${PATH}"
+
+WORKDIR /src
+COPY . /src
+
+# Install gyza + its core deps (real user environment), then freeze. The
+# spec excludes the heavy deps (torch/lancedb/grpc/aioquic/...) from the
+# BUNDLE, but they are installed here so PyInstaller's import analysis sees
+# the same module graph a real install has.
+RUN python3 -m pip install --upgrade pip \
+    && python3 -m pip install . "pyinstaller>=6.0" \
+    && python3 -m PyInstaller --noconfirm \
+         --distpath /out/dist --workpath /out/work \
+         packaging/gyza.spec \
+    && bash packaging/check_glibc_floor.sh /out/dist/gyza 28 \
+    && /out/dist/gyza/gyza --help >/dev/null \
+    && echo "onedir build OK; glibc floor within GLIBC_2.28"
