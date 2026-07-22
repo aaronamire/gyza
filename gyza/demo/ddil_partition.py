@@ -80,6 +80,7 @@ from gyza.sandbox.config import (
     enforcement_satisfies_manifest,
     sandbox_config_from_manifest,
 )
+from gyza.sandbox.runner import detect_backend
 
 INTENT_ID = "ddil-demo-intent"
 NODE_IDS = ["n0", "n1", "n2", "n3", "n4"]
@@ -245,7 +246,16 @@ def run_demo(
     (``verify_delegation``), which needs no OS sandbox — not by OS
     enforcement.
     """
-    has_bwrap = shutil.which("bwrap") is not None
+    # FUNCTIONAL probe, not mere presence. Under Docker's default seccomp
+    # (and other locked-down hosts) bwrap is INSTALLED but cannot create a
+    # user namespace — `shutil.which` would say "present", the demo would
+    # pick enforced, and then CRASH on the first sandboxed action with
+    # "No permissions to create new namespace". detect_backend() runs a
+    # real no-op bwrap spawn and returns NONE in that case, so we disclose
+    # honestly (or REFUSE under --require-sandbox) instead of crashing.
+    # "enforced" means bwrap that actually works, never bwrap that merely
+    # exists.
+    has_bwrap = detect_backend() == SandboxBackend.BUBBLEWRAP
     if sandbox_mode == "bwrap":
         mode = "enforced"
     elif sandbox_mode == "construct":

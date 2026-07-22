@@ -103,18 +103,21 @@ def test_disclosed_over_bound_rejection_comes_from_delegation_logic():
 
 def test_require_sandbox_refuses_rather_than_disclosing(monkeypatch):
     # The third mode of the trichotomy: with --require-sandbox and no
-    # bwrap, the demo REFUSES (raises) instead of silently running the
-    # disclosed path. No DemoResult is produced.
-    monkeypatch.setattr(ddil.shutil, "which", lambda _name: None)
+    # USABLE bwrap, the demo REFUSES (raises) instead of silently running
+    # the disclosed path. No DemoResult is produced.
+    monkeypatch.setattr(ddil, "detect_backend", lambda: SandboxBackend.NONE)
     with pytest.raises(SandboxRequiredError):
         run_demo(verbose=False, sandbox_mode="auto", require_sandbox=True)
 
 
-def test_auto_without_bwrap_discloses_not_refuses(monkeypatch):
-    # Same host (no bwrap) but WITHOUT --require-sandbox: it runs the
-    # disclosed path (backend=none), it does not refuse — the refusal is
-    # opt-in, so the default zero-config demo still works everywhere.
-    monkeypatch.setattr(ddil.shutil, "which", lambda _name: None)
+def test_auto_without_usable_bwrap_discloses_not_crashes(monkeypatch):
+    # THE Docker-default regression: bwrap present but NON-FUNCTIONAL
+    # (userns blocked by seccomp) shows up as detect_backend()==NONE, the
+    # same as bwrap absent. Auto mode must DISCLOSE honestly (backend=none),
+    # never pick enforced-and-crash. Presence (`shutil.which`) is not
+    # enough — usability is the predicate. This is the exact failure the
+    # default `docker run gyza demo` hit before the functional probe.
+    monkeypatch.setattr(ddil, "detect_backend", lambda: SandboxBackend.NONE)
     res = run_demo(verbose=False, sandbox_mode="auto", require_sandbox=False)
     assert res.over_bound_rejected
     execed = [enf for (_t, enf, _m) in res.audit.values() if enf is not None]
