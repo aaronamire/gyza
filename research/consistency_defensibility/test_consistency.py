@@ -97,3 +97,22 @@ def test_defensibility_verdict_and_hedge():
     assert hedge2 == "hedge"                             # no committed answer -> HEDGE
     excl = _round_outcome({"raw": "__ERR__:X", "declared": "invariance", "claim": "9"})
     assert excl == "exclude"
+
+
+# 9. Phase 7 witness harness
+def test_witness_segmentation_and_verdicts():
+    from witness_experiment import segment, _c1_fire, _c2_fire
+    t = "## Step 1: setup.\nfoo.\n\n## Step 2: compute.\nbar."
+    s1 = segment(t); s2 = segment(t)
+    assert s1 == s2 and len(s1) == 2                      # deterministic
+    assert segment("single sentence only") == ["single sentence only"]
+    # C1: NONE on a wrong answer is a MISS (fire=0), not a violation
+    assert _c1_fire("All valid \\boxed{NONE}", 5) == (0, None)
+    # valid first-invalid index
+    assert _c1_fire("Step 3 errs \\boxed{3}", 5) == (1, 3)
+    # out-of-range index is a PARSE FAILURE (None), not a detection
+    assert _c1_fire("\\boxed{99}", 5) == (None, None)
+    assert _c1_fire("__ERR__:X", 5) == (None, None)
+    # C2 prefix verdict
+    assert _c2_fire("looks off \\boxed{INVALID}") == 1
+    assert _c2_fire("\\boxed{VALID}") == 0
