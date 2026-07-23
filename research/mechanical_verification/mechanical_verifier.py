@@ -65,7 +65,8 @@ def parse(s):
     try:
         with timeout(3):
             e = sympy.sympify(t, evaluate=True)
-        return e if e is not None else None
+        # only scalar expressions are checkable; tuples/lists/relationals -> UNRESOLVED
+        return e if isinstance(e, sympy.Expr) else None
     except Exception:
         return None
 
@@ -74,8 +75,33 @@ def _rand_point(rng, syms):
     return {s: sympy.Rational(rng.randint(-9, 9), rng.randint(1, 4)) for s in syms}
 
 
+def _split_eq(s):
+    if s is None:
+        return None
+    parts = str(s).split("=")
+    parts = [p for p in parts if p.strip() != ""]
+    return (parts[0], parts[1]) if len(parts) == 2 else None
+
+
 def verify_identity(lhs, rhs, n_points=30, min_valid=3):
-    """Random-point PRIMARY + simplify confirmatory. Returns verdict + detail."""
+    """Semantically sound routing (a-priori, not FPR-tuned): a transition between
+    two EQUATIONS is a solution-preservation move -> check solution-set equivalence
+    (REDUCED = VIOLATION); an equation A=B alone is a claimed algebraic identity ->
+    check A==B; two EXPRESSIONS -> check lhs==rhs. NOTE: this cannot distinguish a
+    false identity (a real error) from a conditional equation the extractor
+    MISLABELLED as IDENTITY — that mislabelling shows up as FPR, the honest measure
+    of extraction reliability."""
+    le, re = _split_eq(lhs), _split_eq(rhs)
+    if le is not None and re is not None:
+        return verify_solution_set(lhs, rhs)     # equation -> equation: preserve solutions
+    if le is not None:
+        return _identity_pair(le[0], le[1], n_points, min_valid)
+    if re is not None:
+        return _identity_pair(re[0], re[1], n_points, min_valid)
+    return _identity_pair(lhs, rhs, n_points, min_valid)
+
+
+def _identity_pair(lhs, rhs, n_points=30, min_valid=3):
     L, R = parse(lhs), parse(rhs)
     if L is None or R is None:
         return "UNRESOLVED", {"reason": "parse"}
@@ -120,7 +146,12 @@ def verify_identity(lhs, rhs, n_points=30, min_valid=3):
 
 
 def _solset(expr):
-    e = parse(expr)
+    eq = _split_eq(expr)
+    if eq is not None:                       # "A=B" -> solve(A-B=0)
+        a, b = parse(eq[0]), parse(eq[1])
+        e = (a - b) if (a is not None and b is not None) else None
+    else:
+        e = parse(expr)
     if e is None:
         return None
     syms = sorted(e.free_symbols, key=str)
@@ -158,7 +189,7 @@ def verify_substitution(lhs, rhs, assumptions):
         if isinstance(a, str) and "=" in a and a.count("=") == 1:
             k, v = a.split("=")
             ks, vp = parse(k.strip()), parse(v.strip())
-            if ks is not None and vp is not None and ks.is_symbol:
+            if ks is not None and vp is not None and getattr(ks, "is_symbol", False):
                 subs[ks] = vp
     try:
         with timeout(5):

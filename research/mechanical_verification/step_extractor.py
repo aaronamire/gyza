@@ -58,7 +58,27 @@ def parse_extraction(raw: str):
         except Exception:
             continue
     if trans is None:
-        return [], False, False
+        # salvage a TRUNCATED array: parse each complete top-level {...} object
+        salvaged = []
+        depth = 0
+        start = None
+        for i, ch in enumerate(raw):
+            if ch == "{":
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0 and start is not None:
+                    try:
+                        salvaged.append(json.loads(raw[start:i + 1]))
+                    except Exception:
+                        pass
+                    start = None
+        if salvaged:
+            trans = salvaged
+        else:
+            return [], False, False
     clean = []
     proto = False
     for t in trans:
