@@ -1,0 +1,400 @@
+{
+  "program": "Phase 7 witness/localization. NOT a Route 2 rescue.",
+  "DECISION": {
+    "case": "WITNESS_DEAD",
+    "C1_cellB_checkers_live": [],
+    "C2_cellB_checkers_live": [],
+    "paired_witness_effect_C1_minus_C0_cellB": [
+      0.2322,
+      -0.0621,
+      0.5254
+    ]
+  },
+  "conditions_ab_split": {
+    "C0_no_witness": {
+      "ALL": {
+        "n": 630,
+        "n_wrong": 103,
+        "TPR": 0.4466,
+        "FPR": 0.0683,
+        "firing_rate": 0.1302,
+        "precision": 0.561,
+        "J": 0.3783,
+        "J_ci": [
+          0.3789,
+          0.2842,
+          0.4762
+        ],
+        "perm_p": 0.0,
+        "LR": 6.538
+      },
+      "a_checker_SOLVED": {
+        "n": 414,
+        "n_wrong": 30,
+        "TPR": 0.7333,
+        "FPR": 0.0391,
+        "firing_rate": 0.0894,
+        "precision": 0.5946,
+        "J": 0.6943,
+        "J_ci": [
+          0.6941,
+          0.5187,
+          0.8501
+        ],
+        "perm_p": 0.0,
+        "LR": 18.773
+      },
+      "b_checker_FAILED": {
+        "n": 71,
+        "n_wrong": 35,
+        "TPR": 0.2,
+        "FPR": 0.3333,
+        "firing_rate": 0.2676,
+        "precision": 0.3684,
+        "J": -0.1333,
+        "J_ci": [
+          -0.133,
+          -0.3341,
+          0.0742
+        ],
+        "perm_p": 0.9343,
+        "LR": 0.6
+      }
+    },
+    "C1_full_trace": {
+      "ALL": {
+        "n": 554,
+        "n_wrong": 89,
+        "TPR": 0.6067,
+        "FPR": 0.172,
+        "firing_rate": 0.2419,
+        "precision": 0.403,
+        "J": 0.4347,
+        "J_ci": [
+          0.4333,
+          0.3256,
+          0.5366
+        ],
+        "perm_p": 0.0,
+        "LR": 3.527
+      },
+      "a_checker_SOLVED": {
+        "n": 366,
+        "n_wrong": 27,
+        "TPR": 0.6667,
+        "FPR": 0.1534,
+        "firing_rate": 0.1913,
+        "precision": 0.2571,
+        "J": 0.5133,
+        "J_ci": [
+          0.5127,
+          0.3268,
+          0.6932
+        ],
+        "perm_p": 0.0,
+        "LR": 4.346
+      },
+      "b_checker_FAILED": {
+        "n": 62,
+        "n_wrong": 31,
+        "TPR": 0.6129,
+        "FPR": 0.4194,
+        "firing_rate": 0.5161,
+        "precision": 0.5938,
+        "J": 0.1935,
+        "J_ci": [
+          0.1935,
+          -0.0606,
+          0.4472
+        ],
+        "perm_p": 0.104,
+        "LR": 1.462
+      }
+    },
+    "C2_prefix_le3": {
+      "ALL": {
+        "n": 669,
+        "n_wrong": 136,
+        "TPR": 0.1544,
+        "FPR": 0.0525,
+        "firing_rate": 0.0732,
+        "precision": 0.4286,
+        "J": 0.1019,
+        "J_ci": [
+          0.1027,
+          0.0418,
+          0.1707
+        ],
+        "perm_p": 0.0,
+        "LR": 2.939
+      },
+      "a_checker_SOLVED": {
+        "n": 419,
+        "n_wrong": 37,
+        "TPR": 0.0811,
+        "FPR": 0.0471,
+        "firing_rate": 0.0501,
+        "precision": 0.1429,
+        "J": 0.034,
+        "J_ci": [
+          0.034,
+          -0.0446,
+          0.1328
+        ],
+        "perm_p": 0.2613,
+        "LR": 1.721
+      },
+      "b_checker_FAILED": {
+        "n": 73,
+        "n_wrong": 36,
+        "TPR": 0.1111,
+        "FPR": 0.0541,
+        "firing_rate": 0.0822,
+        "precision": 0.6667,
+        "J": 0.0571,
+        "J_ci": [
+          0.0586,
+          -0.0698,
+          0.1852
+        ],
+        "perm_p": 0.321,
+        "LR": 2.056
+      }
+    },
+    "C2_k1": {
+      "ALL": {
+        "n": 591,
+        "n_wrong": 118,
+        "TPR": 0.1271,
+        "FPR": 0.0359,
+        "firing_rate": 0.0541,
+        "precision": 0.4688,
+        "J": 0.0912,
+        "J_ci": [
+          0.0918,
+          0.0325,
+          0.1556
+        ],
+        "perm_p": 0.0,
+        "LR": 3.537
+      },
+      "a_checker_SOLVED": {
+        "n": 362,
+        "n_wrong": 28,
+        "TPR": 0.0,
+        "FPR": 0.0359,
+        "firing_rate": 0.0331,
+        "precision": 0.0,
+        "J": -0.0359,
+        "J_ci": [
+          -0.036,
+          -0.0578,
+          -0.0176
+        ],
+        "perm_p": 1.0,
+        "LR": 0.0
+      },
+      "b_checker_FAILED": {
+        "n": 68,
+        "n_wrong": 34,
+        "TPR": 0.0588,
+        "FPR": 0.0,
+        "firing_rate": 0.0294,
+        "precision": 1.0,
+        "J": 0.0588,
+        "J_ci": [
+          0.0589,
+          0.0,
+          0.1481
+        ],
+        "perm_p": 0.2493,
+        "LR": "inf"
+      }
+    }
+  },
+  "per_checker_cellB": {
+    "llama-3.1-70b-instruct": {
+      "C1_b": {
+        "n": 11,
+        "n_wrong": 5,
+        "TPR": 0.6,
+        "FPR": 0.0,
+        "firing_rate": 0.2727,
+        "precision": 1.0,
+        "J": 0.6,
+        "J_ci": [
+          0.5946,
+          0.0,
+          1.0
+        ],
+        "perm_p": 0.0563,
+        "LR": "inf"
+      },
+      "C2_le3_b": {
+        "n": 14,
+        "n_wrong": 8,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_p": 1.0,
+        "LR": null
+      }
+    },
+    "gemma-2-27b-it": {
+      "C1_b": {
+        "n": 35,
+        "n_wrong": 11,
+        "TPR": 0.7273,
+        "FPR": 0.5417,
+        "firing_rate": 0.6,
+        "precision": 0.381,
+        "J": 0.1856,
+        "J_ci": [
+          0.1908,
+          -0.1435,
+          0.5066
+        ],
+        "perm_p": 0.251,
+        "LR": 1.343
+      },
+      "C2_le3_b": {
+        "n": 39,
+        "n_wrong": 12,
+        "TPR": 0.1667,
+        "FPR": 0.037,
+        "firing_rate": 0.0769,
+        "precision": 0.6667,
+        "J": 0.1296,
+        "J_ci": [
+          0.1311,
+          -0.0741,
+          0.3973
+        ],
+        "perm_p": 0.2117,
+        "LR": 4.5
+      }
+    },
+    "mistral-small-3.2-24b-instruct": {
+      "C1_b": {
+        "n": 8,
+        "n_wrong": 7,
+        "TPR": 0.1429,
+        "FPR": 0.0,
+        "firing_rate": 0.125,
+        "precision": 1.0,
+        "J": 0.1429,
+        "J_ci": [
+          0.1414,
+          0.0,
+          0.4286
+        ],
+        "perm_p": 0.8767,
+        "LR": "inf"
+      },
+      "C2_le3_b": {
+        "n": 9,
+        "n_wrong": 8,
+        "TPR": 0.25,
+        "FPR": 0.0,
+        "firing_rate": 0.2222,
+        "precision": 1.0,
+        "J": 0.25,
+        "J_ci": [
+          0.2487,
+          0.0,
+          0.625
+        ],
+        "perm_p": 0.7723,
+        "LR": "inf"
+      }
+    },
+    "phi-4": {
+      "C1_b": {
+        "n": 8,
+        "n_wrong": 8,
+        "TPR": 0.875,
+        "FPR": null,
+        "firing_rate": 0.875,
+        "precision": 1.0,
+        "J": null,
+        "J_ci": [
+          null,
+          null,
+          null
+        ],
+        "perm_p": null,
+        "LR": "inf"
+      },
+      "C2_le3_b": {
+        "n": 11,
+        "n_wrong": 8,
+        "TPR": 0.0,
+        "FPR": 0.3333,
+        "firing_rate": 0.0909,
+        "precision": 0.0,
+        "J": -0.3333,
+        "J_ci": [
+          -0.3283,
+          -1.0,
+          0.0
+        ],
+        "perm_p": 1.0,
+        "LR": 0.0
+      }
+    }
+  },
+  "localization": {
+    "n_labeled": 16,
+    "note": "hand-labelled first-error step (normalized). See hand_error_labels.json; uncertain traces excluded.",
+    "error_position": {
+      "median_norm": 0.6,
+      "front_loaded_lt_0.4": 0.2,
+      "n": 15
+    },
+    "localization_agreement_within1": 0.611,
+    "n_localization_pairs": 18
+  },
+  "C3_fabricated_fraud": {
+    "fabricator": "meta-llama/llama-3.1-70b-instruct",
+    "checkers": {
+      "gemma-2-27b-it": {
+        "n": 20,
+        "catch_rate_fabricated": 1.0
+      },
+      "mistral-small-3.2-24b-instruct": {
+        "n": 11,
+        "catch_rate_fabricated": 0.9091
+      },
+      "phi-4": {
+        "n": 7,
+        "catch_rate_fabricated": 1.0
+      }
+    },
+    "fabricated_catch_rate_pooled": 0.9737,
+    "C1_natural_wrong_TPR_pooled": 0.6067
+  },
+  "cost": {
+    "gen_solution_out_tok": 312.6,
+    "C1_check_out_tok": 90.5,
+    "C2_k1_out_tok": 57.3,
+    "ratio_C1_over_gen": 0.289,
+    "ratio_C2k1_over_gen": 0.183,
+    "note": "output tokens only; C1/C2 ALSO pay input tokens for the trace (a real cost), noted in findings."
+  },
+  "parse_fail": {
+    "C1": 124,
+    "C2": 193
+  },
+  "data_integrity": {
+    "google/gemma-2-27b-it|C1": "4/162",
+    "google/gemma-2-27b-it|C2": "8/485"
+  },
+  "adversarial_note": "C1/C2/C3 depend on CHECKER honesty (a colluding checker returns NONE/VALID -> J=0); only claimant-gameability is ruled out."
+}

@@ -347,6 +347,8 @@ def analyze():
         # localization agreement: C1 idx vs hand label, on labelled wrong traces
         agree = []
         for key, lab in labels.items():
+            if "|" not in key:
+                continue
             claimant, pid = key.split("|")
             tstep = lab.get("error_step")
             if tstep is None:
