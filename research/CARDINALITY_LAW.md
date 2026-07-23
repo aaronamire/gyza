@@ -50,6 +50,18 @@ together they establish a regularity about what agreement is *worth*.
   lands on easy items. The honest signal is the corrected lift: real, positive,
   and smaller than the raw gap.
 
+  **Scope of this claim (a consequence of the confound correction).** The
+  positive corrected lift is established only for **3-or-more-agent mechanisms**.
+  For a bare **pair** the within-mechanism corrected lift is **0 by
+  construction** — on the items where two agents agree, both gave the agreed
+  answer, so the restricted single-agent comparator equals the pair's own
+  precision. Measuring whether *pairwise* agreement predicts truth therefore
+  requires a **held-out** reference agent not in the pair (the same leave-pair-out
+  logic as the conditional-independence null); pairwise trust-lift without a
+  held-out comparator is not a meaningful quantity. So "agreement is informative
+  on open tasks" is demonstrated for committees of ≥3, and *unmeasured for pure
+  pairs* absent a held-out reference.
+
 ## The engineering rule it implies
 
 - **Trust agreement on open-output tasks.** Where the answer space is large and
