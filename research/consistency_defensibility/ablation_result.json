@@ -1,0 +1,557 @@
+{
+  "program": "Channel A/B Phase 4 ablations (cache-only). NOT a Route 2 rescue.",
+  "4a_DECISION": {
+    "case": "A_LIVE_SURVIVES_deployable",
+    "deployable_J_T2T3T4": 0.9407,
+    "deployable_J_ci": [
+      0.9409,
+      0.8978,
+      0.9781
+    ],
+    "deployable_perm_p": 0.0,
+    "deployable_vs_rematched_SC_paired": [
+      0.6015,
+      0.3997,
+      0.7968
+    ],
+    "interpretation": "deployable content-agnostic detector clears J>0.30, CI>0, beats re-matched SC -> A-LIVE survives with corrected headline"
+  },
+  "4a_per_transform": {
+    "T1": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 1.0,
+        "FPR": 0.1185,
+        "firing_rate": 0.2562,
+        "precision": 0.6098,
+        "J": 0.8815,
+        "LR": 8.438,
+        "J_ci": [
+          0.8815,
+          0.8235,
+          0.9338
+        ],
+        "perm_p": 0.0
+      },
+      "concept": null
+    },
+    "T2": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 1.0,
+        "FPR": 0.0,
+        "firing_rate": 0.1562,
+        "precision": 1.0,
+        "J": 1.0,
+        "LR": "inf",
+        "J_ci": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "perm_p": 0.0
+      },
+      "concept": {
+        "n": 74,
+        "n_wrong": 10,
+        "TPR": 0.6,
+        "FPR": 0.0312,
+        "firing_rate": 0.1081,
+        "precision": 0.75,
+        "J": 0.5687,
+        "LR": 19.2,
+        "J_ci": [
+          0.5666,
+          0.2559,
+          0.8735
+        ],
+        "perm_p": 0.0
+      }
+    },
+    "T3": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.2,
+        "FPR": 0.0593,
+        "firing_rate": 0.0813,
+        "precision": 0.3846,
+        "J": 0.1407,
+        "LR": 3.375,
+        "J_ci": [
+          0.142,
+          -0.0119,
+          0.3162
+        ],
+        "perm_p": 0.036
+      },
+      "concept": {
+        "n": 72,
+        "n_wrong": 10,
+        "TPR": 0.5,
+        "FPR": 0.0645,
+        "firing_rate": 0.125,
+        "precision": 0.5556,
+        "J": 0.4355,
+        "LR": 7.75,
+        "J_ci": [
+          0.4372,
+          0.1194,
+          0.7677
+        ],
+        "perm_p": 0.0007
+      }
+    },
+    "T4": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.68,
+        "FPR": 0.0519,
+        "firing_rate": 0.15,
+        "precision": 0.7083,
+        "J": 0.6281,
+        "LR": 13.114,
+        "J_ci": [
+          0.6292,
+          0.4356,
+          0.8071
+        ],
+        "perm_p": 0.0
+      },
+      "concept": null
+    },
+    "T5": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.12,
+        "FPR": 0.1185,
+        "firing_rate": 0.1187,
+        "precision": 0.1579,
+        "J": 0.0015,
+        "LR": 1.012,
+        "J_ci": [
+          0.0029,
+          -0.1214,
+          0.1574
+        ],
+        "perm_p": 0.6063
+      },
+      "concept": {
+        "n": 32,
+        "n_wrong": 1,
+        "TPR": 0.0,
+        "FPR": 0.2258,
+        "firing_rate": 0.2188,
+        "precision": 0.0,
+        "J": -0.2258,
+        "LR": 0.0,
+        "J_ci": [
+          -0.227,
+          -0.3816,
+          -0.0968
+        ],
+        "perm_p": 1.0
+      }
+    }
+  },
+  "4a_variants": {
+    "A1_full": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 1.0,
+        "FPR": 0.1852,
+        "firing_rate": 0.3125,
+        "precision": 0.5,
+        "J": 0.8148,
+        "LR": 5.4,
+        "J_ci": [
+          0.8151,
+          0.75,
+          0.876
+        ],
+        "perm_p": 0.0
+      },
+      "concept": {
+        "n": 74,
+        "n_wrong": 10,
+        "TPR": 0.7,
+        "FPR": 0.1562,
+        "firing_rate": 0.2297,
+        "precision": 0.4118,
+        "J": 0.5437,
+        "LR": 4.48,
+        "J_ci": [
+          0.5433,
+          0.2208,
+          0.8406
+        ],
+        "perm_p": 0.0
+      },
+      "rematched_SC_surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.56,
+        "FPR": 0.1111,
+        "firing_rate": 0.1812,
+        "precision": 0.4828,
+        "J": 0.4489,
+        "LR": 5.04,
+        "J_ci": [
+          0.4472,
+          0.2292,
+          0.6498
+        ],
+        "perm_p": 0.0
+      },
+      "paired_A1_minus_SC_surface": {
+        "n": 160,
+        "J_A1": 0.8147,
+        "J_SC": 0.4461,
+        "paired_diff_ci": [
+          0.3686,
+          0.1583,
+          0.5711
+        ]
+      },
+      "perm_p_surface": 0.0
+    },
+    "A1_noT1": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 1.0,
+        "FPR": 0.1259,
+        "firing_rate": 0.2625,
+        "precision": 0.5952,
+        "J": 0.8741,
+        "LR": 7.941,
+        "J_ci": [
+          0.8743,
+          0.8182,
+          0.9265
+        ],
+        "perm_p": 0.0
+      },
+      "concept": {
+        "n": 74,
+        "n_wrong": 10,
+        "TPR": 0.7,
+        "FPR": 0.1562,
+        "firing_rate": 0.2297,
+        "precision": 0.4118,
+        "J": 0.5437,
+        "LR": 4.48,
+        "J_ci": [
+          0.5433,
+          0.2208,
+          0.8406
+        ],
+        "perm_p": 0.0
+      },
+      "rematched_SC_surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.48,
+        "FPR": 0.0963,
+        "firing_rate": 0.1562,
+        "precision": 0.48,
+        "J": 0.3837,
+        "LR": 4.985,
+        "J_ci": [
+          0.3837,
+          0.1796,
+          0.5879
+        ],
+        "perm_p": 0.0
+      },
+      "paired_A1_minus_SC_surface": {
+        "n": 160,
+        "J_A1": 0.8737,
+        "J_SC": 0.3812,
+        "paired_diff_ci": [
+          0.4923,
+          0.2795,
+          0.6923
+        ]
+      },
+      "perm_p_surface": 0.0
+    },
+    "A1_deploy_T2T3T4": {
+      "surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 1.0,
+        "FPR": 0.0593,
+        "firing_rate": 0.2062,
+        "precision": 0.7576,
+        "J": 0.9407,
+        "LR": 16.875,
+        "J_ci": [
+          0.9409,
+          0.8978,
+          0.9781
+        ],
+        "perm_p": 0.0
+      },
+      "concept": {
+        "n": 74,
+        "n_wrong": 10,
+        "TPR": 0.7,
+        "FPR": 0.0938,
+        "firing_rate": 0.1757,
+        "precision": 0.5385,
+        "J": 0.6062,
+        "LR": 7.467,
+        "J_ci": [
+          0.6065,
+          0.2841,
+          0.9001
+        ],
+        "perm_p": 0.0
+      },
+      "rematched_SC_surface": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.4,
+        "FPR": 0.0593,
+        "firing_rate": 0.1125,
+        "precision": 0.5556,
+        "J": 0.3407,
+        "LR": 6.75,
+        "J_ci": [
+          0.3404,
+          0.135,
+          0.5404
+        ],
+        "perm_p": 0.0
+      },
+      "paired_A1_minus_SC_surface": {
+        "n": 160,
+        "J_A1": 0.941,
+        "J_SC": 0.3385,
+        "paired_diff_ci": [
+          0.6015,
+          0.3997,
+          0.7968
+        ]
+      },
+      "perm_p_surface": 0.0
+    }
+  },
+  "4b_compounding": {
+    "deploy_T2T3T4": {
+      "1": {
+        "P_fire_wrong": 0.617,
+        "P_fire_correct": 0.0375,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.5795
+      },
+      "2": {
+        "P_fire_wrong": 0.8994,
+        "P_fire_correct": 0.0567,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.8427
+      },
+      "3": {
+        "P_fire_wrong": 1.0,
+        "P_fire_correct": 0.0593,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.9407
+      }
+    },
+    "full": {
+      "1": {
+        "P_fire_wrong": 0.5964,
+        "P_fire_correct": 0.0717,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.5247
+      },
+      "2": {
+        "P_fire_wrong": 0.8672,
+        "P_fire_correct": 0.1077,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.7595
+      },
+      "3": {
+        "P_fire_wrong": 0.9678,
+        "P_fire_correct": 0.1335,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.8343
+      },
+      "4": {
+        "P_fire_wrong": 1.0,
+        "P_fire_correct": 0.1603,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.8397
+      },
+      "5": {
+        "P_fire_wrong": 1.0,
+        "P_fire_correct": 0.1852,
+        "n_wrong": 25,
+        "n_correct": 135,
+        "gap": 0.8148
+      }
+    }
+  },
+  "4c_LR_precision": {
+    "A1_full_surface": {
+      "n": 160,
+      "n_wrong": 25,
+      "TPR": 1.0,
+      "FPR": 0.1852,
+      "firing_rate": 0.3125,
+      "precision": 0.5,
+      "J": 0.8148,
+      "LR": 5.4,
+      "J_ci": [
+        0.8151,
+        0.75,
+        0.876
+      ],
+      "perm_p": 0.0
+    },
+    "A1_deploy_surface": {
+      "n": 160,
+      "n_wrong": 25,
+      "TPR": 1.0,
+      "FPR": 0.0593,
+      "firing_rate": 0.2062,
+      "precision": 0.7576,
+      "J": 0.9407,
+      "LR": 16.875,
+      "J_ci": [
+        0.9409,
+        0.8978,
+        0.9781
+      ],
+      "perm_p": 0.0
+    },
+    "A2_inversion_surface": {
+      "n": 157,
+      "n_wrong": 22,
+      "TPR": 0.5455,
+      "FPR": 0.0148,
+      "firing_rate": 0.0892,
+      "precision": 0.8571,
+      "J": 0.5306,
+      "LR": 36.818,
+      "J_ci": [
+        0.5336,
+        0.3157,
+        0.7362
+      ],
+      "perm_p": 0.0
+    },
+    "A2_inversion_concept": {
+      "n": 73,
+      "n_wrong": 10,
+      "TPR": 0.2,
+      "FPR": 0.0317,
+      "firing_rate": 0.0548,
+      "precision": 0.5,
+      "J": 0.1683,
+      "LR": 6.3,
+      "J_ci": [
+        0.1632,
+        -0.0508,
+        0.4524
+      ],
+      "perm_p": 0.093
+    },
+    "note": "A1 FPR is structural: a violation proves the two answers DISAGREE, not which is wrong, so a botched transform-solve on a correct original convicts an honest defender. Slashing needs FPR low enough that false conviction cost < deterrent value; flagging-for-review tolerates higher FPR."
+  },
+  "4d_two_stage_gate": {
+    "cells": {
+      "SC_stable&A1_fires": {
+        "n": 21,
+        "n_wrong": 15,
+        "P_wrong": 0.7143,
+        "precision_convict": 0.7143
+      },
+      "SC_stable&A1_not": {
+        "n": 121,
+        "n_wrong": 0,
+        "P_wrong": 0.0,
+        "precision_convict": 0.0
+      },
+      "SC_unstable&A1_fires": {
+        "n": 12,
+        "n_wrong": 10,
+        "P_wrong": 0.8333,
+        "precision_convict": 0.8333
+      },
+      "SC_unstable&A1_not": {
+        "n": 6,
+        "n_wrong": 0,
+        "P_wrong": 0.0,
+        "precision_convict": 0.0
+      }
+    },
+    "CONVICT_cell_SCstable_A1fires": {
+      "n": 21,
+      "precision": 0.7143,
+      "false_conviction_n": 6
+    },
+    "FPR_within_SCstable": 0.0472,
+    "escalate_class_SC_unstable_n": 18,
+    "three_way_rule": "CONVICT if SC-stable & A1{T2,T3,T4} fires; ACCEPT if SC-stable & A1 quiet; ESCALATE (Route 1) if SC-unstable"
+  },
+  "4e_channel_b": {
+    "LR_per_condition": {
+      "ASSIGNED_vs_TRUE": 8.256,
+      "HELD_vs_TRUE": 1.25,
+      "violation_rates": {
+        "B_TRUE": 0.5517,
+        "B_HELD": 0.6897,
+        "B_ASSIGNED": 0.4714,
+        "B_TRUE_A": 0.0571
+      }
+    },
+    "economic_note": "a protocol that convicts honest defenders at FPR=violation(B-TRUE) cannot support a bonded market in that regime; ASSIGNED LR~9.6 (deter strategic fraud) vs HELD LR~1.25 (cannot separate sincere error).",
+    "per_round_cumulative_violation": {
+      "B_TRUE": {
+        "1": 0.1379,
+        "2": 0.5517,
+        "3": 0.5517
+      },
+      "B_HELD": {
+        "1": 0.5172,
+        "2": 0.7586,
+        "3": 0.8621
+      },
+      "B_ASSIGNED": {
+        "1": 0.4,
+        "2": 0.5214,
+        "3": 0.5571
+      },
+      "B_TRUE_A": {
+        "1": 0.0,
+        "2": 0.0571,
+        "3": 0.0571
+      }
+    },
+    "maintainability_gate_SCunstable_predicts_Btrue_violation": {
+      "n": 29,
+      "P_Btrue_viol_given_SCunstable": 0.4615,
+      "P_Btrue_viol_given_SCstable": 0.625,
+      "diff_ci": [
+        -0.1635,
+        -0.5191,
+        0.2056
+      ]
+    },
+    "selection_artifact": "B-HELD items were selected BECAUSE the model failed natively, so 'defend the truth' there is 'defend a truth you do not understand' -- the sincere-error null is partly definitional, a limitation not a discovery."
+  }
+}
