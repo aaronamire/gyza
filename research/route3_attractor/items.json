@@ -1,0 +1,815 @@
+{
+  "seed": 1,
+  "n": 80,
+  "by_category": {
+    "i_classic": 20,
+    "iii_substitution": 20,
+    "ii_noop": 40
+  },
+  "control_modes": {
+    "memorized": 24,
+    "competence": 56
+  },
+  "items": [
+    {
+      "item_id": "i_classic_00",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "perturbed_prompt": "You are on a game show with 3 doors; one hides a car, two hide goats. You pick door 1. The host, who does NOT know where the car is, opens one of the other two doors CHOSEN UNIFORMLY AT RANDOM, and it happens to reveal a goat. You may switch to the remaining unopened door. Given that a goat was revealed, what is the probability you win the car if you SWITCH? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1/2",
+      "attractor_answer": "2/3",
+      "original_prompt": "You are on a game show with 3 doors; one hides a car, two hide goats. You pick door 1. The host, who KNOWS where the car is, deliberately opens another door revealing a goat and offers you the chance to switch. What is the probability you win the car if you SWITCH? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Random-host Monty Hall: conditioning on a randomly-revealed goat gives 1/2, not 2/3."
+    },
+    {
+      "item_id": "i_classic_01",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "perturbed_prompt": "A family has two children. You are told that the OLDER child is a boy. What is the probability that BOTH children are boys? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1/2",
+      "attractor_answer": "1/3",
+      "original_prompt": "A family has two children. You are told that AT LEAST ONE of them is a boy. What is the probability that BOTH children are boys? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Fixing the older child removes the ambiguity: 1/2, not the famous 1/3."
+    },
+    {
+      "item_id": "i_classic_02",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "perturbed_prompt": "A family has two children. At least one is a boy born on a Tuesday. What is the probability both are boys? Assume births are independent and uniform over 7 days and 2 sexes. Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "13/27",
+      "attractor_answer": "1/3",
+      "original_prompt": "A family has two children. At least one is a boy. What is the probability that both are boys? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Tuesday-boy problem: 13/27, famously not 1/3."
+    },
+    {
+      "item_id": "i_classic_03",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "perturbed_prompt": "Ignoring leap years (365 equally likely birthdays), how many people must be in a room so that it is more likely than not that at least one shares YOUR specific birthday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "253",
+      "attractor_answer": "23",
+      "original_prompt": "Ignoring leap years (365 equally likely birthdays), how many people must be in a room so that it is more likely than not that some two of them share a birthday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Matching a SPECIFIC date needs 253 (1-(364/365)^n>1/2), not the famous 23."
+    },
+    {
+      "item_id": "i_classic_04",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A doctor gives you 5 pills and tells you to take one every 30 minutes, starting now. How many minutes until you have taken all 5 pills? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "120",
+      "attractor_answer": "150",
+      "original_prompt": "You take 1 pill now, then one more every 30 minutes. After how many minutes have you taken 5 pills in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "4 intervals of 30 = 120; the attractor 5*30=150 counts one interval too many."
+    },
+    {
+      "item_id": "i_classic_05",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 17 sheep. All but 8 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "8",
+      "attractor_answer": "9",
+      "original_prompt": "A farmer has 17 sheep. 9 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_06",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 23 sheep. All but 6 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "6",
+      "attractor_answer": "17",
+      "original_prompt": "A farmer has 23 sheep. 17 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_07",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 30 sheep. All but 7 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "7",
+      "attractor_answer": "23",
+      "original_prompt": "A farmer has 30 sheep. 23 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_08",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 11 sheep. All but 4 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "4",
+      "attractor_answer": "7",
+      "original_prompt": "A farmer has 11 sheep. 7 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_09",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 40 sheep. All but 9 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "9",
+      "attractor_answer": "31",
+      "original_prompt": "A farmer has 40 sheep. 31 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_10",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 25 sheep. All but 3 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "3",
+      "attractor_answer": "22",
+      "original_prompt": "A farmer has 25 sheep. 22 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_11",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 14 sheep. All but 5 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "5",
+      "attractor_answer": "9",
+      "original_prompt": "A farmer has 14 sheep. 9 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_12",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A farmer has 33 sheep. All but 8 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "8",
+      "attractor_answer": "25",
+      "original_prompt": "A farmer has 33 sheep. 25 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'All but N die' => N survive; the attractor S-N misreads it as 'N die'."
+    },
+    {
+      "item_id": "i_classic_13",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 20 metres long, with a post every 2 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "11",
+      "attractor_answer": "10",
+      "original_prompt": "A straight 20-metre path is divided into equal sections 2 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "i_classic_14",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 30 metres long, with a post every 3 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "11",
+      "attractor_answer": "10",
+      "original_prompt": "A straight 30-metre path is divided into equal sections 3 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "i_classic_15",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 100 metres long, with a post every 5 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "21",
+      "attractor_answer": "20",
+      "original_prompt": "A straight 100-metre path is divided into equal sections 5 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "i_classic_16",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 48 metres long, with a post every 4 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "13",
+      "attractor_answer": "12",
+      "original_prompt": "A straight 48-metre path is divided into equal sections 4 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "i_classic_17",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 36 metres long, with a post every 6 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "7",
+      "attractor_answer": "6",
+      "original_prompt": "A straight 36-metre path is divided into equal sections 6 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "i_classic_18",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 60 metres long, with a post every 10 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "7",
+      "attractor_answer": "6",
+      "original_prompt": "A straight 60-metre path is divided into equal sections 10 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "i_classic_19",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "perturbed_prompt": "A straight fence is 21 metres long, with a post every 3 metres, including one at each end. How many posts are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "8",
+      "attractor_answer": "7",
+      "original_prompt": "A straight 21-metre path is divided into equal sections 3 metres long. How many sections are there? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Posts = segments + 1 (fence-post error); attractor drops the final post."
+    },
+    {
+      "item_id": "iii_substitution_00",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 1 to 99, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "4950",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_01",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 2 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "5049",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_02",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 1 to 101, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "5151",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_03",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 1 to 50, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1275",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_04",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 1 to 200, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "20100",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_05",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 3 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "5047",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_06",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of all the integers from 1 to 49, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1225",
+      "attractor_answer": "5050",
+      "original_prompt": "What is the sum of all the integers from 1 to 100, inclusive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Famous 1..100=5050; a shifted range breaks the memorized total."
+    },
+    {
+      "item_id": "iii_substitution_07",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a pentagon (a 5-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "540",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_08",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a hexagon (a 6-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "720",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_09",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a heptagon (a 7-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "900",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_10",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a octagon (a 8-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1080",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_11",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a nonagon (a 9-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1260",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_12",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a decagon (a 10-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1440",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_13",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum, in degrees, of the interior angles of a dodecagon (a 12-sided polygon)? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "1800",
+      "attractor_answer": "180",
+      "original_prompt": "What is the sum, in degrees, of the interior angles of a triangle? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "(n-2)*180; the attractor 180 is the memorized triangle answer."
+    },
+    {
+      "item_id": "iii_substitution_14",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of the first 4 positive EVEN numbers (2 + 4 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "20",
+      "attractor_answer": "16",
+      "original_prompt": "What is the sum of the first 4 positive ODD numbers (1 + 3 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Sum of first n even = n(n+1); the attractor n^2 is the memorized odd-sum."
+    },
+    {
+      "item_id": "iii_substitution_15",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of the first 6 positive EVEN numbers (2 + 4 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "42",
+      "attractor_answer": "36",
+      "original_prompt": "What is the sum of the first 6 positive ODD numbers (1 + 3 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Sum of first n even = n(n+1); the attractor n^2 is the memorized odd-sum."
+    },
+    {
+      "item_id": "iii_substitution_16",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of the first 7 positive EVEN numbers (2 + 4 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "56",
+      "attractor_answer": "49",
+      "original_prompt": "What is the sum of the first 7 positive ODD numbers (1 + 3 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Sum of first n even = n(n+1); the attractor n^2 is the memorized odd-sum."
+    },
+    {
+      "item_id": "iii_substitution_17",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of the first 9 positive EVEN numbers (2 + 4 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "90",
+      "attractor_answer": "81",
+      "original_prompt": "What is the sum of the first 9 positive ODD numbers (1 + 3 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Sum of first n even = n(n+1); the attractor n^2 is the memorized odd-sum."
+    },
+    {
+      "item_id": "iii_substitution_18",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of the first 11 positive EVEN numbers (2 + 4 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "132",
+      "attractor_answer": "121",
+      "original_prompt": "What is the sum of the first 11 positive ODD numbers (1 + 3 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Sum of first n even = n(n+1); the attractor n^2 is the memorized odd-sum."
+    },
+    {
+      "item_id": "iii_substitution_19",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "perturbed_prompt": "What is the sum of the first 15 positive EVEN numbers (2 + 4 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "240",
+      "attractor_answer": "225",
+      "original_prompt": "What is the sum of the first 15 positive ODD numbers (1 + 3 + ... )? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "Sum of first n even = n(n+1); the attractor n^2 is the memorized odd-sum."
+    },
+    {
+      "item_id": "ii_noop_00",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A basket holds 73 apples. 20 of the apples are eaten, and 20 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "53",
+      "attractor_answer": "33",
+      "original_prompt": "A basket holds 73 apples. 20 of the apples are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_01",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A shelf holds 116 books. 6 of the books are borrowed, and 10 of the remaining books have slightly torn covers. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "110",
+      "attractor_answer": "100",
+      "original_prompt": "A shelf holds 116 books. 6 of the books are borrowed. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_02",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A garden has 104 rose bushes. 49 of the bushes are dug up and removed, and 8 of the remaining bushes bloom slightly later than the others. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "55",
+      "attractor_answer": "47",
+      "original_prompt": "A garden has 104 rose bushes. 49 of the bushes are dug up and removed. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_03",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A pond contains 58 fish. 25 of the fish are caught and taken away, and 8 of the remaining fish are a bit smaller than the rest. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "33",
+      "attractor_answer": "25",
+      "original_prompt": "A pond contains 58 fish. 25 of the fish are caught and taken away. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_04",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A box contains 54 pens. 23 of the pens are given away, and 6 of the remaining pens write in slightly lighter ink. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "31",
+      "attractor_answer": "25",
+      "original_prompt": "A box contains 54 pens. 23 of the pens are given away. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_05",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A parking lot has 67 cars. 23 of the cars drive away, and 13 of the remaining cars are older models. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "44",
+      "attractor_answer": "31",
+      "original_prompt": "A parking lot has 67 cars. 23 of the cars drive away. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_06",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A crate holds 37 oranges. 5 of the oranges are sold, and 14 of the remaining oranges are slightly less ripe. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "32",
+      "attractor_answer": "18",
+      "original_prompt": "A crate holds 37 oranges. 5 of the oranges are sold. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_07",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A basket holds 98 apples. 41 of the apples are eaten, and 16 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "57",
+      "attractor_answer": "41",
+      "original_prompt": "A basket holds 98 apples. 41 of the apples are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_08",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A shelf holds 104 books. 20 of the books are borrowed, and 20 of the remaining books have slightly torn covers. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "84",
+      "attractor_answer": "64",
+      "original_prompt": "A shelf holds 104 books. 20 of the books are borrowed. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_09",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A garden has 101 rose bushes. 10 of the bushes are dug up and removed, and 15 of the remaining bushes bloom slightly later than the others. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "91",
+      "attractor_answer": "76",
+      "original_prompt": "A garden has 101 rose bushes. 10 of the bushes are dug up and removed. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_10",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A pond contains 41 fish. 11 of the fish are caught and taken away, and 14 of the remaining fish are a bit smaller than the rest. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "30",
+      "attractor_answer": "16",
+      "original_prompt": "A pond contains 41 fish. 11 of the fish are caught and taken away. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_11",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A box contains 42 pens. 11 of the pens are given away, and 7 of the remaining pens write in slightly lighter ink. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "31",
+      "attractor_answer": "24",
+      "original_prompt": "A box contains 42 pens. 11 of the pens are given away. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_12",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A parking lot has 112 cars. 15 of the cars drive away, and 25 of the remaining cars are older models. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "97",
+      "attractor_answer": "72",
+      "original_prompt": "A parking lot has 112 cars. 15 of the cars drive away. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_13",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A crate holds 53 oranges. 5 of the oranges are sold, and 18 of the remaining oranges are slightly less ripe. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "48",
+      "attractor_answer": "30",
+      "original_prompt": "A crate holds 53 oranges. 5 of the oranges are sold. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_14",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A basket holds 35 apples. 8 of the apples are eaten, and 7 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "27",
+      "attractor_answer": "20",
+      "original_prompt": "A basket holds 35 apples. 8 of the apples are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_15",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A shelf holds 74 books. 8 of the books are borrowed, and 32 of the remaining books have slightly torn covers. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "66",
+      "attractor_answer": "34",
+      "original_prompt": "A shelf holds 74 books. 8 of the books are borrowed. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_16",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A garden has 98 rose bushes. 47 of the bushes are dug up and removed, and 5 of the remaining bushes bloom slightly later than the others. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "51",
+      "attractor_answer": "46",
+      "original_prompt": "A garden has 98 rose bushes. 47 of the bushes are dug up and removed. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_17",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A pond contains 95 fish. 17 of the fish are caught and taken away, and 22 of the remaining fish are a bit smaller than the rest. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "78",
+      "attractor_answer": "56",
+      "original_prompt": "A pond contains 95 fish. 17 of the fish are caught and taken away. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_18",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A box contains 114 pens. 19 of the pens are given away, and 34 of the remaining pens write in slightly lighter ink. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "95",
+      "attractor_answer": "61",
+      "original_prompt": "A box contains 114 pens. 19 of the pens are given away. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_19",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A parking lot has 44 cars. 10 of the cars drive away, and 16 of the remaining cars are older models. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "34",
+      "attractor_answer": "18",
+      "original_prompt": "A parking lot has 44 cars. 10 of the cars drive away. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_20",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A crate holds 68 oranges. 19 of the oranges are sold, and 9 of the remaining oranges are slightly less ripe. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "49",
+      "attractor_answer": "40",
+      "original_prompt": "A crate holds 68 oranges. 19 of the oranges are sold. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_21",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A basket holds 40 apples. 11 of the apples are eaten, and 9 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "29",
+      "attractor_answer": "20",
+      "original_prompt": "A basket holds 40 apples. 11 of the apples are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_22",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A shelf holds 71 books. 28 of the books are borrowed, and 9 of the remaining books have slightly torn covers. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "43",
+      "attractor_answer": "34",
+      "original_prompt": "A shelf holds 71 books. 28 of the books are borrowed. How many books are still on the shelf? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_23",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A garden has 85 rose bushes. 33 of the bushes are dug up and removed, and 24 of the remaining bushes bloom slightly later than the others. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "52",
+      "attractor_answer": "28",
+      "original_prompt": "A garden has 85 rose bushes. 33 of the bushes are dug up and removed. How many rose bushes are still in the garden? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_24",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A pond contains 68 fish. 6 of the fish are caught and taken away, and 23 of the remaining fish are a bit smaller than the rest. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "62",
+      "attractor_answer": "39",
+      "original_prompt": "A pond contains 68 fish. 6 of the fish are caught and taken away. How many fish are still in the pond? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_25",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A box contains 78 pens. 34 of the pens are given away, and 11 of the remaining pens write in slightly lighter ink. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "44",
+      "attractor_answer": "33",
+      "original_prompt": "A box contains 78 pens. 34 of the pens are given away. How many pens are still in the box? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_26",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A parking lot has 63 cars. 6 of the cars drive away, and 14 of the remaining cars are older models. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "57",
+      "attractor_answer": "43",
+      "original_prompt": "A parking lot has 63 cars. 6 of the cars drive away. How many cars are still in the lot? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_27",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A crate holds 88 oranges. 35 of the oranges are sold, and 22 of the remaining oranges are slightly less ripe. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "53",
+      "attractor_answer": "31",
+      "original_prompt": "A crate holds 88 oranges. 35 of the oranges are sold. How many oranges are still in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "'slightly smaller/later' is a no-op; the attractor wrongly subtracts it."
+    },
+    {
+      "item_id": "ii_noop_28",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "Liam buys 17 apples. He also keeps 24 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "17",
+      "attractor_answer": "41",
+      "original_prompt": "Liam buys 17 apples. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_29",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A library adds 49 new novels this week. It already owns 12 maps in a separate archive. How many novels did the library add this week? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "49",
+      "attractor_answer": "61",
+      "original_prompt": "A library adds 49 new novels this week. How many novels did the library add this week? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_30",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A baker makes 24 loaves of bread this morning. The bakery also has 34 chairs for customers. How many loaves of bread did the baker make? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "24",
+      "attractor_answer": "58",
+      "original_prompt": "A baker makes 24 loaves of bread this morning. How many loaves of bread did the baker make? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_31",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "Maria plants 37 tomato seedlings. Her neighbour separately owns 21 chickens. How many tomato seedlings did Maria plant? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "37",
+      "attractor_answer": "58",
+      "original_prompt": "Maria plants 37 tomato seedlings. How many tomato seedlings did Maria plant? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_32",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A cyclist rides 42 kilometres on Monday. She owns 21 pairs of running shoes. How many kilometres did the cyclist ride on Monday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "42",
+      "attractor_answer": "63",
+      "original_prompt": "A cyclist rides 42 kilometres on Monday. How many kilometres did the cyclist ride on Monday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_33",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A theatre sells 58 tickets for the evening show. The building has 30 fire exits. How many tickets were sold for the evening show? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "58",
+      "attractor_answer": "88",
+      "original_prompt": "A theatre sells 58 tickets for the evening show. How many tickets were sold for the evening show? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_34",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "Liam buys 8 apples. He also keeps 8 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "8",
+      "attractor_answer": "16",
+      "original_prompt": "Liam buys 8 apples. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_35",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A library adds 35 new novels this week. It already owns 33 maps in a separate archive. How many novels did the library add this week? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "35",
+      "attractor_answer": "68",
+      "original_prompt": "A library adds 35 new novels this week. How many novels did the library add this week? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_36",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A baker makes 9 loaves of bread this morning. The bakery also has 28 chairs for customers. How many loaves of bread did the baker make? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "9",
+      "attractor_answer": "37",
+      "original_prompt": "A baker makes 9 loaves of bread this morning. How many loaves of bread did the baker make? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_37",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "Maria plants 47 tomato seedlings. Her neighbour separately owns 32 chickens. How many tomato seedlings did Maria plant? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "47",
+      "attractor_answer": "79",
+      "original_prompt": "Maria plants 47 tomato seedlings. How many tomato seedlings did Maria plant? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_38",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A cyclist rides 53 kilometres on Monday. She owns 10 pairs of running shoes. How many kilometres did the cyclist ride on Monday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "53",
+      "attractor_answer": "63",
+      "original_prompt": "A cyclist rides 53 kilometres on Monday. How many kilometres did the cyclist ride on Monday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    },
+    {
+      "item_id": "ii_noop_39",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "perturbed_prompt": "A theatre sells 35 tickets for the evening show. The building has 32 fire exits. How many tickets were sold for the evening show? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "true_answer": "35",
+      "attractor_answer": "67",
+      "original_prompt": "A theatre sells 35 tickets for the evening show. How many tickets were sold for the evening show? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "note": "the second quantity is unrelated; the attractor wrongly adds it (a+b)."
+    }
+  ]
+}
