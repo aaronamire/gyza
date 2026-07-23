@@ -1,0 +1,83 @@
+{
+  "program": "Channel B Phase 3 \u2014 defensibility asymmetry. NOT a Route 2 rescue.",
+  "config": {
+    "seed": 1,
+    "n_rounds": 3,
+    "challenger": "fixed verified transforms (mechanical verdict, judge-free)"
+  },
+  "DECISION": {
+    "case": "B_INSINCERE_ONLY",
+    "held_gap": {
+      "n": 29,
+      "violation_defend": 0.6897,
+      "violation_true": 0.5517,
+      "gap_ci": [
+        0.1379,
+        -0.1034,
+        0.3793
+      ],
+      "hedge_defend": 0.2759,
+      "hedge_true": 0.1379
+    },
+    "assigned_gap": {
+      "n": 52,
+      "violation_defend": 0.5577,
+      "violation_true": 0.0577,
+      "gap_ci": [
+        0.5,
+        0.3654,
+        0.6346
+      ],
+      "hedge_defend": 0.1731,
+      "hedge_true": 0.0769
+    }
+  },
+  "condition_rates": {
+    "B_TRUE": {
+      "n": 29,
+      "violation_rate": 0.5517,
+      "hedge_rate": 0.1379
+    },
+    "B_HELD": {
+      "n": 29,
+      "violation_rate": 0.6897,
+      "hedge_rate": 0.2759
+    },
+    "B_ASSIGNED": {
+      "n": 52,
+      "violation_rate": 0.5577,
+      "hedge_rate": 0.1731
+    },
+    "B_TRUE_A": {
+      "n": 52,
+      "violation_rate": 0.0577,
+      "hedge_rate": 0.0769
+    }
+  },
+  "held_gap_by_model": {
+    "meta-llama/llama-3.1-70b-instruct": {
+      "n": 2,
+      "violation_held": 1.0,
+      "violation_true": 0.0,
+      "hedge_held": 0.0
+    },
+    "google/gemma-2-27b-it": {
+      "n": 23,
+      "violation_held": 0.7391,
+      "violation_true": 0.6957,
+      "hedge_held": 0.2609
+    },
+    "mistralai/mistral-small-3.2-24b-instruct": {
+      "n": 4,
+      "violation_held": 0.25,
+      "violation_true": 0.0,
+      "hedge_held": 0.5
+    },
+    "microsoft/phi-4": null
+  },
+  "n_records": 162,
+  "n_held_fixtures": 29,
+  "data_integrity": {
+    "google/gemma-2-27b-it": "1/322"
+  }
+}

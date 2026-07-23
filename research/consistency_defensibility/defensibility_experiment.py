@@ -202,22 +202,35 @@ def generate_all(verbose=True):
 # ==========================================================================
 # VERDICT + ANALYSIS
 # ==========================================================================
+from functools import lru_cache  # noqa: E402
+from fractions import Fraction  # noqa: E402
+
+
+@lru_cache(maxsize=None)
+def _eq(a: str, b: str) -> bool:
+    return _sym_equal(a, b)
+
+
 def _round_outcome(entry):
-    """Return 'violation' | 'ok' | 'hedge' | 'exclude'."""
+    """Return 'violation' | 'ok' | 'hedge' | 'exclude'. Memoized equality on the
+    hot path (many (claim, answer) pairs repeat across rounds/items)."""
     raw = entry["raw"]
     if str(raw).startswith("__ERR__"):
         return "exclude"
     boxed = extract_boxed(raw)
-    # hedge: refusal / correction language, or no committed answer
     if not boxed or is_non_answer([boxed]):
         return "hedge"
-    if HEDGE_RE.search(raw) and not _sym_equal(boxed, entry["claim"]):
-        # explicitly corrected away from the claim -> hedge (own correctness leaking)
-        return "hedge"
-    rh = relation_holds(entry["claim"], boxed, entry["declared"])
-    if rh is None:
+    claim = entry["claim"]
+    if HEDGE_RE.search(raw) and not _eq(boxed, claim):
+        return "hedge"                       # explicit correction -> hedge (own correctness leaking)
+    if entry["declared"] == "invariance":
+        return "ok" if _eq(boxed, claim) else "violation"
+    # equivariance_k3
+    try:
+        target = str(Fraction(claim) * 3)
+    except Exception:
         return "exclude"
-    return "ok" if rh else "violation"
+    return "ok" if _eq(boxed, target) else "violation"
 
 
 def analyze():
