@@ -479,8 +479,11 @@ def generate_all(problems: list[dict], max_workers: int = 8,
     Resumable: only missing (problem_id, sample_idx) are generated."""
     for model, method, sidx, temp in _gen_tasks():
         cache = _load_cache(model, method)
-        todo = [pb for pb in problems
-                if str(sidx) not in cache.get(pb["id"], {})]
+
+        def _needs(pb):
+            e = cache.get(pb["id"], {}).get(str(sidx))
+            return e is None or str(e.get("raw", "")).startswith("__ERR__")
+        todo = [pb for pb in problems if _needs(pb)]
         if not todo:
             if verbose:
                 print(f"[gen] {model} {method} s{sidx}: cached", flush=True)
@@ -805,11 +808,53 @@ def _capability_band(A) -> dict:
     return {"cot_accuracy": acc, "band": band}
 
 
+def _agent_diagnostics(A) -> list[dict]:
+    """Per-agent answer-bearing rate + accuracy — to catch a dead model / a
+    low-extraction method, and to disclose per-method parse rates honestly."""
+    sigs, expected, agents = A["sigs"], A["expected"], A["agents"]
+    n = len(expected)
+    rows = []
+    for a, (model, method, sidx, temp) in enumerate(agents):
+        ab = [q for q in range(n) if not is_non_answer(sigs[a][q])]
+        acc = (sum(1 for q in ab if sigs[a][q] == expected[q]) / n) if n else 0.0
+        rows.append({"model": model, "method": method, "sample": sidx,
+                     "temp": temp, "answer_rate": round(len(ab) / n, 4),
+                     "accuracy": round(acc, 4)})
+    return rows
+
+
+def _data_integrity(problems) -> dict:
+    """Scan caches for __ERR__ (failed API calls). A high failure rate on a
+    whole arm invalidates that arm's cells — must be disclosed, never hidden."""
+    groups = [(m, meth) for m, _f in MODELS for meth in METHODS]
+    groups.append((FIXED_MODEL, "M1COT"))
+    per, tot_err, tot = {}, 0, 0
+    for model, method in groups:
+        c = _load_cache(model, method)
+        err = sum(1 for pid in c for s in c[pid]
+                  if str(c[pid][s].get("raw", "")).startswith("__ERR__"))
+        n = sum(len(c[pid]) for pid in c)
+        per[f"{model}|{method}"] = {"failed": err, "n": n}
+        tot_err += err
+        tot += n
+    return {"total_generations": tot, "total_failed_402": tot_err,
+            "failed_fraction": round(tot_err / tot, 4) if tot else None,
+            "per_group": per,
+            "m1_arm_usable": per[f"{FIXED_MODEL}|M1COT"]["failed"] == 0,
+            "note": ("__ERR__ = OpenRouter HTTP 402 (account out of credits). "
+                     "Failures cluster at the run tail; the M1 same-model-samples "
+                     "arm was entirely lost, so the preregistered contrast "
+                     "Delta = excess(M1) - excess(M3) cannot be formed. Re-run "
+                     "`generate` after adding credits to fill __ERR__ cells.")}
+
+
 def analyze(problems: list[dict]) -> dict:
     A = assemble(problems)
     sigs, expected, card = A["sigs"], A["expected"], A["cardinality"]
     DET, M1 = A["DET_IDX"], A["M1_IDX"]
     ref_idx = DET                          # leave-pair-out population baseline
+    diagnostics = _agent_diagnostics(A)
+    integrity = _data_integrity(problems)
 
     band = _capability_band(A)
     band_models = band["band"]
@@ -844,10 +889,23 @@ def analyze(problems: list[dict]) -> dict:
     def _bin_counts(diff):
         rows = [c for c in card if diff is None or c["difficulty"] == diff]
         b = Counter(c["space"] for c in rows)
+        # conditional-on-error concentration: among problems where >=2 agents
+        # are wrong, how concentrated is the wrong-answer space (Simpson)?
+        # Separates "few errors" (competence) from "convergent errors" (a
+        # genuine shared attractor).
+        simp = [c["simpson"] for c in rows if c["simpson"] is not None]
+        ge2 = [c for c in rows if c["m_wrong"] >= 2]
         return {"CONSTRAINED": b["CONSTRAINED"], "MID": b["MID"],
                 "LARGE": b["LARGE"], "n": len(rows),
                 "median_distinct": float(np.median([c["distinct_wrong"] for c in rows]))
-                if rows else None}
+                if rows else None,
+                "mean_m_wrong": round(float(np.mean([c["m_wrong"] for c in rows])), 2)
+                if rows else None,
+                "n_ge2_wrong": len(ge2),
+                "median_simpson_when_ge2wrong": round(float(np.median(simp)), 3)
+                if simp else None,
+                "median_distinct_when_ge2wrong": float(np.median(
+                    [c["distinct_wrong"] for c in ge2])) if ge2 else None}
     space_table = {"ALL": _bin_counts(None), "EASY": _bin_counts("EASY"),
                    "HARD": _bin_counts("HARD")}
 
@@ -913,10 +971,19 @@ def analyze(problems: list[dict]) -> dict:
     if large_hard_n < 5:
         decision_caveat = (
             f"HARD x LARGE has only {large_hard_n} problems: the LARGE-space "
-            "stratum is under-populated. If reasoning wrong-answers are "
-            "intrinsically concentrated, Route 2 is blocked by OUTPUT-SPACE "
-            "STRUCTURE, not by the independence mechanism failing — a different "
-            "and more fundamental obstruction. Read the decision as provisional.")
+            "stratum is under-populated. The wrong-answer space is small here "
+            "not by convergence but by SPARSITY — mean m_wrong ~2.7/10 agents, "
+            "and when >=2 err they mostly DISAGREE (median Simpson 0). So Route 2 "
+            "is blocked by OUTPUT-SPACE STRUCTURE (few, diverse errors), not by "
+            "the independence mechanism failing — a different, more fundamental "
+            "obstruction. Read the decision as provisional.")
+    if not integrity["m1_arm_usable"]:
+        decision_caveat = ((decision_caveat or "") +
+            " ALSO: the M1 same-model-samples arm was entirely lost to OpenRouter "
+            "402 (out of credits), so Delta = excess(M1) - excess(M3) cannot be "
+            "formed from real data — the preregistered LIVE/MIRAGE/CLOSED rule is "
+            "UNREACHABLE regardless of the stratum. This is an external data-loss "
+            "blocker, not a scientific null.")
 
     result = {
         "config": {"seed": SEED, "models": [m for m, _ in MODELS],
@@ -927,8 +994,10 @@ def analyze(problems: list[dict]) -> dict:
                    "baseline_population": "12 deterministic model x method agents"},
         "DECISION": {"case": case, "hard": dH, "easy": dE,
                      "caveat": decision_caveat},
+        "data_integrity": integrity,
         "capability": band,
-        "parse_rate": A["parse_rate"],
+        "parse_rate_overall": A["parse_rate"],
+        "agent_diagnostics": diagnostics,
         "space_cardinality_by_difficulty": space_table,
         "cells": cells,
         "robustness": {
