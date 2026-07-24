@@ -86,6 +86,57 @@ def p2_verify():
     return out
 
 
+def p2_correction():
+    """CORRECTION: rho_i ∝ v_i/g_i (consequence-to-gain ratio). Under G1 it's flat
+    (stake uninformative); under G2 above the saturation threshold v*=g_max/beta it
+    rises linearly with v (stake IS the right ranking there). Verify, and test the
+    task's expected 'consequence-weighting approaches optimal under G2' -- if the
+    naive p∝v POLICY does not, report the disagreement and fix the claim."""
+    out = {}
+    beta = 0.4
+    for dist in ["pareto", "lognormal", "uniform"]:
+        cl = A.make_claims(n=8000, dist=dist, regime="G2", beta=beta, alpha_in=1.0,
+                           temptation=1.0, seed=1)
+        v = cl.v
+        vstar = float(np.quantile(v, 0.8))          # g_max=beta*quantile(v,.8) => v*=quantile
+        above = v > vstar
+        r = A.rho(cl)
+        # rho vs v correlation, above vs below saturation
+        r_above, v_above = r[above], v[above]
+        r_below, v_below = r[~above], v[~above]
+        corr_above = float(np.corrcoef(v_above, r_above)[0, 1]) if above.sum() > 2 else None
+        cv_below = float(r_below.std() / r_below.mean()) if r_below.mean() > 0 else 0.0
+        out[dist] = dict(
+            v_star=vstar,
+            frac_claims_above_vstar=float(above.mean()),
+            frac_consequence_above_vstar=float(v[above].sum() / v.sum()),
+            rho_v_corr_above=corr_above,           # ~1.0: rho linear in v above v*
+            rho_cv_below=cv_below,                  # ~0: rho flat below v*
+        )
+    # WHO-to-deter ranking: consequence-order vs rho-order vs low-first, G2 vs G1
+    def rank_check(regime):
+        cl = A.make_claims(n=6000, dist="pareto", regime=regime, beta=beta,
+                           alpha_in=1.0, temptation=1.0, seed=1)
+        C = 0.05 * len(cl)
+        r = A.rho(cl)
+        return dict(
+            v_deterred_consequence_order=A.deter_value_in_order(cl, C, np.argsort(-cl.v)),
+            v_deterred_rho_order=A.deter_value_in_order(cl, C, np.argsort(-r)),
+            v_deterred_low_first=A.deter_value_in_order(cl, C, np.argsort(cl.v)),
+            eps_consequence_policy=A.epsilon_population(cl, A.policy_consequence(cl, C)),
+            eps_optimal_policy=A.epsilon_population(cl, A.policy_optimal(cl, C)),
+        )
+    out["ranking_G2"] = rank_check("G2")
+    out["ranking_G1"] = rank_check("G1")
+    # the disagreement metric: how far is the naive p∝v policy from optimal, G1 vs G2
+    g1, g2 = out["ranking_G1"], out["ranking_G2"]
+    out["consequence_policy_over_optimal"] = dict(
+        G1=g1["eps_consequence_policy"] / max(g1["eps_optimal_policy"], 1e-9),
+        G2=g2["eps_consequence_policy"] / max(g2["eps_optimal_policy"], 1e-9),
+    )
+    return out
+
+
 def p3_verify():
     # bond-capacity vs targeting substitution: sweep B_max, measure the gap between
     # optimal (targeted) and uniform. Gap -> 0 as B_max grows (targeting redundant).
@@ -264,6 +315,7 @@ def main():
                          source="consistency_defensibility/FINDINGS_CORRECTION.md (Phase 8)"),
         P1=p1_verify(),
         P2=p2_verify(),
+        P2_correction=p2_correction(),
         P3=p3_verify(),
         P4=p4_verify(),
         P5=p5_verify(),
@@ -284,6 +336,13 @@ def main():
           "vs", round(g1["v_deterred_low_first"], 2))
     print("P2 dispersion sources:", {k: round(v, 3) for k, v in
           result["P2"]["dispersion_sources_rho_cv"].items()})
+    pc = result["P2_correction"]
+    print("P2-CORR consequence>vstar frac:",
+          {d: round(pc[d]["frac_consequence_above_vstar"], 2)
+           for d in ("pareto", "lognormal", "uniform")},
+          "| rho~v corr above (pareto):", round(pc["pareto"]["rho_v_corr_above"], 3),
+          "| conseq-policy/opt G1:", round(pc["consequence_policy_over_optimal"]["G1"], 2),
+          "G2:", round(pc["consequence_policy_over_optimal"]["G2"], 2))
     print("P3 targeting_gain by B_max:",
           [(r["B_max"], round(r["targeting_gain"], 2)) for r in result["P3"]])
     print("P4 min routing acc to beat single-tier:",

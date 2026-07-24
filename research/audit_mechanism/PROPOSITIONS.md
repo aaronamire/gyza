@@ -37,12 +37,20 @@ expected penalty `p·f`. Townsend (1979) costly-state-verification; Border & Sob
 
 **Claim.** With budget `C`, the loss-minimising policy deters the set `S` maximising
 `Σ_{i∈S} v_i` s.t. `Σ_{i∈S} π_i ≤ C`. The fractional relaxation is solved greedily by
-value density `ρ_i = v_i/π_i = v_i q_i B_i /(c_i g_i)`. **Under G1 (`g_i = β v_i`) with
-homogeneous `q, B, c`, `v_i` cancels: `ρ_i = qB/(cβ)` is constant** — so
-consequence-weighted targeting provides **no gain** at the optimum over any other
-selection of which claims to deter. Dispersion in `ρ_i` (which makes targeting
-valuable) comes from, in measured rank order: **gain saturation (G2) > bond
-heterogeneity > competence (`q`) heterogeneity > cost heterogeneity.**
+value density `ρ_i = v_i/π_i = v_i q_i B_i /(c_i g_i)`. **The invariant kernel is the
+consequence-to-gain ratio `v_i/g_i`.** It has two branches:
+
+- **G1 (`g_i = β v_i`):** `v_i/g_i = 1/β` is constant, so `ρ_i = qB/(cβ)` is constant —
+  stake carries **no** ranking information; at the optimum, selecting *which* claims to
+  deter by consequence yields no gain over any other selection.
+- **G2 (`g_i = min(β v_i, g_max)`), saturation threshold `v* = g_max/β`:** below `v*`,
+  `g_i = β v_i` so `ρ_i = qB/(cβ)` is constant (same as G1); **above `v*`, `g_i = g_max`
+  so `ρ_i = v_i qB/(c g_max)` rises *linearly* in `v_i`.** Ranking by `ρ` in the
+  saturated tail **is** ranking by consequence — high-stake claims are exactly the right
+  target there, because their gain has decoupled from their stake.
+
+Dispersion in `ρ_i` (which makes targeting valuable) comes from, in measured rank
+order: **gain saturation (G2) > bond heterogeneity > competence (`q`) > cost.**
 
 **Proof.** A deterred claim contributes `0` to ε; an undeterred one contributes
 `(1−p_i q_i)v_i`, maximised at `v_i` when `p_i=0`. Fully deterring `i` costs `π_i`
@@ -50,30 +58,45 @@ heterogeneity > competence (`q`) heterogeneity > cost heterogeneity.**
 auditing of a deterrable claim to `p_i<p_i^min` removes `q_i v_i` per unit `p` at cost
 `c_i`, density `q_i v_i/c_i`; the ratio partial/full `= g_i/B_i ≤ q_i ≤ 1` for
 deterrable claims, so full deterrence weakly dominates partial auditing — the problem
-is a 0/1 knapsack, greedily solved by `ρ_i` in the fractional relaxation. Substituting
-`g_i = β v_i` gives `ρ_i = v_i q_i B_i/(c_i β v_i) = q_i B_i/(c_i β)`, independent of
-`v_i`. ∎
+is a 0/1 knapsack, greedily solved by `ρ_i`. Since `ρ_i = (v_i/g_i)(q_i B_i/c_i)`, the
+`v_i/g_i` branches above give: constant under G1; and under G2, for `v_i > v* = g_max/β`,
+`ρ_i = v_i q_i B_i/(c_i g_max)` — increasing linearly in `v_i` (continuous at `v*`,
+where it equals `qB/(cβ)`). ∎
 
-**The counter-intuitive content, stated plainly.** A higher-stake claim tempts a
-proportionally higher lie-gain, which costs proportionally more to deter. The two
-scale together and cancel. **Auditing where the stakes are highest is not optimal when
-gains scale with stakes.** What *does* create exploitable dispersion is the competence
-bound (`q`) and gain saturation (`g` flattening), not consequence (`v`).
+**The correct content, stated plainly (this is the Part-1 CORRECTION).** The invariant
+is: **target the consequence-to-gain ratio `v/g`, not consequence alone and not
+detectability alone.** Under proportional gains that ratio is flat, so stake is
+uninformative (the correctly-derived G1 result). Under *saturating* gains — the regime
+the dispersion ranking calls dominant — the ratio grows with stake above `v*`, so
+**high-stake claims are the right priority precisely there.** My original headline
+("consequence is the wrong thing to target") was derived from the G1 branch alone and is
+**inverted in the G2 tail.**
 
-**Numerical check.** G1 homogeneous: `ρ`-CV `= 2.6e-16` (exact cancellation), and
-value deterred is **order-indifferent** — deterring high-stake-first vs low-stake-first
-gives 3271.8 vs 3267.6 (0.13%). Dispersion sources (`ρ`-CV, one knob at a time):
-baseline 0.00, **G2 saturation 1.69**, bond-het 0.90, **q-competence 0.78**, cost-het
-0.41. Under G2 the optimal beats uniform decisively (ε 433 vs 1556, pareto/G2).
-Deterministic `topk_stake` is the **worst** policy in every cell (e.g. uniform-stakes
-G1: topk 3319 vs uniform 2385) — the inspection-game result (see the exploitability
-note below). ✓
+**Numerical check.** G1 homogeneous: `ρ`-CV `= 2.6e-16` (exact cancellation), value
+deterred **order-indifferent** (high-first 3271.8 vs low-first 3267.6, 0.13%). Under G2:
+`ρ`~`v` correlation *above* `v*` `= 1.000` (exactly linear, as derived) and `ρ`-CV
+*below* `v*` `= 1.5e-16` (flat) — both branches confirmed. Deterring by consequence-order
+under G2 captures **the same** value as deterring by `ρ`-order (4078.5 = 4078.5) and far
+more than low-first (1840) — so under G2, consequence-ranking *is* optimal ranking; under
+G1 all orders tie. Dispersion sources (`ρ`-CV): baseline 0.00, **G2 1.69**, bond 0.90,
+**q 0.78**, cost 0.41. Deterministic `topk_stake` is still the **worst** policy in every
+cell (uniform-stakes G1: 3319 vs uniform 2385) — the inspection game. ✓
 
-**Caveat (found in simulation, reported honestly).** The cancellation is about the
-*optimal*, not about arbitrary heuristic `p`-shapes. Under a heavy stake tail,
-consequence-proportional `p_i ∝ v_i` happens to track `p_i^min ∝ v_i` and so beats a
-flat `p` — but that is a statement about `p`-shape, not evidence that consequence
-*information* helps at the optimum. It does not.
+**Reported disagreement (sim contradicts the naive phrasing; derivation wins).** One
+might expect "the consequence-weighted *policy* (`p_i ∝ v_i`) approaches optimal under
+G2." It does **not**: measured, the `p∝v` policy is **2.04× optimal under G2** versus
+**1.16× under G1** — *worse*, not better. Diagnosis: the `p∝v` policy conflates *who to
+deter* (correctly stake-ranked in the G2 tail) with *how much to audit*. The optimal
+audit intensity is `p_i^min = g_i/(q_i B_i)`, which in the saturated tail is **constant**
+(`g_max/(qB)`), not `∝ v_i`; `p∝v` therefore *overspends* the tail. **Prioritise by
+consequence-to-gain ratio; meter each claim at its own `p_min`.** The ρ-ranking result
+holds; the intensity heuristic does not — reported here rather than reconciled away.
+
+**How much of the mass the G2 branch governs (1c).** Fraction of total *consequence*
+sitting above `v*` (where stake becomes informative): **Pareto 0.59, lognormal 0.56,
+uniform 0.34**. Under heavy-tailed stakes the saturated branch governs the *majority* of
+consequence — this is not a negligible tail; it is where most of the risk lives. Only
+under light (uniform) stakes is it a minority.
 
 **Prior art. KNOWN-VARIANT.** Audit-as-knapsack / greedy value-density is standard in
 security-game resource allocation (Tambe 2011; Korzhyk, Conitzer & Parr 2010) and in

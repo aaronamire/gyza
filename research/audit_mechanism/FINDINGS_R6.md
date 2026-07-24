@@ -8,15 +8,36 @@ error optimally?"), not the verdict. All prior decisions stand.
 
 ## HEADLINE
 
-**1. Consequence is the wrong thing to target.** Under proportional gains
-(`g = β·v`) with homogeneous audit economics, the value density `ρ_i = v_i q_i B_i/(c_i
-g_i)` has the stake `v_i` **cancel exactly** (`ρ`-CV = 2.6e-16; deterring high-stake vs
-low-stake first deters the same total consequence to 0.13%). A higher-stake claim
-tempts a proportionally larger lie that costs proportionally more to deter — the two
-cancel. **Auditing where the money is provides no gain.** The dimensions that *do*
-create exploitable dispersion, in measured rank order: **gain saturation (G2, ρ-CV
-1.69) > bond heterogeneity (0.90) > the competence bound `q` (0.78) > cost heterogeneity
-(0.41).** Target detectability and gain-shape, not stakes.
+**1. Target the consequence-to-gain ratio `v/g` — which means stakes DO matter once
+gains saturate.** The value density is `ρ_i = (v_i/g_i)·(q_i B_i/c_i)`; the invariant
+kernel is the consequence-to-gain ratio `v_i/g_i`. It has two branches:
+- **proportional gains (G1, `g=βv`):** `v/g = 1/β` is constant, so stake carries no
+  ranking information (`ρ`-CV = 2.6e-16; deterring high- vs low-stake first deters the
+  same total to 0.13%);
+- **saturating gains (G2, `g=min(βv, g_max)`, `v*=g_max/β`):** above `v*`, `v/g = v/g_max`
+  rises with stake, so `ρ` rises linearly with `v` (`ρ`~`v` correlation above `v*` = 1.000)
+  and **ranking by consequence IS optimal ranking there** — high-stake claims are the
+  right priority precisely because their gain has decoupled from their stake.
+
+Under heavy-tailed stakes the saturated branch governs the **majority of consequence**
+(fraction above `v*`: Pareto 0.59, lognormal 0.56, uniform 0.34), so this is not a
+negligible tail. The dispersion sources that make targeting valuable, ranked:
+**gain saturation (ρ-CV 1.69) > bond heterogeneity (0.90) > competence `q` (0.78) > cost
+(0.41).** **Prioritise by `v/g`; meter each claim at its own `p_min = g/(qB)`** (see the
+correction note — the naive "audit ∝ stakes" policy overspends the saturated tail and is
+2.04× optimal under G2).
+
+> **CORRECTION (Part 1, this revision).** The original headline read *"Consequence is
+> the wrong thing to target… Auditing where the money is provides no gain."* **That was
+> a derivation error** — it applied the G1 branch (`v` cancels) as if it were general,
+> while the same document ranks G2 (saturating gains) as the *largest* dispersion source
+> and calls it realistic. Under G2 above `v*`, `ρ ∝ v` rises, so ranking by `ρ` = ranking
+> by consequence, and stakes *are* the right target. The corrected invariant is: target
+> the **consequence-to-gain ratio** `v/g`. The error inverted design-rule 2 (below) in
+> exactly the regime the analysis calls realistic; both the error and the fix are kept on
+> the record, same discipline as the Phase 8 canonicalization correction. Numerically
+> confirmed: under G2 consequence-order deters the same value as ρ-order (4078.5 =
+> 4078.5) and far more than low-first (1840); under G1 all orders tie.
 
 **2. The likelihood ratio `q/f`, not TPR/FPR/J, decides whether a bonded mechanism can
 exist at all.** A mechanism both deters lying and retains honest agents iff
@@ -47,18 +68,34 @@ temptation 0.128, `e0` = unaudited baseline):
 | 0.30 | 0.219 | 0.449 |
 | 0.60 | 0.219 | 0.267 |
 
-**The optimal ε plateaus at 0.219·e0 for every `r ≥ 0.05` and never improves.** The
-residual is entirely **out-of-competence + bond-capped-undeterrable** consequence that
-a cheap checker cannot touch at any audit rate. This floor is set by the competence
-bound, not the budget — the single most important number here. (Monte-Carlo reproduces
-the closed form to 0.02%.) **A cheap-checker mechanism guarantees undetected
-consequential error `≤ ~0.22 × baseline` above a ~5% audit rate — and that 0.22 is the
-out-of-competence share, removable only by ground-truth resolution.**
+**The optimal ε plateaus and never improves past a threshold rate.** The residual is
+entirely **out-of-competence + bond-capped-undeterrable** consequence a cheap checker
+cannot touch at any audit rate; the floor is set by the competence bound, not the budget
+(Monte-Carlo reproduces the closed form to 0.02%).
 
-**Robustness.** Sweeping `q_out` across the full underpowered interval `[0, 0.3]`, the
-fraction of residual loss coming from out-of-competence claims stays **0.70–0.96** — the
-floor's *composition* is robust to the exact (uncertain) `q_out`. This is a
-DEMONSTRATED-ROBUST conclusion, not a point-estimate artifact.
+**Two things must be stated precisely (Part-1 corrections):**
+
+- **The plateau's EXISTENCE is robust; its LOCATION is calibration-dependent.** That more
+  budget buys nothing past some `r*` is general (the floor is the undeterrable residual).
+  *Where* `r*` sits is not: from `π_i = c·g/(q·B)`, the cheap tier saturates once budget
+  covers every deterrable in-competence claim, i.e. at
+  `r* ≈ α · E[g/(q_in B)] / c_cheap` (for the calibrated draw, `r* ≈ 0.05`). A different
+  `β` (gain-to-stake), bond cap, or base rate moves `r*`. **Measure your own plateau; do
+  not assume 5%.**
+- **`0.22` is a RATIO (a 78% reduction), NOT an absolute error bound.** The plateau says
+  ε(optimal) `≈ 0.22 · e0`, where `e0` is the unaudited baseline — a relative reduction,
+  not a procurement-grade absolute guarantee. The **absolute** form is
+  `ε_floor ≈ N · λ · [(1−α)·E[v | out] + α·P(g>q_in B_max)·E[v | undeterrable]]`, i.e. the
+  base-rate (`λ ≈ 0.128`) times the out-of-competence-plus-undeterrable consequence mass
+  of the actual claim distribution. A bounded-error *contract* must quote this absolute
+  number for the deployment's own `N, λ, α, v`-distribution — the ratio alone is not a
+  contract.
+
+**Robustness of the composition.** Sweeping `q_out` across the full underpowered interval
+`[0, 0.3]`, the fraction of residual loss from out-of-competence claims stays
+**0.70–0.96** — the floor's *composition* is robust to the exact (uncertain) `q_out`.
+DEMONSTRATED-ROBUST, not a point-estimate artifact. (The `0.219` ratio itself is at the
+calibrated `q_out`; treat it as illustrative, the composition as robust.)
 
 ## The two-tier design and its routing floor
 
@@ -66,10 +103,18 @@ Out-of-competence claims (`q_out ≈ 0`) are undeterrable by the cheap tier at a
 they need the expensive oracle (`q_ex ≈ 1`, cost `c_ex ≫ c_cheap`). A two-tier
 mechanism routes claims and audits each in its tier. At **scarce budget** (`r = 0.05`,
 `c_ex = 20`) two-tier beats single-tier all-expensive (ε 1860 vs 3833 at perfect
-routing) **across the whole routing-accuracy sweep down to 50%** — because misrouting an
-out-claim to cheap only wastes a cheap audit, while the budget freed on in-claims
-dominates. Misrouting is **asymmetric**: out→cheap is dangerous (leaks), in→expensive is
+routing). Misrouting is **asymmetric**: out→cheap is dangerous (leaks), in→expensive is
 merely wasteful.
+
+**Stated precisely (Part-1 correction):** the sweep shows that *under budget scarcity,
+even an uninformative router (accuracy 0.5) beats all-expensive.* That is a statement
+about **scarcity** — when the oracle is too expensive to apply broadly, splitting off any
+cheap capacity helps — **not** about routing *quality*. Routing quality still matters
+monotonically (ε falls from 2737 at acc 0.5 to 1860 at acc 1.0); a better router is
+strictly better. The correct claim is: *two-tier dominates single-tier whenever budget is
+scarce, and the gain grows with routing accuracy* — not "routing accuracy down to 50% is
+fine" in general. At abundant budget with a tight bond cap the ordering can flip (single
+wins), so the result is scarcity-conditional.
 
 **Regime caveat (PARAMETER-DEPENDENT).** The two-tier win is a budget-scarcity effect.
 At *abundant* budget with a *tight* bond cap, single-tier all-expensive can win, because
