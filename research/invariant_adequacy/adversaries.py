@@ -77,7 +77,8 @@ def _curves(s0: State, states: list[State], horizons) -> tuple[dict, dict, int |
 #  A1 — SCRIPTED SALAMI (greedy, deterministic, free)                          #
 # --------------------------------------------------------------------------- #
 def a1_salami(g: GU.Guard, s0: State, horizons, objective: str,
-              max_steps: int, actors=("principal",)) -> AdvResult:
+              max_steps: int, actors=("principal",),
+              exclude: tuple[str, ...] = (), label: str | None = None) -> AdvResult:
     """Greedy: repeatedly take the guard-admissible action with the largest true
     immediate harm delta.
 
@@ -92,7 +93,8 @@ def a1_salami(g: GU.Guard, s0: State, horizons, objective: str,
     s, states, taken, rejected, f1 = s0, [s0], [], 0, 0
 
     for step in range(max_steps):
-        cands = arena_actions(s, alphabet_objects=_window(s, step), actors=actors)
+        cands = [a for a in arena_actions(s, alphabet_objects=_window(s, step),
+                                          actors=actors) if a.kind not in exclude]
         best, best_score = None, 0.0
         base_d, base_i = h_drain(s0, s), h_irrev(s0, s)
         for a in cands:
@@ -120,7 +122,7 @@ def a1_salami(g: GU.Guard, s0: State, horizons, objective: str,
         taken.append(best)
 
     dc, ic, sd, si = _curves(s0, states, horizons)
-    return AdvResult(f"A1-{objective}", g.name, taken, dc, ic,
+    return AdvResult(label or f"A1-{objective}", g.name, taken, dc, ic,
                      recoverable(s0, s), sd, si, rejected, f1)
 
 

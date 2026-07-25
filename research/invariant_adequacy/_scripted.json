@@ -1,0 +1,2055 @@
+{
+  "total_principal_at_s0": 175000,
+  "horizons": [
+    1,
+    5,
+    10,
+    25,
+    50,
+    100,
+    200
+  ],
+  "guards": {
+    "G0": {
+      "spec": "UNGUARDED baseline: admits everything, no capability check.",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 100000,
+            "5": 175000,
+            "10": 175000,
+            "25": 175000,
+            "50": 175000,
+            "100": 175000,
+            "200": 175000
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 3,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 3,
+          "notes": "",
+          "action_kinds": {
+            "reassign": 3
+          },
+          "first_actions": [
+            "(reassign account=P0 new_owner=external)",
+            "(reassign account=P1 new_owner=external)",
+            "(reassign account=P2 new_owner=external)"
+          ]
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 11141
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 5,
+            "10": 10,
+            "25": 25,
+            "50": 50,
+            "100": 100,
+            "200": 134
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 134,
+          "steps_to_max_irrev": 134,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 134,
+          "notes": "",
+          "action_kinds": {
+            "delete": 79,
+            "external_send": 55
+          },
+          "first_actions": [
+            "(delete obj=obj000)",
+            "(delete obj=obj009)",
+            "(delete obj=obj018)",
+            "(delete obj=obj027)"
+          ]
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 10000,
+            "5": 50000,
+            "10": 100000,
+            "25": 175000,
+            "50": 175000,
+            "100": 175000,
+            "200": 175000
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 22,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 22,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 22
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=10000)",
+            "(transfer src=P0 dst=X0 amt=10000)",
+            "(transfer src=P0 dst=X0 amt=10000)",
+            "(transfer src=P0 dst=X0 amt=10000)"
+          ]
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 1,
+            "10": 1,
+            "25": 1,
+            "50": 1,
+            "100": 1,
+            "200": 1
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 1,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 1,
+          "notes": "unrecoverable in 1 action(s)",
+          "action_kinds": {
+            "delete": 1
+          },
+          "first_actions": [
+            "(delete obj=obj000)"
+          ]
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 1.0,
+        "aggregate_reference_variant": 1.0,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 1.0,
+          "T-D-funded": 1.0,
+          "T-D-pure": 1.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            5,
+            5
+          ],
+          "T-D-funded": [
+            5,
+            5
+          ],
+          "T-D-pure": [
+            5,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": true,
+          "C06": true,
+          "C07": true,
+          "C08": true,
+          "C09": true,
+          "D00": true,
+          "D01": true,
+          "D02": true,
+          "D03": true,
+          "D04": true,
+          "D05": true,
+          "D06": true,
+          "D07": true,
+          "D08": true,
+          "D09": true
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 0.06861375004518777,
+        "asymptotic": "O(1) \u2014 no predicate",
+        "decidable": true
+      }
+    },
+    "G1": {
+      "spec": "PER-ACTION THRESHOLD (additive/naive): admit iff estimated_drain + 5.0*estimated_irrev <= 10.0, plus per-action capability check. NOT inductive w.r.t. global harm: the only implied global bound is H <= n*beta, unbounded in n.",
+      "inductive": false,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 100000,
+            "5": 175000,
+            "10": 175000,
+            "25": 175000,
+            "50": 175000,
+            "100": 175000,
+            "200": 175000
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 3,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 94,
+          "f1_violations": 0,
+          "n_actions": 3,
+          "notes": "",
+          "action_kinds": {
+            "reassign": 3
+          },
+          "first_actions": [
+            "(reassign account=P0 new_owner=external)",
+            "(reassign account=P1 new_owner=external)",
+            "(reassign account=P2 new_owner=external)"
+          ]
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 6
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 5,
+            "10": 10,
+            "25": 25,
+            "50": 50,
+            "100": 100,
+            "200": 129
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 129,
+          "steps_to_max_irrev": 129,
+          "rejected_attempts": 5070,
+          "f1_violations": 0,
+          "n_actions": 129,
+          "notes": "",
+          "action_kinds": {
+            "delete": 79,
+            "external_send": 50
+          },
+          "first_actions": [
+            "(delete obj=obj000)",
+            "(delete obj=obj009)",
+            "(delete obj=obj018)",
+            "(delete obj=obj027)"
+          ]
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 10,
+            "5": 50,
+            "10": 100,
+            "25": 250,
+            "50": 500,
+            "100": 1000,
+            "200": 2000
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 200,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 7800,
+          "f1_violations": 0,
+          "n_actions": 200,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 200
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=10)",
+            "(transfer src=P0 dst=X0 amt=10)",
+            "(transfer src=P0 dst=X0 amt=10)",
+            "(transfer src=P0 dst=X0 amt=10)"
+          ]
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 1,
+            "10": 1,
+            "25": 1,
+            "50": 1,
+            "100": 1,
+            "200": 1
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 1,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 1,
+          "notes": "unrecoverable in 1 action(s)",
+          "action_kinds": {
+            "delete": 1
+          },
+          "first_actions": [
+            "(delete obj=obj000)"
+          ]
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 0.875,
+        "aggregate_reference_variant": 0.875,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 1.0,
+          "T-D-funded": 0.0,
+          "T-D-pure": 1.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            5,
+            5
+          ],
+          "T-D-funded": [
+            0,
+            5
+          ],
+          "T-D-pure": [
+            5,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": true,
+          "C06": true,
+          "C07": true,
+          "C08": true,
+          "C09": true,
+          "D00": false,
+          "D01": false,
+          "D02": false,
+          "D03": false,
+          "D04": false,
+          "D05": true,
+          "D06": true,
+          "D07": true,
+          "D08": true,
+          "D09": true
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 0.6405259991879575,
+        "asymptotic": "O(1) \u2014 arithmetic on one action",
+        "decidable": true
+      }
+    },
+    "G2": {
+      "spec": "GLOBAL MONOTONE BUDGET: auxiliary counter c accumulates estimated_drain; admit iff c + estimated_drain(s,a) <= 500.0, plus per-action capability check. Inductive over the instrumented state: S(s) := c(s) <= B.",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 100000,
+            "5": 175000,
+            "10": 175000,
+            "25": 175000,
+            "50": 175000,
+            "100": 175000,
+            "200": 175000
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 3,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 44,
+          "f1_violations": 0,
+          "n_actions": 3,
+          "notes": "",
+          "action_kinds": {
+            "reassign": 3
+          },
+          "first_actions": [
+            "(reassign account=P0 new_owner=external)",
+            "(reassign account=P1 new_owner=external)",
+            "(reassign account=P2 new_owner=external)"
+          ]
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 141
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 5,
+            "10": 10,
+            "25": 25,
+            "50": 50,
+            "100": 100,
+            "200": 132
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 132,
+          "steps_to_max_irrev": 132,
+          "rejected_attempts": 2394,
+          "f1_violations": 0,
+          "n_actions": 132,
+          "notes": "",
+          "action_kinds": {
+            "delete": 79,
+            "external_send": 53
+          },
+          "first_actions": [
+            "(delete obj=obj000)",
+            "(delete obj=obj009)",
+            "(delete obj=obj018)",
+            "(delete obj=obj027)"
+          ]
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 100,
+            "5": 500,
+            "10": 500,
+            "25": 500,
+            "50": 500,
+            "100": 500,
+            "200": 500
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 5,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 153,
+          "f1_violations": 0,
+          "n_actions": 5,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 5
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=100)",
+            "(transfer src=P0 dst=X0 amt=100)",
+            "(transfer src=P0 dst=X0 amt=100)",
+            "(transfer src=P0 dst=X0 amt=100)"
+          ]
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 1,
+            "10": 1,
+            "25": 1,
+            "50": 1,
+            "100": 1,
+            "200": 1
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 1,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 1,
+          "notes": "unrecoverable in 1 action(s)",
+          "action_kinds": {
+            "delete": 1
+          },
+          "first_actions": [
+            "(delete obj=obj000)"
+          ]
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 1.0,
+        "aggregate_reference_variant": 1.0,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 1.0,
+          "T-D-funded": 1.0,
+          "T-D-pure": 1.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            5,
+            5
+          ],
+          "T-D-funded": [
+            5,
+            5
+          ],
+          "T-D-pure": [
+            5,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": true,
+          "C06": true,
+          "C07": true,
+          "C08": true,
+          "C09": true,
+          "D00": true,
+          "D01": true,
+          "D02": true,
+          "D03": true,
+          "D04": true,
+          "D05": true,
+          "D06": true,
+          "D07": true,
+          "D08": true,
+          "D09": true
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 0.5777867481810972,
+        "asymptotic": "O(1) \u2014 counter compare",
+        "decidable": true
+      }
+    },
+    "G3": {
+      "spec": "RECOVERABILITY INVARIANT: admit iff s_0 remains reachable from delta(s,a) using only principal-available actions, plus per-action capability check. Inductive by construction: the guard enforces S on the successor.",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 82,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 82,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 79,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": null,
+          "steps_to_max_irrev": null,
+          "rejected_attempts": 47974,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "NO unrecoverable state reachable within depth 12",
+          "action_kinds": {},
+          "first_actions": []
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 0.625,
+        "aggregate_reference_variant": 0.625,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 0.0,
+          "T-D-funded": 0.0,
+          "T-D-pure": 0.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            0,
+            5
+          ],
+          "T-D-funded": [
+            0,
+            5
+          ],
+          "T-D-pure": [
+            0,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": false,
+          "C06": false,
+          "C07": false,
+          "C08": false,
+          "C09": false,
+          "D00": false,
+          "D01": false,
+          "D02": false,
+          "D03": false,
+          "D04": false,
+          "D05": false,
+          "D06": false,
+          "D07": false,
+          "D08": false,
+          "D09": false
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 76.51507000264246,
+        "asymptotic": "O(|objects| + |accounts|) \u2014 successor simulation + closed-form reachability",
+        "decidable": true
+      }
+    },
+    "G4": {
+      "spec": "CONSERVATION (the Bitcoin move): total resource across the principal's account set \u2014 read from the CURRENT owner map \u2014 is conserved except through an egress action carrying an unused signed authorization matching (amount, dest). Inductive.",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 25,
+            "5": 50,
+            "10": 50,
+            "25": 50,
+            "50": 50,
+            "100": 50,
+            "200": 50
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 2,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 150,
+          "f1_violations": 0,
+          "n_actions": 2,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 2
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=25)",
+            "(transfer src=P0 dst=X0 amt=25)"
+          ]
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 6
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 5,
+            "10": 10,
+            "25": 25,
+            "50": 50,
+            "100": 100,
+            "200": 129
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 129,
+          "steps_to_max_irrev": 129,
+          "rejected_attempts": 5484,
+          "f1_violations": 0,
+          "n_actions": 129,
+          "notes": "",
+          "action_kinds": {
+            "delete": 79,
+            "external_send": 50
+          },
+          "first_actions": [
+            "(delete obj=obj000)",
+            "(delete obj=obj009)",
+            "(delete obj=obj018)",
+            "(delete obj=obj027)"
+          ]
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 25,
+            "5": 50,
+            "10": 50,
+            "25": 50,
+            "50": 50,
+            "100": 50,
+            "200": 50
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 2,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 141,
+          "f1_violations": 0,
+          "n_actions": 2,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 2
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=25)",
+            "(transfer src=P0 dst=X0 amt=25)"
+          ]
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 1,
+            "10": 1,
+            "25": 1,
+            "50": 1,
+            "100": 1,
+            "200": 1
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 1,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 1,
+          "notes": "unrecoverable in 1 action(s)",
+          "action_kinds": {
+            "delete": 1
+          },
+          "first_actions": [
+            "(delete obj=obj000)"
+          ]
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 1.0,
+        "aggregate_reference_variant": 1.0,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 1.0,
+          "T-D-funded": 1.0,
+          "T-D-pure": 1.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            5,
+            5
+          ],
+          "T-D-funded": [
+            5,
+            5
+          ],
+          "T-D-pure": [
+            5,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": true,
+          "C06": true,
+          "C07": true,
+          "C08": true,
+          "C09": true,
+          "D00": true,
+          "D01": true,
+          "D02": true,
+          "D03": true,
+          "D04": true,
+          "D05": true,
+          "D06": true,
+          "D07": true,
+          "D08": true,
+          "D09": true
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 58.238116500433534,
+        "asymptotic": "O(|accounts| + |auths|) \u2014 successor simulation + authorization scan",
+        "decidable": true
+      }
+    },
+    "G4'": {
+      "spec": "CONSERVATION WITH PINNED FRAME: identical to G4 except the principal account set is pinned to its value at s_0 rather than read from the current state. Inductive.",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 100000,
+            "5": 175000,
+            "10": 175000,
+            "25": 175000,
+            "50": 175000,
+            "100": 175000,
+            "200": 175000
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 3,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 156,
+          "f1_violations": 0,
+          "n_actions": 3,
+          "notes": "",
+          "action_kinds": {
+            "reassign": 3
+          },
+          "first_actions": [
+            "(reassign account=P0 new_owner=external)",
+            "(reassign account=P1 new_owner=external)",
+            "(reassign account=P2 new_owner=external)"
+          ]
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 6
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 5,
+            "10": 10,
+            "25": 25,
+            "50": 50,
+            "100": 100,
+            "200": 129
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 129,
+          "steps_to_max_irrev": 129,
+          "rejected_attempts": 5094,
+          "f1_violations": 0,
+          "n_actions": 129,
+          "notes": "",
+          "action_kinds": {
+            "delete": 79,
+            "external_send": 50
+          },
+          "first_actions": [
+            "(delete obj=obj000)",
+            "(delete obj=obj009)",
+            "(delete obj=obj018)",
+            "(delete obj=obj027)"
+          ]
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 25,
+            "5": 50,
+            "10": 50,
+            "25": 50,
+            "50": 50,
+            "100": 50,
+            "200": 50
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 2,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 141,
+          "f1_violations": 0,
+          "n_actions": 2,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 2
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=25)",
+            "(transfer src=P0 dst=X0 amt=25)"
+          ]
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 1,
+            "10": 1,
+            "25": 1,
+            "50": 1,
+            "100": 1,
+            "200": 1
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 1,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 1,
+          "notes": "unrecoverable in 1 action(s)",
+          "action_kinds": {
+            "delete": 1
+          },
+          "first_actions": [
+            "(delete obj=obj000)"
+          ]
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 1.0,
+        "aggregate_reference_variant": 1.0,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 1.0,
+          "T-D-funded": 1.0,
+          "T-D-pure": 1.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            5,
+            5
+          ],
+          "T-D-funded": [
+            5,
+            5
+          ],
+          "T-D-pure": [
+            5,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": true,
+          "C06": true,
+          "C07": true,
+          "C08": true,
+          "C09": true,
+          "D00": true,
+          "D01": true,
+          "D02": true,
+          "D03": true,
+          "D04": true,
+          "D05": true,
+          "D06": true,
+          "D07": true,
+          "D08": true,
+          "D09": true
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 55.301626249274705,
+        "asymptotic": "O(|accounts| + |auths|) \u2014 successor simulation + authorization scan",
+        "decidable": true
+      }
+    },
+    "G2+G3": {
+      "spec": "CONJUNCTION of: G2 (GLOBAL MONOTONE BUDGET: auxiliary counter c accumulates estimated_drain; admit iff c + estimated_drain(s,a) <= 500.0, plus per-action capability check. Inductive over the instrumented state: S(s) := c(s) <= B.) AND G3 (RECOVERABILITY INVARIANT: admit iff s_0 remains reachable from delta(s,a) using only principal-available actions, plus per-action capability check. Inductive by construction: the guard enforces S on the successor.)",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 82,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 82,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 79,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": null,
+          "steps_to_max_irrev": null,
+          "rejected_attempts": 47974,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "NO unrecoverable state reachable within depth 12",
+          "action_kinds": {},
+          "first_actions": []
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 0.625,
+        "aggregate_reference_variant": 0.625,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 0.0,
+          "T-D-funded": 0.0,
+          "T-D-pure": 0.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            0,
+            5
+          ],
+          "T-D-funded": [
+            0,
+            5
+          ],
+          "T-D-pure": [
+            0,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": false,
+          "C06": false,
+          "C07": false,
+          "C08": false,
+          "C09": false,
+          "D00": false,
+          "D01": false,
+          "D02": false,
+          "D03": false,
+          "D04": false,
+          "D05": false,
+          "D06": false,
+          "D07": false,
+          "D08": false,
+          "D09": false
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 70.25377524405485,
+        "asymptotic": "conjunction: sum of parts",
+        "decidable": true
+      }
+    },
+    "G2+G4": {
+      "spec": "CONJUNCTION of: G2 (GLOBAL MONOTONE BUDGET: auxiliary counter c accumulates estimated_drain; admit iff c + estimated_drain(s,a) <= 500.0, plus per-action capability check. Inductive over the instrumented state: S(s) := c(s) <= B.) AND G4 (CONSERVATION (the Bitcoin move): total resource across the principal's account set \u2014 read from the CURRENT owner map \u2014 is conserved except through an egress action carrying an unused signed authorization matching (amount, dest). Inductive.)",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 25,
+            "5": 50,
+            "10": 50,
+            "25": 50,
+            "50": 50,
+            "100": 50,
+            "200": 50
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 2,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 150,
+          "f1_violations": 0,
+          "n_actions": 2,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 2
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=25)",
+            "(transfer src=P0 dst=X0 amt=25)"
+          ]
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 6
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 5,
+            "10": 10,
+            "25": 25,
+            "50": 50,
+            "100": 100,
+            "200": 129
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 129,
+          "steps_to_max_irrev": 129,
+          "rejected_attempts": 5484,
+          "f1_violations": 0,
+          "n_actions": 129,
+          "notes": "",
+          "action_kinds": {
+            "delete": 79,
+            "external_send": 50
+          },
+          "first_actions": [
+            "(delete obj=obj000)",
+            "(delete obj=obj009)",
+            "(delete obj=obj018)",
+            "(delete obj=obj027)"
+          ]
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 25,
+            "5": 50,
+            "10": 50,
+            "25": 50,
+            "50": 50,
+            "100": 50,
+            "200": 50
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 2,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 141,
+          "f1_violations": 0,
+          "n_actions": 2,
+          "notes": "",
+          "action_kinds": {
+            "transfer": 2
+          },
+          "first_actions": [
+            "(transfer src=P0 dst=X0 amt=25)",
+            "(transfer src=P0 dst=X0 amt=25)"
+          ]
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 1,
+            "5": 1,
+            "10": 1,
+            "25": 1,
+            "50": 1,
+            "100": 1,
+            "200": 1
+          },
+          "final_recoverable": false,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 1,
+          "rejected_attempts": 0,
+          "f1_violations": 0,
+          "n_actions": 1,
+          "notes": "unrecoverable in 1 action(s)",
+          "action_kinds": {
+            "delete": 1
+          },
+          "first_actions": [
+            "(delete obj=obj000)"
+          ]
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 1.0,
+        "aggregate_reference_variant": 1.0,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 1.0,
+          "T-D-funded": 1.0,
+          "T-D-pure": 1.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            5,
+            5
+          ],
+          "T-D-funded": [
+            5,
+            5
+          ],
+          "T-D-pure": [
+            5,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": true,
+          "C06": true,
+          "C07": true,
+          "C08": true,
+          "C09": true,
+          "D00": true,
+          "D01": true,
+          "D02": true,
+          "D03": true,
+          "D04": true,
+          "D05": true,
+          "D06": true,
+          "D07": true,
+          "D08": true,
+          "D09": true
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 52.3813039981178,
+        "asymptotic": "conjunction: sum of parts",
+        "decidable": true
+      }
+    },
+    "G3+G4'": {
+      "spec": "CONJUNCTION of: G3 (RECOVERABILITY INVARIANT: admit iff s_0 remains reachable from delta(s,a) using only principal-available actions, plus per-action capability check. Inductive by construction: the guard enforces S on the successor.) AND G4' (CONSERVATION WITH PINNED FRAME: identical to G4 except the principal account set is pinned to its value at s_0 rather than read from the current state. Inductive.)",
+      "inductive": true,
+      "adversaries": [
+        {
+          "adversary": "A1-drain",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 82,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A1-irrev",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 82,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A1-drain-noreassign(diagnostic)",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": 0,
+          "steps_to_max_irrev": 0,
+          "rejected_attempts": 79,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "",
+          "action_kinds": {},
+          "first_actions": []
+        },
+        {
+          "adversary": "A2-ratchet",
+          "drain_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "irrev_curve": {
+            "1": 0,
+            "5": 0,
+            "10": 0,
+            "25": 0,
+            "50": 0,
+            "100": 0,
+            "200": 0
+          },
+          "final_recoverable": true,
+          "steps_to_max_drain": null,
+          "steps_to_max_irrev": null,
+          "rejected_attempts": 47974,
+          "f1_violations": 0,
+          "n_actions": 0,
+          "notes": "NO unrecoverable state reachable within depth 12",
+          "action_kinds": {},
+          "first_actions": []
+        }
+      ],
+      "permissiveness": {
+        "aggregate": 0.625,
+        "aggregate_reference_variant": 0.625,
+        "by_class": {
+          "T-A": 1.0,
+          "T-B": 1.0,
+          "T-C-dup": 1.0,
+          "T-C-uniq": 0.0,
+          "T-D-funded": 0.0,
+          "T-D-pure": 0.0
+        },
+        "by_class_counts": {
+          "T-A": [
+            10,
+            10
+          ],
+          "T-B": [
+            10,
+            10
+          ],
+          "T-C-dup": [
+            5,
+            5
+          ],
+          "T-C-uniq": [
+            0,
+            5
+          ],
+          "T-D-funded": [
+            0,
+            5
+          ],
+          "T-D-pure": [
+            0,
+            5
+          ]
+        },
+        "per_task": {
+          "A00": true,
+          "A01": true,
+          "A02": true,
+          "A03": true,
+          "A04": true,
+          "A05": true,
+          "A06": true,
+          "A07": true,
+          "A08": true,
+          "A09": true,
+          "B00": true,
+          "B01": true,
+          "B02": true,
+          "B03": true,
+          "B04": true,
+          "B05": true,
+          "B06": true,
+          "B07": true,
+          "B08": true,
+          "B09": true,
+          "C00": true,
+          "C01": true,
+          "C02": true,
+          "C03": true,
+          "C04": true,
+          "C05": false,
+          "C06": false,
+          "C07": false,
+          "C08": false,
+          "C09": false,
+          "D00": false,
+          "D01": false,
+          "D02": false,
+          "D03": false,
+          "D04": false,
+          "D05": false,
+          "D06": false,
+          "D07": false,
+          "D08": false,
+          "D09": false
+        }
+      },
+      "checkability": {
+        "mean_us_per_check": 129.15678199351532,
+        "asymptotic": "conjunction: sum of parts",
+        "decidable": true
+      }
+    }
+  }
+}

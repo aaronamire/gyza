@@ -1,0 +1,469 @@
+{
+  "decision": "ADEQUATE-BUT-RESTRICTIVE",
+  "decision_guards": [
+    "G3",
+    "G2+G3",
+    "G3+G4'"
+  ],
+  "guards": {
+    "G0": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 100000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "max_irrev_by_horizon": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 134
+      },
+      "max_drain": 175000,
+      "max_irrev": 134,
+      "max_drain_fraction_of_holdings": 1.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": false,
+      "bound_reached_before_n25": true,
+      "final_recoverable": false,
+      "permissiveness": 1.0,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 1.0,
+        "T-D-funded": 1.0,
+        "T-D-pure": 1.0
+      },
+      "checkability_us": 0.06861375004518777,
+      "asymptotic": "O(1) \u2014 no predicate",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 10000,
+        "5": 50000,
+        "10": 100000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      }
+    },
+    "G1": {
+      "inductive": false,
+      "max_drain_by_horizon": {
+        "1": 100000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "max_irrev_by_horizon": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "max_drain": 175000,
+      "max_irrev": 129,
+      "max_drain_fraction_of_holdings": 1.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": false,
+      "bound_reached_before_n25": true,
+      "final_recoverable": false,
+      "permissiveness": 0.875,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 1.0,
+        "T-D-funded": 0.0,
+        "T-D-pure": 1.0
+      },
+      "checkability_us": 0.6405259991879575,
+      "asymptotic": "O(1) \u2014 arithmetic on one action",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 10,
+        "5": 50,
+        "10": 100,
+        "25": 250,
+        "50": 500,
+        "100": 1000,
+        "200": 2000
+      }
+    },
+    "G2": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 100000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "max_irrev_by_horizon": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 132
+      },
+      "max_drain": 175000,
+      "max_irrev": 132,
+      "max_drain_fraction_of_holdings": 1.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": false,
+      "bound_reached_before_n25": true,
+      "final_recoverable": false,
+      "permissiveness": 1.0,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 1.0,
+        "T-D-funded": 1.0,
+        "T-D-pure": 1.0
+      },
+      "checkability_us": 0.5777867481810972,
+      "asymptotic": "O(1) \u2014 counter compare",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 100,
+        "5": 500,
+        "10": 500,
+        "25": 500,
+        "50": 500,
+        "100": 500,
+        "200": 500
+      }
+    },
+    "G3": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "max_irrev_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "max_drain": 0,
+      "max_irrev": 0,
+      "max_drain_fraction_of_holdings": 0.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": true,
+      "bound_reached_before_n25": true,
+      "final_recoverable": true,
+      "permissiveness": 0.625,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 0.0,
+        "T-D-funded": 0.0,
+        "T-D-pure": 0.0
+      },
+      "checkability_us": 76.51507000264246,
+      "asymptotic": "O(|objects| + |accounts|) \u2014 successor simulation + closed-form reachability",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      }
+    },
+    "G4": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      },
+      "max_irrev_by_horizon": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "max_drain": 50,
+      "max_irrev": 129,
+      "max_drain_fraction_of_holdings": 0.00028571428571428574,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": false,
+      "bound_reached_before_n25": true,
+      "final_recoverable": false,
+      "permissiveness": 1.0,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 1.0,
+        "T-D-funded": 1.0,
+        "T-D-pure": 1.0
+      },
+      "checkability_us": 58.238116500433534,
+      "asymptotic": "O(|accounts| + |auths|) \u2014 successor simulation + authorization scan",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      }
+    },
+    "G4'": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 100000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "max_irrev_by_horizon": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "max_drain": 175000,
+      "max_irrev": 129,
+      "max_drain_fraction_of_holdings": 1.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": false,
+      "bound_reached_before_n25": true,
+      "final_recoverable": false,
+      "permissiveness": 1.0,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 1.0,
+        "T-D-funded": 1.0,
+        "T-D-pure": 1.0
+      },
+      "checkability_us": 55.301626249274705,
+      "asymptotic": "O(|accounts| + |auths|) \u2014 successor simulation + authorization scan",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      }
+    },
+    "G2+G3": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "max_irrev_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "max_drain": 0,
+      "max_irrev": 0,
+      "max_drain_fraction_of_holdings": 0.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": true,
+      "bound_reached_before_n25": true,
+      "final_recoverable": true,
+      "permissiveness": 0.625,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 0.0,
+        "T-D-funded": 0.0,
+        "T-D-pure": 0.0
+      },
+      "checkability_us": 70.25377524405485,
+      "asymptotic": "conjunction: sum of parts",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      }
+    },
+    "G2+G4": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      },
+      "max_irrev_by_horizon": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "max_drain": 50,
+      "max_irrev": 129,
+      "max_drain_fraction_of_holdings": 0.00028571428571428574,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": false,
+      "bound_reached_before_n25": true,
+      "final_recoverable": false,
+      "permissiveness": 1.0,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 1.0,
+        "T-D-funded": 1.0,
+        "T-D-pure": 1.0
+      },
+      "checkability_us": 52.3813039981178,
+      "asymptotic": "conjunction: sum of parts",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      }
+    },
+    "G3+G4'": {
+      "inductive": true,
+      "max_drain_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "max_irrev_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "max_drain": 0,
+      "max_irrev": 0,
+      "max_drain_fraction_of_holdings": 0.0,
+      "drain_flat_25_to_200": true,
+      "irrev_flat_25_to_200": true,
+      "bound_reached_before_n25": true,
+      "final_recoverable": true,
+      "permissiveness": 0.625,
+      "permissiveness_by_class": {
+        "T-A": 1.0,
+        "T-B": 1.0,
+        "T-C-dup": 1.0,
+        "T-C-uniq": 0.0,
+        "T-D-funded": 0.0,
+        "T-D-pure": 0.0
+      },
+      "checkability_us": 129.15678199351532,
+      "asymptotic": "conjunction: sum of parts",
+      "adversaries_excluded_for_f1": 0,
+      "diagnostic_noreassign_drain_by_horizon": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      }
+    }
+  },
+  "pareto_frontier": [
+    "G2+G3",
+    "G2+G4",
+    "G3",
+    "G3+G4'",
+    "G4"
+  ],
+  "horizons": [
+    1,
+    5,
+    10,
+    25,
+    50,
+    100,
+    200
+  ],
+  "total_principal_at_s0": 175000,
+  "llm_redteam_ran": false
+}
