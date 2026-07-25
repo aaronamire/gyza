@@ -18,7 +18,7 @@ trace. The verifier does not need to be as smart as the producer; it needs to ru
 procedure.
 
 Natural-language reasoning is not in such a form. "The answer is 47 because …" is a claim
-whose checkability is exactly the thing in question. The program asked, across five
+whose checkability is exactly the thing in question. The program asked, across six
 structurally independent mechanism families, whether cheap verification is nonetheless
 recoverable for natural-language mathematical reasoning. It is not. The reason is a single
 boundary, which the program calls the **competence bound**: *you cannot cheaply verify
@@ -26,7 +26,14 @@ what you cannot understand.*
 
 ---
 
-## 2. Five mechanism families, one boundary
+## 2. Six mechanism families, one boundary
+
+> **UPDATE (program closure, Route 8).** This synthesis originally counted **five**
+> families. Route 8 (native test-writing) added a **sixth**, reported as family (vi)
+> below, and joins R5 in §3: *an LLM that must supply the check re-imports the bound,
+> whether via CAS extraction (R5) or unit-test writing (R8).* The word "five" elsewhere
+> in this document should read "six"; the original figure is preserved here on the record.
+> No prior family's finding changed.
 
 Each family was preregistered with a decision rule before data. Each hit the same wall
 from a different direction.
@@ -78,6 +85,19 @@ the bound**: a strong and a weak extractor, feeding the *same* CAS over the *sam
 produce opposite-sign detection (J = −0.089 vs +0.149). The CAS is sound; the LLM in front of
 it is not, and it carries the competence dependence back in.
 
+**(vi) Native test-writing — R8 ESCAPE-ILLUSORY.** Give the checker a domain with a native
+formal verifier (code + unit tests) and let it *write* the tests. Test-writing is itself
+competence-bounded: a checker's test validity (fraction of its tests that pass a reference
+solution) collapses from ≈ 0.77 on problems it can solve to ≈ 0.28 on problems it cannot —
+below the 0.5 gate for every checker in both arms. On the reference-filtered *upper bound*
+valid tests detect (cell-(b) J = 0.53 / 0.34, well-powered n = 127–290), but the reference is
+the ground truth deployment lacks; the deployable all-tests variant is a false-positive
+generator (cell-(b) property tests J = 0.12, CI includes 0, LR = 1.17 — the 6B coin flip
+reproduced; example tests LR = 1.92, FPR = 0.44). Property/invariant tests, the
+checking-without-solving hope, do *worse* than example tests, not better. The native verifier
+escapes the bound only when the tests are **externally specified**; when a checker LLM writes
+them, the bound re-enters through validity.
+
 ---
 
 ## 3. The boundary, stated once
@@ -93,14 +113,20 @@ around this re-imported the competence requirement somewhere else:
   defensible error — which requires understanding the problem.
 - **Mechanical checking** (R5) needed a *competent transcriber* to put the reasoning in
   checkable form.
+- **Native test-writing** (R8) needed a *competent test author* — writing a discriminating
+  unit test is the same competence as producing the answer, so validity collapses outside it.
 - **The two-tier router** (Route 6, below) needs *competence-classification* — deciding
   whether a claim is within the cheap checker's competence — which may itself be
   out-of-competence.
 
-This is an **empirical regularity across five families on natural-language mathematical
+R5 and R8 are the same lesson twice: **an LLM that must supply the check — a CAS's
+transcription, or a suite of unit tests — carries the competence dependence back in.** The
+verifier's own machinery may be sound; the LLM feeding it is not.
+
+This is an **empirical regularity across six families on natural-language mathematical
 reasoning**, not a theorem. It is possible a mechanism we did not test escapes it; it is
 possible a different task distribution behaves differently. What the program shows is that
-five structurally distinct, individually plausible mechanisms all fail for the *same reason*,
+six structurally distinct, individually plausible mechanisms all fail for the *same reason*,
 and that the reason is legible: cheap verification requires the verifier (or some stage it
 depends on) to understand the claim, and where it does, it did not need the mechanism.
 
@@ -178,20 +204,37 @@ artifact ledger, not the tools.
 - **Cell-(b) is underpowered.** The out-of-competence cells pool to n = 32–36. Several of the
   decisive nulls — 6B cell-(b) J = 0.111, Route 7 C1 cell-(b) J = 0.164, R5 cell-(b) — are
   **UNDERPOWERED-NULL, not DEMONSTRATED-NULL**, with confidence intervals including 0. The
-  *direction and convergence* across five families is the strength of the result; no single
+  *direction and convergence* across six families is the strength of the result; no single
   out-of-competence cell is individually decisive.
 - **Route 6 is single-shot and risk-neutral.** Repeated play and risk aversion would both
   deter more cheaply; the ε(r) floor is a conservative one-shot bound. The router is modeled
   as free and is the weakest link — if competence-classification is itself out-of-competence,
   the bound re-enters through it.
-- **The escape hatch, stated plainly.** A domain with a **native formal verifier** — code
-  with unit tests, a theorem with a Lean/Coq kernel — **plausibly escapes this bound
-  entirely**, because the claim is already mechanically checkable and no LLM stage stands
-  between the claim and the check. That is *why* those domains already have cheap fraud proofs
-  and natural-language mathematical reasoning does not. The strongest response to the
-  competence bound is therefore to **scope claims to domains with native verifiers**, not to
-  search for a better prose-reasoning detector — the program is five families of evidence that
-  the latter search does not pay.
+- **The escape hatch, and its measured boundary (Route 8).** A domain with a **native formal
+  verifier** — code with unit tests, a theorem with a Lean/Coq kernel — escapes this bound
+  **only when the check itself comes from an independent, non-LLM source** (human-written
+  tests, a formal spec, a proof kernel). It does **not** escape when a cheap checker LLM is
+  asked to *write* the tests: Route 8 measured this on MBPP (4 in-band models, well-powered
+  cell (b), n = 127–290) and found ESCAPE-ILLUSORY. Test-writing is itself competence-bounded —
+  a checker's test validity collapses from ≈ 0.77 on problems it can solve to ≈ 0.28 on problems
+  it cannot, and without a reference solution to filter the invalid tests (the very ground
+  truth deployment lacks), the mechanism is a false-positive generator (deployable LR
+  1.17–1.92, FPR 0.44–0.71); property/invariant tests, the "checking-without-solving" hope,
+  do worse than example tests, not better. So the escape is real but its boundary is sharp:
+  the verifier must be **externally specified**, because writing a discriminating check is the
+  same competence as producing the answer. The strongest response to the competence bound is
+  therefore to **scope claims to domains with an independent verifier already in hand** (human
+  tests, a formal kernel, reality) — not to a better prose-reasoning detector, and not to a
+  cheap model asked to invent the check. Route 8 is the sixth family of evidence.
+
+  > **UPDATE (Route 8 measured what this paragraph reasoned).** The original text read: *"A
+  > domain with a native formal verifier … **plausibly escapes this bound entirely**, because
+  > the claim is already mechanically checkable and no LLM stage stands between the claim and
+  > the check … scope claims to domains with native verifiers."* R8 tested it and qualified
+  > it: the escape holds only for **externally specified** checks; an LLM asked to write the
+  > tests re-imports the bound (ESCAPE-ILLUSORY). The "no LLM stage stands between the claim
+  > and the check" assumption is exactly what fails when the checker supplies the tests. Prior
+  > text preserved here per the Phase-8 correction discipline.
 
 ---
 
