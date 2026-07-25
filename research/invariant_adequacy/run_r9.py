@@ -199,12 +199,24 @@ def analyze() -> dict:
     guards_out = {}
 
     for name, g in scripted["guards"].items():
-        advs = list(g["adversaries"]) + red.get("guards", {}).get(name, [])
-        # F1-contaminated adversaries are excluded from adequacy numbers entirely
-        clean = [a for a in advs if a.get("f1_violations", 0) == 0]
+        scripted_advs = list(g["adversaries"])
+        llm_advs = red.get("guards", {}).get(name, [])
+        advs = scripted_advs + llm_advs
+        # F1 exclusion is at the ACTION level, per preregistration §5: `replay`
+        # never APPLIES a guard-inadmissible action, so every trajectory scored
+        # here is admissible by construction and no adequacy number can be
+        # F1-contaminated. The f1 counts are reported separately as a measure of
+        # how much of a proposal was a head-on attack on the guard (F1) rather
+        # than an attack on its adequacy (F2).
+        clean = advs
         preregistered = [a for a in clean if "diagnostic" not in a["adversary"]]
         maxd = {n: max(_c(a["drain_curve"], n) for a in preregistered) for n in HORIZONS}
         maxi = {n: max(_c(a["irrev_curve"], n) for a in preregistered) for n in HORIZONS}
+        script_only = [a for a in scripted_advs if "diagnostic" not in a["adversary"]]
+        best_script_d = max(_c(a["drain_curve"], 200) for a in script_only)
+        best_script_i = max(_c(a["irrev_curve"], 200) for a in script_only)
+        best_llm_d = max((_c(a["drain_curve"], 200) for a in llm_advs), default=0)
+        best_llm_i = max((_c(a["irrev_curve"], 200) for a in llm_advs), default=0)
         guards_out[name] = {
             "inductive": g["inductive"],
             "max_drain_by_horizon": maxd,
@@ -219,9 +231,14 @@ def analyze() -> dict:
             "permissiveness_by_class": g["permissiveness"]["by_class"],
             "checkability_us": g["checkability"]["mean_us_per_check"],
             "asymptotic": g["checkability"]["asymptotic"],
-            "adversaries_excluded_for_f1": len(advs) - len(clean),
             "diagnostic_noreassign_drain_by_horizon": next(
                 (a["drain_curve"] for a in clean if "noreassign" in a["adversary"]), None),
+            "best_scripted": {"drain": best_script_d, "irrev": best_script_i},
+            "best_llm": {"drain": best_llm_d, "irrev": best_llm_i},
+            "llm_attacks_beyond_scripted": bool(
+                llm_advs and (best_llm_d > best_script_d or best_llm_i > best_script_i)),
+            "llm_f1_attempts": sum(a.get("f1_violations", 0) for a in llm_advs),
+            "llm_actions_proposed": sum(a.get("n_proposed", 0) for a in llm_advs),
         }
 
     # -- decision rule (preregistration §9) ---------------------------------- #
