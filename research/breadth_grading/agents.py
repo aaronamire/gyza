@@ -17,6 +17,7 @@ local check admitted. This is a third failure mode, distinct from R9's F1
 """
 from __future__ import annotations
 
+import copy
 import itertools
 import random
 from dataclasses import dataclass, field
@@ -127,19 +128,27 @@ def run_round(guard, s: State, props: list[Action], mode: str,
         return RoundResult(0, len(props), 0, s)
     worst, worst_state, worst_dropped = None, None, 0
     for order in _orders(len(ok), rng):
+        # A CLONE of the guard per order: admitted actions are applied AND
+        # committed, then the invariant is evaluated on the JOINT state. Checking
+        # the invariant before commit was a harness bug that reported G2's
+        # violations as 0 while its counter stood at 16 against a budget of 6 —
+        # found by the mandated "diagnose any exact zero" check, disclosed in
+        # FINDINGS_R10.md.
+        gg = copy.deepcopy(guard)
         cur, dropped = s, 0
         for i in order:
             a = ok[i]
             if not physically_valid(cur, a):
                 dropped += 1           # dropped, never forced
                 continue
-            cur = apply(cur, a)
-        bad = not guard.invariant(cur)
+            nxt = apply(cur, a)
+            gg.commit(cur, a, nxt)
+            cur = nxt
+        bad = not gg.invariant(cur)
         score = (1 if bad else 0, E.h_lost(guard.s0, cur), E.h_drain(guard.s0, cur))
         if worst is None or score > worst:
-            worst, worst_state, worst_dropped = score, cur, dropped
-    for a in ok:                        # commit once, on the realized worst order
-        guard.commit(s, a, worst_state)
+            worst, worst_state, worst_dropped, worst_guard = score, cur, dropped, gg
+    guard.__dict__.update(worst_guard.__dict__)   # realize the worst order
     return RoundResult(len(ok), len(props) - len(ok) + worst_dropped,
                        1 if worst[0] else 0, worst_state)
 

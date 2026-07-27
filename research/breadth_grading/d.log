@@ -1,0 +1,12 @@
+[D] k=1 mutable: thr=4.00 lost=0.029 rollbacks=30
+[D] k=1 append-only: thr=4.00 lost=0.000 rollbacks=28
+[D] k=5 mutable: thr=4.00 lost=0.250 rollbacks=6
+[D] k=5 append-only: thr=4.00 lost=0.000 rollbacks=6
+[D] k=10 mutable: thr=2.53 lost=0.500 rollbacks=3
+[D] k=10 append-only: thr=2.53 lost=0.250 rollbacks=3
+[D] k=25 mutable: thr=1.87 lost=0.500 rollbacks=1
+[D] k=25 append-only: thr=1.87 lost=0.250 rollbacks=1
+[D] k=50 mutable: thr=1.20 lost=0.500 rollbacks=0
+[D] k=50 append-only: thr=1.20 lost=0.250 rollbacks=0
+[D] k=inf mutable: thr=1.20 lost=0.500 rollbacks=0
+[D] k=inf append-only: thr=1.20 lost=0.250 rollbacks=0
