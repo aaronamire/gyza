@@ -1,0 +1,173 @@
+# The architectural principle
+
+**Three independent routes converge on one property of state representation.** Each
+found it from a different direction, answering a different failure mode, and none was
+looking for it. This file states the principle once, with each route's evidence, its
+cost, and — equally important — the boundary where it does not apply.
+
+> **APPEND-ONLY, PARTITIONED, DERIVED-NOT-STORED.**
+>
+> Represent a safety-relevant quantity as a **pure fold over append-only, partitioned
+> state**, and have the guard invoke **the same function** that computes the harm.
+
+This is not a new idea in isolation — it is event sourcing plus UTXO plus
+referential transparency. What the routes establish is that **one design choice buys
+three different guarantees that were previously being sought separately**, and that
+the failure modes are not independent bugs but the same shape appearing three times.
+
+---
+
+## The three guarantees
+
+### 1. Blind channels become architecturally impossible — R12 Part C
+
+R12 asked whether channels that move a harm quantity *without passing the guard*
+("blind channels") can be found mechanically by static analysis. Answer: **UNSOUND** —
+recall 0.5; they are not reliably discoverable. But Part C found the constructive
+converse: Gyza's credit ledger has **no** blind channel, and not because the analyzer
+was clever.
+
+- Balances are **derived, never stored**: `gyza/economy/wallet.py:169-171` —
+  *"Pure projection over an iterable of `LedgerEntry`."*
+- Entries are **append-only**: `gyza/economy/ledger.py:30-32` — *"Entries are
+  append-only. There is no `update_entry`. Adjustments are made by issuing a
+  counter-entry."*
+- The gate **reads the same fold**: `gyza/economy/subcontract.py:184-196`
+  (`available()` → `self._wallet.net_balance(self._owner) − active_holds`).
+
+**There is no balance field for an unmodelled path to write.** Every path that changes
+the quantity must append an entry, and the gate that folds those entries necessarily
+sees it. The blind channel has nowhere to hide — a structural property, not a
+detection result.
+
+### 2. Frame alignment comes for free — R9 condition 2
+
+R9 established that an invariant is adequate only if evaluated over **the same frame**
+as the harm. Its measured counterexample: `G4′` pinned its frame at `s₀` and lost
+175 000; `G4` read the current frame and bounded at 50. Frame drift is not a subtle
+bug — it is a four-order-of-magnitude failure with the invariant intact and never
+violated.
+
+If the guard and the harm **call the same fold**, the frame is the *same object*.
+There is no second frame to drift. R12 observed this independently in simulation:
+guards that called the environment's own accounting helpers (`principal_total`,
+`recoverable`) inherited the harm's frame transitively, and were the ones that held.
+
+**R9's condition 2 stops being a discipline you must remember and becomes a
+consequence of the representation.**
+
+### 3. Breadth composition — R10 H-APPEND and the H-CONS refutation
+
+R10 asked whether locally-checked guards compose across *concurrent* agents (breadth),
+having established that they compose across *depth* (66 serialized cells, 0
+violations).
+
+**H-APPEND — confirmed.** Append-only storage is the one thing that made a global
+predicate compose: recoverability (G3) under append-only storage showed **0 violations,
+`H_lost` = 0.000, final state recoverable, at N = 2, 4 and 8, under both shared and
+partitioned accounts** — at *higher* throughput than its mutable counterpart
+(0.67 vs 0.50). The canonical A/B race — content X in two objects, each agent deletes
+one, each local check passes, the joint state has lost X — **couples entirely through
+the archive's mutability.** Remove the mutability and the race cannot be constructed.
+
+**H-CONS — refuted, and the refutation is the sharper half.** R10 predicted
+conservation would compose once accounts were partitioned. It does not: G2 and G4
+violate under partitioned accounts exactly as under shared ones, because
+
+> **the guard's own state is the conflict set.**
+
+A single counter `c`, or a single pool of single-use authorizations, has a conflict set
+of size one *no matter how the accounts are arranged*. Eight agents all check against
+the same pre-round `c = 0`; all pass; the joint total blows the budget.
+
+**Bitcoin's discipline is stronger than "partition ownership":** each UTXO is an
+independent spend-once token and validating a spend is **stateless with respect to
+every other UTXO**. Bitcoin partitions *the guard's state*, not merely who owns what.
+
+> **DESIGN RULE. A guard scales in breadth only if its state partitions along the same
+> axis as the actions.** A monotone budget is inherently global and therefore
+> inherently serializing, regardless of how the underlying resource is partitioned.
+
+This is why the principle needs all three words. *Append-only* alone removes the
+storage race; *partitioned* is what removes the guard-state race; *derived-not-stored*
+is what removes the blind channel.
+
+---
+
+## The cost, stated plainly
+
+**Nothing is ever freed.** Deletion stops reclaiming anything, so storage grows without
+bound — pinned in R10 by `test_append_only_has_a_cost_nothing_is_ever_freed`. This is
+not a rounding error in the design; it is the whole price, and it is paid forever.
+
+**This is the same tradeoff Bitcoin accepted**, and the reason its UTXO set and chain
+history only grow. It is a defensible trade when the quantity being protected is
+safety-relevant and the volume is bounded by economic cost; it is a bad trade for
+high-volume, low-stakes state.
+
+A second cost, measured: under append-only storage R10's Part D frontier **disappears**
+— k = 5 dominates every other checkpoint interval at zero harm and full effective
+throughput. That is a benefit, but it means the tuning knob you might have wanted is
+gone; you are choosing the representation, not calibrating it.
+
+---
+
+## Where it does NOT apply — the boundary of containment
+
+**Effects that leave modeled state entirely.** Gyza's H3 sub-class *external network
+sends* (`netd_client.py` — `publish_agent`, `send_message`, `publish_delta`,
+`publish_attestation`) leaves the modeled system. There is no fold over them because
+**there is no state to fold.**
+
+Stated plainly, because it is the boundary condition of the whole containment story:
+
+> A guard can refuse to **emit**. After emission, containment has no meaning — and
+> **no detector would help either.** This is not a gap to be closed; it is the limit
+> of what containment can claim, and it belongs in any claim Gyza makes.
+
+Two further limits:
+
+- **The principle is about state, not semantics.** It makes *quantities* auditable. It
+  says nothing about whether a claim is *true* — that is the competence bound, closed
+  across six mechanism families and terminal (`COMPETENCE_BOUND.md`).
+- **Bounded loss is not zero loss.** R10's graded guard `G5(0.25)` composes at N = 8
+  with harm bounded exactly at θ — and leaves the state **not recoverable**. The
+  principle bounds harm; it does not make harm reversible.
+
+---
+
+## Where Gyza stands against it
+
+| harm class | append-only? | derived-not-stored? | guard reads the same fold? | status |
+|---|---|---|---|---|
+| **H1 credits** | yes (`ledger.py:30-32`) | yes (`wallet.py:169-171`) | yes (`subcontract.py:184-196`) | **conformant** |
+| **H2 market capital** | **no** — `_capital` is a mutable dict, mutated in place at four sites (`market.py:287, 325, 332, 345`) | **no** — stored aggregate | **no gate reads it at all** | **anti-pattern** |
+| **H3 irreversible change** | n/a | n/a | no representation in the codebase | **unmodelled** |
+| **H4 authority** | yes (delegation chain is append-only) | re-decided at acceptance time | yes (`verify_delegation`) | **conformant** |
+
+**H2 is the anti-pattern living in the same codebase as the pattern.** Today it is not
+a leak — `_capital` is seeded from a constructor argument and no path bridges it to
+`LedgerEntry` credits, so they are two disjoint currencies. The hazard is the stated
+roadmap (`market.py:21-23`, the multilateral settlement layer). The moment market
+capital becomes fungible with ledger credits, it is **exactly R9's G2 failure**: value
+moving through a channel the gate's counter does not track, which R9 measured at 100%
+of holdings lost with the invariant intact and never violated.
+
+**The fix is a representation choice, not a bigger gate.** Route market P&L *through*
+`LedgerEntry` so it lands inside the fold the gate already reads. Extending the gate to
+read a second mutable pool would restore the check but forfeit all three guarantees —
+the blind channel becomes possible again, the frame can drift again, and the guard
+acquires a second piece of global state that does not partition.
+
+---
+
+## Provenance
+
+| claim | route | artifact |
+|---|---|---|
+| no blind channel in the ledger; the fold is why | R12 Part C | `channel_discovery/` |
+| frame must match harm's frame (condition 2) | R9 | `invariant_adequacy/` |
+| append-only makes recoverability compose | R10 H-APPEND | `breadth_grading/`, `router/R10_CORRECTIONS.md` |
+| guard state is the conflict set | R10 H-CONS refutation | `breadth_grading/`, `router/R10_CORRECTIONS.md` |
+| composition conditions, corrected | R11 Part A1 | `router/R10_CORRECTIONS.md` |
+| checkpointing bounds resource loss, not content loss | R11 Part A2 | `router/R10_CORRECTIONS.md` |

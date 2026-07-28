@@ -40,31 +40,31 @@
     "models": {
       "google/gemma-2-27b-it": {
         "n": 80,
-        "unresolved": 19,
-        "used": 61,
+        "unresolved": 3,
+        "used": 77,
         "solved": 43,
-        "rate": 0.7049
+        "rate": 0.5584
       },
       "meta-llama/llama-3.1-70b-instruct": {
         "n": 80,
-        "unresolved": 22,
-        "used": 58,
+        "unresolved": 3,
+        "used": 77,
         "solved": 52,
-        "rate": 0.8966
+        "rate": 0.6753
       },
       "microsoft/phi-4": {
         "n": 80,
-        "unresolved": 21,
-        "used": 59,
+        "unresolved": 1,
+        "used": 79,
         "solved": 55,
-        "rate": 0.9322
+        "rate": 0.6962
       },
       "mistralai/mistral-small-3.2-24b-instruct": {
         "n": 80,
-        "unresolved": 40,
-        "used": 40,
+        "unresolved": 1,
+        "used": 79,
         "solved": 40,
-        "rate": 1.0
+        "rate": 0.5063
       }
     }
   },
