@@ -188,18 +188,38 @@ of moving along it.
 > append-only storage the frontier does not exist, because the dominating point
 > achieves zero harm and full effective throughput simultaneously.
 
-### Is rollback effective under a mutable archive?
+### RESULT — ROLLBACK HAS A FLOOR THAT THE REPRESENTATION DOES NOT
 
-**No — not fully.** At k = 1, with a checkpoint every single round, mutable-archive
-harm is **0.0294 while append-only harm is 0.0000**. Rollback restores balances,
-ownership and objects, because the harness retains the immutable checkpoint. It
-**cannot restore destroyed content**: under a mutable archive the deletion already
-happened and there is nothing to roll back to.
+*Stated as a standalone claim, because it is the strongest architectural finding in
+Part A and R10 recorded it only as an observation about append-only halving harm.*
 
-So checkpointing is not a substitute for append-only storage. Checkpoint frequency
-bounds *resource and ownership* loss; only append-only storage bounds *content* loss.
-This is the corrected reading of R10's observation that append-only halves harm at
-every k.
+> **At k = 1 — a checkpoint every single round — mutable-archive harm is 0.0294 while
+> append-only harm is 0.0000. Maximum checkpoint frequency cannot restore destroyed
+> content; under mutable storage the deletion already happened. Therefore checkpoint
+> frequency bounds RESOURCE and OWNERSHIP loss, and only append-only storage bounds
+> CONTENT loss. Checkpointing is not a substitute for the representation choice.**
+
+The mechanism is that rollback restores *what the checkpoint retained*. The harness
+holds an immutable checkpoint of balances, ownership and objects, so those are
+restorable. A mutable archive keeps no pre-image of a destroyed object, so there is
+nothing for the rollback to restore — and this is true **at every checkpoint
+frequency, including the maximum.** k = 1 is the limit case and it does not reach
+zero. No frequency does.
+
+> **COROLLARY. The harm/throughput frontier is an artifact of mutable storage.** Under
+> append-only storage, k = 5 achieves harm **0.0000 at full effective throughput
+> (3.20)** and **dominates every other k, including k = 1** — which pays 28/30
+> rollbacks for 0.27 effective throughput at the same zero harm. The principle
+> **collapses the tradeoff rather than moving along it.**
+
+The practical reading: a system that reaches for more frequent checkpointing to bound
+content loss is buying a guarantee it cannot obtain at any price, while paying the
+rollback cost in full. The representation is the lever; the frequency is not.
+
+**Scope:** N = 4, 30 rounds, one agent policy, the 42-asset arena. The *floor*
+(k = 1 mutable > 0 = k = 1 append-only) is a structural consequence of what a
+checkpoint retains and does not depend on those parameters; the *magnitudes*
+(0.0294, 0.250, 3.20) are arena-specific.
 
 ### One asymmetry that remains asserted, not measured
 
