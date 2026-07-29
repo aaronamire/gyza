@@ -297,6 +297,58 @@ def test_bfs_is_the_definition_and_the_optimization_agrees():
     assert E.reachable_goal_p(s0, s3, "A") is True
 
 
+def test_order_sensitivity_all_orders_are_evaluated():
+    """T-ORDER. Not one arbitrary order: exhaustive below the cutoff, a stated
+    sampled subset above it."""
+    import math
+    import random as _r
+
+    import adversaries_federation as A
+    rng = _r.Random(1)
+    for n in (2, 3, 4):
+        assert len(A._orders(n, rng)) == math.factorial(n)
+        assert len(set(A._orders(n, rng))) == math.factorial(n)
+    for n in (5, 8, 12):
+        assert len(A._orders(n, rng)) == A.N_SAMPLED_ORDERS
+        assert all(sorted(o) == list(range(n)) for o in A._orders(n, rng))
+
+
+def test_adversary_validity_every_action_admissible_under_its_own_guard():
+    """T-ADV-VALID. An adversary that violates its OWN guard is testing
+    F1-type enforcement, not adequacy, and must be excluded."""
+    import adversaries_federation as A
+    for adv in ("A1-salami", "A2-ratchet", "A3-cross", "A4-pool"):
+        for cfg in ("F1", "F2"):
+            r = A.run_cell(cfg, adv, m=2, n_agents=1, mode="serialized", rounds=4)
+            assert r.invalid_excluded == 0, (adv, cfg, r.invalid_excluded)
+
+
+def test_mixed_workload_blocked_actions_are_COUNTED_not_dropped():
+    """The validity rule must NOT be applied to the throughput workload. Its
+    rejected proposals are the measurement: filtering them out before the round
+    would silently inflate throughput and hide F2's authorization cost.
+
+    Found by test_adversary_validity failing on `mixed` — the rule had been
+    applied to the workload, so 3 of its proposals per short cell were dropped
+    before ever reaching the round. Implementation-bug fix, disclosed per R9 §6.
+    """
+    import adversaries_federation as A
+    r = A.run_cell("F2", "mixed", m=2, n_agents=2, mode="serialized")
+    assert r.invalid_excluded == 0, "the workload must not be pre-filtered"
+    assert r.proposals == r.admitted + r.blocked_total, (
+        r.proposals, r.admitted, r.blocked_total)
+    assert r.blocked_total > 0, "F2 must block SOMETHING, or the cost is unmeasured"
+
+
+def test_a3_is_white_box_and_never_violates_its_own_guard():
+    """A3's whole point: it maximises the VICTIM's harm while staying inside
+    its own bound. Assert the actor stays clean while a victim is harmed."""
+    import adversaries_federation as A
+    r = A.run_cell("F1", "A3-cross", m=2, n_agents=2, mode="serialized")
+    assert r.invalid_excluded == 0
+    assert max(r.max_h_lost.values()) > 0.0, "A3 achieved nothing — weak adversary"
+
+
 def test_blind_and_goal_agree_on_a_sample():
     """Agreement is REPORTED, never assumed. Disagreement would be a FINDING."""
     s0 = E.arena(2)

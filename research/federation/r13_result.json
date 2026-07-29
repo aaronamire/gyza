@@ -1,0 +1,8473 @@
+{
+ "auth_cap": 8,
+ "blind_goal_agreement": {
+  "agree": 14,
+  "disagreements": [],
+  "probes": 14,
+  "rate": 1.0
+ },
+ "cells": [
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 19,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0526315789473684,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 20,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 20,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.5833333333333333
+  },
+  {
+   "admitted": 13,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0769230769230769,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 14,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333
+   },
+   "max_overdraft": 4,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 14,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.0833333333333333
+  },
+  {
+   "admitted": 24,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 180,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 180,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.8,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 10,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.1,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 11,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.166667
+   },
+   "max_overdraft": 4,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 11,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.8333333333333334
+  },
+  {
+   "admitted": 24,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 180,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 180,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 11,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 13,
+   "check_cost": 2.1818181818181817,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.108333,
+    "B": 0.108333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.9166666666666666
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 180,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 180,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 7,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 5,
+   "blocked_total": 17,
+   "check_cost": 3.4285714285714284,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.041667,
+    "B": 0.108333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.5833333333333334
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 6,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.1666666666666667,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 7,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 7,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 2,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 2,
+   "check_cost": 2.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 4,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 4,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.16666666666666666
+  },
+  {
+   "admitted": 10,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 14,
+   "check_cost": 2.4,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.8333333333333334
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 20,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 20,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 20,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.6666666666666667
+  },
+  {
+   "admitted": 14,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 1,
+   "final_overdraft": 4,
+   "guard_evals": 14,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 14,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.1666666666666667
+  },
+  {
+   "admitted": 24,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 180,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 180,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.8,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 10,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 10,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.125
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 10,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.8333333333333334
+  },
+  {
+   "admitted": 24,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 180,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 180,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 12,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 12,
+   "check_cost": 2.0,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.108333,
+    "B": 0.108333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 180,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 180,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 8,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 5,
+   "blocked_total": 16,
+   "check_cost": 3.0,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.041667,
+    "B": 0.108333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.6666666666666666
+  },
+  {
+   "admitted": 24,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 4,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 4,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 4,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.3333333333333333
+  },
+  {
+   "admitted": 2,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 2,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 2,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.16666666666666666
+  },
+  {
+   "admitted": 10,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 14,
+   "check_cost": 2.4,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.8333333333333334
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 21,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 19,
+   "check_cost": 1.9047619047619047,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 40,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 40,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.75
+  },
+  {
+   "admitted": 13,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 11,
+   "check_cost": 1.8461538461538463,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333
+   },
+   "max_overdraft": 4,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.0833333333333333
+  },
+  {
+   "admitted": 48,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 372,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 372,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 34,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0294117647058822,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 8,
+   "guard_evals": 35,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 20.0,
+    "B": 20.0
+   },
+   "max_h_lost": {
+    "A": 1.0,
+    "B": 1.0
+   },
+   "max_overdraft": 8,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 35,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.8333333333333335
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 40,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 8,
+   "check_cost": 1.2,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 3.3333333333333335
+  },
+  {
+   "admitted": 10,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 8,
+   "check_cost": 1.8,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 18,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.166667
+   },
+   "max_overdraft": 4,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 18,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.8333333333333334
+  },
+  {
+   "admitted": 48,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 372,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 372,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 18,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 30,
+   "check_cost": 2.6666666666666665,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.5
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 40,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 8,
+   "check_cost": 1.2,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 3.3333333333333335
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 48,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 372,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 372,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 14,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 14,
+   "blocked_total": 34,
+   "check_cost": 3.4285714285714284,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 4.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.091667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.1666666666666667
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 40,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 8,
+   "check_cost": 1.2,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 3.3333333333333335
+  },
+  {
+   "admitted": 6,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 4,
+   "check_cost": 1.6666666666666667,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 10,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 10,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 2,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 6,
+   "check_cost": 4.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 8,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 8,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.16666666666666666
+  },
+  {
+   "admitted": 15,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 33,
+   "check_cost": 3.2,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.25
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 40,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 19,
+   "final_overdraft": 0,
+   "guard_evals": 40,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 40,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 3.3333333333333335
+  },
+  {
+   "admitted": 24,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 11,
+   "final_overdraft": 4,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 48,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 372,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 372,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 35,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 8,
+   "guard_evals": 35,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 20.0,
+    "B": 20.0
+   },
+   "max_h_lost": {
+    "A": 1.0,
+    "B": 1.0
+   },
+   "max_overdraft": 8,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 35,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.9166666666666665
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 48,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 8,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 16,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 6,
+   "final_overdraft": 4,
+   "guard_evals": 16,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.125
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 16,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.3333333333333333
+  },
+  {
+   "admitted": 48,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 372,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 372,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 18,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 30,
+   "check_cost": 2.6666666666666665,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.5
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 48,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 8,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 48,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 372,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 372,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 14,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 14,
+   "blocked_total": 34,
+   "check_cost": 3.4285714285714284,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 4.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.091667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.1666666666666667
+  },
+  {
+   "admitted": 48,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 48,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 8,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 4,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 4,
+   "guard_evals": 4,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 4,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.3333333333333333
+  },
+  {
+   "admitted": 4,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 20,
+   "guard_evals": 4,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 20,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 4,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.3333333333333333
+  },
+  {
+   "admitted": 8,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 40,
+   "check_cost": 6.0,
+   "config": "F3",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.125
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.6666666666666666
+  },
+  {
+   "admitted": 94,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 2,
+   "check_cost": 1.0212765957446808,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 7.833333333333333
+  },
+  {
+   "admitted": 25,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 55,
+   "check_cost": 3.2,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 80,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 80,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0833333333333335
+  },
+  {
+   "admitted": 17,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 31,
+   "check_cost": 2.823529411764706,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 20,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333
+   },
+   "max_overdraft": 20,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.4166666666666667
+  },
+  {
+   "admitted": 96,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 756,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 756,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 56,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 6,
+   "check_cost": 1.1071428571428572,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 62,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 16.0,
+    "B": 16.0
+   },
+   "max_h_lost": {
+    "A": 0.95,
+    "B": 0.95
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 62,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.666666666666667
+  },
+  {
+   "admitted": 90,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 6,
+   "check_cost": 1.0666666666666667,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 7.5
+  },
+  {
+   "admitted": 72,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 24,
+   "check_cost": 1.3333333333333333,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 14,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 22,
+   "check_cost": 2.5714285714285716,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 20,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.166667
+   },
+   "max_overdraft": 20,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.1666666666666667
+  },
+  {
+   "admitted": 96,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 756,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 756,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 23,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 73,
+   "check_cost": 4.173913043478261,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.275
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.9166666666666667
+  },
+  {
+   "admitted": 90,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 6,
+   "check_cost": 1.0666666666666667,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 7.5
+  },
+  {
+   "admitted": 72,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 24,
+   "check_cost": 1.3333333333333333,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 96,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 756,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 756,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 18,
+   "blocked_total": 72,
+   "check_cost": 4.0,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 4.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.191667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 90,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 6,
+   "check_cost": 1.0666666666666667,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 7.5
+  },
+  {
+   "admitted": 72,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 24,
+   "check_cost": 1.3333333333333333,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 5,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 11,
+   "check_cost": 3.2,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 16,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 16,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.4166666666666667
+  },
+  {
+   "admitted": 2,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 14,
+   "check_cost": 8.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 16,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 16,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.16666666666666666
+  },
+  {
+   "admitted": 18,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 78,
+   "check_cost": 5.333333333333333,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.5
+  },
+  {
+   "admitted": 96,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 80,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 55,
+   "final_overdraft": 0,
+   "guard_evals": 80,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 80,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 6.666666666666667
+  },
+  {
+   "admitted": 48,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 31,
+   "final_overdraft": 20,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333
+   },
+   "max_overdraft": 20,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 96,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 756,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 756,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 56,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 5,
+   "final_overdraft": 0,
+   "guard_evals": 56,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 56,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 4.666666666666667
+  },
+  {
+   "admitted": 96,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 2,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 96,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 24,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 32,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 18,
+   "final_overdraft": 20,
+   "guard_evals": 32,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.125
+   },
+   "max_overdraft": 20,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 32,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 2.6666666666666665
+  },
+  {
+   "admitted": 96,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 756,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 756,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 23,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 73,
+   "check_cost": 4.173913043478261,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 1,
+   "final_overdraft": 4,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 4.0
+   },
+   "max_h_lost": {
+    "A": 0.108333,
+    "B": 0.191667
+   },
+   "max_overdraft": 4,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.9166666666666667
+  },
+  {
+   "admitted": 96,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 2,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 96,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 24,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 96,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 756,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 756,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 21,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 20,
+   "blocked_total": 75,
+   "check_cost": 4.571428571428571,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 2,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.108333,
+    "B": 0.233333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 1.75
+  },
+  {
+   "admitted": 96,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 2,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": true,
+    "B": true
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 96,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 24,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 8,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 20,
+   "guard_evals": 8,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 20,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 8,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.6666666666666666
+  },
+  {
+   "admitted": 8,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 52,
+   "guard_evals": 8,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_overdraft": 52,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 8,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.6666666666666666
+  },
+  {
+   "admitted": 6,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 90,
+   "check_cost": 16.0,
+   "config": "F3",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 2,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.041667,
+    "B": 0.125
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25,
+    "C": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 28,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0357142857142858,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 29,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0,
+    "C": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925,
+    "C": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 29,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.3333333333333335
+  },
+  {
+   "admitted": 19,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 8,
+   "check_cost": 1.4210526315789473,
+   "config": "F0",
+   "cross_violation_rounds": 2,
+   "cross_violations": 3,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 27,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 27,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.5833333333333333
+  },
+  {
+   "admitted": 36,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 270,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 270,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 35,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0285714285714285,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 19.333333,
+    "C": 9.333333
+   },
+   "max_h_lost": {
+    "A": 0.416667,
+    "B": 0.95,
+    "C": 0.591667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.9166666666666665
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 16,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 5,
+   "check_cost": 1.3125,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 21,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.083333,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 21,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.3333333333333333
+  },
+  {
+   "admitted": 36,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 270,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 270,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 15,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 21,
+   "check_cost": 2.4,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 0.0,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.166667,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.25
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 270,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 270,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 14,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 4,
+   "blocked_total": 22,
+   "check_cost": 2.5714285714285716,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 0.0,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.166667,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.1666666666666667
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 8,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 4,
+   "check_cost": 1.5,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 12,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 1.333333,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.1,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 12,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.6666666666666666
+  },
+  {
+   "admitted": 3,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 3,
+   "check_cost": 2.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 6,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 6,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.25
+  },
+  {
+   "admitted": 15,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 21,
+   "check_cost": 2.4,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 0.0,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.25
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25,
+    "C": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 29,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 29,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0,
+    "C": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925,
+    "C": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 29,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.4166666666666665
+  },
+  {
+   "admitted": 27,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 2,
+   "cross_violations": 3,
+   "dropped": 8,
+   "final_overdraft": 6,
+   "guard_evals": 27,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 27,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.25
+  },
+  {
+   "admitted": 36,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 270,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 270,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 2.0,
+    "B": 19.333333,
+    "C": 9.333333
+   },
+   "max_h_lost": {
+    "A": 0.416667,
+    "B": 0.95,
+    "C": 0.591667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 18,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 3,
+   "final_overdraft": 6,
+   "guard_evals": 18,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.041667,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 18,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.5
+  },
+  {
+   "admitted": 36,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 270,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 270,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 16,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 20,
+   "check_cost": 2.25,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 0.0,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.166667,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.3333333333333333
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 270,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 270,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 15,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 4,
+   "blocked_total": 21,
+   "check_cost": 2.4,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 0.0,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.166667,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.25
+  },
+  {
+   "admitted": 36,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 36,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0
+  },
+  {
+   "admitted": 6,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 6,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 6,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 3,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 3,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 3,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.25
+  },
+  {
+   "admitted": 16,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 20,
+   "check_cost": 2.25,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 0.0,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 1,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.3333333333333333
+  },
+  {
+   "admitted": 72,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25,
+    "C": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 31,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 27,
+   "check_cost": 1.8709677419354838,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 58,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0,
+    "C": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925,
+    "C": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 58,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.5833333333333335
+  },
+  {
+   "admitted": 19,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 29,
+   "check_cost": 2.526315789473684,
+   "config": "F0",
+   "cross_violation_rounds": 2,
+   "cross_violations": 3,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.5833333333333333
+  },
+  {
+   "admitted": 72,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 558,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 558,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 61,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 5,
+   "check_cost": 1.0819672131147542,
+   "config": "F0",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 66,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 9.333333,
+    "B": 16.666667,
+    "C": 16.666667
+   },
+   "max_h_lost": {
+    "A": 0.733333,
+    "B": 0.958333,
+    "C": 0.708333
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 66,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 5.083333333333333
+  },
+  {
+   "admitted": 71,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0140845070422535,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 5.916666666666667
+  },
+  {
+   "admitted": 60,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 12,
+   "check_cost": 1.2,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 5.0
+  },
+  {
+   "admitted": 16,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 20,
+   "check_cost": 2.25,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 36,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.083333,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 36,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.3333333333333333
+  },
+  {
+   "admitted": 72,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 558,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 558,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 19,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 53,
+   "check_cost": 3.789473684210526,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 4.666667,
+    "B": 1.333333,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.1,
+    "B": 0.1,
+    "C": 0.2
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.5833333333333333
+  },
+  {
+   "admitted": 71,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0140845070422535,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 5.916666666666667
+  },
+  {
+   "admitted": 60,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 12,
+   "check_cost": 1.2,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 5.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 558,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 558,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 14,
+   "blocked_total": 48,
+   "check_cost": 3.0,
+   "config": "F2",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 1.333333,
+    "B": 0.0,
+    "C": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.1,
+    "B": 0.125,
+    "C": 0.166667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 71,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 1,
+   "check_cost": 1.0140845070422535,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 5.916666666666667
+  },
+  {
+   "admitted": 60,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 12,
+   "check_cost": 1.2,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 5.0
+  },
+  {
+   "admitted": 8,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 10,
+   "check_cost": 2.25,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 18,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 5.333333
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 18,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.6666666666666666
+  },
+  {
+   "admitted": 3,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 9,
+   "check_cost": 4.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 12,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 6.0,
+    "C": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.075,
+    "C": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 12,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.25
+  },
+  {
+   "admitted": 22,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 50,
+   "check_cost": 3.272727272727273,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 1.333333,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.1,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.8333333333333333
+  },
+  {
+   "admitted": 72,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25,
+    "C": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 58,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 27,
+   "final_overdraft": 0,
+   "guard_evals": 58,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0,
+    "C": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925,
+    "C": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 58,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 4.833333333333333
+  },
+  {
+   "admitted": 48,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 2,
+   "cross_violations": 3,
+   "dropped": 29,
+   "final_overdraft": 6,
+   "guard_evals": 48,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 48,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 4.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 558,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 558,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 62,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 4,
+   "final_overdraft": 0,
+   "guard_evals": 62,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 15.333333,
+    "B": 15.333333,
+    "C": 15.333333
+   },
+   "max_h_lost": {
+    "A": 0.941667,
+    "B": 0.941667,
+    "C": 0.891667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 62,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 5.166666666666667
+  },
+  {
+   "admitted": 72,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 12,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 30,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 15,
+   "final_overdraft": 6,
+   "guard_evals": 30,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.041667,
+    "C": 0.2
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 30,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.5
+  },
+  {
+   "admitted": 72,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 558,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 558,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 24,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 48,
+   "check_cost": 3.0,
+   "config": "F1",
+   "cross_violation_rounds": 3,
+   "cross_violations": 3,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 2.666667,
+    "B": 1.333333,
+    "C": 1.333333
+   },
+   "max_h_lost": {
+    "A": 0.2,
+    "B": 0.225,
+    "C": 0.116667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 12,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 558,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 558,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 26,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 8,
+   "blocked_total": 46,
+   "check_cost": 2.769230769230769,
+   "config": "F2",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 1.333333,
+    "B": 0.0,
+    "C": 2.0
+   },
+   "max_h_lost": {
+    "A": 0.183333,
+    "B": 0.083333,
+    "C": 0.216667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.1666666666666665
+  },
+  {
+   "admitted": 72,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 72,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 12,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.0
+  },
+  {
+   "admitted": 6,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 6,
+   "guard_evals": 6,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 6,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 6,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 6,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 30,
+   "guard_evals": 6,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 30,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 6,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 21,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 51,
+   "check_cost": 3.4285714285714284,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 2,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.75
+  },
+  {
+   "admitted": 144,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25,
+    "C": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 37,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 79,
+   "check_cost": 3.135135135135135,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 116,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0,
+    "C": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925,
+    "C": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 116,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.0833333333333335
+  },
+  {
+   "admitted": 25,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 71,
+   "check_cost": 3.84,
+   "config": "F0",
+   "cross_violation_rounds": 2,
+   "cross_violations": 3,
+   "dropped": 0,
+   "final_overdraft": 30,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333,
+    "C": 0.2
+   },
+   "max_overdraft": 30,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.0833333333333335
+  },
+  {
+   "admitted": 144,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 1134,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 1134,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 80,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 12,
+   "check_cost": 1.15,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 92,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 18.0,
+    "B": 18.0,
+    "C": 18.0
+   },
+   "max_h_lost": {
+    "A": 0.975,
+    "B": 0.975,
+    "C": 0.975
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 92,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 6.666666666666667
+  },
+  {
+   "admitted": 140,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 4,
+   "check_cost": 1.0285714285714285,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 11.666666666666666
+  },
+  {
+   "admitted": 108,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 36,
+   "check_cost": 1.3333333333333333,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 9.0
+  },
+  {
+   "admitted": 22,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 50,
+   "check_cost": 3.272727272727273,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 30,
+   "guard_evals": 72,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.083333,
+    "C": 0.2
+   },
+   "max_overdraft": 30,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 72,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.8333333333333333
+  },
+  {
+   "admitted": 144,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 1134,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 1134,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 43,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 101,
+   "check_cost": 3.3488372093023258,
+   "config": "F1",
+   "cross_violation_rounds": 2,
+   "cross_violations": 2,
+   "dropped": 0,
+   "final_overdraft": 2,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 4.666667,
+    "B": 4.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.3,
+    "B": 0.3,
+    "C": 0.1
+   },
+   "max_overdraft": 2,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.5833333333333335
+  },
+  {
+   "admitted": 140,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 4,
+   "check_cost": 1.0285714285714285,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 11.666666666666666
+  },
+  {
+   "admitted": 108,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 36,
+   "check_cost": 1.3333333333333333,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 9.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 1134,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 1134,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 28,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 24,
+   "blocked_total": 116,
+   "check_cost": 5.142857142857143,
+   "config": "F2",
+   "cross_violation_rounds": 3,
+   "cross_violations": 3,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 3.333333,
+    "B": 1.333333,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.125,
+    "B": 0.1,
+    "C": 0.15
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.3333333333333335
+  },
+  {
+   "admitted": 140,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 4,
+   "check_cost": 1.0285714285714285,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 11.666666666666666
+  },
+  {
+   "admitted": 108,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 36,
+   "check_cost": 1.3333333333333333,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 9.0
+  },
+  {
+   "admitted": 6,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 22,
+   "check_cost": 4.666666666666667,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 28,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 5.333333,
+    "C": 5.333333
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.066667,
+    "C": 0.066667
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 28,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.5
+  },
+  {
+   "admitted": 3,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 21,
+   "check_cost": 8.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 24,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 6.0,
+    "C": 6.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.075,
+    "C": 0.075
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 24,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.25
+  },
+  {
+   "admitted": 46,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 98,
+   "check_cost": 3.130434782608696,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 1.333333,
+    "B": 1.333333,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.1,
+    "B": 0.1,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "serialized",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 3.8333333333333335
+  },
+  {
+   "admitted": 144,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.25,
+    "B": 0.25,
+    "C": 0.25
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 116,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 79,
+   "final_overdraft": 0,
+   "guard_evals": 116,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 14.0,
+    "B": 14.0,
+    "C": 14.0
+   },
+   "max_h_lost": {
+    "A": 0.925,
+    "B": 0.925,
+    "C": 0.925
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 116,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 9.666666666666666
+  },
+  {
+   "admitted": 96,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 2,
+   "cross_violations": 3,
+   "dropped": 71,
+   "final_overdraft": 30,
+   "guard_evals": 96,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.208333,
+    "C": 0.2
+   },
+   "max_overdraft": 30,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 96,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 8.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 1134,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 1134,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 102,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F0",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 13,
+   "final_overdraft": 0,
+   "guard_evals": 102,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 19.333333,
+    "B": 19.333333,
+    "C": 19.333333
+   },
+   "max_h_lost": {
+    "A": 0.991667,
+    "B": 0.991667,
+    "C": 0.991667
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 102,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 8.5
+  },
+  {
+   "admitted": 144,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 7,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 36,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 60,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 1,
+   "cross_violations": 2,
+   "dropped": 39,
+   "final_overdraft": 30,
+   "guard_evals": 60,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.208333,
+    "B": 0.041667,
+    "C": 0.2
+   },
+   "max_overdraft": 30,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 60,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 5.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F1",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 1134,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 1134,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 35,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 109,
+   "check_cost": 4.114285714285714,
+   "config": "F1",
+   "cross_violation_rounds": 3,
+   "cross_violations": 3,
+   "dropped": 2,
+   "final_overdraft": 14,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 2.666667,
+    "B": 4.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.233333,
+    "B": 0.258333,
+    "C": 0.1
+   },
+   "max_overdraft": 14,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 2.9166666666666665
+  },
+  {
+   "admitted": 144,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 7,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 36,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 0,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": null,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 0,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 0,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 0.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F2",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 1134,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 1134,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 15,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 13,
+   "blocked_total": 129,
+   "check_cost": 9.6,
+   "config": "F2",
+   "cross_violation_rounds": 1,
+   "cross_violations": 3,
+   "dropped": 0,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 2.666667,
+    "B": 1.333333,
+    "C": 0.666667
+   },
+   "max_h_lost": {
+    "A": 0.2,
+    "B": 0.125,
+    "C": 0.108333
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.25
+  },
+  {
+   "admitted": 144,
+   "adversary": "A1-salami",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 7,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": true,
+    "B": true,
+    "C": true
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 144,
+   "adversary": "A2-ratchet",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 36,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.083333,
+    "B": 0.083333,
+    "C": 0.1
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 12.0
+  },
+  {
+   "admitted": 12,
+   "adversary": "A3-cross",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 30,
+   "guard_evals": 12,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 30,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 12,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.0
+  },
+  {
+   "admitted": 12,
+   "adversary": "A4-pool",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 0,
+   "check_cost": 1.0,
+   "config": "F3",
+   "cross_violation_rounds": 0,
+   "cross_violations": 0,
+   "dropped": 0,
+   "final_overdraft": 78,
+   "guard_evals": 12,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+   },
+   "max_overdraft": 78,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 12,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 1.0
+  },
+  {
+   "admitted": 9,
+   "adversary": "mixed",
+   "blocked_awaiting_auth": 0,
+   "blocked_total": 135,
+   "check_cost": 16.0,
+   "config": "F3",
+   "cross_violation_rounds": 1,
+   "cross_violations": 1,
+   "dropped": 1,
+   "final_overdraft": 0,
+   "guard_evals": 144,
+   "invalid_excluded": 0,
+   "m": 3,
+   "max_h_drain": {
+    "A": 1.333333,
+    "B": 1.333333,
+    "C": 0.0
+   },
+   "max_h_lost": {
+    "A": 0.058333,
+    "B": 0.141667,
+    "C": 0.05
+   },
+   "max_overdraft": 0,
+   "mode": "concurrent",
+   "n_agents": 4,
+   "proposals": 144,
+   "recoverable": {
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "rounds": 12,
+   "throughput": 0.75
+  }
+ ],
+ "elapsed_s": 85.14,
+ "inventory": {
+  "2": {
+   "contents_total": 11,
+   "m": 2,
+   "objects_total": 13,
+   "per_principal": {
+    "A": {
+     "accounts": [
+      "A:a0",
+      "A:a1"
+     ],
+     "asset_classes": {
+      "channel": 1.0,
+      "content": 6.0,
+      "ownership": 2.0,
+      "resource": 20.0
+     },
+     "contents": [
+      "c-A-d",
+      "c-A-u0",
+      "c-A-u1",
+      "c-A-u2",
+      "c-A-u3",
+      "c-shared"
+     ],
+     "objects": [
+      "A:o0",
+      "A:o1",
+      "A:o2",
+      "A:o3",
+      "A:o4",
+      "A:o5",
+      "SHARED"
+     ],
+     "pool_contrib": 6,
+     "principal_total": 20.0
+    },
+    "B": {
+     "accounts": [
+      "B:a0",
+      "B:a1"
+     ],
+     "asset_classes": {
+      "channel": 1.0,
+      "content": 6.0,
+      "ownership": 2.0,
+      "resource": 20.0
+     },
+     "contents": [
+      "c-B-d",
+      "c-B-u0",
+      "c-B-u1",
+      "c-B-u2",
+      "c-B-u3",
+      "c-shared"
+     ],
+     "objects": [
+      "B:o0",
+      "B:o1",
+      "B:o2",
+      "B:o3",
+      "B:o4",
+      "B:o5",
+      "SHARED"
+     ],
+     "pool_contrib": 6,
+     "principal_total": 20.0
+    }
+   },
+   "pool_funded": 12,
+   "shared_objects": 1
+  },
+  "3": {
+   "contents_total": 16,
+   "m": 3,
+   "objects_total": 19,
+   "per_principal": {
+    "A": {
+     "accounts": [
+      "A:a0",
+      "A:a1"
+     ],
+     "asset_classes": {
+      "channel": 1.0,
+      "content": 6.0,
+      "ownership": 2.0,
+      "resource": 20.0
+     },
+     "contents": [
+      "c-A-d",
+      "c-A-u0",
+      "c-A-u1",
+      "c-A-u2",
+      "c-A-u3",
+      "c-shared"
+     ],
+     "objects": [
+      "A:o0",
+      "A:o1",
+      "A:o2",
+      "A:o3",
+      "A:o4",
+      "A:o5",
+      "SHARED"
+     ],
+     "pool_contrib": 6,
+     "principal_total": 20.0
+    },
+    "B": {
+     "accounts": [
+      "B:a0",
+      "B:a1"
+     ],
+     "asset_classes": {
+      "channel": 1.0,
+      "content": 6.0,
+      "ownership": 2.0,
+      "resource": 20.0
+     },
+     "contents": [
+      "c-B-d",
+      "c-B-u0",
+      "c-B-u1",
+      "c-B-u2",
+      "c-B-u3",
+      "c-shared"
+     ],
+     "objects": [
+      "B:o0",
+      "B:o1",
+      "B:o2",
+      "B:o3",
+      "B:o4",
+      "B:o5",
+      "SHARED"
+     ],
+     "pool_contrib": 6,
+     "principal_total": 20.0
+    },
+    "C": {
+     "accounts": [
+      "C:a0",
+      "C:a1"
+     ],
+     "asset_classes": {
+      "channel": 1.0,
+      "content": 5.0,
+      "ownership": 2.0,
+      "resource": 20.0
+     },
+     "contents": [
+      "c-C-d",
+      "c-C-u0",
+      "c-C-u1",
+      "c-C-u2",
+      "c-C-u3"
+     ],
+     "objects": [
+      "C:o0",
+      "C:o1",
+      "C:o2",
+      "C:o3",
+      "C:o4",
+      "C:o5"
+     ],
+     "pool_contrib": 6,
+     "principal_total": 20.0
+    }
+   },
+   "pool_funded": 18,
+   "shared_objects": 1
+  }
+ },
+ "rounds": 12,
+ "seed": 1,
+ "theta": 0.1,
+ "violation_metric": "COUNT over (round, victim principal) pairs; cross_violation_rounds is the R10-comparable per-round BINARY indicator",
+ "workload_mix": {
+  "frac_cross": 0.4,
+  "frac_legit_of_cross": 0.75
+ }
+}
