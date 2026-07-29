@@ -887,5 +887,1331 @@
     "new_calls": 620,
     "prompt_tokens": 85854,
     "completion_tokens": 2073
+  },
+  "b4": {
+    "math": {
+      "google/gemma-2-27b-it": {
+        "EASY": {
+          "n": 39,
+          "n_pos": 30,
+          "n_neg": 9,
+          "base_failure": 0.2308,
+          "economy_ceiling": 0.7808,
+          "bar_feasible": true,
+          "auroc_self": 0.6685,
+          "auroc_null": 0.7963,
+          "delta": -0.1278,
+          "ci": [
+            -0.3594,
+            0.1204
+          ],
+          "economy_self": 0.2308,
+          "economy_null": 0.0,
+          "UNDERPOWERED": false
+        },
+        "HARD": {
+          "n": 37,
+          "n_pos": 13,
+          "n_neg": 24,
+          "base_failure": 0.6486,
+          "economy_ceiling": 0.3838,
+          "bar_feasible": false,
+          "auroc_self": 0.6667,
+          "auroc_null": 0.5978,
+          "delta": 0.0689,
+          "ci": [
+            -0.1818,
+            0.3112
+          ],
+          "economy_self": 0.0541,
+          "economy_null": 0.0,
+          "UNDERPOWERED": false
+        }
+      },
+      "meta-llama/llama-3.1-70b-instruct": {
+        "EASY": {
+          "n": 39,
+          "n_pos": 33,
+          "n_neg": 6,
+          "base_failure": 0.1538,
+          "economy_ceiling": 0.8538,
+          "bar_feasible": true,
+          "auroc_self": 0.6061,
+          "auroc_null": 0.5884,
+          "delta": 0.0177,
+          "ci": [
+            -0.3504,
+            0.4046
+          ],
+          "economy_self": 0.0513,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "HARD": {
+          "n": 38,
+          "n_pos": 19,
+          "n_neg": 19,
+          "base_failure": 0.5,
+          "economy_ceiling": 0.525,
+          "bar_feasible": true,
+          "auroc_self": 0.6316,
+          "auroc_null": 0.7327,
+          "delta": -0.1011,
+          "ci": [
+            -0.2969,
+            0.0942
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": false
+        }
+      },
+      "microsoft/phi-4": {
+        "EASY": {
+          "n": 39,
+          "n_pos": 36,
+          "n_neg": 3,
+          "base_failure": 0.0769,
+          "economy_ceiling": 0.9269,
+          "bar_feasible": true,
+          "auroc_self": 0.963,
+          "auroc_null": 0.9491,
+          "delta": 0.0139,
+          "ci": [
+            -0.0694,
+            0.0972
+          ],
+          "economy_self": 0.7179,
+          "economy_null": 0.8205,
+          "UNDERPOWERED": true
+        },
+        "HARD": {
+          "n": 40,
+          "n_pos": 19,
+          "n_neg": 21,
+          "base_failure": 0.525,
+          "economy_ceiling": 0.5012,
+          "bar_feasible": true,
+          "auroc_self": 0.6704,
+          "auroc_null": 0.6504,
+          "delta": 0.0201,
+          "ci": [
+            -0.1366,
+            0.178
+          ],
+          "economy_self": 0.025,
+          "economy_null": 0.075,
+          "UNDERPOWERED": false
+        }
+      },
+      "mistralai/mistral-small-3.2-24b-instruct": {
+        "EASY": {
+          "n": 39,
+          "n_pos": 26,
+          "n_neg": 13,
+          "base_failure": 0.3333,
+          "economy_ceiling": 0.6833,
+          "bar_feasible": true,
+          "auroc_self": 0.5118,
+          "auroc_null": 0.6435,
+          "delta": -0.1317,
+          "ci": [
+            -0.3686,
+            0.1018
+          ],
+          "economy_self": 0.0769,
+          "economy_null": 0.0,
+          "UNDERPOWERED": false
+        },
+        "HARD": {
+          "n": 40,
+          "n_pos": 14,
+          "n_neg": 26,
+          "base_failure": 0.65,
+          "economy_ceiling": 0.3825,
+          "bar_feasible": false,
+          "auroc_self": 0.5522,
+          "auroc_null": 0.6209,
+          "delta": -0.0687,
+          "ci": [
+            -0.2586,
+            0.1354
+          ],
+          "economy_self": 0.075,
+          "economy_null": 0.0,
+          "UNDERPOWERED": false
+        }
+      }
+    },
+    "mbpp": {
+      "meta-llama/llama-3.1-70b-instruct": {
+        "HARD": {
+          "n": 16,
+          "n_pos": 1,
+          "n_neg": 15,
+          "base_failure": 0.9375,
+          "economy_ceiling": 0.1094,
+          "bar_feasible": false,
+          "auroc_self": 0.5333,
+          "auroc_null": 0.5,
+          "delta": 0.0333,
+          "ci": [
+            0.0,
+            0.1071
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "MID": {
+          "n": 16,
+          "n_pos": 2,
+          "n_neg": 14,
+          "base_failure": 0.875,
+          "economy_ceiling": 0.1688,
+          "bar_feasible": false,
+          "auroc_self": 0.5536,
+          "auroc_null": 0.875,
+          "delta": -0.3214,
+          "ci": [
+            -0.5893,
+            -0.0385
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "EASY": {
+          "n": 18,
+          "n_pos": 17,
+          "n_neg": 1,
+          "base_failure": 0.0556,
+          "economy_ceiling": 0.9472,
+          "bar_feasible": true,
+          "auroc_self": 0.7941,
+          "auroc_null": 0.4118,
+          "delta": 0.3824,
+          "ci": [
+            0.25,
+            0.5294
+          ],
+          "economy_self": 0.5556,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        }
+      },
+      "google/gemma-2-27b-it": {
+        "HARD": {
+          "n": 16,
+          "n_pos": 1,
+          "n_neg": 15,
+          "base_failure": 0.9375,
+          "economy_ceiling": 0.1094,
+          "bar_feasible": false,
+          "auroc_self": 0.1,
+          "auroc_null": 0.5,
+          "delta": -0.4,
+          "ci": [
+            -0.5,
+            -0.2333
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "MID": {
+          "n": 16,
+          "n_pos": 2,
+          "n_neg": 14,
+          "base_failure": 0.875,
+          "economy_ceiling": 0.1688,
+          "bar_feasible": false,
+          "auroc_self": 0.4821,
+          "auroc_null": 0.875,
+          "delta": -0.3929,
+          "ci": [
+            -0.8,
+            0.0357
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "EASY": {
+          "n": 18,
+          "n_pos": 16,
+          "n_neg": 2,
+          "base_failure": 0.1111,
+          "economy_ceiling": 0.8944,
+          "bar_feasible": true,
+          "auroc_self": 0.6094,
+          "auroc_null": 1.0,
+          "delta": -0.3906,
+          "ci": [
+            -0.7812,
+            -0.0588
+          ],
+          "economy_self": 0.2778,
+          "economy_null": 0.8889,
+          "UNDERPOWERED": true
+        }
+      },
+      "google/gemma-3-27b-it": {
+        "HARD": {
+          "n": 16,
+          "n_pos": 0,
+          "n_neg": 16,
+          "base_failure": 1.0,
+          "economy_ceiling": 0.05,
+          "bar_feasible": false,
+          "auroc_self": null,
+          "auroc_null": null,
+          "delta": null,
+          "ci": null,
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "MID": {
+          "n": 16,
+          "n_pos": 2,
+          "n_neg": 14,
+          "base_failure": 0.875,
+          "economy_ceiling": 0.1688,
+          "bar_feasible": false,
+          "auroc_self": 0.375,
+          "auroc_null": 0.6071,
+          "delta": -0.2321,
+          "ci": [
+            -0.3846,
+            -0.0357
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "EASY": {
+          "n": 18,
+          "n_pos": 18,
+          "n_neg": 0,
+          "base_failure": 0.0,
+          "economy_ceiling": 1.0,
+          "bar_feasible": true,
+          "auroc_self": null,
+          "auroc_null": null,
+          "delta": null,
+          "ci": null,
+          "economy_self": null,
+          "economy_null": null,
+          "UNDERPOWERED": true
+        }
+      },
+      "mistralai/mistral-small-24b-instruct-2501": {
+        "HARD": {
+          "n": 16,
+          "n_pos": 0,
+          "n_neg": 16,
+          "base_failure": 1.0,
+          "economy_ceiling": 0.05,
+          "bar_feasible": false,
+          "auroc_self": null,
+          "auroc_null": null,
+          "delta": null,
+          "ci": null,
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "MID": {
+          "n": 16,
+          "n_pos": 0,
+          "n_neg": 16,
+          "base_failure": 1.0,
+          "economy_ceiling": 0.05,
+          "bar_feasible": false,
+          "auroc_self": null,
+          "auroc_null": null,
+          "delta": null,
+          "ci": null,
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "EASY": {
+          "n": 18,
+          "n_pos": 16,
+          "n_neg": 2,
+          "base_failure": 0.1111,
+          "economy_ceiling": 0.8944,
+          "bar_feasible": true,
+          "auroc_self": 0.5625,
+          "auroc_null": 1.0,
+          "delta": -0.4375,
+          "ci": [
+            -0.6964,
+            -0.1735
+          ],
+          "economy_self": 0.2222,
+          "economy_null": 0.8889,
+          "UNDERPOWERED": true
+        }
+      },
+      "mistralai/mistral-small-3.2-24b-instruct": {
+        "HARD": {
+          "n": 16,
+          "n_pos": 0,
+          "n_neg": 16,
+          "base_failure": 1.0,
+          "economy_ceiling": 0.05,
+          "bar_feasible": false,
+          "auroc_self": null,
+          "auroc_null": null,
+          "delta": null,
+          "ci": null,
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "MID": {
+          "n": 16,
+          "n_pos": 2,
+          "n_neg": 14,
+          "base_failure": 0.875,
+          "economy_ceiling": 0.1688,
+          "bar_feasible": false,
+          "auroc_self": 0.6786,
+          "auroc_null": 0.8571,
+          "delta": -0.1786,
+          "ci": [
+            -0.3731,
+            0.0357
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "EASY": {
+          "n": 18,
+          "n_pos": 16,
+          "n_neg": 2,
+          "base_failure": 0.1111,
+          "economy_ceiling": 0.8944,
+          "bar_feasible": true,
+          "auroc_self": 0.375,
+          "auroc_null": 1.0,
+          "delta": -0.625,
+          "ci": [
+            -0.7812,
+            -0.4643
+          ],
+          "economy_self": 0.1111,
+          "economy_null": 0.8889,
+          "UNDERPOWERED": true
+        }
+      },
+      "microsoft/phi-4": {
+        "HARD": {
+          "n": 16,
+          "n_pos": 1,
+          "n_neg": 15,
+          "base_failure": 0.9375,
+          "economy_ceiling": 0.1094,
+          "bar_feasible": false,
+          "auroc_self": 1.0,
+          "auroc_null": 0.5,
+          "delta": 0.5,
+          "ci": [
+            0.5,
+            0.5
+          ],
+          "economy_self": 0.0625,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "MID": {
+          "n": 16,
+          "n_pos": 3,
+          "n_neg": 13,
+          "base_failure": 0.8125,
+          "economy_ceiling": 0.2281,
+          "bar_feasible": false,
+          "auroc_self": 0.5385,
+          "auroc_null": 0.7051,
+          "delta": -0.1667,
+          "ci": [
+            -0.5,
+            0.25
+          ],
+          "economy_self": 0.0,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        },
+        "EASY": {
+          "n": 18,
+          "n_pos": 15,
+          "n_neg": 3,
+          "base_failure": 0.1667,
+          "economy_ceiling": 0.8417,
+          "bar_feasible": true,
+          "auroc_self": 0.6,
+          "auroc_null": 0.8222,
+          "delta": -0.2222,
+          "ci": [
+            -0.4688,
+            0.1765
+          ],
+          "economy_self": 0.1667,
+          "economy_null": 0.0,
+          "UNDERPOWERED": true
+        }
+      }
+    }
+  },
+  "b5": {
+    "math": {
+      "meta-llama/llama-3.1-70b-instruct -> google/gemma-2-27b-it": {
+        "n": 76,
+        "n_pos": 43,
+        "n_neg": 33,
+        "base_failure": 0.4342,
+        "economy_ceiling": 0.5875,
+        "bar_feasible": true,
+        "auroc_self": 0.6853,
+        "auroc_null": 0.7604,
+        "delta": -0.0751,
+        "ci": [
+          -0.1949,
+          0.0409
+        ],
+        "economy_self": 0.0263,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> google/gemma-2-27b-it": {
+        "n": 76,
+        "n_pos": 43,
+        "n_neg": 33,
+        "base_failure": 0.4342,
+        "economy_ceiling": 0.5875,
+        "bar_feasible": true,
+        "auroc_self": 0.6512,
+        "auroc_null": 0.7604,
+        "delta": -0.1092,
+        "ci": [
+          -0.229,
+          0.0097
+        ],
+        "economy_self": 0.0132,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> google/gemma-2-27b-it": {
+        "n": 76,
+        "n_pos": 43,
+        "n_neg": 33,
+        "base_failure": 0.4342,
+        "economy_ceiling": 0.5875,
+        "bar_feasible": true,
+        "auroc_self": 0.5606,
+        "auroc_null": 0.7604,
+        "delta": -0.1998,
+        "ci": [
+          -0.3448,
+          -0.0499
+        ],
+        "economy_self": 0.0526,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 77,
+        "n_pos": 52,
+        "n_neg": 25,
+        "base_failure": 0.3247,
+        "economy_ceiling": 0.6916,
+        "bar_feasible": true,
+        "auroc_self": 0.7119,
+        "auroc_null": 0.7385,
+        "delta": -0.0265,
+        "ci": [
+          -0.1641,
+          0.1081
+        ],
+        "economy_self": 0.1299,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 77,
+        "n_pos": 52,
+        "n_neg": 25,
+        "base_failure": 0.3247,
+        "economy_ceiling": 0.6916,
+        "bar_feasible": true,
+        "auroc_self": 0.6031,
+        "auroc_null": 0.7385,
+        "delta": -0.1354,
+        "ci": [
+          -0.2615,
+          -0.0016
+        ],
+        "economy_self": 0.2208,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 77,
+        "n_pos": 52,
+        "n_neg": 25,
+        "base_failure": 0.3247,
+        "economy_ceiling": 0.6916,
+        "bar_feasible": true,
+        "auroc_self": 0.5162,
+        "auroc_null": 0.7385,
+        "delta": -0.2223,
+        "ci": [
+          -0.3895,
+          -0.046
+        ],
+        "economy_self": 0.0909,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> microsoft/phi-4": {
+        "n": 79,
+        "n_pos": 55,
+        "n_neg": 24,
+        "base_failure": 0.3038,
+        "economy_ceiling": 0.7114,
+        "bar_feasible": true,
+        "auroc_self": 0.6447,
+        "auroc_null": 0.803,
+        "delta": -0.1583,
+        "ci": [
+          -0.2971,
+          -0.0226
+        ],
+        "economy_self": 0.1266,
+        "economy_null": 0.2911,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> microsoft/phi-4": {
+        "n": 79,
+        "n_pos": 55,
+        "n_neg": 24,
+        "base_failure": 0.3038,
+        "economy_ceiling": 0.7114,
+        "bar_feasible": true,
+        "auroc_self": 0.7811,
+        "auroc_null": 0.803,
+        "delta": -0.022,
+        "ci": [
+          -0.1264,
+          0.0845
+        ],
+        "economy_self": 0.1646,
+        "economy_null": 0.2911,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> microsoft/phi-4": {
+        "n": 79,
+        "n_pos": 55,
+        "n_neg": 24,
+        "base_failure": 0.3038,
+        "economy_ceiling": 0.7114,
+        "bar_feasible": true,
+        "auroc_self": 0.547,
+        "auroc_null": 0.803,
+        "delta": -0.2561,
+        "ci": [
+          -0.3919,
+          -0.1162
+        ],
+        "economy_self": 0.1013,
+        "economy_null": 0.2911,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 79,
+        "n_pos": 40,
+        "n_neg": 39,
+        "base_failure": 0.4937,
+        "economy_ceiling": 0.531,
+        "bar_feasible": true,
+        "auroc_self": 0.8151,
+        "auroc_null": 0.7,
+        "delta": 0.1151,
+        "ci": [
+          -0.0067,
+          0.2426
+        ],
+        "economy_self": 0.0633,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 79,
+        "n_pos": 40,
+        "n_neg": 39,
+        "base_failure": 0.4937,
+        "economy_ceiling": 0.531,
+        "bar_feasible": true,
+        "auroc_self": 0.7205,
+        "auroc_null": 0.7,
+        "delta": 0.0205,
+        "ci": [
+          -0.1146,
+          0.1555
+        ],
+        "economy_self": 0.038,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 79,
+        "n_pos": 40,
+        "n_neg": 39,
+        "base_failure": 0.4937,
+        "economy_ceiling": 0.531,
+        "bar_feasible": true,
+        "auroc_self": 0.6846,
+        "auroc_null": 0.7,
+        "delta": -0.0154,
+        "ci": [
+          -0.139,
+          0.1058
+        ],
+        "economy_self": 0.0127,
+        "economy_null": 0.0,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      }
+    },
+    "mbpp": {
+      "google/gemma-2-27b-it -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.6717,
+        "auroc_null": 0.9425,
+        "delta": -0.2708,
+        "ci": [
+          -0.4351,
+          -0.1143
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-3-27b-it -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.6958,
+        "auroc_null": 0.9425,
+        "delta": -0.2467,
+        "ci": [
+          -0.4066,
+          -0.091
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-24b-instruct-2501 -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.6317,
+        "auroc_null": 0.9425,
+        "delta": -0.3108,
+        "ci": [
+          -0.4659,
+          -0.1693
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.5133,
+        "auroc_null": 0.9425,
+        "delta": -0.4292,
+        "ci": [
+          -0.5426,
+          -0.3103
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> meta-llama/llama-3.1-70b-instruct": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.65,
+        "auroc_null": 0.9425,
+        "delta": -0.2925,
+        "ci": [
+          -0.4454,
+          -0.1364
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> google/gemma-2-27b-it": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.618,
+        "auroc_null": 0.955,
+        "delta": -0.337,
+        "ci": [
+          -0.4742,
+          -0.2023
+        ],
+        "economy_self": 0.06,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-3-27b-it -> google/gemma-2-27b-it": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.6681,
+        "auroc_null": 0.955,
+        "delta": -0.2869,
+        "ci": [
+          -0.4375,
+          -0.1458
+        ],
+        "economy_self": 0.08,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-24b-instruct-2501 -> google/gemma-2-27b-it": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.6511,
+        "auroc_null": 0.955,
+        "delta": -0.3039,
+        "ci": [
+          -0.4772,
+          -0.142
+        ],
+        "economy_self": 0.02,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> google/gemma-2-27b-it": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.5195,
+        "auroc_null": 0.955,
+        "delta": -0.4355,
+        "ci": [
+          -0.5842,
+          -0.2848
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> google/gemma-2-27b-it": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.6689,
+        "auroc_null": 0.955,
+        "delta": -0.2861,
+        "ci": [
+          -0.4151,
+          -0.1629
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> google/gemma-3-27b-it": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.5975,
+        "auroc_null": 0.965,
+        "delta": -0.3675,
+        "ci": [
+          -0.4805,
+          -0.254
+        ],
+        "economy_self": 0.06,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> google/gemma-3-27b-it": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.6517,
+        "auroc_null": 0.965,
+        "delta": -0.3133,
+        "ci": [
+          -0.4635,
+          -0.1721
+        ],
+        "economy_self": 0.12,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-24b-instruct-2501 -> google/gemma-3-27b-it": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.635,
+        "auroc_null": 0.965,
+        "delta": -0.33,
+        "ci": [
+          -0.4869,
+          -0.1823
+        ],
+        "economy_self": 0.02,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> google/gemma-3-27b-it": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.5067,
+        "auroc_null": 0.965,
+        "delta": -0.4583,
+        "ci": [
+          -0.5676,
+          -0.3548
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> google/gemma-3-27b-it": {
+        "n": 50,
+        "n_pos": 20,
+        "n_neg": 30,
+        "base_failure": 0.6,
+        "economy_ceiling": 0.43,
+        "bar_feasible": true,
+        "auroc_self": 0.6417,
+        "auroc_null": 0.965,
+        "delta": -0.3233,
+        "ci": [
+          -0.4511,
+          -0.202
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> mistralai/mistral-small-24b-instruct-2501": {
+        "n": 50,
+        "n_pos": 16,
+        "n_neg": 34,
+        "base_failure": 0.68,
+        "economy_ceiling": 0.354,
+        "bar_feasible": false,
+        "auroc_self": 0.5671,
+        "auroc_null": 1.0,
+        "delta": -0.4329,
+        "ci": [
+          -0.5466,
+          -0.3199
+        ],
+        "economy_self": 0.06,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> mistralai/mistral-small-24b-instruct-2501": {
+        "n": 50,
+        "n_pos": 16,
+        "n_neg": 34,
+        "base_failure": 0.68,
+        "economy_ceiling": 0.354,
+        "bar_feasible": false,
+        "auroc_self": 0.7151,
+        "auroc_null": 1.0,
+        "delta": -0.2849,
+        "ci": [
+          -0.4427,
+          -0.1436
+        ],
+        "economy_self": 0.08,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-3-27b-it -> mistralai/mistral-small-24b-instruct-2501": {
+        "n": 50,
+        "n_pos": 16,
+        "n_neg": 34,
+        "base_failure": 0.68,
+        "economy_ceiling": 0.354,
+        "bar_feasible": false,
+        "auroc_self": 0.7785,
+        "auroc_null": 1.0,
+        "delta": -0.2215,
+        "ci": [
+          -0.3779,
+          -0.0888
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> mistralai/mistral-small-24b-instruct-2501": {
+        "n": 50,
+        "n_pos": 16,
+        "n_neg": 34,
+        "base_failure": 0.68,
+        "economy_ceiling": 0.354,
+        "bar_feasible": false,
+        "auroc_self": 0.5616,
+        "auroc_null": 1.0,
+        "delta": -0.4384,
+        "ci": [
+          -0.5882,
+          -0.2938
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> mistralai/mistral-small-24b-instruct-2501": {
+        "n": 50,
+        "n_pos": 16,
+        "n_neg": 34,
+        "base_failure": 0.68,
+        "economy_ceiling": 0.354,
+        "bar_feasible": false,
+        "auroc_self": 0.6654,
+        "auroc_null": 1.0,
+        "delta": -0.3346,
+        "ci": [
+          -0.4819,
+          -0.1952
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 50,
+        "n_pos": 18,
+        "n_neg": 32,
+        "base_failure": 0.64,
+        "economy_ceiling": 0.392,
+        "bar_feasible": false,
+        "auroc_self": 0.5773,
+        "auroc_null": 0.9861,
+        "delta": -0.4089,
+        "ci": [
+          -0.5263,
+          -0.2917
+        ],
+        "economy_self": 0.06,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 50,
+        "n_pos": 18,
+        "n_neg": 32,
+        "base_failure": 0.64,
+        "economy_ceiling": 0.392,
+        "bar_feasible": false,
+        "auroc_self": 0.7613,
+        "auroc_null": 0.9861,
+        "delta": -0.2248,
+        "ci": [
+          -0.3695,
+          -0.0985
+        ],
+        "economy_self": 0.1,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-3-27b-it -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 50,
+        "n_pos": 18,
+        "n_neg": 32,
+        "base_failure": 0.64,
+        "economy_ceiling": 0.392,
+        "bar_feasible": false,
+        "auroc_self": 0.7248,
+        "auroc_null": 0.9861,
+        "delta": -0.2613,
+        "ci": [
+          -0.4077,
+          -0.1259
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-24b-instruct-2501 -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 50,
+        "n_pos": 18,
+        "n_neg": 32,
+        "base_failure": 0.64,
+        "economy_ceiling": 0.392,
+        "bar_feasible": false,
+        "auroc_self": 0.651,
+        "auroc_null": 0.9861,
+        "delta": -0.3351,
+        "ci": [
+          -0.5191,
+          -0.1633
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "microsoft/phi-4 -> mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 50,
+        "n_pos": 18,
+        "n_neg": 32,
+        "base_failure": 0.64,
+        "economy_ceiling": 0.392,
+        "bar_feasible": false,
+        "auroc_self": 0.6597,
+        "auroc_null": 0.9861,
+        "delta": -0.3264,
+        "ci": [
+          -0.4581,
+          -0.1929
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      },
+      "meta-llama/llama-3.1-70b-instruct -> microsoft/phi-4": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.6282,
+        "auroc_null": 0.9066,
+        "delta": -0.2784,
+        "ci": [
+          -0.4288,
+          -0.1138
+        ],
+        "economy_self": 0.08,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-2-27b-it -> microsoft/phi-4": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.7233,
+        "auroc_null": 0.9066,
+        "delta": -0.1834,
+        "ci": [
+          -0.3503,
+          -0.017
+        ],
+        "economy_self": 0.1,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "google/gemma-3-27b-it -> microsoft/phi-4": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.7385,
+        "auroc_null": 0.9066,
+        "delta": -0.1681,
+        "ci": [
+          -0.3455,
+          0.0121
+        ],
+        "economy_self": 0.04,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-24b-instruct-2501 -> microsoft/phi-4": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.6171,
+        "auroc_null": 0.9066,
+        "delta": -0.2895,
+        "ci": [
+          -0.4932,
+          -0.0917
+        ],
+        "economy_self": 0.02,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": false,
+        "parse_rate": 1.0
+      },
+      "mistralai/mistral-small-3.2-24b-instruct -> microsoft/phi-4": {
+        "n": 50,
+        "n_pos": 19,
+        "n_neg": 31,
+        "base_failure": 0.62,
+        "economy_ceiling": 0.411,
+        "bar_feasible": true,
+        "auroc_self": 0.5484,
+        "auroc_null": 0.9066,
+        "delta": -0.3582,
+        "ci": [
+          -0.4513,
+          -0.2442
+        ],
+        "economy_self": 0.0,
+        "economy_null": 0.32,
+        "UNDERPOWERED": false,
+        "degenerate": true,
+        "parse_rate": 1.0
+      }
+    },
+    "calls": 2460
   }
 }
