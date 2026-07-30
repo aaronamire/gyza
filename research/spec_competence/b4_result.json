@@ -1,0 +1,531 @@
+{
+ "rows": [
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 0,
+   "missed": 0,
+   "detection": null
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 1,
+   "missed": 1,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 0,
+   "missed": 0,
+   "detection": null
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 0,
+   "detection": 1.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 0,
+   "detection": 1.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 1,
+   "missed": 1,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 0,
+   "missed": 0,
+   "detection": null
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "status": "NOPARSE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "status": "NOPARSE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 1,
+   "missed": 1,
+   "detection": 0.0
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 0,
+   "missed": 0,
+   "detection": null
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 1,
+   "missed": 1,
+   "detection": 0.0
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 0,
+   "missed": 0,
+   "detection": null
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 2,
+   "missed": 2,
+   "detection": 0.0
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 0,
+   "missed": 0,
+   "detection": null
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "status": "REJECTS_BASE"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "status": "OK",
+   "e2e_violations": 1,
+   "missed": 1,
+   "detection": 0.0
+  }
+ ],
+ "summary": {
+  "conservation": {
+   "n_specs": 24,
+   "usable": 0,
+   "rejects_base": 24,
+   "noparse": 0,
+   "mean_detection": null,
+   "total_violations": 0,
+   "total_missed": 0
+  },
+  "monotone": {
+   "n_specs": 24,
+   "usable": 2,
+   "rejects_base": 20,
+   "noparse": 2,
+   "mean_detection": 1.0,
+   "total_violations": 4,
+   "total_missed": 0
+  },
+  "cumulative": {
+   "n_specs": 24,
+   "usable": 14,
+   "rejects_base": 4,
+   "noparse": 0,
+   "mean_detection": 0.0,
+   "total_violations": 23,
+   "total_missed": 23
+  }
+ }
+}
