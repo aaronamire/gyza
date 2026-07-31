@@ -50,6 +50,12 @@ from gyza.identity import AgentIdentity
 from gyza.memory import Episode, EpisodicMemory, build_enriched_prompt
 from gyza.schema import Artifact, HLC, WorkItem
 
+# BUILD_PLAN E2 — process-wide default for the bounds-proof refusal policy.
+# Production entry points set this True (or pass require_enforcement=True);
+# unit tests with mock executors leave it False. Moves into the signed guard
+# configuration (C-8) once that trust domain exists.
+REQUIRE_ENFORCEMENT_DEFAULT = False
+
 
 # Observability hooks. The module-private wrappers fail closed so an
 # import-time error in gyza.observability (e.g. prometheus_client
@@ -99,7 +105,31 @@ class AgentRunner:
         strict_chain_verification: bool = False,
         hlc: HLC | None = None,
         reputation_store=None,
+        require_enforcement: bool | None = None,
     ):
+        # BUILD_PLAN E2 — the fail-open gate.
+        #
+        # The bounds check historically ran only `if enforcement is not None`,
+        # so an executor that stamped no record skipped it entirely and still
+        # produced a signed envelope. That is non-repudiation of a claim rather
+        # than refusal to proceed without one.
+        #
+        # `require_enforcement` makes the policy EXPLICIT and refusable:
+        #   True  — refuse to sign any work item lacking a valid record.
+        #   False — permit it (the historical behaviour), for unit tests and
+        #           mock/deterministic executors that do not sandbox at all.
+        #   None  — take the process-wide default below.
+        #
+        # The default is deliberately NOT flipped here: 18 test files drive the
+        # runner with non-sandboxing executors, and flipping it silently would
+        # convert a security decision into test churn. Production entry points
+        # set it True explicitly. When C-8 (guard configuration in a separate
+        # trust domain) lands, this policy moves there and stops being a
+        # constructor argument at all.
+        self._require_enforcement = (
+            REQUIRE_ENFORCEMENT_DEFAULT if require_enforcement is None
+            else bool(require_enforcement)
+        )
         self._identity = identity
         self._bb = blackboard
         self._mem = memory
@@ -404,6 +434,15 @@ class AgentRunner:
         # for them — the artifact below is byte-identical to before
         # and the existing test suite is unaffected.
         enforcement = raw.get("__enforcement__")
+        if enforcement is None and self._require_enforcement:
+            # FAIL CLOSED. Under this policy an absent record is a refusal,
+            # not a skip: we cannot prove the work stayed in bounds, so no
+            # envelope is produced for it.
+            raise RuntimeError(
+                "refusing to sign — no sandbox enforcement record was "
+                "stamped and require_enforcement is set; an unenforced "
+                "execution cannot carry a bounds-proof"
+            )
         if enforcement is not None:
             from gyza.sandbox.config import enforcement_satisfies_manifest
             ok, why = enforcement_satisfies_manifest(

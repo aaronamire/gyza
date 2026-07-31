@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "BUILD_PLAN D1 — declared harm bound levels. USER DECISION, 2026-07-31.",
+    "Every level in research/HARM_MODEL_DRAFT.md was 'TBD — user decision';",
+    "these are the first declared values. They are deliberately TIGHT: the",
+    "point of D1 is a declared, falsifiable model, and tightening later is",
+    "cheap while loosening after a loss is not.",
+    "",
+    "H1_credits: max net drawdown per run, in credits. The quantity may be",
+    "  negative by design (net debt is never clamped, wallet.py:276-280), so",
+    "  this is a floor on net position, not a cap on magnitude.",
+    "H2_market_capital: same shape. NOTE the standing hazard: _capital is a",
+    "  mutable dict no gate reads (market.py:231, mutated :287/:325/:332/:345).",
+    "  This bound makes the exposure measurable; it does NOT fix the",
+    "  representation. The fix is to route market P&L through LedgerEntry.",
+    "H4_authority: 0. Authority exceedance is a BREACH, not a budget — the",
+    "  attenuation theorem says it cannot happen, so any count above zero is a",
+    "  broken invariant rather than consumed allowance.",
+    "",
+    "C-8: this file will move into the signed guard-configuration trust domain.",
+    "Until then it is an ordinary repo file and is NOT tamper-evident."
+  ],
+  "version": 1,
+  "declared": "2026-07-31",
+  "bounds": {
+    "H1_credits": 100.0,
+    "H2_market_capital": 100.0,
+    "H4_authority": 0.0
+  }
+}
