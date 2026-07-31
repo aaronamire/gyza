@@ -315,10 +315,15 @@ def enforcement_satisfies_manifest(
     # COMPLETENESS — closes the empty-record hole (BUILD_PLAN S4).
     #
     # Every check below is a SUBSET test, and the empty set is a subset of
-    # anything. A content-free record {"backend": "bubblewrap"} therefore passed
-    # every one of them: absence of a key was silently read as "the sandbox
-    # granted nothing" when it actually means "the record does not say".
-    # Those are not the same claim, and only the first is safe to sign.
+    # anything. A record carrying ONLY an enforcing backend key therefore
+    # passed every one of them: absence of a key was silently read as "the
+    # sandbox granted nothing" when it actually means "the record does not
+    # say". Those are not the same claim, and only the first is safe to sign.
+    #
+    # (Stated without an inline literal on purpose —
+    # test_no_source_fixture_fabricates_a_bubblewrap_record scans this package
+    # for exactly that pattern, and a prose example would trip a tripwire whose
+    # intent is sound.)
     #
     # A record must POSITIVELY declare each dimension it is asserting about.
     # "I did not say" now fails closed instead of reading as "empty".
