@@ -48,6 +48,7 @@ import os
 import shutil
 import struct
 import subprocess
+import sys
 from dataclasses import dataclass
 from typing import Any
 
@@ -64,6 +65,40 @@ _HEADER_FMT = "!Q"
 _HEADER_SIZE = 8
 
 _ENTRYPOINT_MODULE = "gyza.sandbox._entrypoint"
+# Sentinel argv[0] that makes a FROZEN gyza binary run the in-sandbox
+# entrypoint instead of the normal CLI. A source build never uses it (it
+# runs ``python -m gyza.sandbox._entrypoint``); a PyInstaller binary has
+# no ``-m``, so run_sandboxed re-execs the binary with this sentinel —
+# the same self-re-exec pattern PyInstaller's own multiprocessing support
+# uses. The sentinel ONLY routes to the entrypoint; it never stamps an
+# enforcement record (that is the trusted parent's job in
+# make_sandboxed_executor), so invoking it directly, outside bwrap, can
+# only ever yield backend=none — it is not a fabrication vector.
+_SANDBOX_ENTRY_SENTINEL = "__gyza_sandbox_entry__"
+
+
+def _is_frozen() -> bool:
+    """True when running inside a PyInstaller (or similar) frozen binary."""
+    return bool(getattr(sys, "frozen", False))
+
+
+def _frozen_bind_paths() -> list[str]:
+    """
+    Read-only bind mounts a frozen binary needs to re-exec itself inside
+    bwrap: the executable, plus the PyInstaller bundle dir (``_internal/``
+    for onedir, the ``_MEIxxxx`` extraction for onefile) when present.
+    Binding the whole binary is not an escalation — inside ``--unshare-all``
+    + uid 65534 the sandboxee holds no privilege to invoke the CLI paths
+    it contains — and containment still rests on the namespace + rlimit
+    flags, asserted by the enforced smoke test.
+    """
+    paths = [os.path.realpath(sys.executable)]
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass:
+        rp = os.path.realpath(meipass)
+        if rp not in paths:
+            paths.append(rp)
+    return paths
 
 
 # ---------------------------------------------------------------------------
@@ -169,7 +204,7 @@ def detect_backend() -> SandboxBackend:
 
 def _build_bwrap_argv(
     config: SandboxConfig,
-    python_bin: str,
+    entry_argv: list[str],
 ) -> list[str]:
     """
     Translate a SandboxConfig into bwrap's CLI flags.
@@ -275,9 +310,13 @@ def _build_bwrap_argv(
     ]
 
     # --- command ---------------------------------------------------------
-    # Inside the sandbox, run the entrypoint module from the bound gyza
-    # source. ``-u`` for unbuffered IO (matches the framing protocol).
-    argv += [python_bin, "-u", "-m", _ENTRYPOINT_MODULE]
+    # Inside the sandbox, run the sandboxee entrypoint. A SOURCE build
+    # passes [python, "-u", "-m", gyza.sandbox._entrypoint] with the gyza
+    # source bind-mounted and on PYTHONPATH. A FROZEN single binary passes
+    # [binary, __gyza_sandbox_entry__] and binds the binary + its bundle
+    # instead — the binary is itself the interpreter and carries its own
+    # source, so there is no separate python and no source tree to bind.
+    argv += list(entry_argv)
     return argv
 
 
@@ -329,37 +368,46 @@ def run_sandboxed(
             "fall back to SandboxBackend.NONE",
         )
 
-    # Resolve the python binary AND make sure it's bind-mounted. Default
-    # to the running interpreter — it's already on the system_paths
-    # allowlist via sys.prefix/base_prefix.
-    if python_bin is None:
-        import sys
-        python_bin = sys.executable
-
-    # The gyza package source must be visible inside the sandbox. We
-    # locate it via the import system rather than relative paths so
-    # this works whether gyza is installed editable, vendored, or
-    # placed via PYTHONPATH.
-    if gyza_source_root is None:
-        import gyza
-        gyza_source_root = os.path.dirname(os.path.dirname(gyza.__file__))
-
-    # Augment ro_paths with gyza root and the python binary's prefix
-    # in case the caller forgot. Dedup happens inside default_system_paths.
-    augmented_ro = list(config.ro_paths)
-    if gyza_source_root not in augmented_ro:
-        augmented_ro.append(gyza_source_root)
-
-    # Build a temporary copy of config with augmented paths — we don't
-    # mutate the caller's config. PYTHONPATH must include the gyza
-    # source root so the sandboxee can import the entrypoint module;
-    # we layer this on top of any caller-supplied env_set without
-    # clobbering the caller's other vars.
-    augmented_env = dict(config.env_set)
-    existing_pp = augmented_env.get("PYTHONPATH", "")
-    augmented_env["PYTHONPATH"] = (
-        f"{gyza_source_root}:{existing_pp}" if existing_pp else gyza_source_root
-    )
+    # Resolve the sandboxee entry command + the read-only binds it needs.
+    # Two shapes, ONE code path: the bounds (memory / cpu / timeout /
+    # network / rw) are identical in both branches, so the enforcement
+    # record the trusted parent stamps (make_sandboxed_executor, from the
+    # same cfg) reflects exactly what was handed to bwrap here. The frozen
+    # branch changes only WHICH binary runs and WHICH paths are bound —
+    # never the bounds — so no fabrication vector is reintroduced.
+    if _is_frozen():
+        # Frozen single binary: sys.executable IS the binary (it does not
+        # honor `-m`), and the gyza source lives inside the bundle, not a
+        # bindable tree. Re-exec the binary with the sandbox sentinel and
+        # bind the binary (+ its _internal/ bundle) read-only. No source
+        # bind, no PYTHONPATH — the binary carries its own source.
+        exe = python_bin if python_bin is not None else sys.executable
+        entry_argv = [exe, _SANDBOX_ENTRY_SENTINEL]
+        augmented_ro = list(config.ro_paths)
+        for p in _frozen_bind_paths():
+            if p not in augmented_ro:
+                augmented_ro.append(p)
+        augmented_env = dict(config.env_set)  # source is in-bundle
+    else:
+        # Source build: run `python -m gyza.sandbox._entrypoint` with the
+        # gyza source bind-mounted and on PYTHONPATH. Default python_bin to
+        # the running interpreter (already allowlisted via sys.prefix). We
+        # locate the source via the import system rather than relative
+        # paths so this works installed-editable, vendored, or on PYTHONPATH.
+        if python_bin is None:
+            python_bin = sys.executable
+        if gyza_source_root is None:
+            import gyza
+            gyza_source_root = os.path.dirname(os.path.dirname(gyza.__file__))
+        augmented_ro = list(config.ro_paths)
+        if gyza_source_root not in augmented_ro:
+            augmented_ro.append(gyza_source_root)
+        augmented_env = dict(config.env_set)
+        existing_pp = augmented_env.get("PYTHONPATH", "")
+        augmented_env["PYTHONPATH"] = (
+            f"{gyza_source_root}:{existing_pp}" if existing_pp else gyza_source_root
+        )
+        entry_argv = [python_bin, "-u", "-m", _ENTRYPOINT_MODULE]
     effective = SandboxConfig(
         ro_paths=augmented_ro,
         rw_paths=list(config.rw_paths),
@@ -373,7 +421,7 @@ def run_sandboxed(
         backend=config.backend,
     )
 
-    argv = _build_bwrap_argv(effective, python_bin)
+    argv = _build_bwrap_argv(effective, entry_argv)
 
     request = {
         "factory": factory_qualname,

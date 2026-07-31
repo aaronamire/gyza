@@ -596,14 +596,17 @@ def test_tmpfs_precedes_tmp_rooted_binds_in_argv():
     # Python interpreter (sys.prefix) or ro_path physically under /tmp is
     # shadowed by the tmpfs and bwrap dies with "execvp .../python: No
     # such file or directory". This bit a venv installed under /tmp.
-    from gyza.sandbox.runner import _build_bwrap_argv
+    from gyza.sandbox.runner import _ENTRYPOINT_MODULE, _build_bwrap_argv
 
     cfg = SandboxConfig(
         ro_paths=["/tmp/some/ro/path"],
         max_memory_mb=256,
         backend=SandboxBackend.BUBBLEWRAP,
     )
-    argv = _build_bwrap_argv(cfg, python_bin="/tmp/venv/bin/python")
+    argv = _build_bwrap_argv(
+        cfg,
+        entry_argv=["/tmp/venv/bin/python", "-u", "-m", _ENTRYPOINT_MODULE],
+    )
 
     tmpfs_idx = None
     for i in range(len(argv) - 1):

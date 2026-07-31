@@ -95,13 +95,73 @@ jobs:
           path: dist/*
 
   # ---------------------------------------------------------------------
+  # Build the self-contained `gyza` onedir binary (the one-command-install
+  # artifact). Built INSIDE manylinux_2_28 via packaging/Dockerfile.build
+  # so the glibc floor stays <= 2.28 (Ubuntu 20.04+/RHEL 8+). The floor is
+  # asserted inside the image build (check_glibc_floor.sh), so a too-new
+  # floor fails the job before anything ships — portability is a tested
+  # invariant, never "works on my machine". amd64 + arm64 via native
+  # runners (PyInstaller cannot cross-compile; each arch builds on its own).
+  # ---------------------------------------------------------------------
+  build-onedir:
+    name: build self-contained gyza (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            pbs_asset: cpython-3.14.6+20260718-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            pbs_asset: cpython-3.14.6+20260718-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz
+    steps:
+      - uses: actions/checkout@v4
+      - name: build onedir in manylinux (glibc floor asserted inside)
+        run: |
+          docker build -f packaging/Dockerfile.build \
+            --build-arg PBS_ASSET=${{ matrix.pbs_asset }} \
+            -t gyza-onedir-build .
+          id=$(docker create gyza-onedir-build)
+          mkdir -p dist
+          docker cp "$id:/out/dist/gyza" dist/gyza
+          docker rm "$id"
+      - name: package + checksum (mandatory)
+        run: |
+          tarball="gyza-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz"
+          tar -czf "$tarball" -C dist gyza
+          sha256sum "$tarball" > "$tarball.sha256"
+          ls -la "$tarball"*
+      - name: sign the tarball (minisign, if key configured)
+        env:
+          MINISIGN_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+        if: ${{ env.MINISIGN_KEY != '' }}
+        run: |
+          # Signs the whole tarball => covers the entire onedir tree
+          # transitively. install.sh verifies BEFORE extraction.
+          sudo apt-get update && sudo apt-get install -y minisign
+          printf '%s' "$MINISIGN_KEY" > /tmp/minisign.key
+          tarball="gyza-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz"
+          minisign -Sm "$tarball" -s /tmp/minisign.key
+          rm -f /tmp/minisign.key
+          ls -la "$tarball.minisig"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gyza-onedir-${{ matrix.arch }}
+          path: |
+            gyza-*-linux-*.tar.gz
+            gyza-*-linux-*.tar.gz.sha256
+            gyza-*-linux-*.tar.gz.minisig
+
+  # ---------------------------------------------------------------------
   # Collect all artifacts and publish a GitHub Release.
   # The release notes are auto-generated from commit messages between
   # the previous tag and this one; can be edited manually after publish.
   # ---------------------------------------------------------------------
   publish:
     name: publish github release
-    needs: [build-daemon, build-wheel]
+    needs: [build-daemon, build-wheel, build-onedir]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

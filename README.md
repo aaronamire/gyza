@@ -21,8 +21,9 @@ internals but by making every agent action *signed, attributable, and
 cryptographically bounded*, with misbehavior detectable and slashable.
 
 At the level of one agent, Gyza is a seatbelt and a flight recorder:
-run any agent or command in a kernel-enforced sandbox and get a
-receipt anyone can verify. At the level of a collective, those
+run any agent or command in an OS-enforced sandbox (bubblewrap —
+namespaces + seccomp) and get a receipt anyone can verify. At the
+level of a collective, those
 receipts are the accountability layer that makes emergence
 *controlled* rather than merely hoped-for.
 
@@ -69,7 +70,49 @@ honestly dependent on a TA2 partner for inference-time control.
 
 ---
 
-## What actually works today — try it in ~2 minutes
+## Try it in ~90 seconds
+
+**Self-contained binary** — Linux x86_64/aarch64, no Python, no pipx; it
+carries its own interpreter and native deps:
+
+```bash
+curl -sSf https://gyza.network/install.sh | bash   # verifies checksum + signature
+gyza demo
+```
+
+`gyza demo` runs the flagship story offline in a few seconds: five nodes,
+a network partition, bounded work continuing on both sides with **no
+quorum and no connectivity**, an over-budget action refused, the mesh
+self-healing, and one provenance DAG that verifies end to end across the
+blackout. It states on screen exactly which enforcement mode it ran in,
+and never claims containment it didn't perform:
+
+- **Linux with bubblewrap** → **OS-enforced** (real containment:
+  namespaces + seccomp; records `backend=bubblewrap`).
+- **OS sandbox unavailable** (macOS, a locked-down container) → the
+  **disclosed no-sandbox** path — the delegation-bound and provenance
+  logic (cryptographic, needing no sandbox) still hold, and every signed
+  record honestly carries `backend=none`.
+
+No Linux box? The same demo runs in Docker:
+
+```bash
+docker run --rm ghcr.io/aaronamire/gyza demo          # disclosed (Docker blocks userns by default)
+docker run --rm --security-opt seccomp=unconfined \
+           --security-opt systempaths=unconfined \
+           ghcr.io/aaronamire/gyza demo               # OS-enforced
+```
+
+The install is tamper-evident end to end: the release tarball's SHA256 is
+verified (mandatory) and a signature over the whole tree is checked
+*before* extraction. For a tool whose whole point is provenance, the
+install path is provenance too.
+
+*(The public `gyza.network` installer and `ghcr.io` image ship with the
+first tagged release — until then, build from source below, or from
+`packaging/`.)*
+
+### From source
 
 The single-agent product needs no network and no daemon. Everything
 below is real, runnable, and honest about what it proves.
@@ -77,10 +120,10 @@ below is real, runnable, and honest about what it proves.
 ```bash
 # Linux x86_64/aarch64, Python 3.10+, plus bubblewrap (bwrap).
 git clone https://github.com/aaronamire/gyza && cd gyza
-pip install -e .                 # PyPI publish is on the roadmap
+pip install -e .
 gyza init                        # 32-byte master seed at ~/.gyza/compositor.key
 
-# Run any command in a kernel-enforced sandbox → signed receipt.
+# Run any command in an OS-enforced sandbox (bubblewrap) → signed receipt.
 gyza exec --allow-read . -- ls -la
 
 # Turn the run into a receipt anyone can verify — no node, no identity,
@@ -101,9 +144,10 @@ bounds check:   ✓ enforcement ⊆ manifest (re-verified here)
 ✓ bounded (INDEPENDENTLY VERIFIED)
 ```
 
-Demonstrations, all offline unless noted:
+More demonstrations, all offline unless noted:
 
 ```bash
+gyza demo              # the flagship: DDIL partition + provenance audit (above)
 gyza demo bounds       # controlled emergence at one agent: signed → verified,
                        # tampered → caught, out-of-bounds → never signed. ~2 s.
 gyza demo injection    # tamper a provenance chain, re-verify, watch it fail
@@ -113,11 +157,10 @@ gyza demo global --fast # local two-daemon testbed: peer-to-peer coordination,
                         # settlement, a chain that verifies across the blackout
 ```
 
-`gyza demo global --fast` is the decentralized story in miniature: two
-independent daemons form a collective, one goes dark for 3 seconds, the
-mesh heals, credits settle to byte-identical ledgers, and the resulting
-provenance chain verifies across the outage — the DICE resilience
-property, demonstrated on one machine.
+`gyza demo global --fast` is the multi-daemon story: two independent
+daemons form a collective, one goes dark for 3 seconds, the mesh heals,
+credits settle to byte-identical ledgers, and the provenance chain
+verifies across the outage — the DICE resilience property on one machine.
 
 ---
 
@@ -152,7 +195,7 @@ The distinctive piece, and Gyza's answer to "remain under our control":
    its signed capability manifest.
 2. **Execution runs inside the sandbox** — the command or model call
    executes inside [bubblewrap](https://github.com/containers/bubblewrap),
-   kernel-enforced.
+   OS-enforced.
 3. **Refuse-to-sign-if-not-enforced.** A host-side enforcement record
    is stamped onto the result; the runner refuses to sign unless that
    record is no wider than the manifest, and folds it into the artifact
@@ -162,7 +205,7 @@ The distinctive piece, and Gyza's answer to "remain under our control":
    and returns one of five honest verdicts.
 
 The consequence: a valid signature *implies* the work ran inside
-declared, kernel-enforced bounds. An agent cannot exceed its granted
+declared, OS-enforced bounds. An agent cannot exceed its granted
 capabilities and still produce a valid receipt. That is emergence made
 containable at the individual level and auditable at the collective
 level.
@@ -204,7 +247,7 @@ first-class, not afterthoughts.
   signature and every downstream link.
 - **Authorship** — every action binds to an Ed25519 identity.
 - **Bounded execution, independently verifiable** — a verified result
-  implies the work ran in a kernel-enforced sandbox no wider than the
+  implies the work ran in an OS-enforced sandbox no wider than the
   agent's declared manifest.
 - **Resilience to compromise** — Sybil resistance and forged-quorum
   resistance for high-tier work via k-of-n attestation; a compromised

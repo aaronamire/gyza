@@ -16,6 +16,9 @@ byte-stable across machines; the demo itself auto-detects bubblewrap.
 from __future__ import annotations
 
 import random
+import shutil
+
+import pytest
 
 from gyza.demo.coordination_plane import CoordinationState
 from gyza.demo.ddil_partition import NODE_IDS, run_demo
@@ -29,8 +32,15 @@ from gyza.economy.delegation import (
 from gyza.icp import verify_chain, verify_dag
 
 
+@pytest.mark.skipif(
+    shutil.which("bwrap") is None,
+    reason="the 'exceeds manifest budget' reason comes from the memory-bound "
+           "check, reachable only after the backend check passes — i.e. when "
+           "OS enforcement actually ran. Under disclosed no-sandbox the action "
+           "is still rejected, but fail-closed on backend=none (Stage-2 adds "
+           "the verify_delegation logical rejection).")
 def test_over_bound_action_rejected_during_partition():
-    r = run_demo(verbose=False, sandbox_mode="construct")
+    r = run_demo(verbose=False, sandbox_mode="bwrap")
     # The rogue 1024 MB action was refused against the 512 MB grant...
     assert r.over_bound_rejected
     assert "exceeds manifest budget" in r.over_bound_reason
@@ -128,8 +138,13 @@ def test_merge_associativity_on_real_scenario_envelopes():
     assert left.canonical_bytes() == r.converged_canonical
 
 
+@pytest.mark.skipif(
+    shutil.which("bwrap") is None,
+    reason="audit 'within bounds' requires real OS enforcement; under "
+           "disclosed no-sandbox the executed actions honestly record "
+           "backend=none and do not pass the bounds check (fail-closed).")
 def test_unified_audit_passes_on_scenario():
-    r = run_demo(verbose=False, sandbox_mode="construct")
+    r = run_demo(verbose=False, sandbox_mode="bwrap")
     assert r.audit_report.valid, r.audit_report.summary
     # The synthesis + both branches' work are bounded executions; the two
     # pre-partition actions are coordination.

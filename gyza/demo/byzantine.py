@@ -42,15 +42,19 @@ from gyza.demo.coordination_plane import CoordinationState
 from gyza.icp import ICPEnvelope, verify_dag
 from gyza.identity import LocalCompositor
 from gyza.resilience import ResilienceReport, assess_resilience
+from gyza.sandbox.config import SandboxBackend
 
 INTENT = "recon-mission"
 BAR = "─" * 68
 
-# A bounds record wider than the compromised agent's 512 MB manifest —
-# an enforcing bubblewrap backend, so only the width (not the backend)
-# is the violation the gate must catch.
+# A bounds record a compromised agent supplies to try to get a bounded
+# signature for out-of-bounds work: no real sandbox ran (backend=none)
+# AND it declares 4096 MB against a 512 MB manifest. Either failing alone
+# is enough; the gate refuses it. We do NOT hardcode `bubblewrap` here —
+# a bubblewrap-backed record may only come from an actual bwrap run
+# (test_enforcement_honesty pins that no source fixture fabricates one).
 _OVER_BOUND = {
-    "backend": "bubblewrap",
+    "backend": SandboxBackend.NONE.value,
     "ro_paths": [],
     "rw_paths": [],
     "requires_network": False,

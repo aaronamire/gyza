@@ -36,6 +36,7 @@ from pathlib import Path
 
 from gyza.config import GyzaConfig, load_config
 from gyza.identity import LocalCompositor
+from gyza.sandbox.runner import _SANDBOX_ENTRY_SENTINEL
 
 
 def _resolve(p: str) -> Path:
@@ -454,7 +455,19 @@ def _run_demo_subprocess(name: str, extra_args: "list[str] | None" = None) -> in
     return subprocess.call([sys.executable, str(script), *(extra_args or [])])
 
 
+def _run_partition_demo(require_sandbox: bool) -> int:
+    # In-process import (NOT subprocess/runpy): this is the default,
+    # zero-config demo and must work from a frozen single-file binary
+    # where there is no demo/ directory and no external Python
+    # interpreter to re-invoke. ddil_partition.main owns the enforcement
+    # trichotomy (ENFORCED / DISCLOSED / REFUSE) and the exit codes.
+    from gyza.demo import ddil_partition
+    return ddil_partition.main(["--require-sandbox"] if require_sandbox else [])
+
+
 def cmd_demo(args: argparse.Namespace) -> int:
+    if args.scenario == "partition":
+        return _run_partition_demo(getattr(args, "require_sandbox", False))
     if args.scenario == "injection":
         return _run_demo_script("injection_demo.py")
     if args.scenario == "lan":
@@ -2375,11 +2388,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_demo.add_argument(
         "scenario",
         nargs="?",
-        choices=["pipeline", "injection", "lan", "global", "bounds",
-                 "loop", "loop-host", "loop-join"],
-        default="pipeline",
+        choices=["partition", "pipeline", "injection", "lan", "global",
+                 "bounds", "loop", "loop-host", "loop-join"],
+        default="partition",
         help=(
-            "pipeline (default — Phase-1 two-agent local demo), "
+            "partition (default — zero-config DDIL partition + provenance "
+            "audit, offline, ~seconds), "
+            "pipeline (Phase-1 two-agent local demo), "
             "injection (tamper attack on the envelope chain), "
             "lan (Phase-2 single-machine cluster sim), "
             "global (Phase-3 two daemons on loopback through settlement), "
@@ -2388,6 +2403,12 @@ def build_parser() -> argparse.ArgumentParser:
             "loop-host / loop-join (the same across TWO machines: run "
             "loop-host on one, loop-join <addr> on the other)"
         ),
+    )
+    p_demo.add_argument(
+        "--require-sandbox", action="store_true",
+        help="partition demo only: refuse to run unless OS-level sandbox "
+             "(bubblewrap) enforcement is available, instead of running the "
+             "disclosed no-sandbox path",
     )
     p_demo.add_argument(
         "addr", nargs="?", default=None,
@@ -2679,6 +2700,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Frozen-binary self-re-exec hook. When run_sandboxed launches the
+    # enforced path inside a PyInstaller binary it re-execs THIS binary
+    # with the sandbox sentinel as argv[0]; that invocation must run the
+    # in-sandbox entrypoint (framed stdin/stdout protocol), NOT argparse.
+    # It never stamps an enforcement record — the trusted parent does that
+    # — so a direct invocation outside bwrap can only yield backend=none.
+    raw_argv = sys.argv[1:] if argv is None else argv
+    if raw_argv and raw_argv[0] == _SANDBOX_ENTRY_SENTINEL:
+        from gyza.sandbox._entrypoint import main as _sandbox_entry_main
+        return _sandbox_entry_main()
+
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "init":

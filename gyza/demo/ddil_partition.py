@@ -75,10 +75,12 @@ from gyza.icp import (
 from gyza.identity import AgentIdentity, LocalCompositor
 from gyza.release import CURRENT_RELEASE as _CURRENT_RELEASE
 from gyza.sandbox.config import (
+    SandboxBackend,
     SandboxConfig,
     enforcement_satisfies_manifest,
     sandbox_config_from_manifest,
 )
+from gyza.sandbox.runner import detect_backend
 
 INTENT_ID = "ddil-demo-intent"
 NODE_IDS = ["n0", "n1", "n2", "n3", "n4"]
@@ -107,12 +109,16 @@ def _enforcement_record(cfg: SandboxConfig, *, real: bool) -> dict:
     The host-stamped ``__enforcement__`` record for a sandbox config.
 
     When ``real`` and bubblewrap is present, we run the *actual*
-    production sandbox (``sandboxed_mock_executor``) and use the record
-    it stamps. Otherwise we construct the identical record from the
-    config — a verbatim mirror of the stamp in
-    ``gyza.sandbox.executor.make_sandboxed_executor`` (cited so it
-    cannot drift silently). Either way the record is then judged by the
-    REAL ``enforcement_satisfies_manifest`` gate.
+    production sandbox (``sandboxed_mock_executor``), which stamps
+    ``backend=bubblewrap`` ONLY because bwrap actually executed.
+
+    When bwrap did NOT run (``real`` is False, or bwrap was unavailable
+    mid-run), the record honestly reports ``backend=none`` — it is NEVER
+    stamped with a backend that did not run. ``enforcement_satisfies_
+    manifest`` fails closed on ``backend=none`` (config.py), so an
+    unenforced run can never yield "within bounds". This removes the
+    fabrication primitive: a signed enforcement record now reflects what
+    actually executed, not what was requested.
     """
     if real:
         from gyza.sandbox.executor import sandboxed_mock_executor
@@ -120,9 +126,9 @@ def _enforcement_record(cfg: SandboxConfig, *, real: bool) -> dict:
         enf = raw.get("__enforcement__")
         if isinstance(enf, dict):
             return enf
-        # bwrap unexpectedly unavailable mid-run — fall back to constructed.
+        # bwrap unavailable mid-run — fall through to an HONEST none record.
     rec = {
-        "backend": cfg.backend.value,
+        "backend": SandboxBackend.NONE.value,   # no OS enforcement ran; never fabricate
         "ro_paths": sorted(cfg.ro_paths),
         "rw_paths": sorted(cfg.rw_paths),
         "requires_network": bool(cfg.requires_network),
@@ -156,6 +162,15 @@ def _fold_artifact(text: str, enforcement: dict | None) -> str:
 # ----------------------------------------------------------------------
 # Result object — lets tests drive the scenario headlessly.
 # ----------------------------------------------------------------------
+
+class SandboxRequiredError(RuntimeError):
+    """
+    Raised when ``--require-sandbox`` is set but bubblewrap is not
+    available, so OS-level containment cannot be demonstrated. The demo
+    refuses rather than running the disclosed no-sandbox path — the
+    explicit third mode of the enforcement trichotomy.
+    """
+
 
 @dataclass
 class DemoResult:
@@ -206,29 +221,91 @@ def run_demo(
     *,
     verbose: bool = True,
     sandbox_mode: str = "auto",
+    require_sandbox: bool = False,
     pre_heal_rounds: int | None = None,
 ) -> DemoResult:
     """
     Execute the full partition scenario and return a self-checking
-    ``DemoResult``. ``sandbox_mode`` is ``"auto"`` (real bwrap if
-    present, else constructed records), ``"construct"`` (never bwrap —
-    used by tests for byte-stable records), or ``"bwrap"`` (force real).
-    """
-    use_real = (
-        (sandbox_mode == "auto" and shutil.which("bwrap") is not None)
-        or sandbox_mode == "bwrap"
-    )
-    mode_label = "real bubblewrap sandbox" if use_real else (
-        "constructed records (no bwrap) — gate is still the real one"
-    )
-    t = _Trace(verbose)
+    ``DemoResult``.
 
+    ``sandbox_mode`` selects how OS enforcement is obtained:
+      * ``"auto"``      — real bwrap if present; otherwise the disclosed
+                          no-sandbox path (backend=none, honestly recorded);
+      * ``"bwrap"``     — force the real bwrap path (ENFORCED);
+      * ``"construct"`` — never bwrap (byte-stable records for tests);
+                          behaves as the disclosed no-sandbox path.
+
+    ``require_sandbox`` turns the auto no-bwrap case into a REFUSAL
+    instead of a disclosed run: if OS enforcement cannot be demonstrated,
+    ``SandboxRequiredError`` is raised rather than running without it.
+
+    Three enforcement modes result — ENFORCED, DISCLOSED-NO-SANDBOX,
+    REFUSE — and the trace states which is active. The disclosed path is
+    honest, not silent: every signed record carries ``backend=none`` and
+    the over-bound refusal is proven by the *logical* delegation bound
+    (``verify_delegation``), which needs no OS sandbox — not by OS
+    enforcement.
+    """
+    # FUNCTIONAL probe, not mere presence. Under Docker's default seccomp
+    # (and other locked-down hosts) bwrap is INSTALLED but cannot create a
+    # user namespace — `shutil.which` would say "present", the demo would
+    # pick enforced, and then CRASH on the first sandboxed action with
+    # "No permissions to create new namespace". detect_backend() runs a
+    # real no-op bwrap spawn and returns NONE in that case, so we disclose
+    # honestly (or REFUSE under --require-sandbox) instead of crashing.
+    # "enforced" means bwrap that actually works, never bwrap that merely
+    # exists.
+    has_bwrap = detect_backend() == SandboxBackend.BUBBLEWRAP
+    if sandbox_mode == "bwrap":
+        mode = "enforced"
+    elif sandbox_mode == "construct":
+        mode = "disclosed"
+    elif sandbox_mode == "auto":
+        if has_bwrap:
+            mode = "enforced"
+        elif require_sandbox:
+            mode = "refuse"
+        else:
+            mode = "disclosed"
+    else:
+        raise ValueError(f"unknown sandbox_mode {sandbox_mode!r}")
+    use_real = mode == "enforced"
+
+    t = _Trace(verbose)
     t.line()
     t.line("GYZA — DDIL PARTITION DEMO")
     t.line("=" * 68)
+
+    if mode == "refuse":
+        t.line("REFUSING TO RUN — --require-sandbox was set and bubblewrap is "
+               "not available on this host.")
+        t.line("This host cannot demonstrate OS-level containment. Install "
+               "bubblewrap (on Linux,")
+        t.line("your distro's `bubblewrap` package) or run the Docker image, "
+               "then retry. To see the")
+        t.line("delegation-bound + provenance logic WITHOUT OS enforcement, "
+               "run without --require-sandbox.")
+        t.line()
+        raise SandboxRequiredError(
+            "bubblewrap unavailable and --require-sandbox was set"
+        )
+
     t.line("Five nodes. One network partition. The network keeps working,")
     t.line("refuses to overstep its authority while cut off, and proves it")
-    t.line(f"afterward.   [enforcement mode: {mode_label}]")
+    t.line("afterward.")
+    t.line()
+    if mode == "enforced":
+        t.line("Enforcement:  OS-enforced (bubblewrap: namespaces + seccomp) — "
+               "real containment on this host.")
+    else:
+        t.line("Enforcement:  NONE — bubblewrap (the OS sandbox) is unavailable "
+               "on this platform.")
+        t.line("              This run demonstrates the delegation-bound and "
+               "provenance LOGIC,")
+        t.line("              which is cryptographic and needs no OS sandbox — "
+               "but NOT OS-level")
+        t.line("              containment. Every signed record honestly carries "
+               "backend=none.")
     t.line()
 
     tmpdir = tempfile.mkdtemp(prefix="gyza-ddil-demo-")
@@ -390,7 +467,11 @@ def run_demo(
         # Majority side: coordinator executes within its own 1024 MB manifest.
         ec = _enforcement_record(sandbox_config_from_manifest(coord_manifest),
                                  real=use_real)
-        assert enforcement_satisfies_manifest(ec, coord_manifest)[0]
+        # Only assert OS-enforcement passes when it ACTUALLY ran. Under
+        # disclosed no-sandbox (backend=none) the gate fails closed — that
+        # is correct, not an error; Stage-2 disclosed mode narrates it.
+        if use_real:
+            assert enforcement_satisfies_manifest(ec, coord_manifest)[0]
         e2M = sign_exec(coordinator, "W0-step-a", e1, ec, coord_manifest,
                         "coordinator work A")
         e3M = sign_exec(coordinator, "W0-step-b", e2M, ec, coord_manifest,
@@ -405,7 +486,8 @@ def run_demo(
         # Minority side: subcontractor executes WITHIN its 256 MB grant.
         es = _enforcement_record(sandbox_config_from_manifest(sub_manifest),
                                  real=use_real)
-        assert enforcement_satisfies_manifest(es, sub_manifest)[0]
+        if use_real:
+            assert enforcement_satisfies_manifest(es, sub_manifest)[0]
         e2m = sign_exec(subcontractor, "W1-step-a", e1, es, sub_manifest,
                         "subcontractor work A")
         e3m = sign_exec(subcontractor, "W1-step-b", e2m, es, sub_manifest,
@@ -420,22 +502,64 @@ def run_demo(
 
         # =================================================================
         t.head("5.  OVER-BOUND ACTION REFUSED  —  locally, with NO quorum")
-        # The isolated subcontractor tries to grab 1024 MB — 4x its grant.
-        # No peers beyond n4, no quorum. The brick-3 gate still refuses.
+        # The isolated subcontractor tries to grab 1024 MB — 2x its 512 MB
+        # grant. No peers beyond n4, no quorum. The action is refused with
+        # zero connectivity — the critical DDIL property. HOW it is refused
+        # depends on what enforcement this host can offer:
+        #   * ENFORCED : the OS gate (enforcement_satisfies_manifest over a
+        #     real bwrap record) rejects it — measured containment.
+        #   * DISCLOSED: the LOGICAL delegation bound (verify_delegation)
+        #     rejects it — a 1024 MB claim exceeds the 512 MB delegated.
+        #     This holds with no OS sandbox and no connectivity, and is the
+        #     more fundamental of the two bounds.
         assert not control[SUBCONTRACTOR_NODE].has_quorum()
         wide_cfg = SandboxConfig(max_memory_mb=OVER_BOUND_MEMORY_MB)
         wide_enf = _enforcement_record(wide_cfg, real=use_real)
-        ob_ok, ob_why = enforcement_satisfies_manifest(wide_enf, sub_manifest)
-        over_bound_rejected = not ob_ok
         t.line(f"  subcontractor (isolated, quorum={control[SUBCONTRACTOR_NODE].has_quorum()}) "
                f"tries a {OVER_BOUND_MEMORY_MB} MB action")
         t.line(f"  against its {DELEGATED_MEMORY_MB} MB budget:")
-        if over_bound_rejected:
-            t.line(f"  ✗ REFUSED TO SIGN — {ob_why}")
-            t.line("    No envelope is produced. Bounds held with zero "
-                   "connectivity — the critical DDIL property.")
+        if use_real:
+            ob_ok, ob_why = enforcement_satisfies_manifest(wide_enf, sub_manifest)
+            over_bound_rejected = not ob_ok
+            if over_bound_rejected:
+                t.line(f"  ✗ REFUSED TO SIGN — a {OVER_BOUND_MEMORY_MB} MB action "
+                       f"exceeds the {DELEGATED_MEMORY_MB} MB the subcontractor "
+                       f"was delegated.")
+                t.line("    OS-enforced, and refused with NO quorum and NO "
+                       "connectivity. No envelope is produced.")
+            else:
+                t.line("  (unexpected: over-bound action was allowed)")
         else:
-            t.line("  (unexpected: over-bound action was allowed)")
+            # Disclosed: prove the refusal from the logical delegation bound.
+            # A rogue hop that claims a wide (1024 MB) manifest to cover its
+            # 1024 MB attempt is still caught — only 512 MB was delegated.
+            rogue_root = DelegationHop(
+                agent_pubkey=coordinator.pubkey_hex,
+                manifest=spec_from_manifest(coord_manifest),
+                enforcement=spec_from_manifest(coord_manifest),
+                delegated=None,
+            )
+            rogue_sub = DelegationHop(
+                agent_pubkey=subcontractor.pubkey_hex,
+                manifest=spec_from_enforcement(wide_enf),   # claims 1024 to cover it
+                enforcement=spec_from_enforcement(wide_enf),
+                delegated=delegated,                        # only 512 was granted
+            )
+            log_ok, ob_why = verify_delegation([rogue_root, rogue_sub])
+            over_bound_rejected = not log_ok
+            if over_bound_rejected:
+                t.line(f"  ✗ REFUSED — the delegation bound rejects it: a "
+                       f"{OVER_BOUND_MEMORY_MB} MB action exceeds the "
+                       f"{DELEGATED_MEMORY_MB} MB the subcontractor was")
+                t.line("    delegated (verify_delegation). This check is LOGICAL "
+                       "and cryptographic — it")
+                t.line("    holds with no OS sandbox and no connectivity. No "
+                       "envelope is produced.")
+                t.line("    (OS-level containment is disclosed as none here; this "
+                       "refusal came from")
+                t.line("     the delegation logic, not the OS.)")
+            else:
+                t.line("  (unexpected: over-bound action was allowed)")
         t.line()
 
         # =================================================================
@@ -517,15 +641,28 @@ def run_demo(
                f"{'VALID ✓' if deleg_ok else f'✗ {deleg_why}'}")
 
         # (d) Per-action bounds + tamper-evident binding to the signature.
-        per_action_ok = True
+        # Binding (tamper-evidence) holds regardless of OS enforcement; the
+        # OS-bounds gate only passes when bwrap actually ran (backend=none
+        # fails it closed — correct, not an error).
+        os_bounds_ok = True
+        binding_all_ok = True
         env_by_action = {e.action_id: e for e in all_envs}
         for action_id, (text, enf, manifest) in audit.items():
             gate_ok, _ = enforcement_satisfies_manifest(enf, manifest)
             bound = env_by_action[action_id]
             binding_ok = _fold_artifact(text, enf) == bound.output_hash
-            per_action_ok = per_action_ok and gate_ok and binding_ok
-        t.line(f"  every executed action within its manifest + bound to its "
-               f"signature: {'YES ✓' if per_action_ok else 'NO ✗'}")
+            os_bounds_ok = os_bounds_ok and gate_ok
+            binding_all_ok = binding_all_ok and binding_ok
+        t.line(f"  every executed action bound to its signature "
+               f"(tamper-evident): {'YES ✓' if binding_all_ok else 'NO ✗'}")
+        if use_real:
+            t.line(f"  every executed action within its manifest "
+                   f"(OS-enforced): {'YES ✓' if os_bounds_ok else 'NO ✗'}")
+        else:
+            t.line("  OS-enforced bounds: not demonstrated on this platform "
+                   "(backend=none) —")
+            t.line("    the delegation bound above (verify_delegation) is the "
+                   "logical guarantee that held.")
         t.line()
 
         # =================================================================
@@ -543,29 +680,89 @@ def run_demo(
         t.line(f"  audit_provenance(): {report.summary}")
         for row in report.actions:
             tag = ("execution" if row.is_execution else "coordination")
-            status = "✓" if row.ok else f"✗ {row.reason}"
+            if row.ok:
+                status = "✓"
+            elif (not use_real and row.is_execution and row.binding_ok
+                  and row.manifest_bound_ok and not row.within_bounds):
+                # Disclosed: the ONLY failing check is the OS-bounds gate
+                # (backend=none). Graph shape, tamper-evident binding, and
+                # manifest binding all hold — so we say what is true rather
+                # than print a bare ✗ that reads as breakage.
+                status = "OS-bounds not demonstrated (backend=none)"
+            else:
+                status = f"✗ {row.reason}"
             t.line(f"    [{tag:12}] {row.action_id:24} {status}")
+        if not use_real:
+            t.line("  Every execution row's provenance + tamper-evident binding "
+                   "hold; only the OS-")
+            t.line("  enforcement bounds are undemonstrated on this platform. "
+                   "The logical delegation")
+            t.line("  bound — the more fundamental guarantee — passed in "
+                   "section 7.")
         t.line()
 
-        verdict_ok = (
+        # Logical + provenance properties — hold with OR without an OS
+        # sandbox (signatures, DAG shape, convergence, the delegation bound,
+        # the over-bound refusal, control-plane quorum behavior).
+        logical_ok = (
             all_converged and no_loss and all_chains_ok and dag.valid
-            and deleg_ok and per_action_ok and report.valid
-            and over_bound_rejected and minority_paused and majority_active
+            and deleg_ok and binding_all_ok and over_bound_rejected
+            and minority_paused and majority_active
         )
+        # OS-enforcement property — only meaningful when bwrap actually ran.
+        os_ok = os_bounds_ok and report.valid
+
         t.head("VERDICT")
-        if verdict_ok:
-            t.line(f"  Provenance verified end-to-end: {total_envs} envelopes, "
-                   f"0 lost, all actions within bounds.")
-            t.line("  The over-bound action was refused with no connectivity;")
-            t.line("  the control plane paused on the minority while the data")
-            t.line("  plane stayed available on both sides; the merged history")
-            t.line("  is intact and independently re-verifiable.")
-            t.line()
-            t.line("  Proven: accountability, containment, bounds-compliance.")
-            t.line("  NOT proven: output correctness — that needs a human on "
-                   "the loop.")
+        if use_real:
+            verdict_ok = logical_ok and os_ok
+            if verdict_ok:
+                t.line(f"  Provenance verified end-to-end: {total_envs} "
+                       f"envelopes, 0 lost, all actions within bounds.")
+                t.line("  The over-bound action was refused with no "
+                       "connectivity; the control plane")
+                t.line("  paused on the minority while the data plane stayed "
+                       "available on both sides;")
+                t.line("  the merged history is intact and independently "
+                       "re-verifiable.")
+                t.line()
+                t.line("  Proven: accountability (every action signed), "
+                       "containment (OS-enforced")
+                t.line("  bounds, backend=bubblewrap), recovery (survived "
+                       "partition, reconciled).")
+                t.line("  NOT proven: output correctness — that needs a human "
+                       "on the loop.")
+            else:
+                t.line("  ✗ scenario invariant violated — see flags above.")
         else:
-            t.line("  ✗ scenario invariant violated — see flags above.")
+            verdict_ok = logical_ok   # disclosed: OS bounds intentionally not required
+            if verdict_ok:
+                t.line(f"  Provenance verified end-to-end: {total_envs} "
+                       f"envelopes, 0 lost, delegation bounds held.")
+                t.line("  The over-bound action was refused by the logical "
+                       "delegation bound with no")
+                t.line("  connectivity; the control plane paused on the "
+                       "minority while the data plane")
+                t.line("  stayed available on both sides; the merged history "
+                       "is intact and re-verifiable.")
+                t.line()
+                t.line("  Proven: accountability (every action signed), "
+                       "delegation-bound compliance")
+                t.line("  (logical bounds held with zero connectivity), "
+                       "recovery (survived partition,")
+                t.line("  reconciled). NOT shown on this platform: OS-level "
+                       "containment — records")
+                t.line("  honestly carry backend=none; run under bubblewrap "
+                       "for that.")
+                t.line("  NOT proven: output correctness — that needs a human "
+                       "on the loop.")
+                t.line()
+                t.line("  For OS-enforced bounds: run on Linux with bubblewrap "
+                       "installed, or")
+                t.line("  `docker run … gyza demo`. Pass --require-sandbox to "
+                       "refuse rather than")
+                t.line("  run disclosed.")
+            else:
+                t.line("  ✗ scenario invariant violated — see flags above.")
         t.line()
 
         return DemoResult(
@@ -595,17 +792,26 @@ def main(argv: list[str] | None = None) -> int:
     mode = "construct" if "--construct" in argv else (
         "bwrap" if "--bwrap" in argv else "auto"
     )
-    result = run_demo(verbose=True, sandbox_mode=mode)
+    require_sandbox = "--require-sandbox" in argv
+    try:
+        result = run_demo(verbose=True, sandbox_mode=mode,
+                          require_sandbox=require_sandbox)
+    except SandboxRequiredError:
+        return 2   # refused: OS enforcement required but unavailable
     ok = (
         result.all_nodes_converged
         and result.dag.valid
-        and result.audit_report.valid
         and len(result.dag.leaves) == 1
         and result.over_bound_rejected
         and result.minority_control_paused
         and result.majority_control_active
         and verify_delegation(result.delegation_hops)[0]
     )
+    # The OS-level audit only passes when bwrap actually ran; under the
+    # disclosed no-sandbox path it is intentionally undemonstrated
+    # (backend=none), so require it only in enforced mode.
+    if result.sandbox_mode == "bwrap":
+        ok = ok and result.audit_report.valid
     return 0 if ok else 1
 
 
