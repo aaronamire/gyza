@@ -1,0 +1,50 @@
+{
+ "seed": 1,
+ "bound": 100.0,
+ "n_actions": 240,
+ "feasibility": {
+  "refusals_at_k1": 227,
+  "measurable": true
+ },
+ "variants": {
+  "per-action": {
+   "k": 1,
+   "actions": 240,
+   "attempts": 240,
+   "refusals": 227,
+   "promoted_effective": 13,
+   "rolled_back": 227,
+   "effective_throughput": 0.05416666666666667,
+   "nominal_admission": 1.0,
+   "escalation_rate": 0.9458333333333333,
+   "gate_evals_per_promoted": 18.46153846153846,
+   "peak_harm_fraction_of_bound": 0.99
+  },
+  "per-task": {
+   "k": 4,
+   "actions": 240,
+   "attempts": 60,
+   "refusals": 57,
+   "promoted_effective": 12,
+   "rolled_back": 228,
+   "effective_throughput": 0.05,
+   "nominal_admission": 1.0,
+   "escalation_rate": 0.95,
+   "gate_evals_per_promoted": 5.0,
+   "peak_harm_fraction_of_bound": 0.97
+  },
+  "per-batch": {
+   "k": 32,
+   "actions": 240,
+   "attempts": 8,
+   "refusals": 8,
+   "promoted_effective": 0,
+   "rolled_back": 240,
+   "effective_throughput": 0.0,
+   "nominal_admission": 1.0,
+   "escalation_rate": 1.0,
+   "gate_evals_per_promoted": Infinity,
+   "peak_harm_fraction_of_bound": 0.0
+  }
+ }
+}

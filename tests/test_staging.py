@@ -325,3 +325,34 @@ def test_bounds_reach_the_harm_registry_only_through_a_verified_config():
     assert h.unbounded() == ["spend"]
     store.apply_to(h)
     assert h.bound("spend") == 42.0
+
+
+def test_frequent_promotion_cannot_reset_a_cumulative_budget():
+    """The cumulative bound's frame is the accounting-period ORIGIN, not the
+    moving rollback checkpoint.
+
+    Found by SR-5's preregistered feasibility check: it reported ZERO refusals
+    at k=1, which could only happen if each promotion re-based the measurement.
+    Promoting after every action must not buy unlimited drain.
+    """
+    st, gate = _staged(bound=100.0)
+    total = 0.0
+    refused = False
+    for _ in range(40):                       # 40 x 10 = 400, far past the bound
+        st.stage("p", "stage_artifact", {"delta": -10.0})
+        res = gate.promote()
+        if res.promoted:
+            total += 10.0
+        else:
+            refused = True
+            break
+    assert refused, "per-action promotion must NOT be able to outrun the bound"
+    assert total <= 100.0, total
+
+
+def test_origin_frame_is_distinct_from_the_rollback_checkpoint():
+    st, gate = _staged(bound=100.0)
+    st.stage("p", "stage_artifact", {"delta": -10.0})
+    assert gate.promote().promoted
+    assert st.origin_state().total == 0.0, "origin never moves"
+    assert st.baseline_state().total == -10.0, "checkpoint does move"

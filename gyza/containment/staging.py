@@ -100,8 +100,27 @@ class StagingArea:
         return [e for e in self._log.events()
                 if e.seq <= upto and e.seq not in self._abandoned]
 
+    def origin_state(self) -> object:
+        """State at the ORIGIN of the accounting period.
+
+        Distinct from `baseline_state()`, and the distinction is load-bearing.
+        The rollback checkpoint moves forward with every promotion; the frame a
+        CUMULATIVE bound is measured over must not. Measuring cumulative harm
+        from the last promotion lets an agent defeat the bound entirely by
+        promoting after every action -- each batch measures a fresh, tiny drain
+        and the run-level total is never anyone's frame.
+
+        That is R9's G4' failure in this codebase's own shape: an invariant
+        evaluated over a frame that is not the harm's frame. G4' pinned at s0
+        and lost 175000; here the error is the mirror image -- pinning at the
+        MOVING checkpoint instead of the origin -- and it was found by SR-5's
+        preregistered feasibility check reporting zero refusals at k=1.
+        """
+        return self._project([])
+
     def baseline_state(self) -> object:
-        """State as of the last promotion -- the checkpoint (C-7)."""
+        """State as of the last promotion -- the ROLLBACK checkpoint (C-7).
+        Correct for rollback; wrong as a cumulative-harm frame (see above)."""
         return self._project(self._live(self._watermark))
 
     def staged_state(self) -> object:
@@ -173,7 +192,11 @@ class PromotionGate:
         if batch == 0:
             return PromotionResult(promoted=True, batch_size=0)
 
-        s0 = st.baseline_state()
+        # CUMULATIVE harm is measured from the accounting-period ORIGIN, not
+        # from the moving rollback checkpoint. See StagingArea.origin_state --
+        # using the checkpoint here lets an agent defeat the bound by promoting
+        # after every action.
+        s0 = st.origin_state()
         s_next = st.staged_state()
 
         # (1) The staged batch, against CUMULATIVE bounds. This is the
