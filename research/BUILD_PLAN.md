@@ -275,6 +275,15 @@ Carried unchanged from the research program. Twelve artifacts were caught by the
 7. **Negative results are successes.** A design that does not work, established cleanly, saves more than a design that appears to work.
 8. **No tuning after seeing data.** Implementation-bug fixes only, disclosed with their rates.
 9. **Verify citations against the tree**, including citations in this document.
+10. **Any cumulative measurement must name its origin explicitly, and that origin
+    must be immutable for the lifetime of the bound.** A cumulative bound whose
+    origin can move is not a bound. Added after artifact #13
+    (`ARTIFACT_LEDGER.md`): the C-6 promotion gate measured cumulative harm from
+    the *moving* rollback checkpoint, so promoting after every action bought
+    unlimited drain. R9's G4′ pinned a frame that should have floated; this
+    floated a frame that should have been fixed. **Both are frame drift** — the
+    lemma is that the invariant's frame must be the *harm's* frame, and which
+    one that is depends on whether the harm is instantaneous or cumulative.
 
 ---
 
