@@ -317,7 +317,10 @@ Full ledger in `ARTIFACT_LEDGER.md`.
 | 6 | T1/T2 detector **coupling** reading as independent detection | checking independence |
 | 7 | 33% canonicalization contamination | canonical comparison |
 | 8 | R8 `__ERR__` generation failures counted as wrong answers | inspecting failures |
-| 9–12 | *running tally across R12–R14; individual identities live in those routes' findings — this document does not re-derive a numbering it cannot verify* | |
+| 9–12a | a monotone-budget guard "composing" under concurrency — violation count read **exactly 0** while the counter stood at 16 against a budget of 6 (R10) | diagnose-any-exact-zero, before reporting; Part C re-run in full |
+| 9–12b | a guard ordering that was an artifact of the **denominator** — the same guard at the same θ admits opposite task classes under `flat` vs `classmean` (R10) | the amendment fixed the variant *before any number existed* |
+| 9–12c | **an exact 1.000 with half the data dropped** — NO-ANSWER folded into UNRESOLVED, and the discarded half was the failures (R11) | the exact 1.000, decomposed instead of reported |
+| 9–12d | **double** the true recall — pair-level 0.50 vs witness-level 0.25; right pair, wrong channel (R12) | requiring the metric to name the witness, not the pair |
 | **13** | granularity "does not matter" (a clean 3-way tie at 1.0) while promotion-per-action bought **unlimited drain** | a preregistered feasibility check demanding refusals before the comparison was trusted |
 | **14** | CONSERVATION 0.667 read as a **class property** when it was a mixture (PROOF 1.000 n=8 + TEST 0.000 n=4) | having recorded the carrier, so the aggregate could be decomposed |
 | **15** | 11 false WRONGs from **repr equality** mistaken for value equality; a recurrence of #7 in a different codebase | an exactly-at-threshold gate number (0.950 vs a 0.95 bar) being diagnosed rather than accepted |
@@ -345,6 +348,14 @@ Full ledger in `ARTIFACT_LEDGER.md`.
    **sign** of the residual: a one-directional error confirms the mechanism.
 9. **Label every cell DEFINITIONAL or MEASURED.** Definitional cells
    illustrate; they do not confirm.
+9b. **A count is not a ledger.** Entries 9–12 above existed for three routes as
+   an incrementing number in prose, and the ordinals drifted until they
+   contradicted each other (R13 said "ten … most recently NO-ANSWER"; R14 said
+   "eleven … most recently NO-ANSWER" — the same entry cannot be most recent at
+   two counts). The mechanisms survived because they were written down in the
+   route findings; the numbering did not. **Enumerate the mechanism when you
+   catch it**, because the mechanism is what a new clean number is
+   pattern-matched against.
 10. **A prompt contradicting a committed finding loses to the finding**, and the
     contradiction is reported.
 

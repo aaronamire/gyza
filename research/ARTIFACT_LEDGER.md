@@ -9,11 +9,96 @@ check killed it.
 `PAPER_READINESS.md` §5 (forced collision, degenerate weak-model outputs, the
 MBPP function-name harness bug, the sentinel collision, the trust-lift selection
 confound, the T1/T2 detector coupling, the 33% canonicalization contamination,
-the R8 `__ERR__` generation-failure contamination). Entries 9–12 accrued across
-R12–R14 and are recorded in those routes' own findings — the running tally was
-"ten" at R13, "eleven" at R14's preregistration, and twelve by R14's close. This
-file does not re-derive a canonical numbering for 1–12; it records **#13 in
-full**, because #13 is the first of a new kind.
+the R8 `__ERR__` generation-failure contamination).
+
+**Entries 9–12 were reconstructed from the committed findings** (previously they
+existed only as a running tally). All four mechanisms are recovered with
+citations below. **Their ORDINALS are not recoverable, and that is itself the
+finding** — see the note after #12.
+
+---
+
+## THE 9–12 BAND — four mechanisms, recovered from committed findings
+
+The count stood at **eight** while R9 was written (`FINDINGS_R9.md:266`, "Per
+the eight-artifact discipline") and at **nine** by R10
+(`FINDINGS_R10.md:76`, "nine artifacts to date"). These four fall in that band,
+in chronological order.
+
+### 9–12(a) — the pre-commit invariant evaluation (R10)
+
+`run_round` evaluated the guard invariant **before** `commit`, so G2's violation
+count read **exactly 0** while its own counter stood at **16 against a budget of
+6** (`breadth_grading/FINDINGS_R10.md:242-248`).
+
+- **Would have falsely shown:** that a monotone-budget guard composes under
+  concurrency — the precise opposite of R10's actual H-CONS refutation, and it
+  would have propagated into R13's federation design.
+- **Caught by:** the mandated diagnose-any-exact-zero rule, before reporting.
+  Part C was **re-run in full** and the pre-fix matrix was not reported.
+- **Species:** an exact zero that was *definitional* (the check ran at the wrong
+  point) rather than safe.
+
+### 9–12(b) — the denomination artifact (R10)
+
+Under the `flat` harm normalization, one CHANNEL asset is ≈0.001 of a state
+holding 1000 credits, so **egress unlocks first instead of last** — the reverse
+ordering from `classmean` (`FINDINGS_R10.md:85-100`).
+
+- **Would have falsely shown:** a guard ordering that is an artifact of the
+  denominator. *The same guard at the same θ admits opposite task classes
+  depending on how the harm measure normalizes.*
+- **Caught by:** the amendment, which fixed `classmean` as the decision variant
+  **before any number existed** — predicted, not discovered.
+- **Species:** a result about **harm-model design** masquerading as a result
+  about guards. The closest relative of #14 (a number that was about the
+  measurement apparatus, not the phenomenon).
+
+### 9–12(c) — NO-ANSWER folded into UNRESOLVED (R11)
+
+`extract_boxed` found no `\boxed{...}` at all in a large fraction of
+completions. Folding those into UNRESOLVED and excluding them produced **an
+exact 1.000 with 40 of 80 items dropped**
+(`router/PREREGISTRATION_R11_AMENDMENT.md`).
+
+- **Would have falsely shown:** a perfect score computed over half the data,
+  with the discarded half being precisely the failures.
+- **Caught by:** the exact 1.000, diagnosed rather than reported. Decomposing
+  the `None`s showed they were **overwhelmingly NO-ANSWER (16/19/20/39)**, i.e.
+  truncation — a *failure* — not undecidability.
+- **Species:** an exclusion rule that silently removed the outcome class being
+  measured. This is the entry R13 and R14 both cite as "most recent".
+
+### 9–12(d) — pair-level recall overstating the analyzer (R12)
+
+Scoring "did the analyzer flag this (guard, harm) pair at all" gives recall
+**0.50**; scoring "did it flag via the action that actually caused the leak"
+gives **0.25** (`channel_discovery/FINDINGS_R12.md:118-126`).
+
+- **Would have falsely shown:** **double** the true recall. The gap is entirely
+  pairs "hit" via `external_send`/`transfer` while the demonstrated witness was
+  `reassign` — *right pair, wrong channel*.
+- **Caught by:** insisting the metric name the witness, not the pair.
+  Witness-level is used everywhere in R12.
+- **Species:** a coarse-grained metric crediting a coincidence. Same family as
+  #14 — the aggregate was not the thing it appeared to measure.
+
+### Why the ordinals are not recoverable, and why that matters
+
+The tally is **inconsistent across the documents that cite it**: R13's findings
+say "TEN artifacts ... most recently NO-ANSWER", while R14's preregistration
+says "Eleven ... most recently NO-ANSWER". The same entry cannot be the most
+recent at two different counts.
+
+**The count was maintained by incrementing a number in prose, without an
+enumerated ledger.** So the mechanisms survived and the ordinals drifted.
+
+> **A count is not a ledger.** The value of this file is the enumerated
+> *mechanisms* — they are what a new clean number gets pattern-matched against.
+> An ordinal that cannot be resolved to a mechanism protects nothing.
+
+This file was created at #13. Entries 1–8 and this band were recovered
+afterwards; every future entry is enumerated when it is caught.
 
 ---
 
