@@ -38,9 +38,10 @@ class TierRouter:
 
     def route(self, claim_type: str) -> Routing:
         if claim_type in self._v:
+            v = self._v.get(claim_type)
             return Routing(claim_type, 1,
-                           f"native verifier registered ({self._v.get(claim_type).witness})",
-                           "PROOF")
+                           f"native verifier registered ({v.witness})",
+                           v.carrier)
         if claim_type in self._s:
             return Routing(claim_type, 2, "human-authored partial spec registered",
                            "SPEC")

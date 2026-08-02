@@ -1,0 +1,192 @@
+{
+ "seed": 1,
+ "status": "ANALYTIC (definitional, not measured)",
+ "assumption": "chains sampled uniformly from the claim vocabulary",
+ "inventory": [
+  {
+   "claim_type": "artifact_content_address",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/network/artifact_store.py:47"
+  },
+  {
+   "claim_type": "balance_fold",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/economy/wallet.py:274"
+  },
+  {
+   "claim_type": "delegation_attenuation",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/economy/delegation.py:213"
+  },
+  {
+   "claim_type": "enforcement_within_manifest",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/sandbox/config.py:286"
+  },
+  {
+   "claim_type": "envelope_chain",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/icp.py:105"
+  },
+  {
+   "claim_type": "envelope_dag",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/icp.py:217"
+  },
+  {
+   "claim_type": "envelope_signature",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/icp.py:82"
+  },
+  {
+   "claim_type": "ledger_entry_signatures",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/economy/ledger.py:348"
+  },
+  {
+   "claim_type": "manifest_identity",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/identity.py:101"
+  },
+  {
+   "claim_type": "market_capital_fold",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/economy/market.py:CapitalEntry fold"
+  },
+  {
+   "claim_type": "unit_test_execution",
+   "tier": 1,
+   "carrier": "TEST",
+   "witness": "V-3 adapter (finite sample)"
+  },
+  {
+   "claim_type": "hlc_ordering",
+   "tier": 2,
+   "carrier": "SPEC",
+   "witness": "human-authored (xan)"
+  },
+  {
+   "claim_type": "reputation_score",
+   "tier": 2,
+   "carrier": "SPEC",
+   "witness": "human-authored (xan)"
+  },
+  {
+   "claim_type": "work_claim_exclusivity",
+   "tier": 2,
+   "carrier": "SPEC",
+   "witness": "human-authored (xan)"
+  },
+  {
+   "claim_type": "execution_output_content",
+   "tier": 3,
+   "carrier": "NONE",
+   "witness": "no verifier \u2014 semantic (competence bound)"
+  },
+  {
+   "claim_type": "memory_retrieval_relevance",
+   "tier": 3,
+   "carrier": "NONE",
+   "witness": "no verifier \u2014 semantic (competence bound)"
+  },
+  {
+   "claim_type": "routing_match_quality",
+   "tier": 3,
+   "carrier": "NONE",
+   "witness": "no verifier \u2014 semantic (competence bound)"
+  },
+  {
+   "claim_type": "external_send_content",
+   "tier": 3,
+   "carrier": "NONE",
+   "witness": "no verifier \u2014 semantic (competence bound)"
+  }
+ ],
+ "isolated": {
+  "n": 18,
+  "tier_1": 11,
+  "fraction_tier_1": 0.6111,
+  "by_carrier": {
+   "PROOF": 10,
+   "TEST": 1,
+   "SPEC": 3,
+   "NONE": 4
+  },
+  "fraction_by_carrier": {
+   "PROOF": 0.5556,
+   "TEST": 0.0556,
+   "SPEC": 0.1667,
+   "NONE": 0.2222
+  }
+ },
+ "chains": [
+  {
+   "depth": 1,
+   "tier_1": 0.555556,
+   "tier_2": 0.166667,
+   "tier_3": 0.277778,
+   "any_correctness_claim": 0.722222,
+   "_p": {
+    "proof_t1": 0.555556,
+    "spec": 0.166667,
+    "test": 0.055556,
+    "none": 0.222222
+   }
+  },
+  {
+   "depth": 2,
+   "tier_1": 0.308642,
+   "tier_2": 0.212963,
+   "tier_3": 0.478395,
+   "any_correctness_claim": 0.521605,
+   "_p": {
+    "proof_t1": 0.555556,
+    "spec": 0.166667,
+    "test": 0.055556,
+    "none": 0.222222
+   }
+  },
+  {
+   "depth": 4,
+   "tier_1": 0.09526,
+   "tier_2": 0.176812,
+   "tier_3": 0.727928,
+   "any_correctness_claim": 0.272072,
+   "_p": {
+    "proof_t1": 0.555556,
+    "spec": 0.166667,
+    "test": 0.055556,
+    "none": 0.222222
+   }
+  },
+  {
+   "depth": 8,
+   "tier_1": 0.009074,
+   "tier_2": 0.064949,
+   "tier_3": 0.925977,
+   "any_correctness_claim": 0.074023,
+   "_p": {
+    "proof_t1": 0.555556,
+    "spec": 0.166667,
+    "test": 0.055556,
+    "none": 0.222222
+   }
+  }
+ ],
+ "tier1_ceiling_after_all_possible_upgrades": {
+  "1": 0.777778,
+  "2": 0.604938,
+  "4": 0.36595,
+  "8": 0.13392
+ }
+}

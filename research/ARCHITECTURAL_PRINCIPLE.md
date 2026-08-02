@@ -94,6 +94,65 @@ is what removes the blind channel.
 
 ---
 
+## CORRECTION (SR-3) — the taxonomy is TWO-DIMENSIONAL
+
+**Added after SR-3. The prior text above is preserved verbatim and is not
+wrong; it is INCOMPLETE, and the omission changed a design decision.**
+
+Everything above treats the invariant **CLASS** (conservation / monotone /
+cumulative) as the variable that governs composition. SR-3 measured composition
+directly and found class is **not** that variable. Two dimensions govern two
+different questions, and this document had collapsed them into one:
+
+| dimension | values | governs | established by |
+|---|---|---|---|
+| **invariant CLASS** | CONSERVATION / MONOTONE_NON_CUMULATIVE / CUMULATIVE | **CONCURRENCY** — what may run in the interior vs what must serialize at the gate | C6, C7 (R9+R10+R13) |
+| **CARRIER** | PROOF / SPEC / TEST | **EVIDENTIAL COMPOSITION** — whether a chain of checks still checks anything | SR-3 |
+
+Class still governs concurrency exactly as §3 says. It does **not** govern
+whether per-stage checks compose into a check on the whole.
+
+### The measurement
+
+SR-3, 12 three-stage pipelines over Gyza's own claim types, 27 end-to-end
+violations, single-stage mutations:
+
+| carrier | n | detection under verified fold |
+|---|---|---|
+| PROOF — the check RECOMPUTES the property | 21 | **1.000** |
+| SPEC — a registered partial property | 2 | **1.000** |
+| **TEST — a finite sample** | 4 | **0.000** |
+
+### How the class reading fooled itself — the carrier mixture
+
+Measured **by class**, CONSERVATION detects **0.667** and MONOTONE **1.000**,
+which reads as "conservation composes less well than monotone" and would have
+been recorded as a class property. It is not. CONSERVATION decomposes:
+
+| class × carrier | n | detection |
+|---|---|---|
+| CONSERVATION × PROOF | 8 | **1.000** |
+| CONSERVATION × TEST | 4 | **0.000** |
+
+**0.667 was a MIXTURE of two populations, not a property of either.** Every
+conservation failure was a TEST-carried failure. The aggregate had no referent.
+
+### The corrected statement
+
+> **APPEND-ONLY, PARTITIONED, DERIVED-NOT-STORED** — governs whether a quantity
+> can be bounded at all, and (via class) what may run concurrently.
+>
+> **PROOF-CARRIED, NOT TEST-CARRIED** — governs whether the bound survives
+> composition. A check that RECOMPUTES its property composes to arbitrary
+> depth; a check that SAMPLES its property composes to nothing, because a finite
+> sample cannot bound behaviour outside itself. Adding cases moves the boundary
+> without removing it.
+
+The practical consequence, quantified in `CARRIER_COVERAGE.md`: a claim type's
+TIER is a property of that claim **in isolation** and is not a composition
+budget. A tier-1 claim whose verifier is a unit-test suite forces every chain
+containing it to tier 3.
+
 ## The cost, stated plainly
 
 **Nothing is ever freed.** Deletion stops reclaiming anything, so storage grows without

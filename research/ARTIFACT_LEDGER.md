@@ -84,3 +84,44 @@ the question "is this the harm's frame?" answerable by inspection instead of by
 a feasibility check that happens to be preregistered.
 
 Recorded in `BUILD_PLAN.md` §6 and in `CLAUDE.md`'s standing discipline.
+
+---
+
+## #14 — the carrier mixture read as a class property
+
+**Species: an aggregate over a heterogeneous population, read as a property of
+the population.** The same shape as the trust-lift selection confound (entry 5).
+
+### What it would have falsely shown
+
+SR-3's by-class table reads CONSERVATION **0.667**, MONOTONE **1.000**. Taken at
+face value that is a clean, publishable-looking claim — *conservation composes
+less reliably than monotone* — and it would have been written into
+`ARCHITECTURAL_PRINCIPLE.md` as a refinement of the existing class taxonomy,
+which already had class governing composition. It fits the prior so well it
+would not have looked like a finding at all.
+
+It is an artifact. CONSERVATION decomposes into **PROOF 1.000 (n=8)** and
+**TEST 0.000 (n=4)**. The 0.667 is the mixing ratio of two populations with
+nothing between them. There is no conservation-class effect; there is a carrier
+effect, and conservation happened to be the class where both carriers appeared.
+
+### What caught it
+
+Recording the CARRIER as a first-class variable alongside the class, so the
+by-class number could be decomposed instead of only being reported. Had the
+harness tracked class alone — which is what the existing taxonomy would have
+suggested tracking — the aggregate would have been the finest available grain
+and the artifact would have been invisible.
+
+### The generalized lesson
+
+> **An aggregate is only a property when the population is homogeneous in every
+> variable that affects the outcome. Decompose before believing.**
+
+The prior entries of this species (trust-lift selection confound; the T1/T2
+detector coupling) were caught the same way: by having recorded the variable
+that turned out to matter. The rule that follows is not "distrust aggregates" —
+it is that a taxonomy which tells you what to record determines which artifacts
+you *can* catch, so a measurement should carry the variables a competing theory
+would need, not only the ones the current theory predicts.

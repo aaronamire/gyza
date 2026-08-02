@@ -98,7 +98,10 @@ NATIVE: list[Verifier] = [
              "gyza/economy/market.py:CapitalEntry fold"),
     Verifier("artifact_content_address", _artifact_content_address,
              "gyza/network/artifact_store.py:47"),
-    Verifier("unit_test_execution", _unit_test_execution, "V-3 adapter (TEST-carried)"),
+    # TEST-carried: tier 1 in isolation, but forces any chain containing it to
+    # tier 3. The tier and the carrier disagree here and both are right.
+    Verifier("unit_test_execution", _unit_test_execution,
+             "V-3 adapter (finite sample)", carrier="TEST"),
 ]
 
 # R14 Part C's CHEAP-PARTIAL bucket: mechanically checkable conservation or

@@ -34,11 +34,29 @@ class RegistryVersionError(RuntimeError):
 
 @dataclass(frozen=True)
 class Verifier:
-    """A NATIVE verifier: a mechanical postcondition that RECOMPUTES the
-    property. Carrier = PROOF, which is what makes it compose (SR-3)."""
+    """A NATIVE verifier: a mechanical postcondition.
+
+    CARRIER is a first-class field, not a comment, because SR-3 measured it as
+    the variable that governs composition -- and because artifact #14 was an
+    aggregate that could only be decomposed BECAUSE the carrier had been
+    recorded. A taxonomy determines which artifacts you can catch.
+
+      PROOF  the check RECOMPUTES the property; sound on every input, and
+             composes to arbitrary depth (SR-3: 1.000, n=21).
+      TEST   the check runs a FINITE SAMPLE; sound only where it sampled, and
+             composes to nothing (SR-3: 0.000, n=4). A tier-1 claim may still
+             be TEST-carried -- tier and carrier are independent.
+    """
     claim_type: str
     fn: Callable[..., bool]
     witness: str                   # file:line of the production implementation
+    carrier: str = "PROOF"
+
+    def __post_init__(self):
+        if self.carrier not in ("PROOF", "TEST"):
+            raise ValueError(
+                f"verifier {self.claim_type!r} declares carrier "
+                f"{self.carrier!r}; must be PROOF or TEST (SR-3)")
 
 
 @dataclass(frozen=True)
