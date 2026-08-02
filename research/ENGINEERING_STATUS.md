@@ -4,10 +4,23 @@ Input to the open-problem document. Written to be honest about gaps rather than
 tidy. Every "BUILT" names the test that demonstrates it; every "PARTIAL" names
 the specific gap.
 
-## 1. The central engineering result of the phase
+## 1. The central engineering results of the phase
 
-**Verifiability does not survive composition, and the ceiling on fixing that is
-low.**
+**Two findings, and they are the same species: an isolated number that shrinks
+once you ask the system-level question.** Neither is a caveat on the other;
+both are results.
+
+> **THE ISOLATED NUMBER IS NOT THE SYSTEM NUMBER.**
+>
+> | | isolated | system-level |
+> |---|---|---|
+> | **verifiability** | 61.1% of claim types are tier-1 | **0.9%** of depth-8 chains are tier-1 |
+> | **harm coverage** | 3 harm classes declared, bounded, and enforced | **13.3%** — 2 of 15 stateful action types move any declared quantity |
+>
+> Both were reported as the isolated number first, and in both cases the
+> isolated number is the one a reader takes as the capability claim.
+
+### 1a. Verifiability does not survive composition, and the ceiling on fixing that is low
 
 | | tier-1 | tier-3 | any correctness claim |
 |---|---|---|---|
@@ -28,6 +41,28 @@ vocabulary.
 
 *(ANALYTIC, under a uniform-chain-sampling assumption. Real chains are not
 uniform; this is a shape argument, not a forecast.)*
+
+### 1b. The declared harm model covers 13.3% of the stateful action vocabulary
+
+`selection_routes/unmeasured_actions.json`. For each action type, apply it and
+ask whether any **declared** harm quantity moves.
+
+| | |
+|---|---|
+| action types in the C-3 vocabulary | 19 |
+| changing state | 15 |
+| **moving any declared harm quantity** | **2 (13.3%)** — `settle_credits`, `reserve_credits`, both via H1 |
+| **moving none** | **13 (86.7%)** |
+
+**Two of the three declared harm classes have no action in the vocabulary that
+moves them at all.** The action vocabulary and the harm model are largely
+**disjoint**: H2 (market capital) and H4 (authority) are declared, bounded, and
+never touched by anything the system does.
+
+Sound in one direction only — a gap found is definite; a gap not found proves
+nothing (R12). The unmeasured 13 are enumerated with proposed quantities in
+`HARM_MODEL_GAP.md`; roughly two thirds are declarable today and the rest are
+the competence bound reappearing in the harm model.
 
 Two corollaries that changed what got built: **depth is the exponent**, so a
 decomposer should minimise depth before improving per-subtask tier; and **tier
@@ -111,28 +146,46 @@ cost model (one spec per type) does **not** extend to type assignment.
 
 It runs a task through a kernel-enforced sandbox, refuses to sign unless
 enforcement is no wider than the signed manifest, and emits a provenance chain
-any third party can verify offline with no trust in the producing machine. It
-bounds declared harm classes against declared bounds, evaluates conservation and
-monotone invariants concurrently in an append-only interior and cumulative ones
-only at a serialized promotion gate, rolls back to the last promotion without
-losing content, refuses to let the constrained system rewrite its own guard
-configuration, routes claims to a verification tier with zero model calls,
-refuses model-authored specs, consults a measured tier algebra before permitting
-a deep chain, and escalates with the specific bound that would be exceeded.
-782 Python tests, 94 Rust, the Go suite.
+any third party can verify offline with no trust in the producing machine. That
+part is unqualified.
+
+**Its containment claim is narrower than that sentence suggests, and the honest
+form is:** the system bounds **declared** harm classes against **declared**
+bounds — and the declared model currently covers **13.3% of the stateful action
+vocabulary** (2 of 15 action types). Two of its three declared classes have no
+action that moves them at all. Deletion, key rotation, delegation, storage
+growth, guard-configuration updates, and every form of emission move **no
+declared quantity**.
+
+Within that scope the machinery is real and demonstrated: conservation and
+monotone invariants evaluate concurrently in an append-only interior while
+cumulative ones evaluate only at a serialized promotion gate; rollback restores
+interior state without losing content; the constrained system cannot rewrite its
+own guard configuration; claims route to a verification tier with zero model
+calls; model-authored specs are refused; a measured tier algebra is consulted
+before a deep chain is permitted; and a refusal escalates with the specific
+bound that would be exceeded. 785 Python tests, 94 Rust, the Go suite.
+
+**A reader who takes this section as a capability claim is being misled.** The
+mechanism is built; the model it enforces is 13.3% of the vocabulary.
 
 ## 6. What it cannot do today
 
-It cannot tell you whether any output is *correct* — that is the competence
-bound, closed across six mechanism families and terminal. It cannot verify that
-the claim type attached to a task is the right one, so the whole tier apparatus
-rests on a human judgement it cannot check. It cannot keep a correctness claim
-across a deep chain: at depth 8, 92.6% of uniformly-drawn chains are
-containment-only, and no representation work moves that past ~13%. It cannot
-decompose a task or decide when to retry — both stubs, both blocked on evidence
-rather than effort. It cannot prove the runner that stamped an enforcement
-record is the runner whose source you read (S5). And it has never been run by
-anyone other than its author.
+It cannot tell you whether any output is *correct* — the competence bound,
+closed across six mechanism families and terminal. It cannot bound harm it was
+not told about: **13 of 15 stateful action types move no declared quantity**, so
+for those the system provides attribution and containment-of-authority but no
+harm bound at all. It cannot bound the *consequence* of an emission even in
+principle, only the count — after emission there is no containment and no
+detector helps. It cannot verify that the claim type attached to a task is the
+right one, so the whole tier apparatus rests on a human judgement it cannot
+check, and the ceiling for any text-based assigner is 0.5. It cannot keep a
+correctness claim across a deep chain: at depth 8, 92.6% of uniformly-drawn
+chains are containment-only, and no representation work moves that past ~13%. It
+cannot decompose a task or decide when to retry — both stubs, both blocked on
+evidence rather than effort. It cannot prove the runner that stamped an
+enforcement record is the runner whose source you read (S5). And it has never
+been run by anyone other than its author.
 
 ## 7. The three things gating value
 

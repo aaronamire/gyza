@@ -264,7 +264,7 @@ H-1 escalation queue → O-2/O-3 metrics and alarms → S5 reproducible builds a
 
 ## 6. Standing discipline
 
-Carried unchanged from the research program. Twelve artifacts were caught by these rules; they are not ceremony.
+Carried unchanged from the research program. Every entry in `ARTIFACT_LEDGER.md` was caught by these rules; they are not ceremony. (Cite the entry, not a count — a count is not a ledger.)
 
 1. **Preregister before data.** Commit the design, metric, and decision rule before any code that produces a result. Git timestamp is the record.
 2. **Diagnose any exact 0 or 1 before reporting.** Four artifacts were caught by this rule alone. A clean number is a suspected coupling until proven otherwise.
@@ -316,3 +316,19 @@ That last item has been outstanding longer than any other and gates the value of
 
 
 CANONICALIZE BEFORE COMPARING. An equality test between two REPRESENTATIONS of a value is a claim about the representation, not the value (artifacts #7 and #15 — a recurrence). Where an error of this species is suspected, check the SIGN of the residual: repr equality can only be stricter than value equality, so a one-directional error confirms the mechanism.
+
+REGISTERING A CHECKER IS NOT EVIDENCE THAT IT RUNS. A registry makes a
+component reachable, not exercised; a suite that builds its own fixtures never
+touches the registered ones. 785 passing tests did not detect a harm quantity
+that raised on every input (artifact #16). Assert that every registry entry is
+executed against a real input.
+
+AN ERROR IS NOT A VALUE. An exception written into the same channel as a
+measurement makes "it broke" indistinguishable from "it found nothing", and
+those are opposite claims. The false reading was the reassuring one -- 0%
+unmeasured against a true 86.7% -- and the reassuring direction is the one that
+does not get questioned.
+
+A COUNT IS NOT A LEDGER. Cite the entry, not the tally. A count incremented in
+prose drifts until it contradicts itself; the mechanisms survive only if they
+are enumerated where they are caught (research/ARTIFACT_LEDGER.md).

@@ -26,7 +26,7 @@ says so.
 
 | | status | where |
 |---|---|---|
-| **(a)** bounded undetected error | **partially solved, and the bound is narrower than it looks.** Harm is bounded where it is *declared* and *measurable as a state quantity*; correctness of content is not bounded at all. | §2.1, §2.4, §2.7 |
+| **(a)** bounded undetected error | **partially solved, and the bound is much narrower than it looks.** Harm is bounded where *declared* and *measurable as a state quantity* — currently **13.3% of the stateful action vocabulary**. Correctness of content is not bounded at all. | §2.1, §2.4, §2.7, §3 |
 | **(b)** attributability | **solved**, and it is the one unqualified success. Signed provenance chains verify offline with no trust in the producer. | §3 |
 | **(c)** aggregate benefit | **untouched.** No formalism exists. | §4.1 |
 | **(d)** scale | **depth: bounded and low** (§2.7). **breadth: solved for the right invariant class** (§2.2). **across principals: closed negative** (§2.6). |
@@ -192,6 +192,18 @@ that commits it.
 
 Full inventory in `ENGINEERING_STATUS.md`. One page:
 
+**What it bounds, stated before what it is.** The system bounds **declared**
+harm classes against **declared** bounds. The declared model currently covers
+**13.3% of the stateful action vocabulary** — 2 of 15 action types move any
+declared quantity (`selection_routes/unmeasured_actions.json`), and **two of the
+three declared classes have no action that moves them at all**. Deletion, key
+rotation, delegation, storage growth, guard updates and every form of emission
+are unbounded by the declared model. The mechanism below is real; the model it
+enforces is 13.3% of what the system does. `HARM_MODEL_GAP.md` enumerates the
+gap and proposes quantities; roughly two thirds are declarable today and the
+remainder are the competence bound reappearing in the harm model rather than in
+verification.
+
 **The architecture.** An **append-only interior** where nothing is irreversible,
 so it needs no per-action gating; **one batched, serialized promotion gate**
 which is simultaneously the irreversibility gate and the serialization point
@@ -327,8 +339,9 @@ way is untested.
 
 ## §5 — The traps
 
-Fifteen artifacts, each of which would have produced a specific false headline.
-Full ledger in `ARTIFACT_LEDGER.md`.
+Each entry below would have produced a specific false headline.
+Full ledger, canonically numbered, in `ARTIFACT_LEDGER.md` — cite
+the entry, never a count.
 
 | # | would have falsely shown | caught by |
 |---|---|---|
