@@ -134,6 +134,10 @@ class AgentAdaptor:
     # -- identity surface ----------------------------------------------------
 
     @property
+    def identity(self) -> AgentIdentity:
+        return self._identity
+
+    @property
     def pubkey_hex(self) -> str:
         return self._identity.pubkey_hex
 

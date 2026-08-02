@@ -31,9 +31,16 @@ class ChainDecision:
     depth_permitted: bool = True
 
 
-# C14: unverified steps decay as (1-p)^n; at the measured tier depth beyond ~10
-# is worthless. Verified claims do not decay.
-TIER_DEPTH_CAP = {1: None, 2: 32, 3: 10}
+# SR-6 — the cap is keyed on CARRIER, not on tier.
+#
+# It was keyed on tier ({1: None, 2: 32, 3: 10}) and that was wrong for exactly
+# the reason Part A is about: a TIER-1, TEST-CARRIED chain would have been given
+# NO CAP while being the chain that decays fastest. Corrected, disclosed.
+#
+# PROOF/SPEC do not decay -- a violation is caught at the stage that commits it
+# (SR-3 escape rate 0.000). TEST/NONE decay as (1-p)^n; the 10 is C14's
+# inherited parameter (p ~ 0.35, 0.65^10 ~ 0.013), not re-measured here.
+CARRIER_DEPTH_CAP = {"PROOF": None, "SPEC": None, "TEST": 10, "NONE": 10}
 
 
 def consult_tier_algebra(carriers: list[str], tiers: list[int],
@@ -62,9 +69,13 @@ def consult_tier_algebra(carriers: list[str], tiers: list[int],
             "a cumulative quantity (C7), so it must be evaluated at the "
             "serialized promotion gate regardless of tier")
 
-    cap = TIER_DEPTH_CAP.get(d.tier)
+    # The chain's cap is the TIGHTEST any stage imposes.
+    caps = [CARRIER_DEPTH_CAP.get(c, 10) for c in carriers] or [None]
+    real = [c for c in caps if c is not None]
+    cap = min(real) if real else None
     if depth is not None and cap is not None and depth > cap:
         d.depth_permitted = False
         d.reasons.append(
-            f"depth {depth} exceeds the tier-{d.tier} cap of {cap} (C14)")
+            f"depth {depth} exceeds the cap of {cap} imposed by the tightest "
+            f"carrier present (SR-6; C14's p~0.35 parameter)")
     return d
