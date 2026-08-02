@@ -1,0 +1,17 @@
+{
+ "n": 472,
+ "disagreements": 0,
+ "disagreement_rate": 0.0,
+ "unassignable_by_heuristic": 0,
+ "per_type_agreement": {
+  "artifact_content_address": 1.0,
+  "delegation_attenuation": 1.0,
+  "enforcement_within_manifest": 1.0,
+  "envelope_signature": 1.0,
+  "execution_output_content": 1.0,
+  "manifest_identity": 1.0,
+  "unit_test_execution": 1.0
+ },
+ "examples": [],
+ "scoping": "types are CONSTRUCTED; this is a LOWER BOUND"
+}

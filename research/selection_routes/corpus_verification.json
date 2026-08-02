@@ -1,0 +1,17 @@
+{
+ "n_sample": 40,
+ "agreement": 0.95,
+ "disagreements": [
+  {
+   "task_id": "mbpp-test-llama-3.1-70b-instruct-3",
+   "recorded": false,
+   "source_says": true
+  },
+  {
+   "task_id": "mbpp-test-phi-4-26",
+   "recorded": false,
+   "source_says": true
+  }
+ ],
+ "gate_pass": true
+}

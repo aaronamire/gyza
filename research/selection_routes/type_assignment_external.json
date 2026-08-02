@@ -1,0 +1,7 @@
+{
+ "n_external_artifacts": 196,
+ "artifacts_with_ambiguous_type": 196,
+ "ambiguity_rate": 1.0,
+ "max_accuracy_of_any_text_based_assigner": 0.5,
+ "note": "the external prompt is identical across the competing types, so no text feature can separate them"
+}
