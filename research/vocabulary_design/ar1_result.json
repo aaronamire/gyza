@@ -1,0 +1,35 @@
+{
+ "seed": 1,
+ "n_actions_audited": 8,
+ "audit_valid": true,
+ "claim_types_exercised": {
+  "envelope_signature": 8,
+  "envelope_chain": 8,
+  "artifact_content_address": 8,
+  "manifest_identity": 8,
+  "enforcement_within_manifest": 8
+ },
+ "carrier_distribution": {
+  "PROOF": 40
+ },
+ "p_proof_empirical": 1.0,
+ "depth_curve_empirical": {
+  "1": 1.0,
+  "2": 1.0,
+  "4": 1.0,
+  "8": 1.0
+ },
+ "depth_curve_uniform": {
+  "1": 0.555556,
+  "2": 0.308642,
+  "4": 0.09526,
+  "8": 0.009074
+ },
+ "COUNTER_METRIC": {
+  "semantic_claims_audited": 0,
+  "correctness_coverage_of_the_work": 0.0,
+  "note": "the audit composes signature, linkage, content-address, manifest-identity and bounds checks. NONE of them asks whether the output is RIGHT."
+ },
+ "distinct_claim_types": 5,
+ "DEFINITIONAL_if_single_type": false
+}
