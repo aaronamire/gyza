@@ -257,6 +257,29 @@ This is the only item here that is cheap, runnable now, and would change what
 the system may honestly claim. **It should run before any external claim about
 what the system guarantees.**
 
+**The mechanical half has now been run, and it is sound in one direction only**
+(`selection_routes/unmeasured_actions.py`, `unmeasured_actions.json`). For each
+action type, apply it and ask whether any declared harm quantity moves. A gap
+found is **definite**; a gap not found **proves nothing** — that is R12 again.
+
+| | |
+|---|---|
+| action types in the vocabulary | 19 |
+| changing state | 15 |
+| **measured by NO declared harm class** | **13 (86.7%)** |
+
+Only `settle_credits` and `reserve_credits` move anything, both via H1. **Two of
+the three declared harm classes have no action in the vocabulary that moves them
+at all** — the action vocabulary and the harm model are largely *disjoint*.
+
+**What remains for a human, stated so it is not mistaken for done:** this audit
+asks whether the *declared* model measures the vocabulary. It cannot ask whether
+the declared model is the *right* model — whether there is damage nobody wrote
+down. That question is R12-hard and requires an adversary **independent of the
+harm model's author**. The author of this audit is also the author of the harm
+model, so this is the half that could be run honestly, and the other half is
+still open.
+
 ### 4.3 SR-1 and SR-4 — blocked on artifacts, not ideas
 
 | route | blocking artifact |
@@ -324,6 +347,7 @@ Full ledger in `ARTIFACT_LEDGER.md`.
 | **13** | granularity "does not matter" (a clean 3-way tie at 1.0) while promotion-per-action bought **unlimited drain** | a preregistered feasibility check demanding refusals before the comparison was trusted |
 | **14** | CONSERVATION 0.667 read as a **class property** when it was a mixture (PROOF 1.000 n=8 + TEST 0.000 n=4) | having recorded the carrier, so the aggregate could be decomposed |
 | **15** | 11 false WRONGs from **repr equality** mistaken for value equality; a recurrence of #7 in a different codebase | an exactly-at-threshold gate number (0.950 vs a 0.95 bar) being diagnosed rather than accepted |
+| **16** | **0% of actions unmeasured** when the truth is **86.7%** — two stacked bugs: a shipped harm quantity that had never executed, and an audit writing the exception into the "it moved" channel | the exact zero being *inconsistent with a documented fact* (H3 is unmodelled, so zero gaps was impossible) |
 
 **The standing discipline, as rules with their provenance:**
 
