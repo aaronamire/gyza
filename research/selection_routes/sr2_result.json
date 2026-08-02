@@ -1,0 +1,32 @@
+{
+ "seed": 1,
+ "n_claim_types_in_slice": 2,
+ "by_claim_type": {
+  "execution_output_content": {
+   "n": 46,
+   "dropped_incomplete_rows": 4,
+   "handlers": 4,
+   "problems_with_handler_variance": 14,
+   "variance_rate": 0.3043,
+   "round_robin": 0.4565,
+   "type_routed": 0.3261,
+   "oracle": 0.5652,
+   "escalation_rate_oracle": 0.4348,
+   "gap_to_oracle_from_type_routed": 0.2391,
+   "type_routed_minus_round_robin": -0.1304
+  },
+  "unit_test_execution": {
+   "n": 46,
+   "dropped_incomplete_rows": 4,
+   "handlers": 4,
+   "problems_with_handler_variance": 14,
+   "variance_rate": 0.3043,
+   "round_robin": 0.4565,
+   "type_routed": 0.3261,
+   "oracle": 0.5652,
+   "escalation_rate_oracle": 0.4348,
+   "gap_to_oracle_from_type_routed": 0.2391,
+   "type_routed_minus_round_robin": -0.1304
+  }
+ }
+}

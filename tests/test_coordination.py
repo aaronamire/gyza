@@ -78,11 +78,22 @@ def test_task_carries_carrier_and_knows_whether_it_composes():
 def test_unselected_components_raise_and_name_the_blocking_artifact():
     """A default nobody chose is worse than an absence somebody noticed."""
     for fn, args in ((decompose, (_task("x"),)),
-                     (allocate, (_task("x"), [])),
                      (retry_policy, (_task("x"), 1))):
         with pytest.raises(NotSelectedError) as e:
             fn(*args)
         assert "BLOCKED_SR1_SR2_SR4.md" in str(e.value)
+
+
+def test_k3_allocator_is_round_robin_per_sr2():
+    """SR-2 measured type-routing 13pp WORSE than round-robin (0.3261 vs
+    0.4565): a taxonomy too coarse to discriminate converts a spread into a bet
+    on one handler, while round-robin diversifies."""
+    hs = ["a", "b", "c"]
+    got = [allocate(_task(f"t{i}"), hs) for i in range(6)]
+    assert got == ["a", "b", "c", "a", "b", "c"], got
+    assert len(set(got)) == 3, "the point is that it diversifies"
+    with pytest.raises(ValueError):
+        allocate(_task("x"), [])
 
 
 # --------------------------------------------------------------------------- #

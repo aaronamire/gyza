@@ -36,10 +36,28 @@ def decompose(task: TaskSpec):
         "research/selection_routes/BLOCKED_SR1_SR2_SR4.md")
 
 
-def allocate(task: TaskSpec, handlers):
-    raise NotSelectedError(
-        "K-3 requires SR-2, which needs ground-truth task outcomes that do not "
-        "exist in the repository. See BLOCKED_SR1_SR2_SR4.md")
+_rr_cursor = {"i": 0}
+
+
+def allocate(task: TaskSpec, handlers: list[str]) -> str:
+    """K-3 — ROUND-ROBIN, per SR-2.
+
+    Type-routing was the design default and SR-2 measured it 13 points WORSE
+    than round-robin (0.3261 vs 0.4565), because the allocable taxonomy carries
+    two claim types across 196 tasks and cannot discriminate four handlers.
+    Routing by a taxonomy too coarse to discriminate converts a spread into a
+    bet on one handler; round-robin, which knows nothing, diversifies.
+
+    This is NOT an argument against type-routing in general -- with a taxonomy
+    fine enough to discriminate, the sign could reverse, and that is untested.
+    It is the decision for THIS taxonomy, and it is revisited when the taxonomy
+    changes.
+    """
+    if not handlers:
+        raise ValueError("no handlers to allocate to")
+    h = handlers[_rr_cursor["i"] % len(handlers)]
+    _rr_cursor["i"] += 1
+    return h
 
 
 def retry_policy(task: TaskSpec, attempts: int):
