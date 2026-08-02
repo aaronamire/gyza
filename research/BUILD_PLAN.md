@@ -313,3 +313,6 @@ That last item has been outstanding longer than any other and gates the value of
 - **Cumulative cross-principal harm under local checks.** Proven closed (C12). Requires serialization, always.
 - **Harm-model completeness.** Not mechanically discoverable (C13). Requires adversarial human testing — the one discovery route still worth running, and it should run *before* any external claim about what the system guarantees.
 - **Coverage generality.** The 58.8% native-verifier fraction is a property of Gyza's cryptographic/accounting vocabulary. The general lesson is the inverse of how it reads: **design the claim vocabulary so the fraction is high**, rather than measuring an existing vocabulary and hoping.
+
+
+CANONICALIZE BEFORE COMPARING. An equality test between two REPRESENTATIONS of a value is a claim about the representation, not the value (artifacts #7 and #15 — a recurrence). Where an error of this species is suspected, check the SIGN of the residual: repr equality can only be stricter than value equality, so a one-directional error confirms the mechanism.

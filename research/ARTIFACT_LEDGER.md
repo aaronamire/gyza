@@ -125,3 +125,77 @@ that turned out to matter. The rule that follows is not "distrust aggregates" �
 it is that a taxonomy which tells you what to record determines which artifacts
 you *can* catch, so a measurement should carry the variables a competing theory
 would need, not only the ones the current theory predicts.
+
+---
+
+## #15 — repr-equality mistaken for value-equality (a RECURRENCE of #7)
+
+**Species: an equality test between two REPRESENTATIONS of a value, read as a
+test on the value.** This is artifact #7 (the 33% canonicalization
+contamination) reappearing in a different codebase, and the recurrence is the
+part worth recording — the discipline caught it the second time, but did not
+prevent it.
+
+### The defect
+
+`research/native_verifier/native_verifier.py:219` computes
+
+```python
+return "CORRECT" if signature == expected else "WRONG"
+```
+
+where both sides are lists of **string reprs** of call results. Two cases where
+the value compares equal and the repr does not:
+
+- `{1: 2, 2: 3, 3: 1, ...}` vs `{2: 3, 1: 2, 5: 2, ...}` — the same dict, a
+  different insertion order in the repr;
+- `(1, 0.0)` vs `(1.0, 0.0)` — `1 == 1.0` is True in Python.
+
+### The measurement
+
+Re-executing all **196** (model, problem) pairs against MBPP's own asserts
+(`research/selection_routes/mbpp_truth.json`):
+
+| | |
+|---|---|
+| agreement with the cached label | **0.9439** |
+| **false WRONG** (cache said wrong, asserts pass) | **11** |
+| **false CORRECT** | **0** |
+
+### Why the direction confirms the diagnosis
+
+**Repr equality can only be STRICTER than value equality, never looser.** A
+defect of this species therefore predicts errors in exactly one direction, and
+that is what was found: 11 and 0. A two-directional error would have meant
+something else was also wrong. **The sign of the residual is evidence about the
+mechanism, not merely evidence that numbers moved** — and checking it is cheaper
+than any other diagnostic available here.
+
+### What it touches, stated rather than assumed away
+
+R8 (ESCAPE-ILLUSORY) and R14 (SPEC-COLLAPSES) both assigned cell (a)/(b) from
+this label. A false WRONG places a **solved** problem into cell (b),
+contaminating the out-of-competence cell with items the model actually handled.
+That biases cell (b) to look **better** than it is, so both results are
+**conservative — if anything understated.**
+
+**Neither was re-run.** The direction is favourable to their conclusions and
+re-running was out of scope for the session that found this, so the correction
+is recorded and the decisions stand on their prior evidence. Any future re-run
+of R8 or R14 must read `selection_routes/mbpp_truth.json` rather than the cached
+`status`, or it inherits the same eleven.
+
+### How it was caught
+
+The corpus's hand-verification gate landed on **exactly 0.950** against a 0.95
+threshold. An exactly-at-threshold number was diagnosed instead of accepted, per
+the diagnose-any-clean-number rule — and the two disagreements it surfaced were
+both the repr case.
+
+### Standing discipline added
+
+> **Canonicalize before comparing, or compare semantically. An equality test
+> between representations is a claim about the representation.**
+
+Already implied by #7; made explicit here because implication was not enough to
+prevent the recurrence.
