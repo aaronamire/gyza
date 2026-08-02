@@ -356,3 +356,107 @@ def test_origin_frame_is_distinct_from_the_rollback_checkpoint():
     assert gate.promote().promoted
     assert st.origin_state().total == 0.0, "origin never moves"
     assert st.baseline_state().total == -10.0, "checkpoint does move"
+
+
+# --------------------------------------------------------------------------- #
+#  C-8 — PERMISSIVENESS monotonicity, computed over the protected quantity     #
+# --------------------------------------------------------------------------- #
+def test_permissiveness_is_computed_over_the_admitted_set_not_the_number():
+    """An UNSET bound FAILS CLOSED (engine.py:99-101 refuses every action on an
+    unbounded class), so ADDING a bound is a LOOSENING and REMOVING one is a
+    TIGHTENING. Read off the magnitudes alone, both come out inverted."""
+    from gyza.containment.guardconfig import diff_bounds
+    d = {c.bound_id: c.direction for c in diff_bounds(
+        {"a": 100.0, "b": 5.0}, {"a": 200.0, "b": 1.0, "c": 7.0})}
+    assert d == {"a": "LOOSENED", "b": "TIGHTENED", "c": "LOOSENED"}
+    d2 = {c.bound_id: c.direction for c in diff_bounds({"a": 100.0}, {})}
+    assert d2 == {"a": "TIGHTENED"}, "removing a bound REFUSES more, not less"
+
+
+def test_a_higher_version_that_loosens_is_refused_by_the_ordinary_path():
+    """The live defect. Version-integer monotonicity tests the LABEL; a
+    correctly-signed v2 raising every bound would otherwise install cleanly —
+    and the guard config is the trust root the whole induction rests on."""
+    sk, pk = _keys()
+    st = GuardConfigStore(pk)
+    v1 = {"version": 1, "bounds": {"spend": 100.0}, "tier_assignments": {}}
+    st.load(v1, sign_config(v1, sk))
+
+    v2 = {"version": 2, "bounds": {"spend": 1e9}, "tier_assignments": {}}
+    with pytest.raises(GuardConfigError, match="LOOSEN"):
+        st.load(v2, sign_config(v2, sk))
+    assert st.config.bounds == {"spend": 100.0}, "bounds must be untouched"
+
+    # tightening through the ordinary path is fine
+    v3 = {"version": 2, "bounds": {"spend": 10.0}, "tier_assignments": {}}
+    st.load(v3, sign_config(v3, sk))
+    assert st.config.bounds == {"spend": 10.0}
+
+
+def test_loosening_requires_a_separately_signed_record_and_raises_an_alarm():
+    from gyza.containment.guardconfig import LooseningRecord, sign_loosening
+    sk, pk = _keys()
+    st = GuardConfigStore(pk)
+    v1 = {"version": 1, "bounds": {"spend": 100.0, "other": 5.0}, "tier_assignments": {}}
+    st.load(v1, sign_config(v1, sk))
+
+    v2 = {"version": 2, "bounds": {"spend": 250.0, "other": 5.0}, "tier_assignments": {}}
+    rec = LooseningRecord(changes=(("spend", 100.0, 250.0),), reason="q3 budget raise")
+    cfg = st.install_loosening(v2, sign_config(v2, sk), rec,
+                               sign_loosening(rec, sk), requested_by="operator")
+    assert cfg.bounds["spend"] == 250.0
+    assert len(st.alarms) == 1
+    assert "GUARD-LOOSENED" in st.alarms[0] and "q3 budget raise" in st.alarms[0]
+
+
+def test_a_loosening_record_that_under_reports_is_refused():
+    """Under-reporting is worse than no record: the signature would attest to a
+    change nobody read."""
+    from gyza.containment.guardconfig import LooseningRecord, sign_loosening
+    sk, pk = _keys()
+    st = GuardConfigStore(pk)
+    v1 = {"version": 1, "bounds": {"spend": 100.0, "other": 5.0}, "tier_assignments": {}}
+    st.load(v1, sign_config(v1, sk))
+
+    # BOTH loosen; the record names only one
+    v2 = {"version": 2, "bounds": {"spend": 250.0, "other": 50.0}, "tier_assignments": {}}
+    rec = LooseningRecord(changes=(("spend", 100.0, 250.0),), reason="partial")
+    with pytest.raises(GuardConfigError, match="Undeclared loosenings"):
+        st.install_loosening(v2, sign_config(v2, sk), rec, sign_loosening(rec, sk))
+    assert st.config.bounds == {"spend": 100.0, "other": 5.0}
+    assert st.alarms == []
+
+
+def test_a_loosening_record_that_misstates_values_is_refused():
+    from gyza.containment.guardconfig import LooseningRecord, sign_loosening
+    sk, pk = _keys()
+    st = GuardConfigStore(pk)
+    v1 = {"version": 1, "bounds": {"spend": 100.0}, "tier_assignments": {}}
+    st.load(v1, sign_config(v1, sk))
+    v2 = {"version": 2, "bounds": {"spend": 250.0}, "tier_assignments": {}}
+    rec = LooseningRecord(changes=(("spend", 100.0, 120.0),), reason="understated")
+    with pytest.raises(GuardConfigError, match="misstates"):
+        st.install_loosening(v2, sign_config(v2, sk), rec, sign_loosening(rec, sk))
+
+
+def test_a_loosening_record_signed_by_the_wrong_key_is_refused():
+    from gyza.containment.guardconfig import LooseningRecord, sign_loosening
+    sk, pk = _keys()
+    agent_sk, _ = _keys()
+    st = GuardConfigStore(pk)
+    v1 = {"version": 1, "bounds": {"spend": 100.0}, "tier_assignments": {}}
+    st.load(v1, sign_config(v1, sk))
+    v2 = {"version": 2, "bounds": {"spend": 250.0}, "tier_assignments": {}}
+    rec = LooseningRecord(changes=(("spend", 100.0, 250.0),), reason="r")
+    with pytest.raises(GuardConfigError, match="LOOSENING RECORD does not verify"):
+        st.install_loosening(v2, sign_config(v2, sk), rec,
+                             sign_loosening(rec, agent_sk))
+
+
+def test_guard_loosening_always_raises_an_o3_alarm():
+    from gyza.coordination import RunMetrics, alarms
+    m = RunMetrics(admitted=10)
+    m.carrier_distribution = {"PROOF": 10}
+    fired = alarms(m, invariants_evaluated=1, invariants_enforced=1,
+                   guard_loosenings=["GUARD-LOOSENED (requested by 'op'): spend: 100.0 -> 250.0"])
+    assert any("GUARD-LOOSENED" in a for a in fired)

@@ -43,7 +43,7 @@ Each entry states the result, the evidence, and **why the obvious next attempt
 fails**. The fences are here because the most expensive thing a fresh agent can
 do is open a sixteenth route that re-derives one of these.
 
-### 2.1 Cheap correctness verification is bounded by verifier competence
+### 2.1 The competence bound — ONE result with TWO faces
 
 **Result.** You cannot cheaply verify what you cannot understand. Six
 preregistered, structurally independent mechanism families all failed, each for
@@ -63,6 +63,27 @@ that re-solves, telling defensible truth from defensible error, transcription
 into the CAS, and test authorship. So "use a different mechanism" is not a plan.
 Any proposed verifier must first explain which of those five stages it avoids,
 and no proposal so far has avoided all of them.
+
+**THE SECOND FACE — the harm model.** The same wall is reached again from a
+completely different direction, and a fresh agent needs to recognise it as the
+same wall rather than as a specification oversight:
+
+| face | how it presents |
+|---|---|
+| **verification** | *cheap checking cannot establish correctness* |
+| **harm model** | *the quantity you care about is not a function of the state you can observe* |
+
+`HARM_MODEL_GAP.md` enumerates it concretely. For an emission, the *count* is a
+clean state function and the harm is **what the content does in the world**. For
+a signed envelope, the *count* is a state function and the harm is **attesting
+to something false**. You can declare a bound on the count; it bounds the rate
+of exposure and not the consequence.
+
+**So a harm-model gap on a semantic action is NOT a specification oversight to
+go and fix.** It is this closed result reappearing, and no amount of declaring
+closes it — which is exactly why §4.2's red team is about the completeness of
+the *declared* model and cannot be about this. Roughly two thirds of the current
+gap is genuine specification work; the rest is this.
 
 **Novelty, honestly.** `PAPER_READINESS.md` classifies the individual pieces as
 KNOWN or KNOWN-VARIANT and only the six-family convergence as

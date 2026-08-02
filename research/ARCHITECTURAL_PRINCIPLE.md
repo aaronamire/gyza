@@ -171,6 +171,20 @@ gone; you are choosing the representation, not calibrating it.
 
 ---
 
+## The document fails its own rule, applied to itself
+
+The cost section above states the price of append-only — **nothing is ever
+freed, paid forever** — and then declares no quantity that measures it. The
+rule this document exists to state is that a safety-relevant quantity should be
+a **declared fold that a guard reads**. Storage growth is safety-relevant (it is
+the one unbounded consequence the design knowingly accepts), it is trivially a
+fold over the log, and **no guard reads it**.
+
+Named here rather than fixed, because declaring a bound is an owner decision.
+A proposed quantity — with its immutable origin, its CUMULATIVE class, and the
+observation that CUMULATIVE puts it at the promotion gate the architecture
+already serializes — is in `HARM_MODEL_GAP.md`.
+
 ## Where it does NOT apply — the boundary of containment
 
 **Effects that leave modeled state entirely.** Gyza's H3 sub-class *external network

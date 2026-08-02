@@ -44,7 +44,8 @@ from gyza.containment.invariants import (
 from gyza.containment.reversibility import Reversibility, ReversibilityTable
 from gyza.containment.engine import Decision, GuardEngine, Phase
 from gyza.containment.guardconfig import (
-    GuardConfigError, GuardConfigStore, VerifiedGuardConfig, sign_config,
+    BoundChange, GuardConfigError, GuardConfigStore, LooseningRecord,
+    VerifiedGuardConfig, diff_bounds, sign_config, sign_loosening,
     verify_config,
 )
 from gyza.containment.log import AppendOnlyLog, Event
@@ -63,4 +64,5 @@ __all__ = [
     "NotInteriorError",
     "GuardConfigStore", "VerifiedGuardConfig", "GuardConfigError",
     "sign_config", "verify_config",
+    "BoundChange", "diff_bounds", "LooseningRecord", "sign_loosening",
 ]

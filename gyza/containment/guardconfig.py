@@ -37,6 +37,73 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 )
 
 
+@dataclass(frozen=True)
+class BoundChange:
+    bound_id: str
+    old: float | None
+    new: float | None
+    direction: str          # UNCHANGED | TIGHTENED | LOOSENED
+
+
+def diff_bounds(old: dict, new: dict) -> list[BoundChange]:
+    """Classify each bound as UNCHANGED / TIGHTENED / LOOSENED.
+
+    PERMISSIVENESS IS COMPUTED OVER THE ADMITTED SET, NOT OVER THE NUMBER.
+    That distinction is the whole point and it is easy to get backwards:
+
+      * an UNSET bound FAILS CLOSED -- `GuardEngine.evaluate` refuses every
+        action touching a harm class with no declared bound
+        (`engine.py:99-101`). So a class with no bound admits NOTHING.
+      * therefore ADDING a bound is a LOOSENING (refuse-all -> admit-some), and
+        REMOVING one is a TIGHTENING.
+
+    Read off the magnitudes alone, both of those come out inverted. The bound
+    *number* is a label that correlates with permissiveness; the admitted set is
+    the quantity being protected.
+    """
+    out: list[BoundChange] = []
+    for k in sorted(set(old) | set(new)):
+        o, n = old.get(k), new.get(k)
+        if o is None and n is None:
+            continue
+        if o is None:                       # unbounded (refuse-all) -> bounded
+            out.append(BoundChange(k, None, float(n), "LOOSENED"))
+        elif n is None:                     # bounded -> unbounded (refuse-all)
+            out.append(BoundChange(k, float(o), None, "TIGHTENED"))
+        elif float(n) > float(o):
+            out.append(BoundChange(k, float(o), float(n), "LOOSENED"))
+        elif float(n) < float(o):
+            out.append(BoundChange(k, float(o), float(n), "TIGHTENED"))
+        else:
+            out.append(BoundChange(k, float(o), float(n), "UNCHANGED"))
+    return out
+
+
+@dataclass(frozen=True)
+class LooseningRecord:
+    """An explicit, separately-signed declaration that specific bounds loosen.
+
+    Loosening is permitted, but it is a DISTINCT OPERATION from updating. The
+    record must name every bound that moves, with its old and new value, and a
+    reason. A record that UNDER-REPORTS is refused: a loosening you did not
+    declare is worse than one you did, because the signature would then attest
+    to a change nobody read.
+    """
+    changes: tuple                          # ((bound_id, old, new), ...)
+    reason: str
+
+    def as_dict(self) -> dict:
+        return {"changes": [list(c) for c in self.changes], "reason": self.reason}
+
+    @property
+    def named(self) -> set:
+        return {c[0] for c in self.changes}
+
+
+def sign_loosening(rec: LooseningRecord, authority_sk: bytes) -> str:
+    return sign_config(rec.as_dict(), authority_sk)
+
+
 class GuardConfigError(RuntimeError):
     """Verification or mutation failure. Always fails closed: an unverifiable
     configuration is not a permissive configuration."""
@@ -91,6 +158,8 @@ class GuardConfigStore:
     def __init__(self, authority_pubkey: bytes):
         self._authority = bytes(authority_pubkey)
         self._cfg: VerifiedGuardConfig | None = None
+        # O-3 surface: every loosening lands here, always.
+        self.alarms: list[str] = []
 
     @property
     def config(self) -> VerifiedGuardConfig:
@@ -126,7 +195,8 @@ class GuardConfigStore:
                 f"the authority key."
             ) from None
 
-    def _install(self, config: dict, signature_hex: str) -> VerifiedGuardConfig:
+    def _install(self, config: dict, signature_hex: str,
+                 _allow_loosening: bool = False) -> VerifiedGuardConfig:
         if not verify_config(config, signature_hex, self._authority):
             raise GuardConfigError(
                 "signature does not verify against the declared authority key")
@@ -138,6 +208,25 @@ class GuardConfigStore:
                 f"refusing to install version {version} over "
                 f"{self._cfg.version}: guard configuration versions are "
                 f"monotone (rollback would be a downgrade attack)")
+
+        # PERMISSIVENESS monotonicity -- computed over the admitted set, never
+        # inferred from the version integer. A version bump is a LABEL that
+        # correlates with intent; it says nothing about whether the guard got
+        # weaker, and a correctly-signed v2 raising every bound would otherwise
+        # install cleanly. The guard configuration is the immutable trust root
+        # the whole induction rests on, so an undetected escalation here voids
+        # every downstream containment claim without tripping a check.
+        if self._cfg is not None and not _allow_loosening:
+            loosened = [c for c in diff_bounds(self._cfg.bounds, config.get("bounds", {}))
+                        if c.direction == "LOOSENED"]
+            if loosened:
+                detail = ", ".join(
+                    f"{c.bound_id}: {c.old} -> {c.new}" for c in loosened)
+                raise GuardConfigError(
+                    f"refusing to install: {len(loosened)} bound(s) LOOSEN "
+                    f"({detail}). Loosening is permitted but it is a DISTINCT "
+                    f"OPERATION -- use install_loosening() with a separately "
+                    f"signed LooseningRecord naming every bound that moves.")
         self._cfg = VerifiedGuardConfig(
             version=version,
             bounds=dict(config.get("bounds", {})),
@@ -147,6 +236,61 @@ class GuardConfigStore:
             config_hash=config_hash(config),
         )
         return self._cfg
+
+    def install_loosening(self, config: dict, signature_hex: str,
+                          record: LooseningRecord, record_signature_hex: str,
+                          *, requested_by: str = "unknown") -> VerifiedGuardConfig:
+        """The ONLY path by which a bound may loosen.
+
+        Requires a separately-signed record naming EXACTLY the bounds that
+        actually move. Refuses on any mismatch in either direction:
+        under-reporting hides an escalation behind an authorized signature, and
+        over-reporting means the record does not describe the config it
+        accompanies.
+
+        Every successful loosening raises an O-3 alarm. Always -- a loosening
+        that is authorized is still a loosening, and the alarm is how it becomes
+        visible rather than merely permitted.
+        """
+        if self._cfg is None:
+            raise GuardConfigError(
+                "no configuration is installed; there is nothing to loosen")
+        if not verify_config(record.as_dict(), record_signature_hex, self._authority):
+            raise GuardConfigError(
+                "the LOOSENING RECORD does not verify against the authority key")
+
+        actual = {c.bound_id: (c.old, c.new)
+                  for c in diff_bounds(self._cfg.bounds, config.get("bounds", {}))
+                  if c.direction == "LOOSENED"}
+        if not actual:
+            raise GuardConfigError(
+                "install_loosening called but no bound loosens; use the "
+                "ordinary update path")
+
+        if record.named != set(actual):
+            missing = sorted(set(actual) - record.named)
+            extra = sorted(record.named - set(actual))
+            raise GuardConfigError(
+                f"LOOSENING RECORD does not match the configuration. "
+                f"Undeclared loosenings: {missing or 'none'}; "
+                f"declared but not loosening: {extra or 'none'}. A record that "
+                f"under-reports is worse than none -- the signature would "
+                f"attest to a change nobody read.")
+        for bid, old, new in record.changes:
+            a_old, a_new = actual[bid]
+            if (old, new) != (a_old, a_new):
+                raise GuardConfigError(
+                    f"LOOSENING RECORD misstates {bid}: says {old} -> {new}, "
+                    f"actual {a_old} -> {a_new}")
+        if not record.reason.strip():
+            raise GuardConfigError("a loosening requires a reason")
+
+        cfg = self._install(config, signature_hex, _allow_loosening=True)
+        alarm = (f"GUARD-LOOSENED (requested by {requested_by!r}): "
+                 + "; ".join(f"{b}: {o} -> {n}" for b, o, n in record.changes)
+                 + f" — reason: {record.reason}")
+        self.alarms.append(alarm)
+        return cfg
 
     def apply_to(self, harm_registry) -> None:
         """Push verified bounds into C-1. Bounds reach the harm registry ONLY

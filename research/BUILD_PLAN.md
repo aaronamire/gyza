@@ -332,3 +332,15 @@ does not get questioned.
 A COUNT IS NOT A LEDGER. Cite the entry, not the tally. A count incremented in
 prose drifts until it contradicts itself; the mechanisms survive only if they
 are enumerated where they are caught (research/ARTIFACT_LEDGER.md).
+
+A MONOTONICITY CHECK MUST BE COMPUTED OVER THE PROTECTED QUANTITY, NEVER OVER A
+LABEL THAT CORRELATES WITH IT. GuardConfigStore tested the VERSION INTEGER and
+called it monotone, so a correctly-signed higher version could raise every bound
+and install cleanly -- in the guard configuration, which is the immutable trust
+root the whole induction rests on. This is the THIRD instance of the species in
+this program: R9's G4' pinned the frame at s_0, SR-5's gate floated the origin,
+and this checked the label instead of the permissiveness. Each time the check
+was over something that CORRELATES with the protected quantity rather than the
+quantity itself. NOT recorded as a ledger artifact: the ledger is for clean
+numbers that turned out false, and this produced no number -- it was found by
+reading. Recording it here instead keeps the ledger's definition intact.

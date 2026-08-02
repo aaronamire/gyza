@@ -34,19 +34,45 @@ computes it.
 **1. The architecture's own stated cost has no declared bound.**
 `ARCHITECTURAL_PRINCIPLE.md` says the price of append-only is that **nothing is
 ever freed**, "paid forever". `stage_artifact`/`stage_envelope` grow storage
-without limit and **no declared quantity measures it**. The design names its
-cost and then does not bound it. A storage budget is the most obviously
-declarable class in the table — a pure fold, cumulative, and therefore evaluated
-at the promotion gate like every other cumulative bound.
+without limit and **no declared quantity measures it**.
 
-**2. The guard configuration refuses downgrades by VERSION but not by
-PERMISSIVENESS.** `GuardConfigStore._install` verifies the authority signature
-and rejects `version <= current`. It does **not** compare bound *values*. So a
-correctly-signed **v2** config may raise every bound arbitrarily and be
-installed — a *loosening* that is not a downgrade by the only test applied. The
-monotone quantity in row 5 is what would close it. Flagged here rather than
-fixed, because choosing whether bounds may ever loosen is exactly the kind of
-decision this document does not make.
+#### PROPOSAL: a storage-growth harm class (not registered, no bound set)
+
+| | |
+|---|---|
+| **quantity** | retained bytes, or retained event count: `Σ len(event) over the append-only log`, including abandoned (rolled-back) events, which by design are never removed |
+| **frame** | the log itself — a single append-only sequence per node. **Immutable origin**: the log's genesis, per discipline #10. A storage bound whose origin moved with each promotion would be the SR-5 defect again |
+| **pure function of state?** | **yes** — it is a fold over the log, the same shape as `balance_fold`. No stored aggregate is needed and none should be added |
+| **invariant class** | **CUMULATIVE**, almost certainly. Retained bytes only increase; nothing frees them; the quantity is a running total by construction |
+| **existing code** | `AppendOnlyLog.__len__` and the events themselves. Nothing measures bytes, and nothing bounds either |
+
+**And the class placement is convenient rather than awkward.** CUMULATIVE means
+C7 applies: it cannot be bounded by any stateless local check and must be
+evaluated at a **serialization point**. The architecture already has exactly
+one — the promotion gate — and already serializes there for the credit budget.
+So if a storage bound is ever declared, **it lands in the place the design
+already pays for**, with no new serialization and no new coordination.
+
+**The meta-point, recorded in `ARCHITECTURAL_PRINCIPLE.md` as well:** the
+document states a cost it does not bound. That is the architecture failing its
+own rule applied to itself — the rule being that a safety-relevant quantity
+should be a declared fold that a guard reads.
+
+**2. The guard configuration refused downgrades by VERSION but not by
+PERMISSIVENESS — now FIXED.** `GuardConfigStore` tested `version <= current` and
+nothing else, so a correctly-signed **v2** could raise every bound and install
+cleanly. **Owner decision taken:** bounds MAY loosen, but loosening is a
+**distinct operation**. Permissiveness is now computed structurally per bound
+(`diff_bounds`), the ordinary update path refuses any config that loosens
+anything, and loosening requires a separately-signed `LooseningRecord` naming
+exactly the bounds that move with their old and new values and a reason — a
+record that under-reports is refused, and every loosening raises an O-3 alarm.
+
+**One subtlety that had to be right:** an UNSET bound **fails closed**
+(`engine.py:99-101` refuses every action on an unbounded class), so **adding** a
+bound is a *loosening* and **removing** one is a *tightening*. Computed from
+magnitudes alone, both come out inverted — which is the same label-vs-quantity
+error the fix exists to correct, one level down.
 
 ---
 

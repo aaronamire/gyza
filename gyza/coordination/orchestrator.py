@@ -191,8 +191,13 @@ ALARM_ESCALATION_RATE = 0.25
 
 
 def alarms(m: RunMetrics, *, invariants_evaluated: int = 0,
-           invariants_enforced: int = 0) -> list[str]:
+           invariants_enforced: int = 0,
+           guard_loosenings: list[str] | None = None) -> list[str]:
     out = []
+    # A guard loosening is ALWAYS an alarm, even when fully authorized. The
+    # authorization makes it permitted; the alarm makes it visible.
+    for a in (guard_loosenings or []):
+        out.append(a)
     for cls, frac in m.harm_fraction_of_bound.items():
         if frac >= ALARM_HARM_FRACTION:
             out.append(f"HARM-NEAR-BOUND: {cls} at {frac:.0%} of its bound")
