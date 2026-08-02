@@ -1,0 +1,207 @@
+{
+ "soundness": "one-directional: a gap found is DEFINITE; a gap not found proves nothing (R12 UNSOUND)",
+ "n_action_types": 19,
+ "n_changing_state": 15,
+ "n_unmeasured_gaps": 13,
+ "gap_fraction_of_stateful": 0.8667,
+ "declared_harm_classes": [
+  "H1_credits",
+  "H2_market_capital",
+  "H4_authority"
+ ],
+ "declared_but_unmodelled": [
+  "H3_irreversible_change"
+ ],
+ "gaps": [
+  "delete_artifact",
+  "external_send",
+  "grant_delegation",
+  "publish_agent",
+  "publish_attestation",
+  "publish_delta",
+  "rotate_key",
+  "send_message",
+  "sign_envelope",
+  "stage_artifact",
+  "stage_envelope",
+  "update_guard_config",
+  "write_outside_sandbox"
+ ],
+ "rows": [
+  {
+   "action": "claim_work_item",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": false,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": false,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "compute",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": false,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": false,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "delete_artifact",
+   "reversibility": "IRREVERSIBLE",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "external_send",
+   "reversibility": "EGRESS",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "grant_delegation",
+   "reversibility": "IRREVERSIBLE",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "publish_agent",
+   "reversibility": "EGRESS",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "publish_attestation",
+   "reversibility": "EGRESS",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "publish_delta",
+   "reversibility": "EGRESS",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "read",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": false,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": false,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "reserve_credits",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": true,
+   "harm_classes_that_move": {
+    "H1_credits": 5.0
+   },
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": false,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "retrieve_memory",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": false,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": false,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "rotate_key",
+   "reversibility": "IRREVERSIBLE",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "send_message",
+   "reversibility": "EGRESS",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "settle_credits",
+   "reversibility": "IRREVERSIBLE",
+   "changes_state": true,
+   "harm_classes_that_move": {
+    "H1_credits": 10.0
+   },
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": false,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "sign_envelope",
+   "reversibility": "IRREVERSIBLE",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "stage_artifact",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "stage_envelope",
+   "reversibility": "REVERSIBLE_INTERIOR",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "update_guard_config",
+   "reversibility": "IRREVERSIBLE",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  },
+  {
+   "action": "write_outside_sandbox",
+   "reversibility": "EGRESS",
+   "changes_state": true,
+   "harm_classes_that_move": {},
+   "harm_classes_that_ERRORED": {},
+   "UNMEASURED_GAP": true,
+   "UNSCORABLE": false
+  }
+ ]
+}

@@ -284,3 +284,67 @@ both the repr case.
 
 Already implied by #7; made explicit here because implication was not enough to
 prevent the recurrence.
+
+---
+
+## #16 — an exact zero produced by TWO STACKED BUGS
+
+**Species: a zero that was definitional of a broken check — the same shape as
+9–12(a), recurring.** Notable because it took *two* independent defects to
+produce, and either alone would have been caught.
+
+### The defects
+
+1. **The shipped harm quantity had never executed.**
+   `gyza/containment/gyza_model.py::_credits_at_risk` read a non-existent
+   `.credits` attribute on `Credits` (which exposes `.micros`), so it **raised
+   on every input**. It survived two sessions because every containment test
+   used a **test-local** quantity; nothing ever ran the *registered* Gyza
+   quantities against real state.
+2. **The audit counted the exception as a harm movement.** The unmeasured-action
+   audit recorded `f"ERROR: {type(e).__name__}"` into the same dict it used for
+   "which harm classes moved", so an erroring quantity read as a *measuring*
+   one.
+
+### What it would have falsely shown
+
+**Zero unmeasured actions — that the declared harm model measures every action
+in the vocabulary.** The truth after fixing both:
+
+| | |
+|---|---|
+| action types | 19 |
+| changing state | 15 |
+| **UNMEASURED by any declared harm class** | **13 (86.7%)** |
+
+The reported number and the true number were **maximally far apart**: 0% vs
+86.7%. And the false version was the *reassuring* one, which is the direction
+that does not get questioned.
+
+### What caught it
+
+The **exact zero**, per the standing rule. The audit printed
+`UNMEASURED: 0 (0.0% of stateful actions)` against a system whose own
+`HARM_MODEL_DRAFT` says H3 (irreversible change) is **unmodelled entirely** —
+so a zero was inconsistent with a documented fact, and inspecting the per-action
+column showed `AttributeError` in every cell.
+
+### The fix, and the durable half
+
+Both defects fixed. The durable half is a test that **executes every registered
+Gyza harm quantity against real state**
+(`test_every_registered_gyza_harm_quantity_actually_EXECUTES`), plus a guard
+that the credit fold uses `.micros` and never the display-only `.value`, which
+`Credits` documents as "Never fold with this".
+
+### The generalized lesson
+
+> **Registering a checker is not evidence that it runs.** A registry makes a
+> component *reachable*, not *exercised* — and a test suite that constructs its
+> own fixtures will never touch the registered ones.
+
+And, sharper, for any harness that classifies:
+
+> **An error is not a value.** Writing an exception into the same channel as a
+> measurement makes "it broke" indistinguishable from "it found nothing", and
+> those have opposite meanings.

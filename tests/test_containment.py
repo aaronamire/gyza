@@ -340,3 +340,58 @@ def test_runner_fail_open_is_now_a_refusable_policy():
     i_policy = src.index("self._require_enforcement")
     i_check = src.index("enforcement_satisfies_manifest")
     assert i_policy < i_check, "the absent-record refusal must precede the subset check"
+
+
+def test_every_registered_gyza_harm_quantity_actually_EXECUTES():
+    """The gap that shipped a broken harm quantity.
+
+    `_credits_at_risk` read a non-existent `.credits` attribute on `Credits`
+    (which exposes `.micros`) and therefore RAISED on every input. It survived
+    two sessions because every containment test used a TEST-LOCAL quantity;
+    nothing ever ran the registered Gyza ones against real state.
+
+    Registering a quantity is not evidence that it runs.
+    """
+    from gyza.economy.wallet import Credits
+
+    class _E:
+        def __init__(self, frm, to, amt):
+            self.from_compositor, self.to_compositor = frm, to
+            self.amount_credits, self.settled = amt, True
+            self.entry_id = f"{frm}{to}{amt}"
+            self.from_signature = self.to_signature = "x"
+
+    class _S:
+        owner = "A"
+        entries: list = []
+        active_holds = 0.0
+        capital = 100.0
+        authority_violations: tuple = ()
+
+    s0 = _S()
+    s1 = _S()
+    s1.entries = [_E("A", "B", 10.0)]
+    s1.capital = 90.0
+    s1.authority_violations = ("hop2",)
+
+    h, _i = build_registries()
+    for hc in h:
+        v0 = hc.measure(s0, s0)     # must not raise
+        v1 = hc.measure(s0, s1)
+        assert isinstance(v0, float) and isinstance(v1, float)
+        assert v0 == 0.0, f"{hc.id} must measure zero harm against itself"
+
+    assert h.get("H1_credits").measure(s0, s1) == pytest.approx(10.0)
+    assert h.get("H2_market_capital").measure(s0, s1) == pytest.approx(10.0)
+    assert h.get("H4_authority").measure(s0, s1) == pytest.approx(1.0)
+
+
+def test_credits_are_folded_in_micros_not_via_the_display_property():
+    """`Credits.value` is documented display-only — 'Never fold with this'."""
+    import inspect
+    from gyza.containment import gyza_model
+    src = inspect.getsource(gyza_model._credits_at_risk)
+    # strip comments: the prose legitimately names the attributes it warns about
+    code = "\n".join(l.split("#")[0] for l in src.splitlines())
+    assert ".micros" in code
+    assert ".value" not in code and ".credits" not in code

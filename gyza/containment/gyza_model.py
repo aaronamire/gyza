@@ -49,7 +49,15 @@ def _credits_at_risk(s0: object, s: object) -> float:
     before = Wallet(getattr(s0, "entries", [])).net_balance(s0.owner)
     after = Wallet(getattr(s, "entries", [])).net_balance(s.owner)
     holds = float(getattr(s, "active_holds", 0.0))
-    return float(before.credits) - float(after.credits) + holds
+    # Fold in MICROS -- `Credits.value` is display-only and the class says so
+    # explicitly ("Never fold with this"). An earlier version of this function
+    # read a non-existent `.credits` attribute and therefore RAISED on every
+    # input; it had never been executed, because no test exercised the
+    # registered Gyza quantities against real state. Found by the unmeasured-
+    # action audit, whose own harness had counted the resulting exception as a
+    # harm movement and reported ZERO gaps -- an exact zero that was
+    # definitional of two stacked bugs.
+    return (before.micros - after.micros) / 1_000_000.0 + holds
 
 
 def _market_capital_at_risk(s0: object, s: object) -> float:
