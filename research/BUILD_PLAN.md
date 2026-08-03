@@ -351,3 +351,14 @@ CLAIM TYPES) and a chain-survival statistic (0.9% of HYPOTHETICAL UNIFORM
 CHAINS) were plotted as one decay curve, producing an erosion story that
 describes nothing. Two numbers with the same units and a plausible ordering will
 form a trend line whether or not they are the same measurement.
+
+
+A GUARD'S THROUGHPUT COST IS NOT EVIDENCE THAT IT IS DOING ANYTHING. The
+containment-side analogue of reporting TPR without FPR. AG-3's LOCAL guard blocked 871
+extra actions -- a 26% throughput cost -- and its violation count equalled the
+no-guard baseline in ALL 60 CELLS; zero differed. It compared its own share against a
+denominator frozen at s_0, so it could only ever block its own principal's GROWTH,
+while the mechanism that raises concentration is OTHER principals SHRINKING. A guard
+watching the wrong end of a ratio is expensive and inert. Pair every containment
+number with the counterfactual: what would this cost have bought if the guard were
+absent?

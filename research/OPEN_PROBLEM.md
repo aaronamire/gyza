@@ -405,6 +405,70 @@ discipline forbids. So this route is legitimate **only** if either:
 argument, not by measurement: no function of a byte-identical object separates
 two claims about it. A touch-set is still a function of the object.
 
+### 4.4c — PREREGISTERABLE FUTURE ROUTE: per-principal reservation
+
+**Recorded, deliberately not taken.** AG-3 found that stale-read admission, not
+read-set extent, is what breaks aggregate bounds under concurrency, and that
+`PARTITIONED_READ`'s failures are monotone in agents-per-principal (0, 2, 6 at
+M=2) — an *intra*-principal staleness that survives every partitioning of the
+read-set.
+
+**The repair.** A guard that **decrements a local budget as it admits within a
+round**, rather than re-reading a snapshot for each admission. Each principal's
+guard becomes stateful for the duration of a round.
+
+**Why it is plausible, and why it is worth a route rather than a patch.** It is
+a serialization point of **width one principal rather than width M**. That is a
+materially cheaper primitive: it needs no cross-principal coordination, no joint
+snapshot, and no consensus — only that one principal's own agents are ordered
+against each other, which a single process already provides. If it holds, the
+cost of bounding an aggregate quantity drops from global serialization to local
+mutual exclusion.
+
+**What it cannot do**, stated now so no route rediscovers it: it addresses only
+condition (ii), recency. For a two-sided quantity such as concentration the
+*inter*-principal counterexample stands — four actions from B and C pushed A past
+the bound with A idle — so per-principal reservation cannot make a ratio-type
+bound composable. Its plausible reach is same-direction quantities, where a local
+test exists and staleness is the only remaining obstruction.
+
+**The methodological condition, and it is binding — the same one attached to the
+AR-3 touch-set thread.** AG-3's numbers are now known, and this repair was
+deliberately NOT added as an arm after seeing them, because adding arms after
+results is the tuning this program forbids. So the route is legitimate **only**
+if either:
+
+- it is preregistered by someone who **has not seen** AG-3's results; or
+- it is preregistered by someone who has, with **AG-3's counts treated as a
+  stated prior** and the entire design — guard definition, metric, decision rule,
+  feasibility ceiling — **fixed and committed before any new measurement.**
+
+**It also needs an adversary that AG-3 did not have** — see §4.4d.
+
+### 4.4d — THE ADVERSARY GAP AG-3 LEFT OPEN
+
+**All of AG-3's instantaneous violations came from ONE adversary (`mixed`).**
+A1-salami, A2-ratchet, A3-cross and A4-pool contributed **0** in every
+configuration, because R13's four attacks were designed against R13's quantities
+(cross-principal drain, pool overdraft) and **none of them targets
+concentration**. The new quantity was exercised only by the benign varied
+workload.
+
+**Consequence, stated plainly: every instantaneous SIMULATION cell in AG-3 is
+INCONCLUSIVE on adversary breadth.** The measured *rates* rest on one workload
+and should not be quoted as if they were general.
+
+**What this does NOT touch.** The refutation of AG-3's P3 does **not** depend on
+any simulated rate. It is a **constructive counterexample** — four specific
+actions, each admitted, jointly violating — proved on paper and pinned by a unit
+test. A counterexample needs to happen once, and it is exhibited deterministically
+rather than sampled.
+
+**What a future route needs:** an adversary designed to attack a *two-sided*
+aggregate quantity, i.e. one that drains other principals to raise a third
+party's share. Designing it now, against AG-3's known numbers, is the tuning the
+discipline forbids; it must be preregistered under the same condition as §4.4c.
+
 ### 4.5 Claim-vocabulary design
 
 **Coverage is a design variable, not a measurement.** The 61.1% is a property of

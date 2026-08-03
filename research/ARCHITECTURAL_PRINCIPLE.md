@@ -108,6 +108,72 @@ every other UTXO**. Bitcoin partitions *the guard's state*, not merely who owns 
 > axis as the actions.** A monotone budget is inherently global and therefore
 > inherently serializing, regardless of how the underlying resource is partitioned.
 
+### CORRECTION (AG-3) — the rule above is NECESSARY BUT NOT SUFFICIENT
+
+**The prior text is preserved verbatim above and remains true.** AG-3 measured
+that it is only half of the requirement.
+
+`PARTITIONED_READ` partitions its state perfectly — it reads no other
+principal's state at all and enforces a box *proved sound* — and it **leaks
+4.5x MORE than the global-read guard**: 9 violations against 2, with max
+concentration 0.7368 against 0.6250. Violations by agents-per-principal at M=2
+are **0, 2, 6 — monotone in N.**
+
+> **THE RULE, IN FULL. A guard bounds a quantity in breadth only if BOTH hold:**
+> **(i) the guard's own state partitions along the action axis** — R10; and
+> **(ii) the admission decision is LINEARIZED against updates to everything it
+> READS** — AG-3.
+
+**The mechanism, which is the part worth carrying.** Removing the
+cross-principal read did not remove the staleness — it **relocated it from
+between principals to within one**. With N >= 2 agents per principal, each agent
+verifies "my principal's total stays above the floor" against the *same stale
+value of its own principal's total*, and they jointly breach it.
+
+**The read-set's EXTENT was never the disease. Recency at decision time is.**
+And note precisely what fails: **consistency is not the property required.**
+Every guard read a perfectly *consistent* pre-round snapshot and was still
+wrong, because the other admitted effects land after the read. A stale read is
+exactly as unsound as an unobserved write — reads commute and never conflict,
+but a *decision* taken from a stale read does not commute with anything.
+
+### THE COMPOSABILITY CRITERION IS DIRECTIONAL LOCALITY (AG-3), not the temporal class
+
+AG-3 preregistered a three-way temporal taxonomy (instantaneous / cumulative /
+path-dependent) and **retired it**: it is a valid partition that does not predict
+composability, because the instantaneous class is not internally uniform.
+
+> **A sound purely-local test `T_p` exists iff `h` decomposes as
+> `F(g_1(s_1), …, g_M(s_M))` with `F` monotone in each argument IN THE SAME
+> DIRECTION** — so that every principal can conservatively bound its own
+> contribution's movement in the harmful direction using only what it controls.
+
+| quantity | shape | local test? |
+|---|---|---|
+| `total_holdings = Σ_p x_p` | monotone **increasing** in every `x_p` | **yes** — a static split `x_p >= B/M` composes |
+| `concentration = max_p x_p / Σ_q x_q` | increasing in `x_p`, **decreasing** in every other `x_q` | **no exact test exists** |
+
+For concentration the proviso is **unsatisfiable, not merely unmet**: a
+principal can push another past the bound by an action wholly inside its own
+authority, so no test over what a principal controls can prevent it.
+
+**Witness (M=3, κ=0.60), proved and unit-tested.** At `s_0` every principal
+holds 20. Four actions, each evaluated by its own guard against the **same
+pre-round state**, each admitted at concentration ≤ 0.40:
+
+| action | concentration if applied ALONE |
+|---|---|
+| B sends 10 from `B:a0` | 0.4000 |
+| B sends 4 from `B:a1` | 0.3571 |
+| C sends 10 from `C:a0` | 0.4000 |
+| C sends 4 from `C:a1` | 0.3571 |
+
+Applied jointly: `A=20, B=6, C=6`, **concentration = 0.625 > κ**. **Principal A,
+whose share crossed the bound, took no action at all** — its total is
+bit-identical before and after. That is what "no exact local test exists" looks
+like operationally: the violating movement was not A's to make and not B's or
+C's to see.
+
 This is why the principle needs all three words. *Append-only* alone removes the
 storage race; *partitioned* is what removes the guard-state race; *derived-not-stored*
 is what removes the blind channel.
