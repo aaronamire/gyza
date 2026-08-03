@@ -1,0 +1,11 @@
+{
+ "n_sampled": 45,
+ "n_checked": 45,
+ "n_unresolvable_excluded": 0,
+ "unresolvable": [],
+ "agreement": 1.0,
+ "gate": 0.95,
+ "gate_pass": true,
+ "verification_source": "GraphQL statusCheckRollup (DIFFERENT endpoint from extraction's REST check-runs)",
+ "disagreements": []
+}
