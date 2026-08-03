@@ -150,7 +150,42 @@ def _verifier_inputs(idn):
         "market_capital_fold": (None, {}),              # special-cased below
         "artifact_content_address": ((data, blake3.blake3(data).hexdigest()), {}),
         "unit_test_execution": ((lambda x: x * 2, [(1, 2), (2, 4)]), {}),
+        # RESPECIFIED out of NO_VERIFIER. Registered entries with no input here
+        # would be exactly the gap artifact #16 records: reachable, never run.
+        "memory_retrieval_relevance": (_retrieval_case(), {}),
+        "external_send_content": (_send_case(), {}),
     }
+
+
+def _retrieval_case():
+    import numpy as np
+
+    from gyza.verification.respec import (
+        FILTER_SUCCESS_ONLY, METRIC_COSINE_UNIT, RetrievalClaim,
+        corpus_snapshot_digest,
+    )
+    rng = np.random.default_rng(5)
+    q = rng.normal(size=8).astype(np.float32)
+    items = [(f"e{i}", rng.normal(size=8).astype(np.float32), True)
+             for i in range(4)]
+    scored = sorted(
+        ((e, float(np.dot(q / np.linalg.norm(q), v / np.linalg.norm(v))))
+         for e, v, _ in items), key=lambda p: (-p[1], p[0]))
+    claim = RetrievalClaim(
+        corpus_snapshot=corpus_snapshot_digest(items),
+        metric=METRIC_COSINE_UNIT, k=2, threshold=-1.0,
+        filter_predicate=FILTER_SUCCESS_ONLY,
+        returned_ids=tuple(e for e, _ in scored[:2]))
+    return (claim, items, q)
+
+
+def _send_case():
+    from gyza.verification.respec import SendClaim, wire_digest
+
+    payload = b"registry-exercised-bytes"
+    return (SendClaim(artifact_hash=wire_digest(payload), policy_id="P",
+                      destination="peer", timestamp_ns=1,
+                      n_bytes=len(payload)), payload)
 
 
 def test_every_registered_verifier_executes_against_a_real_input(idn):

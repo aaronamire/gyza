@@ -82,6 +82,35 @@ def _unit_test_execution(fn, cases) -> bool:
         return False
 
 
+def _memory_retrieval_topk(claim, candidates, query_vec) -> bool:
+    """RESPECIFIED (route DR -> respecify). Was in NO_VERIFIER: "these memories
+    are relevant" has no mechanical check. The restated claim names its metric,
+    k, threshold, filter and a CONTENT-ADDRESSED corpus snapshot, so the
+    neighbour set can be RECOMPUTED -- which is what makes it PROOF-carried
+    rather than sampled.
+
+    What the restatement loses: whether nearness under M IS relevance. That
+    judgement moves from per-query (unverifiable, every time) to ONCE, by a
+    human, when M is chosen. See research/respecification/FINDINGS.md.
+    """
+    from gyza.verification.respec import verify_retrieval_claim
+    return verify_retrieval_claim(claim, candidates, query_vec)
+
+
+def _external_send_content(claim, emitted: bytes, policy=None) -> bool:
+    """RESPECIFIED. Was in NO_VERIFIER: "the right content was sent" has no
+    mechanical check. The restated claim binds a content hash to the bytes that
+    ACTUALLY LEFT -- not to a value the sender computed from what it intended,
+    which would be self-reporting at a finer grain (S5 B3's circularity).
+
+    What the restatement loses: whether sending was a good idea. Containment
+    ends at emission regardless (C15), so non-repudiation of WHAT LEFT is close
+    to the whole of what is obtainable at that boundary.
+    """
+    from gyza.verification.respec import verify_send_claim
+    return verify_send_claim(claim, emitted, policy)
+
+
 NATIVE: list[Verifier] = [
     Verifier("envelope_signature", _envelope_signature, "gyza/icp.py:82"),
     Verifier("envelope_chain", _envelope_chain, "gyza/icp.py:105"),
@@ -102,6 +131,11 @@ NATIVE: list[Verifier] = [
     # tier 3. The tier and the carrier disagree here and both are right.
     Verifier("unit_test_execution", _unit_test_execution,
              "V-3 adapter (finite sample)", carrier="TEST"),
+    # --- RESPECIFIED out of NO_VERIFIER (route DR's engineering finding) ------
+    Verifier("memory_retrieval_relevance", _memory_retrieval_topk,
+             "gyza/verification/respec.py:124"),
+    Verifier("external_send_content", _external_send_content,
+             "gyza/verification/respec.py:196"),
 ]
 
 # R14 Part C's CHEAP-PARTIAL bucket: mechanically checkable conservation or
@@ -129,11 +163,21 @@ HUMAN_SPECS: list[PartialSpec] = [
 
 # R14 Part C's NO-VERIFIER bucket. Enumerated so tier-3 coverage is computed
 # rather than assumed -- correctness here is semantic (the competence bound).
+# Two types LEFT this bucket by RESPECIFICATION (route DR -> respecify); the
+# two that remain are IRREDUCIBLY SEMANTIC, and the reasons are recorded so a
+# future reader does not propose them again:
+#
+#   execution_output_content  -- restatement "output hash = H, checkable by
+#       re-execution" verifies REPRODUCIBILITY and discards exactly the property
+#       wanted. A deterministic wrong program passes every time.
+#   routing_match_quality     -- restatement "routed to argmax of declared-
+#       capability overlap F" is mechanically checkable, and R11 ROUTER-DEAD
+#       measured that the restated property does not deliver the value:
+#       difficulty routing failed even with an AUROC-1.000 oracle.
+#       VERIFIABLE AND KNOWN NOT TO DELIVER IS NOT A WIN (rule 3d).
 NO_VERIFIER: list[str] = [
     "execution_output_content",      # gyza/runner.py:374
-    "memory_retrieval_relevance",    # gyza/memory.py:402
     "routing_match_quality",         # gyza/demand.py:35
-    "external_send_content",         # gyza/network/netd_client.py:461 (C15)
 ]
 
 

@@ -130,22 +130,36 @@ def test_verifier_must_cite_its_implementation():
 #  V-3 — coverage computed FROM THE REGISTRY, not copied from a document       #
 # --------------------------------------------------------------------------- #
 def test_coverage_is_computed_from_the_registry_and_divergence_is_explained():
-    """R14 Part C reported 17 claim types, 10 native (58.8%). The registry now
-    reports 18 and 11 (61.1%). The divergence is EXACTLY the unit-test
-    execution adapter Phase 3 mandated adding, and is accounted for rather than
-    reconciled away."""
+    """Coverage is READ FROM THE REGISTRY, never copied from a document, and
+    every divergence from R14 Part C's committed number is accounted for here
+    rather than reconciled away. This test is the LEDGER of those divergences.
+
+        R14 Part C (committed)     17 types, 10 native  = 0.588
+        + unit_test_execution      18 types, 11 native  = 0.611   (Phase 3)
+        + 2 RESPECIFIED types      18 types, 13 native  = 0.722   (route DR)
+
+    R14's number is not edited -- it was a correct measurement of the registry
+    as it stood. The registry has since changed twice, deliberately, and each
+    change is named.
+    """
     v, s = build_registries()
     r = TierRouter(v, s)
     cov = r.coverage(all_claim_types())
 
     assert cov["n"] == 18
-    assert cov["tier_1"] == 11
+    assert cov["tier_1"] == 13
     assert cov["tier_2"] == 3
-    assert cov["tier_3"] == len(NO_VERIFIER) == 4
+    assert cov["tier_3"] == len(NO_VERIFIER) == 2
 
-    # the single added adapter accounts for the whole difference
+    # divergence 1 -- the unit-test adapter Phase 3 mandated
     assert "unit_test_execution" in v.claim_types()
-    assert cov["tier_1"] - 1 == 10, "R14 Part C's native count"
+    # divergence 2 -- the two types respecified out of NO_VERIFIER
+    respecified = {"memory_retrieval_relevance", "external_send_content"}
+    assert respecified <= set(v.claim_types())
+    assert not (respecified & set(NO_VERIFIER))
+
+    # the three named changes account for the WHOLE difference from R14
+    assert cov["tier_1"] - 1 - len(respecified) == 10, "R14 Part C's native count"
     assert cov["n"] - 1 == 17, "R14 Part C's type count"
 
 

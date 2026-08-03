@@ -1,0 +1,34 @@
+{
+ "composition_after": {
+  "PROOF": 12,
+  "TEST": 1,
+  "SPEC": 3,
+  "NONE": 2
+ },
+ "p_composable_after": 0.8333333333333334,
+ "frac_semantic_after": 0.1111111111111111,
+ "log_decay_after": -0.10780211932219008,
+ "semantic_reliability": 0.379,
+ "silent_wrong": [
+  {
+   "depth": 1,
+   "before": 0.1275,
+   "after": 0.0638
+  },
+  {
+   "depth": 2,
+   "before": 0.2572,
+   "after": 0.1388
+  },
+  {
+   "depth": 4,
+   "before": 0.449,
+   "after": 0.2512
+  },
+  {
+   "depth": 8,
+   "before": 0.702,
+   "after": 0.4298
+  }
+ ]
+}
