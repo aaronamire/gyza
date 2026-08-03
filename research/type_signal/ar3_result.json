@@ -1,0 +1,179 @@
+{
+ "seed": 1,
+ "n_claim_types": 12,
+ "distinct_shapes": 9,
+ "feasible_signal_carries_information": true,
+ "overall": {
+  "shape_unique_determination": 0.5833,
+  "applicability_unique_determination": 0.5833,
+  "AMBIGUITY_RATE_shape": 0.4167
+ },
+ "by_pair_kind": {
+  "TOUCH": {
+   "n": 10,
+   "shape_unique": 0.7,
+   "applicability_unique": 0.7
+  },
+  "ASSERTION": {
+   "n": 2,
+   "shape_unique": 0.0,
+   "applicability_unique": 0.0,
+   "best_achievable_accuracy": 0.5,
+   "DEFINITIONAL": true
+  }
+ },
+ "rows": [
+  {
+   "claim_type": "artifact_content_address",
+   "shape": "bytes",
+   "shape_unique": true,
+   "shape_peers": [
+    "artifact_content_address"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "balance_fold",
+   "shape": "LedgerEntry-sequence",
+   "shape_unique": true,
+   "shape_peers": [
+    "balance_fold"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "delegation_attenuation",
+   "shape": "DelegationHop-chain",
+   "shape_unique": true,
+   "shape_peers": [
+    "delegation_attenuation"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "enforcement_within_manifest",
+   "shape": "enforcement-dict",
+   "shape_unique": true,
+   "shape_peers": [
+    "enforcement_within_manifest"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "envelope_chain",
+   "shape": "ICPEnvelope",
+   "shape_unique": false,
+   "shape_peers": [
+    "envelope_chain",
+    "envelope_dag",
+    "envelope_signature"
+   ],
+   "applicability_unique": false,
+   "n_applicable_verifiers": 3,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "envelope_dag",
+   "shape": "ICPEnvelope",
+   "shape_unique": false,
+   "shape_peers": [
+    "envelope_chain",
+    "envelope_dag",
+    "envelope_signature"
+   ],
+   "applicability_unique": false,
+   "n_applicable_verifiers": 3,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "envelope_signature",
+   "shape": "ICPEnvelope",
+   "shape_unique": false,
+   "shape_peers": [
+    "envelope_chain",
+    "envelope_dag",
+    "envelope_signature"
+   ],
+   "applicability_unique": false,
+   "n_applicable_verifiers": 3,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "execution_output_content",
+   "shape": "program",
+   "shape_unique": false,
+   "shape_peers": [
+    "execution_output_content",
+    "unit_test_execution"
+   ],
+   "applicability_unique": false,
+   "n_applicable_verifiers": 2,
+   "pair_kind": "ASSERTION",
+   "registered": false
+  },
+  {
+   "claim_type": "ledger_entry_signatures",
+   "shape": "LedgerEntry",
+   "shape_unique": true,
+   "shape_peers": [
+    "ledger_entry_signatures"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "manifest_identity",
+   "shape": "manifest-dict",
+   "shape_unique": true,
+   "shape_peers": [
+    "manifest_identity"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "market_capital_fold",
+   "shape": "CapitalEntry-sequence",
+   "shape_unique": true,
+   "shape_peers": [
+    "market_capital_fold"
+   ],
+   "applicability_unique": true,
+   "n_applicable_verifiers": 1,
+   "pair_kind": "TOUCH",
+   "registered": true
+  },
+  {
+   "claim_type": "unit_test_execution",
+   "shape": "program",
+   "shape_unique": false,
+   "shape_peers": [
+    "execution_output_content",
+    "unit_test_execution"
+   ],
+   "applicability_unique": false,
+   "n_applicable_verifiers": 2,
+   "pair_kind": "ASSERTION",
+   "registered": true
+  }
+ ]
+}
