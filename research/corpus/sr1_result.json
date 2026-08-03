@@ -1,0 +1,1491 @@
+{
+ "preregistration_sha256": "4dd64e7d795f7c28598f36486b9938dfb86167bdaf2997ae7f93af235a30e6d9",
+ "void_checks": {
+  "missing_fraction": 0.0,
+  "void_if_over": 0.1,
+  "H1_H3_void": false
+ },
+ "H1_primary": {
+  "n_conserving": 14,
+  "n_revisiting": 165,
+  "fail_conserving": 0.0,
+  "fail_revisiting": 0.1273,
+  "decision": "NOT-EVALUABLE",
+  "why": "an arm has n < 15 (prereg \u00a76)"
+ },
+ "H2_secondary": {
+  "n": 179,
+  "events": 21,
+  "coef_log2_depth": 0.1742,
+  "se": 0.2321,
+  "p_log2_depth": 0.453,
+  "coef_log10_files": -0.1801,
+  "p_log10_files": 0.8124,
+  "decision": "NULL",
+  "confound": "depth is not randomly assigned; a positive coefficient is consistent with task difficulty and is NOT causal evidence"
+ },
+ "H3_tertiary": {
+  "n_defined": 179,
+  "n_conserving": 14,
+  "fraction_conserving": 0.0782,
+  "n_undefined_dropped": 0,
+  "prediction": "0.20-0.35"
+ },
+ "counter_metrics": {
+  "per_repo": {
+   "pydantic/pydantic": {
+    "n": 58,
+    "n_conserving": 4,
+    "n_revisiting": 54,
+    "fail_conserving": 0.0,
+    "fail_revisiting": 0.2222
+   },
+   "scikit-learn/scikit-learn": {
+    "n": 121,
+    "n_conserving": 10,
+    "n_revisiting": 111,
+    "fail_conserving": 0.0,
+    "fail_revisiting": 0.0811
+   }
+  },
+  "depth_median_conserving": 3,
+  "depth_median_revisiting": 5,
+  "files_median_conserving": 3,
+  "files_median_revisiting": 2,
+  "note": "if CONSERVING is simply SHORT, H1 and H2 are one finding twice"
+ },
+ "rows": [
+  {
+   "record_id": "scikit-learn#34613",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34611",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34605",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34600",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34594",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 10,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34588",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 9,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34572",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34553",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 100,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34551",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34539",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34535",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34533",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34526",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34524",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34523",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34515",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34509",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 8,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34499",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34488",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34468",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34467",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 4,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34460",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34449",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34443",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 5,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34442",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 62,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34440",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34434",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 8,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34430",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34429",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 10,
+   "n_files": 7,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34426",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34423",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34419",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 31,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34417",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34413",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 15,
+   "n_files": 19,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34412",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 11,
+   "n_files": 11,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34411",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34393",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 41,
+   "n_files": 10,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34392",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34386",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 15,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34380",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34378",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 20,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34377",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 8,
+   "n_files": 7,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34376",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 11,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34371",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34363",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34362",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 11,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34361",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34355",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 8,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34353",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34352",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34343",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34336",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34335",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34334",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 8,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34332",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34328",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34323",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 8,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34322",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34321",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34318",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34317",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34303",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 22,
+   "n_files": 10,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34302",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 2,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34289",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34288",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34287",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 36,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34285",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34277",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 6,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34273",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34263",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34262",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34257",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 11,
+   "n_files": 4,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34256",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34250",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34248",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 24,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34246",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 12,
+   "n_files": 9,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34242",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 9,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34239",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 31,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34236",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34231",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 36,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34224",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34221",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 12,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34215",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 17,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34214",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 15,
+   "n_files": 16,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34211",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34199",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34194",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 17,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34190",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 9,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34187",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 8,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34183",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34179",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 34,
+   "n_files": 8,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34173",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 44,
+   "n_files": 100,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34169",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 18,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34168",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34162",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 13,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34157",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 9,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34155",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34153",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 10,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34147",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 14,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34146",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 30,
+   "n_files": 5,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34144",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 16,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34142",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 23,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34136",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34131",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34129",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34122",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 12,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34120",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34107",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34106",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34101",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34098",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 3,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34097",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 2,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34096",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34092",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 12,
+   "n_files": 14,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34083",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34077",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 25,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34066",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34065",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34064",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 10,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "scikit-learn#34055",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 9,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13553",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 1,
+   "fail": 1
+  },
+  {
+   "record_id": "scikit-learn#34054",
+   "repo": "scikit-learn/scikit-learn",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13537",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13473",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13443",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 29,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13438",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13401",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 1,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13391",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13357",
+   "repo": "pydantic/pydantic",
+   "conservation": "CONSERVING",
+   "depth": 4,
+   "n_files": 9,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13339",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 23,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13329",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13304",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 3,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13225",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13206",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13201",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13199",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 28,
+   "n_files": 12,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13197",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 2,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13191",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 10,
+   "n_files": 1,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13180",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13177",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13157",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 13,
+   "n_files": 11,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13149",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13146",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13127",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 7,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13117",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 7,
+   "n_files": 2,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13102",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 5,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13101",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13087",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 11,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13079",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13070",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 18,
+   "n_files": 100,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13067",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13062",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13045",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 5,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13043",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13010",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 1
+  },
+  {
+   "record_id": "pydantic#13004",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#13000",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12981",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 10,
+   "n_files": 18,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12965",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12953",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12951",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12918",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12907",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 9,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12905",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 5,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12879",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 4,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12872",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12846",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12844",
+   "repo": "pydantic/pydantic",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 5,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12826",
+   "repo": "pydantic/pydantic",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12825",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12820",
+   "repo": "pydantic/pydantic",
+   "conservation": "CONSERVING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12819",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 6,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12816",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 4,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12815",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12799",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12793",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 6,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12786",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 1,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12785",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 3,
+   "fail": 0
+  },
+  {
+   "record_id": "pydantic#12770",
+   "repo": "pydantic/pydantic",
+   "conservation": "REVISITING",
+   "depth": 3,
+   "n_files": 2,
+   "fail": 0
+  }
+ ]
+}

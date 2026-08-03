@@ -69,31 +69,59 @@ failure and a small PR became the same observation. That is artifact #16's
 species reproduced in my own extractor; it now raises, retries, and counts
 separately.
 
-### What `outcome` MEANS — read this before using it
+### `outcome` vs `outcome_substantive` — the DEPENDENT VARIABLE IS PARTITIONED
 
 `outcome` is **"the CI checks on this commit concluded success/failure"**. It is
-**not** "the goal was achieved"; no mechanical source supplies that, and claiming
-it would be the competence bound ignored. Every record carries
-`outcome_semantics` saying so.
+**not** "the goal was achieved"; no mechanical source supplies that.
 
-**And CI failure is heterogeneous.** Of the 38 FAIL records:
+**42% of raw FAIL records failed only on bots and benchmarks. That is
+contamination of the dependent variable, not a caveat**, so the partition is now
+a **first-class corpus field**, not an analysis-time filter.
 
-- **22 (0.579)** have ≥1 code-substantive failing check (test matrix, lint);
-- **16 (0.421)** fail **only** on non-code checks — CodSpeed performance
-  analysis (the single most common failing check, 14), Cloudflare Pages doc
-  previews, `labeler` bots, a "a reviewer will let you know" notice bot, and one
-  `codecov/patch` coverage gate.
+`check_taxonomy.py` declares an ordered rule (first match wins) over all **240
+distinct check names** observed, with **zero UNCLASSIFIED** — `UNCLASSIFIED` is
+a failure state, not a default, for the same reason a missing verdict is not a
+PASS.
 
-A route reading `outcome == FAIL` as "the code was wrong" would be wrong about
-**42% of the failures**. Use the evidence field, not the label.
+- **CODE_SUBSTANTIVE** (206 names / 7211 instances): test suites and platform
+  matrices, linters, type checkers, static analysis (CodeQL), builds and
+  compilations including the docs *build*.
+- **INFRASTRUCTURE** (34 names / 2203 instances): deploy previews, benchmark
+  services, coverage reporters, labelers, notice bots, publishing steps, and CI
+  orchestration meta-jobs.
 
-> **Correction recorded:** the first computation of this split returned 0.474,
-> and it was contaminated. `ci_verdict` sliced evidence `[:12]` in API order, so
-> on a commit with 36 checks the failing one could fall outside the stored
-> evidence — leaving records marked FAIL whose evidence showed no failure at all
-> (4 such records). The verdicts were always correct, being computed over *all*
-> conclusions; the evidence did not support them. Evidence is now sorted
-> failures-first and the corrected figure is **0.421**.
+**Borderline calls declared rather than hidden:** coverage (`codecov/*`) →
+INFRASTRUCTURE, because it measures the *tests*, not the code; docs **build** →
+SUBSTANTIVE (Sphinx executes example code) while docs **preview** →
+INFRASTRUCTURE; CI meta-jobs → INFRASTRUCTURE, since they restate other jobs and
+counting them double-counts.
+
+**Effect of the recomputation: 19 of 181 records change class** (17 FAIL→PASS,
+2 PASS→NONE).
+
+| | raw FAIL | **substantive FAIL** | n usable |
+|---|---|---|---|
+| scikit-learn | 0.116 | **0.074** | 121 |
+| pydantic | 0.400 | **0.207** | 58 |
+| **all** | 0.210 | **0.117** | **179** |
+
+pydantic's raw rate was **halved** by the correction — it was dominated by
+CodSpeed performance-regression checks. The two-culture gap narrows from 3.4× to
+2.8× but survives.
+
+**Two records (`pydantic#13463`, `pydantic#12830`) have `outcome_substantive =
+NONE`** — no substantive check ran at all. They are excluded from the usable
+population, never defaulted to PASS.
+
+### Type assignments are UNAUDITED — a stated limitation, not a footnote
+
+All **1455** subtask claim-type assignments carry `audited: false` and
+`assigned_by: "mechanical-proposal:propose_carrier"`. Per the established
+finding, **assigning a claim type to a task is itself a tier-3 claim**: it is a
+judgement about what a piece of work *means*, and no mechanical check can settle
+it. **This corpus therefore contains no audited type assignment**, and any route
+whose metric depends on type correctness is blocked until a human audits them —
+the cost of which is per *task*, not per *type*.
 
 ### B2 — the leakage check: **0.864 not reconstructible** (19/22 hand-verified)
 
@@ -117,6 +145,29 @@ predict a reviewer's future comments.
 
 Every record now carries `leakage_risk.flag`; **56/181 (0.309)** are flagged.
 Routes should exclude them or report split by that boundary.
+
+### CARRIER-MAXIMIZATION IS UNMEASURABLE ON THIS SUBSTRATE — and the reason is definitional
+
+**Recorded so no future route reaches for it here.** SR-1's original metric was
+*fraction of subtasks PROOF/SPEC-carried*. It cannot be measured on any
+CI-mined corpus, ever, for a reason that is not about this corpus's size or
+quality:
+
+> **PROOF-carriage requires a verifier that RECOMPUTES the property. CI running
+> a test suite is a finite sample over inputs. So every CI-derived subtask is
+> TEST-carried BY DEFINITION** — a corpus whose verdicts come from CI can no
+> more contain a PROOF-carried subtask than a thermometer can report colour.
+
+The metric was written for Gyza's own claim vocabulary — where
+`envelope_signature` and `balance_fold` are re-computations — and **does not
+transfer** to mined software history. Any future route wanting carrier
+maximization needs a substrate whose verdicts come from recomputation, not
+sampling; this corpus is the wrong instrument and no amount of extra records
+fixes it.
+
+SR-1's objective on this corpus was replaced accordingly (outcome rate /
+depth / conservation-preservation) — see `PREREGISTRATION_SR1.md` and
+`FINDINGS_SR1.md`.
 
 ### The carrier distribution is DEFINITIONAL and must not be read as a result
 

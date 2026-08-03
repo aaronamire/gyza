@@ -124,3 +124,55 @@ def test_corpus_carries_both_outcome_classes_and_both_merge_classes(records):
     """Selection on success is the failure that disqualified source (i)."""
     assert len({r["outcome"] for r in records}) == 2, "outcome has no variance"
     assert len({r["merged"] for r in records}) == 2, "unmerged population dropped"
+
+
+# --------------------------------------------------------------------------- #
+#  The CODE-SUBSTANTIVE / INFRASTRUCTURE partition                             #
+# --------------------------------------------------------------------------- #
+import sys
+
+sys.path.insert(0, str(CORPUS.parent))
+
+ALL_CHECKS = CORPUS.parent / "all_checks.json"
+
+
+@pytest.mark.skipif(not ALL_CHECKS.exists(), reason="check lists not fetched")
+def test_every_observed_check_name_is_declared():
+    """UNCLASSIFIED is a failure state, not a default. Defaulting an unknown
+    check to either bucket is the same error as defaulting a missing verdict
+    to PASS."""
+    from check_taxonomy import classify
+
+    names = {c["name"] for v in json.loads(ALL_CHECKS.read_text()).values() for c in v}
+    undeclared = sorted(n for n in names if classify(n)[0] == "UNCLASSIFIED")
+    assert not undeclared, (
+        f"{len(undeclared)} check names match no rule; declare each in "
+        f"check_taxonomy.RULES before use: {undeclared[:12]}")
+
+
+def test_substantive_outcome_is_a_corpus_field_not_a_filter(records):
+    for r in records:
+        assert r["outcome_substantive"] in ("PASS", "FAIL", "NONE"), r["record_id"]
+        p = r["checks_partition"]
+        assert p["n_substantive"] + p["n_infrastructure"] == p["n_total"], (
+            f"{r['record_id']}: checks unaccounted for — every check must land "
+            f"in a declared bucket")
+
+
+def test_substantive_none_is_not_treated_as_pass(records):
+    """An absent verdict is not a passing one — the rule that governs the raw
+    outcome governs the substantive one too."""
+    none_recs = [r for r in records if r["outcome_substantive"] == "NONE"]
+    for r in none_recs:
+        assert r["checks_partition"]["n_substantive"] == 0, (
+            "NONE must mean no substantive check ran, never 'none failed'")
+
+
+def test_substantive_outcome_is_never_stricter_than_raw(records):
+    """Direction check: the substantive set is a SUBSET of all checks, so it can
+    only turn FAIL into PASS, never PASS into FAIL. A violation means the
+    partition is dropping a failing check out of the raw set — i.e. the two
+    verdicts were computed over inconsistent data."""
+    bad = [r["record_id"] for r in records
+           if r["outcome"] == "PASS" and r["outcome_substantive"] == "FAIL"]
+    assert not bad, f"substantive FAIL under a raw PASS is impossible: {bad}"
