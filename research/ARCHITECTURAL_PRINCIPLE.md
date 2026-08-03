@@ -17,6 +17,26 @@ the failure modes are not independent bugs but the same shape appearing three ti
 
 ---
 
+## What the three guarantees are NOT
+
+**Added after AR-1, which measured what was already true.** The three guarantees
+below are about **provenance**, **containment**, and the **composition of
+INVARIANTS**. **None of them is a correctness guarantee**, and none ever was:
+
+| guarantee | what it establishes | what it does not |
+|---|---|---|
+| blind channels architecturally impossible | every path that moves a quantity appends to the fold the gate reads | nothing about whether the work was right |
+| frame alignment free | guard and harm measure cannot disagree about the frame | nothing about whether the work was right |
+| breadth composition | conservation/monotone invariants hold under concurrency | nothing about whether the work was right |
+
+AR-1 measured the consequence directly: real audited chains are 100%
+PROOF-carried and flat through depth 8, while **correctness coverage is 0.0 at
+every depth, including depth 1**. The fold composes; the claim that the folded
+work is *correct* was never present to compose.
+
+This is not a limitation discovered by AR-1. It is what a provenance substrate
+is, stated plainly so no reader infers otherwise from the word "guarantee".
+
 ## The three guarantees
 
 ### 1. Blind channels become architecturally impossible — R12 Part C

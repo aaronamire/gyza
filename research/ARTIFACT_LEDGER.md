@@ -351,3 +351,48 @@ And, sharper, for any harness that classifies:
 > **An error is not a value.** Writing an exception into the same channel as a
 > measurement makes "it broke" indistinguishable from "it found nothing", and
 > those have opposite meanings.
+
+---
+
+## #17 — two different quantities plotted as one series
+
+**Species: NOT #14.** #14 was one number that was secretly two *populations*
+(CONSERVATION 0.667 = PROOF 1.000 + TEST 0.000). This is two *different
+quantities* treated as points on one curve.
+
+### The defect
+
+`OPEN_PROBLEM` §2.7 drew a decay curve between:
+
+| | what it counts |
+|---|---|
+| **61.1%** | fraction of **CLAIM TYPES** that have a verifier |
+| **0.9%** | fraction of **HYPOTHETICAL UNIFORM CHAINS** that stay tier-1 |
+
+These are not the same measurement at two depths. They are a *coverage
+statistic* and a *chain-survival statistic*, and **real chains draw from
+neither population**. Interpolating between them produced a decay story —
+"verifiability erodes with depth" — that describes nothing.
+
+### What it would have falsely shown
+
+That correctness existed at shallow depth and was lost by composition, making
+the fix look like *shortening chains* or *improving verifiers*. AR-1 measured
+the truth: real audited chains are 100% PROOF-carried and flat at 1.0000
+through depth 8, while correctness coverage is **0.0 at every depth, including
+depth 1**. There was never anything at depth 1 to erode.
+
+### What caught it
+
+AR-1's counter-metric, **specified before data** (P3): "report the fraction of
+the actual WORK whose correctness the chain covers." Without it the flat curve
+would have read as *good news* — correctness surviving depth — which is the
+opposite of what it means.
+
+### The generalized lesson
+
+> **BEFORE PLOTTING A CURVE THROUGH TWO NUMBERS, CHECK THAT THEY MEASURE THE
+> SAME QUANTITY OVER THE SAME POPULATION.**
+
+Two numbers with the same units and a plausible ordering will happily form a
+trend line. The trend is only real if both are the same measurement.

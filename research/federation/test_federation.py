@@ -72,7 +72,10 @@ def test_ind_3_identical_harm_under_every_guard_configuration():
             tuple(round(E.h_lost(s0, s_end, p), 9) for p in ("A", "B")),
             E.pool_overdraft(s_end),
         )
-    assert len({repr(v) for v in scores.values()}) == 1, scores
+    # canonical_form, not repr: repr is not order-stable for dicts/sets,
+    # so an equal-scoring pair could read as unequal (ledger #7/#15).
+    from gyza.canon import canonical_form
+    assert len({canonical_form(v) for v in scores.values()}) == 1, scores
 
 
 # --------------------------------------------------------------------------- #

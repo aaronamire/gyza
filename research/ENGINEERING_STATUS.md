@@ -6,21 +6,56 @@ the specific gap.
 
 ## 1. The central engineering results of the phase
 
-**Two findings, and they are the same species: an isolated number that shrinks
-once you ask the system-level question.** Neither is a caveat on the other;
-both are results.
+### THE HONEST DESCRIPTION — reuse this paragraph verbatim wherever the system is described
 
-> **THE ISOLATED NUMBER IS NOT THE SYSTEM NUMBER.**
->
-> | | isolated | system-level |
-> |---|---|---|
-> | **verifiability** | 61.1% of claim types are tier-1 | **0.9%** of depth-8 chains are tier-1 |
-> | **harm coverage** | 3 harm classes declared, bounded, and enforced | **13.3%** — 2 of 15 stateful action types move any declared quantity |
->
-> Both were reported as the isolated number first, and in both cases the
-> isolated number is the one a reader takes as the capability claim.
+> **Gyza is a provenance and containment layer.** It proves what ran, under
+> what bounds, in what order, with attribution to a bonded actor — and those
+> proofs compose to arbitrary depth. **It makes no claim that any output is
+> correct, at any depth**, and cheap correctness verification is closed across
+> six mechanism families. It bounds declared harm classes against declared
+> bounds, over a harm model currently covering **13.3%** of the stateful action
+> vocabulary.
 
-### 1a. Verifiability does not survive composition, and the ceiling on fixing that is low
+Every capability claim in every document must be consistent with that
+paragraph. Where one is not, **the claim is fixed, not the paragraph.**
+
+---
+
+### CORRECTION (AR-1) — the verifiability row was measuring the wrong thing
+
+**Prior text preserved below.** The table originally read:
+
+| | isolated | system-level |
+|---|---|---|
+| ~~verifiability~~ | ~~61.1% of claim types are tier-1~~ | ~~0.9% of depth-8 chains are tier-1~~ |
+| harm coverage | 3 harm classes declared, bounded, enforced | **13.3%** — 2 of 15 stateful action types |
+
+**The verifiability row was not an isolated-vs-system pair.** It plotted a
+*coverage statistic* against a *chain-survival statistic* over two different
+populations, and real chains draw from neither (ledger #17). AR-1 measured what
+real audited chains do:
+
+> **PROVENANCE COMPOSES TO ARBITRARY DEPTH. CORRECTNESS IS ABSENT AT DEPTH 1,
+> NOT DECAYING WITH DEPTH.**
+
+Corrected table:
+
+| | isolated | system-level | status |
+|---|---|---|---|
+| **provenance** | 5 checks per action, all PROOF-carried | **flat at 1.0000 through depth 8** | MEASURED (AR-1) |
+| **correctness** | — | **0.0 at every depth, including depth 1** | MEASURED (AR-1) |
+| **harm coverage** | 3 classes declared, bounded, enforced | **13.3%** — 2 of 15 stateful action types | MEASURED |
+
+`gyza/audit.py` composes exactly five checks — `envelope_signature`,
+`envelope_chain`, `artifact_content_address`, `manifest_identity`,
+`enforcement_within_manifest` — and **none asks whether an output is right**.
+The semantic claim types are never links in a chain; they are the payload it
+carries.
+
+**Harm coverage survives the correction unchanged** and is now the only
+isolated-vs-system collapse in the table that is genuinely one.
+
+### 1a. The composition ceiling — SUPERSEDED IN FRAMING by AR-1, retained for the arithmetic
 
 | | tier-1 | tier-3 | any correctness claim |
 |---|---|---|---|
@@ -39,8 +74,10 @@ the competence bound, and **any chain touching one inherits tier 3**. The
 binding constraint is not verifier quality. It is the shape of the claim
 vocabulary.
 
-*(ANALYTIC, under a uniform-chain-sampling assumption. Real chains are not
-uniform; this is a shape argument, not a forecast.)*
+*(ANALYTIC, under a uniform-chain-sampling assumption. **AR-1 measured that
+nothing samples that way** — the arithmetic below is correct and describes a
+population the system never draws from. Retained because the ceiling it
+computes still bounds any design that WOULD chain arbitrary claim types.)*
 
 ### 1b. The declared harm model covers 13.3% of the stateful action vocabulary
 
@@ -146,8 +183,18 @@ cost model (one spec per type) does **not** extend to type assignment.
 
 It runs a task through a kernel-enforced sandbox, refuses to sign unless
 enforcement is no wider than the signed manifest, and emits a provenance chain
-any third party can verify offline with no trust in the producing machine. That
-part is unqualified.
+any third party can verify offline with no trust in the producing machine.
+**That part is unqualified, and AR-1 measured that it composes to arbitrary
+depth: real audited chains are 100% PROOF-carried and flat at 1.0000 through
+depth 8.**
+
+**CORRECTION (AR-1).** Nothing in that sentence is a correctness claim, and no
+part of the system checks correctness **at any depth, including depth 1**. The
+five checks the audit composes ask what ran, under what bounds, in what order,
+and by whom — never whether the answer is right. A reader who took the flat
+depth curve as "correctness survives composition" would have it exactly
+backwards: it is flat because **there was never a correctness claim in the
+chain to decay.**
 
 **Its containment claim is narrower than that sentence suggests, and the honest
 form is:** the system bounds **declared** harm classes against **declared**
@@ -172,7 +219,11 @@ mechanism is built; the model it enforces is 13.3% of the vocabulary.
 ## 6. What it cannot do today
 
 It cannot tell you whether any output is *correct* — the competence bound,
-closed across six mechanism families and terminal. It cannot bound harm it was
+closed across six mechanism families and terminal. **AR-1 makes this concrete
+rather than theoretical: correctness coverage of audited work is 0.0 at every
+depth, including depth 1.** The provenance chain proves what ran; it has never
+proved that what ran was right, and the flat depth curve is a fact about
+provenance, not about correctness. It cannot bound harm it was
 not told about: **13 of 15 stateful action types move no declared quantity**, so
 for those the system provides attribution and containment-of-authority but no
 harm bound at all. It cannot bound the *consequence* of an emission even in

@@ -344,3 +344,10 @@ was over something that CORRELATES with the protected quantity rather than the
 quantity itself. NOT recorded as a ledger artifact: the ledger is for clean
 numbers that turned out false, and this produced no number -- it was found by
 reading. Recording it here instead keeps the ledger's definition intact.
+
+BEFORE PLOTTING A CURVE THROUGH TWO NUMBERS, CHECK THAT THEY MEASURE THE SAME
+QUANTITY OVER THE SAME POPULATION. Artifact #17: a coverage statistic (61.1% of
+CLAIM TYPES) and a chain-survival statistic (0.9% of HYPOTHETICAL UNIFORM
+CHAINS) were plotted as one decay curve, producing an erosion story that
+describes nothing. Two numbers with the same units and a plausible ordering will
+form a trend line whether or not they are the same measurement.

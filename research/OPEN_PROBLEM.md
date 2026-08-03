@@ -161,7 +161,38 @@ And the reason is the property the design leaned on: statelessness. A stateless
 check cannot accumulate, so it cannot bound a cumulative quantity — the same
 wall as §2.2, reached from authority instead of concurrency.
 
-### 2.7 Verifiability does not survive composition, and the ceiling is low
+### 2.7 The chain carries PROVENANCE, not correctness — and always did
+
+**CORRECTED BY AR-1. The prior framing is preserved below and is not deleted.**
+
+The closed result is **not** "verifiability does not survive composition". It is:
+
+> **PROVENANCE COMPOSES TO ARBITRARY DEPTH. CORRECTNESS IS ABSENT AT DEPTH 1,
+> NOT DECAYING WITH DEPTH.**
+
+Real audited chains are **100% PROOF-carried and flat at 1.0000 through depth
+8** (`vocabulary_design/ar1_result.json`). `gyza/audit.py` composes five checks
+— signature, linkage, content address, manifest identity, bounds — and **none
+asks whether an output is right**. The semantic claim types are never links in
+a chain; they are the payload it carries.
+
+**Two things follow, and the second is the one that matters.**
+
+1. The **0.9%** below describes chains sampled **uniformly from the
+   vocabulary**. Nothing samples that way, so as a description of the system it
+   was answering a question nobody asks.
+2. **The empirical flat curve is worse news stated more precisely.** The old
+   framing implied correctness existed at shallow depth and eroded — which
+   suggests fixes (shorter chains, better verifiers). There is nothing at depth
+   1 to erode. The arithmetic below is *correct*; it was interpolating between a
+   coverage statistic and a chain-survival statistic over two different
+   populations (ledger **#17**).
+
+The ceiling arithmetic is retained because it still bounds any design that
+*would* chain arbitrary claim types — it is a constraint on future vocabularies,
+not a description of this one.
+
+#### PRIOR FRAMING (preserved): verifiability does not survive composition
 
 **Result.** The central engineering finding. `CARRIER_COVERAGE.md`,
 `selection_routes/carrier_coverage.json`.
@@ -341,6 +372,38 @@ type — and §2.4's affordable cost model does not extend to it.
 **Open:** is there a **non-text** signal that determines the claim type — the
 consuming context, the downstream use, the caller's declared intent? Unevidenced
 either way. Nobody has looked.
+
+### 4.4b — PREREGISTERABLE FUTURE ROUTE: the runtime touch-set signal
+
+**Recorded, deliberately not taken.** AR-3 measured non-text type assignment at
+**0.70** on touch-differing claim types, against a 0.75 bar, and **0.0000** on
+assertion-differing ones (definitional — byte-identical objects admit no
+separating function).
+
+**The signal.** A **runtime touch-set**: which *fields of the object* a
+verification actually reads. This is plausible precisely where AR-3 failed —
+the envelope-family collision. `envelope_signature`, `envelope_chain` and
+`envelope_dag` all take an `ICPEnvelope`, so *shape* cannot separate them, but
+they **read different fields**: the signature check reads `signature` and
+`agent_pubkey`; the chain check reads `parent_envelope_hash`; the DAG check
+reads `input_hashes`. A touch-set is therefore a different signal, not a
+refinement of the one already tested.
+
+**The bar it must clear: 0.75** on touch-differing types — the same bar AR-3
+used, fixed before AR-3's number was known and not to be moved now.
+
+**The methodological condition, and it is binding.** AR-3's 0.70 is now known.
+Designing a new signal against a number you have already seen is the tuning the
+discipline forbids. So this route is legitimate **only** if either:
+
+- it is preregistered by someone who **has not seen** AR-3's result; or
+- it is preregistered by someone who has, with **0.70 treated as a stated
+  prior** and the entire design — signal definition, metric, bar, decomposition
+  by pair kind — **fixed and committed before any new measurement**.
+
+**It cannot rescue the assertion-differing half.** That half is closed by
+argument, not by measurement: no function of a byte-identical object separates
+two claims about it. A touch-set is still a function of the object.
 
 ### 4.5 Claim-vocabulary design
 
