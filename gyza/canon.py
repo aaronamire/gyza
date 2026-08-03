@@ -96,3 +96,104 @@ def _fallback(v: Any) -> str:
 
 
 __all__ = ["values_equal", "sequences_equal", "canonical_form"]
+
+
+# --------------------------------------------------------------------------- #
+#  THE SECOND MECHANISM: a failure is not an empty value                       #
+# --------------------------------------------------------------------------- #
+#
+# WHY THIS EXISTS, and why it lives beside the comparison helpers. Both halves
+# of this module fix the SAME underlying error -- reading something that is not
+# a measurement as if it were one:
+#
+#     a REPRESENTATION read as a value   -> artifacts #7, #15, AR-2
+#     an ERROR read as a value           -> artifact #16, and the corpus
+#                                           extractor one session later
+#
+# The fourth recurrence was `gh(...) or []` in `research/corpus/run_partB.py`:
+# `gh` returned None on a transport failure, `or []` turned it into an empty
+# commit list, and the record was silently scored "this PR has fewer than 3
+# commits". A failed API call and a small pull request became the same
+# observation, and the drop counter that was supposed to make the corpus
+# auditable counted them together.
+#
+# A rule that has recurred four times is not a discipline problem. It is a
+# missing mechanism. The mechanism is this: make the failure value REFUSE to be
+# treated as data. `Failure` raises on every operation that would silently
+# absorb it -- truthiness, iteration, length, indexing -- so the exact idiom
+# that caused the defect (`call() or []`) now raises instead of lying.
+
+
+class CallFailed(Exception):
+    """A `Failure` was used where a value was expected."""
+
+
+class Failure:
+    """The call did not produce a value.
+
+    This is **not** None, **not** empty, and deliberately **not falsy** -- it is
+    hostile to every operation that would let it pass as data:
+
+        >>> f = Failure("HTTP 502")
+        >>> f or []                     # the idiom that caused the defect
+        Traceback (most recent call last):
+        CallFailed: ...
+        >>> len(f)                      # ... and its neighbours
+        Traceback (most recent call last):
+        CallFailed: ...
+
+    To proceed anyway you must say so, in a form that greps:
+
+        >>> unwrap_or(f, [])
+        []
+    """
+
+    __slots__ = ("reason", "where")
+
+    def __init__(self, reason: str, where: str = ""):
+        self.reason = str(reason)
+        self.where = where
+
+    def _refuse(self, op: str):
+        raise CallFailed(
+            f"a failed call is being used as a value ({op}). "
+            f"reason={self.reason!r} where={self.where!r}. "
+            f"Handle the failure, or opt in explicitly with "
+            f"gyza.canon.unwrap_or(x, default).")
+
+    def __bool__(self):        self._refuse("truth test / `or` default")
+    def __iter__(self):        self._refuse("iteration")
+    def __len__(self):         self._refuse("len()")
+    def __getitem__(self, k):  self._refuse("indexing")
+    def __contains__(self, k): self._refuse("`in`")
+
+    def __repr__(self) -> str:
+        return f"Failure(reason={self.reason!r}, where={self.where!r})"
+
+
+def failed(x: Any) -> bool:
+    """True if `x` is a Failure. The only safe way to test one."""
+    return isinstance(x, Failure)
+
+
+def attempt(fn, *args, where: str = "", catching: type[BaseException] | tuple = Exception,
+            **kwargs):
+    """Run `fn`, returning its value or a `Failure` -- never a stand-in.
+
+    The point is that the caller cannot accidentally continue: the returned
+    Failure raises the moment it is used as data.
+    """
+    try:
+        return fn(*args, **kwargs)
+    except catching as e:                                     # noqa: BLE001
+        return Failure(f"{type(e).__name__}: {e}", where or getattr(fn, "__name__", ""))
+
+
+def unwrap_or(x: Any, default: Any) -> Any:
+    """Explicitly substitute `default` for a failure.
+
+    This is the ONLY sanctioned way to default past a failure. It exists so the
+    decision is greppable: `unwrap_or` at a call site is a recorded choice,
+    whereas `or []` was an invisible one.
+    """
+    return default if failed(x) else x

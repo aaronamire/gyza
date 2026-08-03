@@ -25,6 +25,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
 from gyza.canon import canonical_form, sequences_equal, values_equal
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -176,3 +178,102 @@ def test_values_equal_is_not_merely_double_equals():
 def test_sequences_equal_compares_elementwise_not_serialized():
     assert sequences_equal([{1: 2, 2: 3}], [{2: 3, 1: 2}])
     assert not sequences_equal([1, 2], [1, 2, 3])
+
+
+# --------------------------------------------------------------------------- #
+#  THE SECOND MECHANISM: a failure is not an empty value                       #
+# --------------------------------------------------------------------------- #
+#
+# Same underlying error as the repr rule above, other half: reading something
+# that is not a measurement as if it were one. `gh(...) or []` in the corpus
+# extractor turned a transport failure into "this PR has 0 commits" -- the
+# FOURTH recurrence of the species, one session after the rule was written down.
+#
+# Unlike the repr scanner, this one is AST-based rather than line-based, so it
+# does not share that scanner's BUILD-HERE/COMPARE-THERE blind spot for this
+# pattern: `call() or []` is a single expression and cannot be split across
+# files. It still cannot see the idiom inside embedded source strings.
+import ast
+
+# Calls that are TOTAL -- defined for every input, no failure mode. `d.get(k) or
+# []` is null-field normalisation, not failure absorption, and flagging it would
+# bury the real signal in 40 false positives (measured: 41 raw hits, 1 real).
+_TOTAL_CALLS = {"get", "getattr", "pop", "getenv"}
+
+# Sites where a fallible call may be defaulted, each with a reason.
+OR_EMPTY_EXEMPT: dict[str, str] = {}
+
+
+def _is_empty_literal(n) -> bool:
+    return ((isinstance(n, ast.List) and not n.elts)
+            or (isinstance(n, ast.Dict) and not n.keys)
+            or (isinstance(n, ast.Tuple) and not n.elts)
+            or (isinstance(n, ast.Constant) and n.value in (0, "", None, False)))
+
+
+def _is_fallible_call(n) -> bool:
+    if not isinstance(n, ast.Call):
+        return False
+    f = n.func
+    if isinstance(f, ast.Attribute) and f.attr in _TOTAL_CALLS:
+        return False
+    if isinstance(f, ast.Name) and f.id in _TOTAL_CALLS:
+        return False
+    return True
+
+
+def _or_empty_sites():
+    out = []
+    for root in SCAN:
+        for py in root.rglob("*.py"):
+            if "__pycache__" in py.parts:
+                continue
+            try:
+                tree = ast.parse(py.read_text())
+            except SyntaxError:
+                continue
+            rel = py.relative_to(ROOT).as_posix()
+            for n in ast.walk(tree):
+                if isinstance(n, ast.BoolOp) and isinstance(n.op, ast.Or):
+                    for i, v in enumerate(n.values[:-1]):
+                        if _is_fallible_call(v) and _is_empty_literal(n.values[i + 1]):
+                            out.append((rel, n.lineno, ast.unparse(n)[:90]))
+    return out
+
+
+def test_no_fallible_call_is_defaulted_to_an_empty_value():
+    """`call() or []` makes "it failed" indistinguishable from "it found
+    nothing", and those are opposite claims."""
+    bad = [s for s in _or_empty_sites() if s[0] not in OR_EMPTY_EXEMPT]
+    assert not bad, (
+        "a call that can fail is being defaulted to an empty value. Return "
+        "gyza.canon.Failure and handle it, or opt in with canon.unwrap_or(x, d):\n"
+        + "\n".join(f"  {f}:{i}  {src}" for f, i, src in bad))
+
+
+def test_failure_refuses_every_silent_absorption_path():
+    """The mechanism is that Failure is HOSTILE, not falsy. If any of these
+    stopped raising, `call() or []` would start lying again."""
+    from gyza.canon import CallFailed, Failure, failed, unwrap_or
+
+    f = Failure("HTTP 502", "gh")
+    for label, thunk in (("`or` default", lambda: f or []),
+                         ("len()", lambda: len(f)),
+                         ("iteration", lambda: list(f)),
+                         ("indexing", lambda: f[0]),
+                         ("`in`", lambda: 1 in f)):
+        with pytest.raises(CallFailed):
+            thunk()
+        assert label                      # names the path in the failure output
+
+    assert failed(f) and not failed([])
+    assert unwrap_or(f, ["d"]) == ["d"], "explicit opt-out must still work"
+    assert unwrap_or([1], ["d"]) == [1]
+
+
+def test_attempt_returns_a_failure_rather_than_a_stand_in():
+    from gyza.canon import attempt, failed
+
+    assert attempt(int, "42") == 42
+    bad = attempt(int, "x")
+    assert failed(bad) and "ValueError" in bad.reason

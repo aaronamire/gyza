@@ -206,7 +206,12 @@ def extract():
         n_repo = sum(1 for r in records if r["repo"] == repo)
         prs = []
         for pg in range(1, PAGES + 1):
-            d = gh(f"repos/{repo}/pulls?state=closed&per_page=100&page={pg}") or []
+            # No `or []` here. `gh` raises on failure, so the default would be
+            # dead code -- but it is the exact idiom that caused the defect this
+            # file already documents, and leaving it would re-arm the trap the
+            # moment gh's contract changes. Found by the AST scanner in
+            # tests/test_canonical_comparison.py on its first run.
+            d = gh(f"repos/{repo}/pulls?state=closed&per_page=100&page={pg}")
             prs += d
             if len(d) < 100:
                 break

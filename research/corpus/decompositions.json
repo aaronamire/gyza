@@ -170,6 +170,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -346,6 +354,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -513,6 +529,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -702,6 +726,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -962,6 +994,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -1212,6 +1252,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 42,
+    "n_substantive": 25,
+    "n_infrastructure": 17,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -1419,6 +1467,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -2845,6 +2901,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -3053,6 +3117,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -3229,6 +3301,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -3392,6 +3472,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -3581,6 +3669,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 70,
+    "n_substantive": 54,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -3744,6 +3840,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 41,
+    "n_substantive": 25,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -3907,6 +4011,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -4090,6 +4202,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -4292,6 +4412,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 40,
+    "n_substantive": 25,
+    "n_infrastructure": 15,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -4520,6 +4648,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -4711,6 +4847,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -4900,6 +5044,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -5066,6 +5218,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -5187,6 +5347,75 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "macOS x86-64 pylatest_conda_forge_mkl_no_openmp",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pylatest_conda_forge_mkl",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Windows x64 pymin_conda_forge_openblas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 ubuntu_atlas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux pymin_conda_forge_arm",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "macOS pylatest_conda_forge_arm",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pymin_conda_forge_openblas_min_dependencies",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pymin_conda_forge_openblas_ubuntu_2204",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux pylatest_pip_openblas_pandas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux i386 debian_32bit",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "ci/circleci: doc-min-dependencies",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    },
+    {
+     "name": "ci/circleci: doc",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -5311,6 +5540,35 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Linux pylatest_pip_openblas_pandas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pymin_conda_forge_openblas_ubuntu_2204",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "lint",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "ci/circleci: lint",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 32,
+    "n_substantive": 23,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -5474,6 +5732,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -5671,6 +5937,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -6608,6 +6882,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -6771,6 +7053,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 36,
+    "n_substantive": 25,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -6987,6 +7277,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -7168,6 +7466,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -7432,6 +7738,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 44,
+    "n_substantive": 27,
+    "n_infrastructure": 17,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -7600,6 +7914,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -7796,6 +8118,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -8049,6 +8379,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -8225,6 +8563,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -8577,6 +8923,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -8863,6 +9217,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -9058,6 +9420,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -9731,6 +10101,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Linux x86-64 pymin_conda_forge_openblas_min_dependencies",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pylatest_conda_forge_mkl",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 36,
+    "n_substantive": 25,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -9939,6 +10328,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -10264,6 +10661,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -10432,6 +10837,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -10585,6 +10998,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 41,
+    "n_substantive": 27,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -10822,6 +11243,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -11092,6 +11521,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 41,
+    "n_substantive": 25,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -11268,6 +11705,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -11431,6 +11876,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 36,
+    "n_substantive": 25,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -11705,6 +12158,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 36,
+    "n_substantive": 25,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -11868,6 +12329,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -12096,6 +12565,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -12290,6 +12767,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -12453,6 +12938,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -12629,6 +13122,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -12796,6 +13297,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -12972,6 +13481,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 44,
+    "n_substantive": 27,
+    "n_infrastructure": 17,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -13139,6 +13656,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -13315,6 +13840,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -13481,6 +14014,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -13709,6 +14250,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -13885,6 +14434,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -14102,6 +14659,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -14265,6 +14830,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -14455,6 +15028,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -14883,6 +15464,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -15022,6 +15611,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Lint",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "ci/circleci: lint",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 24,
+    "n_substantive": 15,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -15211,6 +15819,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -15429,6 +16045,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -15649,6 +16273,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -15812,6 +16444,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -15986,6 +16626,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 39,
+    "n_substantive": 25,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -16152,6 +16800,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -16361,6 +17017,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 44,
+    "n_substantive": 27,
+    "n_infrastructure": 17,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -16529,6 +17193,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -16801,6 +17473,75 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Build wheel for cp314t-macosx_arm64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314t-macosx_x86_64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314-macosx_x86_64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314-macosx_arm64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314t-manylinux_x86_64-manylinux_2_28",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314t-win_arm64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314t-manylinux_aarch64-manylinux_2_28",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314-manylinux_x86_64-manylinux_2_28",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314-manylinux_aarch64-manylinux_2_28",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314t-win_amd64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314-win_amd64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Build wheel for cp314-win_arm64-",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 67,
+    "n_substantive": 54,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -16967,6 +17708,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -17190,6 +17939,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -17635,6 +18392,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -17929,6 +18694,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -18176,6 +18949,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -18704,6 +19485,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -18896,6 +19685,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -19114,6 +19911,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 50,
+    "n_substantive": 29,
+    "n_infrastructure": 21,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -19308,6 +20113,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -19588,6 +20401,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -19939,6 +20760,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 67,
+    "n_substantive": 54,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -20282,6 +21111,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -20474,6 +21311,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -20670,6 +21515,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -21018,6 +21871,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -21266,6 +22127,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -21500,6 +22369,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -21718,6 +22595,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -22295,6 +23180,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -23119,6 +24012,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 53,
+    "n_infrastructure": 27,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -23252,6 +24153,35 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "numpy-reproducer (openblas)",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "numpy-reproducer (blis)",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "numpy-reproducer (newaccelerate)",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "ci/circleci: lint",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 8,
+    "n_substantive": 5,
+    "n_infrastructure": 3,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -23415,6 +24345,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -23595,6 +24533,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -23843,6 +24789,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -24032,6 +24986,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -24291,6 +25253,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -24597,6 +25567,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -25053,6 +26031,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Lint",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "ci/circleci: lint",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 25,
+    "n_substantive": 15,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -25390,6 +26387,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -25818,6 +26823,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -25981,6 +26994,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -26170,6 +27191,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -26333,6 +27362,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -26618,6 +27655,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -26839,6 +27884,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -27015,6 +28068,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -27191,6 +28252,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -27354,6 +28423,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -27535,6 +28612,65 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Linux pylatest_pip_openblas_pandas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pymin_conda_forge_openblas_ubuntu_2204",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Windows x64 pymin_conda_forge_openblas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "macOS x86-64 pylatest_conda_forge_mkl_no_openmp",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 ubuntu_atlas",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pymin_conda_forge_openblas_min_dependencies",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "macOS pylatest_conda_forge_arm",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux x86-64 pylatest_conda_forge_mkl",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux pymin_conda_forge_arm",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Linux i386 debian_32bit",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 41,
+    "n_substantive": 27,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -27674,6 +28810,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Lint",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "ci/circleci: lint",
+     "conclusion": "failure",
+     "channel": "legacy-status"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 27,
+    "n_substantive": 15,
+    "n_infrastructure": 12,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -27881,6 +29036,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -28185,6 +29348,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -28379,6 +29550,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -28591,6 +29770,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -28811,6 +29998,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -29007,6 +30202,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 43,
+    "n_substantive": 27,
+    "n_infrastructure": 16,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -29264,6 +30467,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -29507,6 +30718,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -29709,6 +30928,35 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "Test LangChain (main branch) on Python 3.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test LangChain (main branch) on Python 3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test LangChain (main branch) on Python 3.10",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test LangChain (main branch) on Python 3.12",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 101,
+    "n_substantive": 92,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -29911,6 +31159,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 38,
+    "n_substantive": 25,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -30076,6 +31332,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 69,
+    "n_infrastructure": 8,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -30241,6 +31505,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 78,
+    "n_substantive": 69,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -30591,6 +31863,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "NONE",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 2,
+    "n_substantive": 0,
+    "n_infrastructure": 2,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -30802,6 +32082,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 69,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -31007,6 +32295,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 69,
+    "n_infrastructure": 12,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -31196,6 +32492,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "core / Build PyEmscripten (3.14)",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 79,
+    "n_substantive": 69,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -31363,6 +32678,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 69,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -31552,6 +32875,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 78,
+    "n_substantive": 69,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -31750,6 +33081,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 83,
+    "n_substantive": 69,
+    "n_infrastructure": 14,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -31926,6 +33265,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 79,
+    "n_substantive": 69,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -32120,6 +33467,45 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.14",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.12",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.10",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 78,
+    "n_substantive": 69,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -32285,6 +33671,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 69,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -32476,6 +33870,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 100,
+    "n_substantive": 83,
+    "n_infrastructure": 17,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -32641,6 +34043,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -33151,6 +34561,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 69,
+    "n_infrastructure": 13,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -33329,6 +34747,45 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.12",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.14",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.10",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -33583,6 +35040,30 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test ubuntu-latest / pypy3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / 3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -33748,6 +35229,25 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "core / Test on macos",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -33941,6 +35441,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -34251,6 +35759,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test ubuntu-latest / pypy3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 79,
+    "n_substantive": 70,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -34448,6 +35975,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 78,
+    "n_substantive": 69,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -34615,6 +36150,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -34787,6 +36330,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 79,
+    "n_substantive": 68,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -35004,6 +36555,45 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.10",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.12",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.14",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -35187,6 +36777,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.11",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -35353,6 +36962,25 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Lint 3.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -35622,6 +37250,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 77,
+    "n_substantive": 68,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -35790,6 +37426,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 79,
+    "n_substantive": 68,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -36271,6 +37915,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 79,
+    "n_substantive": 68,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -36437,6 +38089,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 84,
+    "n_substantive": 73,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -36615,6 +38275,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 84,
+    "n_substantive": 73,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -36826,6 +38494,25 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test ubuntu-latest / pypy3.11.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 73,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -37024,6 +38711,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 73,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -37190,6 +38885,75 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "FAIL",
+   "outcome_substantive_evidence": [
+    {
+     "name": "check",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test macos-latest / pypy3.11.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / 3.10",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / 3.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / 3.9",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / 3.14t",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test macos-latest / 3.14t",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / 3.14",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test windows-latest / pypy3.11.13",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test macos-latest / 3.14",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test macos-15-intel / 3.14t",
+     "conclusion": "failure",
+     "channel": "check-run"
+    },
+    {
+     "name": "Test ubuntu-latest / 3.14",
+     "conclusion": "failure",
+     "channel": "check-run"
+    }
+   ],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 73,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -37374,6 +39138,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 72,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -37537,6 +39309,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 83,
+    "n_substantive": 72,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -37816,6 +39596,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -37981,6 +39769,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -38147,6 +39943,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -38312,6 +40116,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -38478,6 +40290,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -38685,6 +40505,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -38877,6 +40705,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 83,
+    "n_substantive": 72,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -39059,6 +40895,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -39235,6 +41079,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -39400,6 +41252,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 72,
+    "n_infrastructure": 8,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -39573,6 +41433,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 72,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -40269,6 +42137,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "NONE",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 1,
+    "n_substantive": 0,
+    "n_infrastructure": 1,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -40434,6 +42310,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 72,
+    "n_infrastructure": 8,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -40613,6 +42497,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -40776,6 +42668,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 72,
+    "n_infrastructure": 8,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -40989,6 +42889,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 72,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -41167,6 +43075,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 81,
+    "n_substantive": 72,
+    "n_infrastructure": 9,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -41332,6 +43248,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 80,
+    "n_substantive": 72,
+    "n_infrastructure": 8,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -41497,6 +43421,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 67,
+    "n_substantive": 60,
+    "n_infrastructure": 7,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -41699,6 +43631,14 @@
    "leakage_risk": {
     "flag": false,
     "why": "n_subtasks>=4; dominated by review-cycle residue that did not exist when the goal was written and cannot be predicted from it"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 67,
+    "n_substantive": 60,
+    "n_infrastructure": 7,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -41862,6 +43802,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 82,
+    "n_substantive": 72,
+    "n_infrastructure": 10,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -42029,6 +43977,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 83,
+    "n_substantive": 72,
+    "n_infrastructure": 11,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   },
   {
@@ -42195,6 +44151,14 @@
    "leakage_risk": {
     "flag": true,
     "why": "n_subtasks<=3 follows the project's code->test->changelog convention closely enough that a convention-aware reader could reproduce the split from goal+context alone (leakage_handcheck.json: all flagged cases were minimum-length)"
+   },
+   "outcome_substantive": "PASS",
+   "outcome_substantive_evidence": [],
+   "checks_partition": {
+    "n_total": 67,
+    "n_substantive": 60,
+    "n_infrastructure": 7,
+    "rule": "research/corpus/check_taxonomy.py (ordered, first match wins, 0 UNCLASSIFIED)"
    }
   }
  ],
