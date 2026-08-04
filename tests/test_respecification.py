@@ -264,3 +264,111 @@ def test_both_new_verifiers_execute_through_the_registry():
     c = SendClaim(artifact_hash=wire_digest(payload), policy_id="P",
                   destination="d", timestamp_ns=1, n_bytes=len(payload))
     assert verifiers.get("external_send_content").fn(c, payload) is True
+
+
+# --------------------------------------------------------------------------- #
+#  THE FIX — and the verifier is its regression test                           #
+# --------------------------------------------------------------------------- #
+#
+# The chain this demonstrates, end to end:
+#   respecify the claim -> the verifier catches a REAL bug -> fix the bug ->
+#   the verifier becomes the regression guard.
+#
+# The PRE-FIX behaviour is kept as an explicit fixture below. A regression test
+# that cannot reproduce the original failure is not a regression test.
+
+def _prefix_lance_scoring(ranked_rows, query_vec):
+    """The PRE-FIX D2 scoring, preserved verbatim: dot against the STORED
+    vector. `gyza/memory.py:323` before the fix."""
+    return [(ep, float(np.dot(query_vec, ep.task_embedding)))
+            for ep in ranked_rows]
+
+
+def _lance_store(items, tmp):
+    from gyza.memory import Episode, EpisodicMemory
+
+    mem = EpisodicMemory(agent_id="b" * 16, db_path=tmp)
+    if mem._backend_name != "lancedb":
+        pytest.skip("lance backend unavailable in this environment")
+    mem._backend.add([
+        Episode(episode_id=eid, agent_id="b" * 16,
+                task_embedding=np.asarray(v, dtype=np.float32),
+                intent_text=eid, input_hashes=[], output_hash="h",
+                action_types=[], success=ok, duration_ms=1,
+                model_identifier="m", icp_envelope_hash="e", timestamp_ns=1)
+        for eid, v, ok in items])
+    return mem
+
+
+def test_D1_FIXED_lance_and_sqlite_agree_on_the_divergence_case():
+    """A3: proven against the REAL backend (lancedb), not a stub."""
+    import tempfile
+
+    pytest.importorskip("lancedb")
+    q = _vec(7)
+    k = 5
+    items = _corpus(n_fail=30, n_succ=10, query=q)     # the case that broke it
+
+    with tempfile.TemporaryDirectory() as tmp:
+        mem = _lance_store(items, tmp)
+        lance = [ep.episode_id
+                 for ep, _ in mem._backend.search(q, k=k, success_only=True)][:k]
+
+    truth = _correct_claim(items, q, k, -1.0).returned_ids
+    assert len(lance) == k, (
+        f"pre-fix this returned 0 of {k} qualifying results; got {len(lance)}")
+    assert values_equal(tuple(lance), truth), (lance, truth)
+
+
+def test_D1_the_prefix_behaviour_is_STILL_rejected_regression_fixture():
+    """The original failure must remain reproducible, or this proves nothing."""
+    q = _vec(7)
+    items = _corpus(n_fail=30, n_succ=10, query=q)
+    # pre-fix: rank everything, THEN drop failures, window = max(4k,16) = 20
+    scored = sorted(
+        ((eid, float(np.dot(q / np.linalg.norm(q), v / np.linalg.norm(v))), ok)
+         for eid, v, ok in items), key=lambda p: (-p[1], p[0]))
+    window = scored[:20]
+    prefix_result = tuple(e for e, _s, ok in window if ok)[:5]
+    assert prefix_result == (), "the pre-fix window must contain no successes"
+
+    claim = RetrievalClaim(
+        corpus_snapshot=corpus_snapshot_digest(items),
+        metric=METRIC_COSINE_UNIT, k=5, threshold=-1.0,
+        filter_predicate=FILTER_SUCCESS_ONLY, returned_ids=prefix_result)
+    assert verify_retrieval_claim(claim, items, q) is False, (
+        "the verifier must still reject the pre-fix behaviour")
+
+
+def test_D2_FIXED_ranking_follows_the_declared_metric_not_magnitude():
+    """The claim declares metric = cosine_unit; that definition is the arbiter."""
+    import tempfile
+
+    from gyza.memory import _normalize
+
+    pytest.importorskip("lancedb")
+    q = _vec(11)
+    near = (q * 0.05).astype(np.float32)
+    other = _vec(12)
+    far = ((0.3 * q + 0.7 * other) * 6.0).astype(np.float32)
+    items = [("near", near, True), ("far", far, True)]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        mem = _lance_store(items, tmp)
+        got = [ep.episode_id
+               for ep, _ in mem._backend.search(q, k=2, success_only=True)]
+
+    by_cosine = tuple(sorted(
+        (e for e, _v, _o in items),
+        key=lambda e: -float(np.dot(_normalize(q),
+                                    _normalize(dict((i, v) for i, v, _ in items)[e])))))
+    assert values_equal(tuple(got), by_cosine), (got, by_cosine)
+    assert got[0] == "near", "magnitude must not outrank direction"
+
+    prefix = _prefix_lance_scoring(
+        [type("E", (), {"episode_id": e, "task_embedding": v})()
+         for e, v, _ in items], q)
+    prefix_order = tuple(e.episode_id for e, _ in
+                         sorted(prefix, key=lambda t: -t[1]))
+    assert prefix_order != tuple(got), (
+        "the pre-fix scoring must still differ, or the fixture is inert")

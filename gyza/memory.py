@@ -305,24 +305,58 @@ class _LanceBackend:
         rows = [self._episode_to_row(e) for e in episodes]
         self._table.add(rows)
 
-    def search(self, query_vec: np.ndarray, k: int) -> list[tuple[Episode, float]]:
+    def search(self, query_vec: np.ndarray, k: int,
+               *, success_only: bool = False) -> list[tuple[Episode, float]]:
+        """Top candidates by COSINE over L2-NORMALIZED vectors.
+
+        Two divergences from the SQLite path were fixed here; both were found by
+        the respecification verifier (`gyza/verification/respec.py`), which is
+        now their regression test.
+
+        D1 -- FILTER BEFORE RANK, not after. The previous version over-fetched
+        ``max(4k, 16)`` candidates and let `retrieve_similar` drop the
+        unsuccessful ones AFTERWARD. If the nearest 20 episodes were all
+        failures, this returned NOTHING while qualifying successes existed --
+        silently, and differently from the SQLite path, which scans everything.
+        The filter is now pushed into the query as a LanceDB PREFILTER, so the
+        over-fetch window contains only rows that can survive it.
+
+        Alternatives considered and rejected (see
+        research/respecification/FINDINGS.md §A1): an ADAPTIVE over-fetch that
+        widens until k qualify degenerates to a full scan over an
+        all-unsuccessful corpus and pays several round trips to get there; an
+        EXHAUSTIVE scan is sound but abandons the index, trading a silent wrong
+        answer for a silent performance cliff, which is a different bug rather
+        than a fix.
+
+        D2 -- SCORE BY THE DECLARED METRIC. The previous version computed
+        ``dot(query, stored_vector)`` against the UN-normalized stored vector,
+        so magnitude decided the ranking rather than direction: cosine 1.0 at
+        norm 0.05 lost to a lower cosine at norm 6.0. `RetrievalClaim` declares
+        ``metric = "cosine_unit"``, defined as the dot product of L2-normalized
+        vectors, so THE METRIC DEFINITION IS THE ARBITER -- not either
+        implementation.
+
+        What is NOT claimed: exactness. This is an approximate-nearest-neighbour
+        index and remains one. What is fixed is the SYSTEMATIC under-retrieval,
+        where a qualifying result could never be returned regardless of recall.
+        """
         if self._table is None:
             return []
-        # LanceDB returns _distance for L2 by default; we feed normalized
-        # vectors so cosine = 1 - L2/2. Either way we re-rank below by
-        # exact cosine to keep the API explicit.
-        df = (
-            self._table
-            .search(query_vec.astype(np.float32).tolist())
-            .limit(max(k * 4, 16))  # over-fetch, then cosine-rerank
-            .to_list()
-        )
+        q = _normalize(np.asarray(query_vec, dtype=np.float32))
+        query = self._table.search(q.tolist())
+        if success_only:
+            # D1: prefilter, so the window holds only qualifying rows.
+            query = query.where("success = true", prefilter=True)
+        df = query.limit(max(k * 4, 16)).to_list()
         results: list[tuple[Episode, float]] = []
         for r in df:
             ep = self._row_to_episode(r)
-            cos = float(np.dot(query_vec, ep.task_embedding))
+            cos = float(np.dot(q, _normalize(ep.task_embedding)))   # D2
             results.append((ep, cos))
-        results.sort(key=lambda t: t[1], reverse=True)
+        # deterministic tie-break by id, matching the verifier's ordering so a
+        # tie cannot make a correct implementation look divergent.
+        results.sort(key=lambda t: (-t[1], t[0].episode_id))
         return results
 
     def count(self) -> int:
@@ -426,13 +460,14 @@ class EpisodicMemory:
             return []
 
         if isinstance(self._backend, _LanceBackend):
-            ranked = self._backend.search(q_vec, k=k)
+            # D1: the filter must reach the QUERY, not just this loop.
+            ranked = self._backend.search(q_vec, k=k, success_only=success_only)
         else:
             ranked = []
             for ep in self._backend.all_for_agent():
                 v = _normalize(ep.task_embedding)
                 ranked.append((ep, float(np.dot(q_vec, v))))
-            ranked.sort(key=lambda t: t[1], reverse=True)
+            ranked.sort(key=lambda t: (-t[1], t[0].episode_id))
 
         results: list[Episode] = []
         for ep, sim in ranked:
