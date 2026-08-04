@@ -359,6 +359,14 @@ class _LanceBackend:
         results.sort(key=lambda t: (-t[1], t[0].episode_id))
         return results
 
+    def all_for_agent(self) -> list[Episode]:
+        """Full candidate set. Needed ONLY to content-address the corpus
+        snapshot for a RetrievalClaim -- it is an O(corpus) scan and is never
+        on the retrieval hot path."""
+        if self._table is None:
+            return []
+        return [self._row_to_episode(r) for r in self._table.to_arrow().to_pylist()]
+
     def count(self) -> int:
         if self._table is None:
             return 0
@@ -397,6 +405,9 @@ class EpisodicMemory:
 
         self._buffer: list[Episode] = []
         self._buffer_lock = threading.Lock()
+        # Set only when retrieve_similar(emit_claim=True) is used; None means
+        # NO CLAIM WAS PRODUCED, never "the claim was empty".
+        self.last_retrieval_claim = None
 
         # Try LanceDB first; fall back to SQLite if anything in the
         # initialization path raises (missing wheel, schema mismatch,
@@ -439,7 +450,22 @@ class EpisodicMemory:
         k: int = 5,
         min_similarity: float = 0.75,
         success_only: bool = True,
+        emit_claim: bool = False,
     ) -> list[Episode]:
+        """Retrieve similar past episodes.
+
+        `emit_claim` -- when True, also build the `RetrievalClaim` describing
+        exactly what was returned and stash it on `last_retrieval_claim`.
+
+        WHY IT IS OPT-IN AND OFF BY DEFAULT. Content-addressing the corpus
+        snapshot requires enumerating every candidate, which is O(corpus) -- the
+        same full scan this module just refused as a fix for D1, where trading a
+        silent wrong answer for a silent performance cliff was rejected as "a
+        different bug, not a fix". Making the claim mandatory would reintroduce
+        that cliff on the retrieval hot path. So verification is O(corpus) and
+        retrieval stays O(log corpus): an auditor pays the cost deliberately,
+        every query does not.
+        """
         # Always flush so a just-written episode is searchable.
         self.flush()
 
@@ -478,7 +504,33 @@ class EpisodicMemory:
             results.append(ep)
             if len(results) >= k:
                 break
+
+        if emit_claim:
+            self.last_retrieval_claim = self._build_retrieval_claim(
+                results, k, min_similarity, success_only)
         return results
+
+    def _build_retrieval_claim(self, results, k, min_similarity, success_only):
+        """Emit the claim carrying the parameters that used to be implicit.
+
+        Every parameter is named: metric, k, threshold, filter and a
+        content-addressed corpus snapshot. `RetrievalClaim` rejects an
+        incomplete claim at construction, so a producer cannot default one.
+        """
+        from gyza.verification.respec import (
+            FILTER_NONE, FILTER_SUCCESS_ONLY, METRIC_COSINE_UNIT,
+            RetrievalClaim, corpus_snapshot_digest,
+        )
+        corpus = [(e.episode_id, e.task_embedding, bool(e.success))
+                  for e in self._backend.all_for_agent()]
+        return RetrievalClaim(
+            corpus_snapshot=corpus_snapshot_digest(corpus),
+            metric=METRIC_COSINE_UNIT,
+            k=k,
+            threshold=float(min_similarity),
+            filter_predicate=FILTER_SUCCESS_ONLY if success_only else FILTER_NONE,
+            returned_ids=tuple(e.episode_id for e in results),
+        )
 
     def format_as_few_shot(self, episodes: list[Episode]) -> str:
         # Newest-first composition. We then truncate from the *end* (oldest

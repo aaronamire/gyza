@@ -235,3 +235,178 @@ they follow from compounding, not from evidence.
    verification commit.
 4. **The retrieval trade depends on M being a decent proxy in this deployment**
    (A4), which is a judgement, not a measurement.
+
+---
+
+# Part 2 (2026-08-04) — the fix, the survey, and the wiring
+
+## A1 — which behaviour is correct, and why
+
+**D2 — settled by the claim, not by either implementation.** `RetrievalClaim`
+declares `metric = "cosine_unit"`, defined in `gyza/verification/respec.py:54`
+as *the dot product of L2-normalized vectors*. So **the metric definition is the
+arbiter**. SQLite was computing that; Lance was computing
+`dot(query, stored_vector)`, which is `‖stored‖ · cos` — a different quantity in
+which magnitude outranks direction. Lance now normalizes both sides.
+
+This is the payoff of respecification beyond bug-catching: **before the claim
+named its metric, "which backend is right?" had no answer inside the system.**
+Now it does.
+
+**D1 — three alternatives, and making the backends agree is not the same as
+making them right.**
+
+| option | verdict |
+|---|---|
+| (i) **filter before rank** — push the predicate into the query as a LanceDB prefilter | **CHOSEN** |
+| (ii) adaptive over-fetch, widening until *k* qualify | rejected |
+| (iii) exhaustive scan | rejected |
+
+(ii) degenerates to a full scan over an all-unsuccessful corpus **and pays
+several round trips to get there** — strictly worse than one scan in the worst
+case, and its cost depends on data the caller cannot see.
+(iii) is sound and abandons the ANN index. **That trades a silent wrong answer
+for a silent performance cliff, which is a different bug rather than a fix** —
+so it is not shipped.
+
+(i) keeps the index and removes the *systematic* under-retrieval: the over-fetch
+window now contains only rows that can survive the filter, so a qualifying
+result can no longer be structurally unreachable. Verified available in
+lancedb 0.30.2 (`where(..., prefilter=True)`) before being relied on.
+
+**What is NOT claimed: exactness.** This is an approximate-nearest-neighbour
+index and remains one. Recall is still approximate; what is fixed is the case
+where a qualifying result could *never* be returned regardless of recall.
+
+A deterministic id tie-break was added on **both** paths, matching the
+verifier's ordering, so a score tie cannot make a correct implementation look
+divergent.
+
+## A2/A3 — the fix, proven on the real backend
+
+| test | what it pins |
+|---|---|
+| `test_D1_FIXED_lance_and_sqlite_agree_on_the_divergence_case` | lancedb 0.30.2, 384-dim, the same 30-failure/10-success corpus: Lance returns **all 5** qualifying results and agrees with SQLite exactly. Pre-fix it returned **0**. |
+| `test_D2_FIXED_ranking_follows_the_declared_metric_not_magnitude` | `near` (cos ≈ 1.0, norm 0.05) now outranks `far` (lower cos, norm 6.0) |
+| `test_D1_the_prefix_behaviour_is_STILL_rejected_regression_fixture` | the original failure remains reproducible and still rejected |
+
+**A regression test that cannot reproduce the original failure is not a
+regression test**, so both pre-fix behaviours are kept as explicit fixtures and
+asserted to still fail.
+
+## A4 — sibling survey (REPORT ONLY; nothing here was changed)
+
+Both bugs are one family: *a claim's parameters were implicit, so two
+implementations of the same operation silently diverged.* Searching `gyza/` for
+that shape:
+
+| # | sibling pair | agree on a nontrivial input? |
+|---|---|---|
+| S1 | `uuid.uuid7` (native) vs `gyza/_compat.py:30 _uuid7_fallback` | **YES, tested** — both give version 7, variant 2, 36 chars; the fallback is monotone in its ms field across 5 draws |
+| S2 | `gyza/memory.py:_embed` vs `gyza/embeddings.default_embedder()` | **NOT A PAIR ANY MORE** — `_embed` routes through `default_embedder()` (`memory.py:80-81`). See the correction below. |
+| S3 | `wallet.net_balance` (`wallet.py:274`) vs `ReservationBook.available` (`subcontract.py:184`) | **NOT DUPLICATION** — `available()` *calls* `net_balance()`. This is the architectural principle holding: the gate reads the same fold rather than a second one. |
+| S4 | Python ↔ Rust (`gyza-rs`, 7 crates) | **COULD NOT TEST HERE.** Genuine dual implementation and the largest such surface. It has a fixture-based parity discipline (`gyza-rs/scripts/regenerate_*_fixtures.py`, 4 generators). Exercising it means running the Rust suite, which the standing rule forbids running beside the Python suite, and a survey that turns into a test campaign stops being a survey. **`gyza-rs/` is also untracked on this branch.** |
+| S5 | Python JSON-canonical cosigs vs Go deterministic-protobuf cosigs | **DELIBERATELY DIFFERENT BYTES**, documented as such. Not a divergence bug; making them agree is explicitly forbidden. |
+
+> **A documentation correction, found by the survey.** CLAIMED trip-wire:
+> *"`gyza.memory._embed` loads SentenceTransformer independently of
+> `gyza.embeddings.default_embedder()`, so `GYZA_EMBEDDER=stub` leaks."*
+> **That is STALE** — `_embed` now routes through `default_embedder()`
+> (`memory.py:80-81`) and source inspection confirms it. The trip-wire describes
+> a divergence that no longer exists.
+
+**No sibling was fixed in the fix commit**, per the instruction.
+
+## B — the wiring
+
+**B1 — `retrieve_similar` emits a `RetrievalClaim`** carrying metric, k,
+threshold, filter and the content-addressed corpus snapshot. It is built through
+`RetrievalClaim`, which rejects an incomplete claim at construction, so **a
+producer cannot default one into existence**.
+
+> **Claim emission is OPT-IN (`emit_claim=False`) and that is a considered
+> decision, not laziness.** Content-addressing the snapshot requires enumerating
+> every candidate — the same O(corpus) full scan rejected in A1 as a fix for D1.
+> Making the claim mandatory would reintroduce on the hot path exactly the
+> performance cliff refused three sections earlier. **Verification is O(corpus);
+> retrieval stays O(log corpus).** An auditor pays deliberately; every query
+> does not.
+>
+> The honest cost: a claim is only available where someone asked for one. A
+> retrieval with no claim is `last_retrieval_claim is None` — **no claim
+> produced, never "the claim was empty"**.
+
+`_LanceBackend.all_for_agent` was added for this and is documented as never
+being on the retrieval path.
+
+**B2 — the four send paths emit a `SendClaim`** over the bytes handed to the
+transport: `send_message:461`, `broadcast:493`, `publish_agent:316`,
+`publish_delta:928`, `publish_attestation:1122` (five, counting `broadcast`,
+which the prompt did not list but which emits bytes the same way).
+
+**A scope difference between them, stated rather than smoothed over:**
+
+- `send_message` / `broadcast`: `emitted` **IS** the wire payload — the same
+  `bytes` object passed to the stub.
+- the three protobuf paths: `emitted` is **this process's serialization of the
+  message the transport will itself serialize**. That is the closest faithful
+  capture available without a transport interceptor, and it is **not** a claim
+  about gRPC's own output bytes.
+
+`test_POWER_a_wired_sender_reporting_INTENT_is_caught` pins the one way this
+wiring could be silently useless: a claim built from `intended` fails against
+`actually_emitted`.
+
+**B3 — no default policy is authored.** All five paths currently record
+`policy_id = "no-policy-declared"`; **none has a caller-supplied policy today.**
+The absence is *recorded in the claim* rather than passing vacuously, and a test
+asserts no policy predicate is defined in `netd_client`. A policy this module
+wrote for the sends this module makes is the oracle-embedding species (R14).
+
+**B4 — the registry-execution test now uses a real produced claim.**
+`_send_case` calls `_emit_send_claim`, the same function the send paths call;
+`test_retrieve_similar_emits_a_claim_the_REGISTERED_VERIFIER_ACCEPTS` runs the
+**registered** verifier over a producer-emitted claim and the real corpus, then
+asserts a tampered ordering over the same corpus is rejected.
+
+## C — what is MEASURED now, and what was DEFINITIONAL then
+
+**C1. Registry, recomputed from code** (not restated from the prior session):
+
+| PROOF | TEST | SPEC | NONE | n | p(composable) |
+|---|---|---|---|---|---|
+| 12 | 1 | 3 | 2 | 18 | **0.8333** |
+
+**C2. The separation.**
+
+**DEFINITIONAL (prior session, and still definitional — not re-reported as a
+result):**
+- the −0.1078 per-step log decay matching DR's projection. DR computed that
+  projection *from the same registry composition this change edits*; landing on
+  it verifies arithmetic, not the world.
+- the 50.0% depth-1 silent-wrong reduction, which follows by construction from
+  halving the semantic fraction.
+
+**MEASURED (and this is what the two sessions actually bought):**
+- the verifiers reject **three real divergences** in shipped code (D1, D2, D3),
+  none synthetic;
+- **D1 and D2 are now fixed**, proven against the real LanceDB backend, with the
+  pre-fix behaviour retained and still rejected;
+- **producers now emit claims the registered verifiers accept on correct
+  behaviour and reject on divergence** — production and verification are
+  connected, where before the verifiers existed and nothing produced what they
+  check.
+
+**C3.** The decay projection is **not** re-reported as a result of this work. It
+was arithmetic then and it is arithmetic now. What is new is that the machinery
+exists end to end.
+
+## Still not done
+
+- **Only `memory` and `netd_client` are wired.** No other producer emits either
+  claim type.
+- **No caller supplies a policy** for any send path (B3), so
+  `verify_send_claim`'s policy argument is exercised only in tests.
+- **The protobuf paths' digest is over our serialization**, not the transport's
+  (B2). Closing that needs a gRPC interceptor.
+- **S4 (Python ↔ Rust) is unexamined** by this survey.

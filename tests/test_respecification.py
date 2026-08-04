@@ -372,3 +372,112 @@ def test_D2_FIXED_ranking_follows_the_declared_metric_not_magnitude():
                          sorted(prefix, key=lambda t: -t[1]))
     assert prefix_order != tuple(got), (
         "the pre-fix scoring must still differ, or the fixture is inert")
+
+
+# --------------------------------------------------------------------------- #
+#  PART B — the PRODUCERS are wired, and what they emit is what gets verified  #
+# --------------------------------------------------------------------------- #
+def test_retrieve_similar_emits_a_claim_the_REGISTERED_VERIFIER_ACCEPTS():
+    """END TO END, and the loop is CLOSED: a real producer emits the claim, the
+    real corpus is the snapshot, and the REGISTERED verifier checks it.
+
+    Before this session the verifiers existed and nothing produced what they
+    check -- reachable but never exercised, which is artifact #16's shape.
+    """
+    import tempfile
+
+    from gyza.memory import _embed, _normalize
+    from gyza.verification.adapters import build_registries
+    from gyza.verification.respec import METRIC_COSINE_UNIT
+
+    pytest.importorskip("lancedb")
+    q = _vec(21)
+    items = _corpus(n_fail=12, n_succ=6, query=q)
+    task_text = "a task to retrieve against"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        mem = _lance_store(items, tmp)
+        assert mem.last_retrieval_claim is None, (
+            "no claim produced must be None, never an empty claim")
+        got = mem.retrieve_similar(task_text, k=4, min_similarity=-1.0,
+                                   success_only=True, emit_claim=True)
+        claim = mem.last_retrieval_claim
+        corpus = [(e.episode_id, e.task_embedding, bool(e.success))
+                  for e in mem._backend.all_for_agent()]
+        # the SAME query vector the producer ranked with -- _embed is
+        # deterministic for a given embedder, so this is reproduction, not a
+        # re-implementation of the producer's logic.
+        q_used = _normalize(_embed([task_text])[0])
+
+    assert claim is not None
+    assert claim.metric == METRIC_COSINE_UNIT
+    assert claim.k == 4 and claim.filter_predicate == "success_only"
+    assert len(claim.corpus_snapshot) == 64
+    assert claim.returned_ids == tuple(e.episode_id for e in got)
+
+    verifiers, _ = build_registries()
+    fn = verifiers.get("memory_retrieval_relevance").fn
+    assert fn(claim, corpus, q_used) is True, (
+        "the registered verifier must ACCEPT a correctly produced claim")
+
+    # ... and still reject a tampered one over the same corpus
+    tampered = RetrievalClaim(
+        corpus_snapshot=claim.corpus_snapshot, metric=claim.metric,
+        k=claim.k, threshold=claim.threshold,
+        filter_predicate=claim.filter_predicate,
+        returned_ids=tuple(reversed(claim.returned_ids)))
+    if len(claim.returned_ids) > 1:
+        assert fn(tampered, corpus, q_used) is False
+
+
+def test_a_producer_cannot_emit_a_claim_missing_a_parameter():
+    """The producer builds through RetrievalClaim, which rejects at
+    construction -- so an incomplete claim cannot be defaulted into existence."""
+    from gyza.verification.respec import METRIC_COSINE_UNIT
+
+    with pytest.raises(IncompleteClaim):
+        RetrievalClaim(corpus_snapshot="", metric=METRIC_COSINE_UNIT, k=3,
+                       threshold=0.5, filter_predicate=FILTER_SUCCESS_ONLY,
+                       returned_ids=())
+
+
+def test_send_paths_emit_a_claim_whose_hash_is_over_the_EMITTED_bytes():
+    from gyza.network.netd_client import NO_POLICY_DECLARED, _emit_send_claim
+
+    emitted = b"the exact bytes handed to the transport"
+    claim = _emit_send_claim(emitted, destination="peer-9")
+    assert verify_send_claim(claim, emitted) is True
+    assert claim.n_bytes == len(emitted)
+    assert claim.policy_id == NO_POLICY_DECLARED
+
+
+def test_POWER_a_wired_sender_reporting_INTENT_is_caught():
+    """B2's binding check. If the producer hashed what it MEANT to send, the
+    wiring would be silently useless -- S5 B3's circularity at the send
+    boundary. The claim is built from the same object passed to the stub."""
+    from gyza.network.netd_client import _emit_send_claim
+
+    intended = b"payload-v2"
+    actually_emitted = b"payload-v1"          # stale buffer: a real bug shape
+    claim_from_intent = _emit_send_claim(intended, destination="peer-9")
+    assert verify_send_claim(claim_from_intent, actually_emitted) is False, (
+        "a claim built from sender intent must not verify against the wire")
+    claim_from_wire = _emit_send_claim(actually_emitted, destination="peer-9")
+    assert verify_send_claim(claim_from_wire, actually_emitted) is True
+
+
+def test_no_default_policy_is_authored_and_the_absence_is_RECORDED():
+    """B3: a policy this module wrote for the sends it checks is the
+    oracle-embedding species. Absence must be recorded, not passed vacuously."""
+    import inspect
+
+    from gyza.network import netd_client
+    from gyza.network.netd_client import NO_POLICY_DECLARED, _emit_send_claim
+
+    src = inspect.getsource(netd_client._emit_send_claim)
+    assert "policy=" not in src and "def _policy" not in src, (
+        "no policy predicate may be authored here")
+    claim = _emit_send_claim(b"x", destination="d")
+    assert claim.policy_id == NO_POLICY_DECLARED
+    # and the recorded absence is distinguishable from a satisfied policy
+    assert claim.policy_id != "" and claim.policy_id != "ok"

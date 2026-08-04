@@ -108,7 +108,47 @@ def _resolve_daemon_binary(binary_path: str | None) -> str:
 # the boundary clean.
 # ---------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------- #
+#  SendClaim emission (S5 B3's circularity, at the send boundary)              #
+# --------------------------------------------------------------------------- #
+NO_POLICY_DECLARED = "no-policy-declared"
+"""Recorded in the claim when no caller supplied a policy.
+
+THE POLICY PREDICATE STAYS CALLER-SUPPLIED. A default policy authored in this
+module, checking the sends this module makes, is the oracle-embedding species
+(R14): it would pass by construction and certify nothing. So a send with no
+declared policy RECORDS that fact in the claim rather than passing vacuously,
+and a reader can tell the two apart.
+"""
+
+
+def _emit_send_claim(emitted: bytes, destination: str,
+                     policy_id: str = NO_POLICY_DECLARED):
+    """Build a SendClaim over THE BYTES HANDED TO THE TRANSPORT.
+
+    The hash must not come from what the sender INTENDED to send -- that is
+    self-report at a finer grain, which is exactly what S5 B3 records for binary
+    hashes. `emitted` is therefore the same object passed to the stub.
+
+    SCOPE, stated because it differs per path: for `send_message` and
+    `broadcast`, `emitted` IS the wire payload. For the protobuf paths it is
+    THIS process's serialization of the message the transport will itself
+    serialize -- the closest faithful capture available without a transport
+    interceptor, and not a claim about gRPC's own bytes.
+    """
+    from gyza.verification.respec import SendClaim, wire_digest
+
+    return SendClaim(
+        artifact_hash=wire_digest(emitted),
+        policy_id=policy_id,
+        destination=destination,
+        timestamp_ns=time.time_ns(),
+        n_bytes=len(emitted),
+    )
+
+
 @dataclass
+
 class NodeInfo:
     peer_id: str
     compositor_pubkey: str
@@ -325,7 +365,10 @@ class NetdClient:
         advertisement still lands in the daemon's local cache.
         """
         stub = netd_pb2_grpc.DiscoveryServiceStub(self._ensure_channel())
-        result = stub.PublishAgent(ad.to_proto())
+        msg = ad.to_proto()
+        self.last_send_claim = _emit_send_claim(
+            msg.SerializeToString(), destination="dht:/gyza/agents")
+        result = stub.PublishAgent(msg)
         if not result.success:
             raise RuntimeError(f"PublishAgent failed: {result.error}")
         return result.dht_key
@@ -480,10 +523,12 @@ class NetdClient:
                 f"payload must be bytes, got {type(payload).__name__}"
             )
         stub = netd_pb2_grpc.MessageServiceStub(self._ensure_channel())
+        emitted = bytes(payload)                     # the bytes that LEAVE
+        self.last_send_claim = _emit_send_claim(emitted, destination=peer_id)
         result = stub.Send(netd_pb2.SendRequest(
             peer_id=peer_id,
             message_type=message_type,
-            payload=bytes(payload),
+            payload=emitted,
         ))
         if not result.success:
             LOG.warning("[netd_client] send_message %s -> %s failed: %s",
@@ -503,9 +548,11 @@ class NetdClient:
                 f"payload must be bytes, got {type(payload).__name__}"
             )
         stub = netd_pb2_grpc.MessageServiceStub(self._ensure_channel())
+        emitted = bytes(payload)                     # the bytes that LEAVE
+        self.last_send_claim = _emit_send_claim(emitted, destination="broadcast")
         result = stub.Broadcast(netd_pb2.BroadcastRequest(
             message_type=message_type,
-            payload=bytes(payload),
+            payload=emitted,
             exclude_peer_ids=list(exclude_peer_ids or []),
         ))
         return result.delivered_count
@@ -931,7 +978,10 @@ class GossipClient:
         signature. Returns the assigned sender_seq.
         """
         stub = netd_pb2_grpc.GossipServiceStub(self._ensure())
-        result = stub.PublishDelta(netd_pb2.PublishDeltaRequest(delta=delta.to_proto()))
+        msg = netd_pb2.PublishDeltaRequest(delta=delta.to_proto())
+        self.last_send_claim = _emit_send_claim(
+            msg.SerializeToString(), destination="gossip:deltas")
+        result = stub.PublishDelta(msg)
         if not result.success:
             raise RuntimeError(f"PublishDelta failed: {result.error}")
         return result.sender_seq
@@ -1123,6 +1173,8 @@ class CapabilityClient:
         """Publish a netd_pb2.AttestationCert. Returns the DHT key on
         success. Raises RuntimeError on rejection."""
         stub = netd_pb2_grpc.CapabilityServiceStub(self._ensure())
+        self.last_send_claim = _emit_send_claim(
+            cert_proto.SerializeToString(), destination="dht:/gyza/attestations")
         result = stub.PublishAttestation(cert_proto)
         if not result.success:
             raise RuntimeError(f"PublishAttestation failed: {result.error}")

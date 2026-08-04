@@ -180,12 +180,16 @@ def _retrieval_case():
 
 
 def _send_case():
-    from gyza.verification.respec import SendClaim, wire_digest
+    """B4: exercised against a REAL PRODUCED claim, not a hand-built fixture.
+
+    `_emit_send_claim` is the same function the four netd send paths call, so
+    this proves production and verification are connected rather than merely
+    both present.
+    """
+    from gyza.network.netd_client import _emit_send_claim
 
     payload = b"registry-exercised-bytes"
-    return (SendClaim(artifact_hash=wire_digest(payload), policy_id="P",
-                      destination="peer", timestamp_ns=1,
-                      n_bytes=len(payload)), payload)
+    return (_emit_send_claim(payload, destination="peer"), payload)
 
 
 def test_every_registered_verifier_executes_against_a_real_input(idn):
