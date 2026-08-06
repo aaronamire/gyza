@@ -1,0 +1,122 @@
+{
+ "gyza_registered": {
+  "DECLARATIVE": {
+   "INTERNAL": 10,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "COMMISSIVE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "DIRECTIVE": {
+   "INTERNAL": 1,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "ASSERTIVE": {
+   "INTERNAL": 5,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 2,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "UNSURE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  }
+ },
+ "gyza_named": {
+  "DECLARATIVE": {
+   "INTERNAL": 8,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 2,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "COMMISSIVE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "DIRECTIVE": {
+   "INTERNAL": 1,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "ASSERTIVE": {
+   "INTERNAL": 2,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 5,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "UNSURE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  }
+ },
+ "external": {
+  "DECLARATIVE": {
+   "INTERNAL": 2,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 1,
+   "UNSURE": 0
+  },
+  "COMMISSIVE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 13,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "DIRECTIVE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "ASSERTIVE": {
+   "INTERNAL": 207,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 3,
+   "CONTESTED": 0,
+   "UNSURE": 0
+  },
+  "UNSURE": {
+   "INTERNAL": 0,
+   "UNDERDETERMINED": 0,
+   "EXOGENOUS": 0,
+   "CONTESTED": 0,
+   "UNSURE": 14
+  }
+ },
+ "f_gyza_registered": 0.2857142857142857,
+ "f_gyza_named": 0.7142857142857143,
+ "f_external": 0.014285714285714285,
+ "unsure_external": 14,
+ "n_external": 240,
+ "basis_counts": {
+  "inspection": 8,
+  "judgement": 10
+ }
+}
