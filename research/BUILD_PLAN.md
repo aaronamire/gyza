@@ -317,6 +317,17 @@ That last item has been outstanding longer than any other and gates the value of
 
 CANONICALIZE BEFORE COMPARING. An equality test between two REPRESENTATIONS of a value is a claim about the representation, not the value (artifacts #7 and #15 — a recurrence). Where an error of this species is suspected, check the SIGN of the residual: repr equality can only be stricter than value equality, so a one-directional error confirms the mechanism.
 
+AN UNENFORCED INVARIANT IS AN ASSUMPTION. Same species as the above, one step
+earlier: a property stated in a comment, docstring or design note that no code
+checks. gyza-icp documented an "ASCII-only invariant" -- no envelope field holds
+non-ASCII, so the Python and Rust encoders agree, and "if a future field needs
+non-ASCII, this needs explicit reconciliation." EVERY CLAUSE WAS TRUE AND IT WAS
+STILL THE WRONG CALL: nothing restricted any field to ASCII, and
+`gyza bundle <intent_id>` (cli.py:2493) takes free-form text, so the "future
+field" was reachable from the command line the whole time -- under every
+cross-language signature. Write the check, or write down that there is no check.
+A documented invariant with no mechanism is a promise the code has not made.
+
 REGISTERING A CHECKER IS NOT EVIDENCE THAT IT RUNS. A registry makes a
 component reachable, not exercised; a suite that builds its own fixtures never
 touches the registered ones. 785 passing tests did not detect a harm quantity
