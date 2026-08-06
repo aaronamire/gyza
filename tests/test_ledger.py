@@ -424,3 +424,90 @@ def test_credit_rates_table_keys():
 # unused — we want it in the public surface for the runner integration.
 _ = verify_payer_signature
 _ = time
+
+
+# ---------------------------------------------------------------------------
+# The guard SHAPE: a positive predicate over the protected quantity.
+#
+# `create_entry` used `if amount < 0: raise`. NaN compares False against every
+# ordering operator, so `nan < 0` is False and NaN was ACCEPTED -- as was
+# +inf. A guard written as the negation of an ordering test cannot exclude a
+# value that is unordered. These tests pin the property, not the phrasing.
+# ---------------------------------------------------------------------------
+
+_UNSIGNABLE = [
+    pytest.param(float("nan"), id="nan"),
+    pytest.param(float("inf"), id="inf"),
+    pytest.param(float("-inf"), id="neg_inf"),
+    pytest.param(-1.0, id="negative"),
+]
+
+
+def _entry_with_amount(amount) -> LedgerEntry:
+    return LedgerEntry(
+        entry_id="e", from_compositor="a" * 64, to_compositor="b" * 64,
+        amount_credits=amount, work_item_id="w", icp_envelope_hash="c" * 64,
+        model_identifier="m", tokens_out=1, duration_ms=1, created_at_ns=1,
+    )
+
+
+@pytest.mark.parametrize("amount", _UNSIGNABLE)
+def test_unsignable_amount_never_reaches_a_signature(amount):
+    """The chokepoint is canonical_sign_bytes, not create_entry.
+
+    LedgerEntry.from_dict builds PEER-RELAYED entries straight from the
+    network (settlement.py), bypassing create_entry entirely. Guarding only
+    construction would guard the path rather than the quantity.
+    """
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        canonical_sign_bytes(_entry_with_amount(amount), "earner")
+
+
+@pytest.mark.parametrize("amount", _UNSIGNABLE)
+def test_create_entry_rejects_unsignable_amounts(amount, tmp_path):
+    me = _make_compositor(tmp_path, "me")
+    them = _make_compositor(tmp_path, "them")
+    ml = _make_ledger(tmp_path, me, "me")
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        ml.create_entry(
+            from_compositor=them.pubkey_hex, to_compositor=me.pubkey_hex,
+            amount=amount, work_item_id="w", icp_envelope_hash="0" * 64,
+            model_identifier="m", tokens_out=0, duration_ms=0,
+        )
+
+
+def test_nan_specifically_evades_an_ordering_guard():
+    """The NEGATIVE CONTROL for the guard's shape.
+
+    Demonstrates that the OLD predicate could not have rejected these, so the
+    new test is not passing for an unrelated reason. If someone rewrites the
+    guard as `if amount < 0` again, the assertions below still hold and the
+    two tests above start failing -- which is the point.
+    """
+    assert not (float("nan") < 0), "nan evades an ordering guard"
+    assert not (float("inf") < 0), "inf evades an ordering guard"
+    assert float("-inf") < 0, "-inf is caught by an ordering guard"
+    assert -1.0 < 0, "-1.0 is caught by an ordering guard"
+
+
+def test_zero_is_signable_the_guard_is_not_over_tight():
+    """Counter-metric: a guard that refused everything would pass the tests
+    above and be useless. 0.0 is a legitimate amount and must still sign."""
+    assert canonical_sign_bytes(_entry_with_amount(0.0), "earner")
+    assert canonical_sign_bytes(_entry_with_amount(1e-9), "earner")
+
+
+def test_verification_REJECTS_a_hostile_amount_rather_than_raising(tmp_path):
+    """A peer-relayed entry carrying NaN is adversarial input, not a bug.
+
+    A network-facing verifier that raises on a hostile field is a
+    denial-of-service. verify_* must return False with a reason.
+    """
+    e = _entry_with_amount(float("nan"))
+    # Well-formed lengths (64-byte sig, 32-byte pubkey) so the amount guard is
+    # what rejects, not a length check firing first.
+    e.to_signature = "ab" * 64
+    e.from_signature = "cd" * 64
+    ok, reason = verify_earner_signature(e)
+    assert ok is False
+    assert "unsignable" in reason
