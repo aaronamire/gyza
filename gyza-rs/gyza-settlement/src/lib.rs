@@ -532,6 +532,82 @@ mod tests {
         assert_eq!(amount_canonical(0.000001), b"0.000001".to_vec());
     }
 
+    /// NUMERIC EDGE FIXTURES -- Python's REAL digests, from
+    /// regenerate_settlement_fixtures.py.
+    ///
+    /// `amount_canonical_six_decimals` above checks four trivial values
+    /// against HAND-WRITTEN strings and its own comment admits it dodged the
+    /// hard case ("let's just check a known-clean case below"). Trivial
+    /// agreement cannot distinguish two float formatters. These can:
+    /// negative zero, the smallest denormal, f64::MAX, both half-even
+    /// boundaries, and a value that only exists as a floating-point artifact.
+    #[test]
+    fn numeric_edge_digests_match_python() {
+        let cases: &[(&str, f64, &str)] = &[
+            (
+                "neg_zero",
+                -0.0_f64,
+                "5a6660aa0ba78307bfe4eb39f95c20afd68c8dd9156756c27f1e36f5f429050e",
+            ),
+            (
+                "denormal_min",
+                5e-324_f64,
+                "17574cfead2b17a849ed4b77d632b90f435dd313513a309f0958e3c79a038162",
+            ),
+            (
+                "f64_max",
+                1.7976931348623157e308_f64,
+                "d98ef824a7dfc66551d564beb937ee99a2a3da1b491baf6909fa21d5b102daed",
+            ),
+            (
+                "half_even_lo",
+                0.1234565_f64,
+                "a3aa6e0616c0053aec8101d789c4eeba583414b877039b08c277366aa2f99029",
+            ),
+            (
+                "half_even_hi",
+                0.1234575_f64,
+                "e7f72e28b17272e99cf3e10bb00ee1b77902df11c5eb9b1185e34113f36aa614",
+            ),
+            (
+                "fp_artifact",
+                0.30000000000000004_f64,
+                "690eb10e204fd86067ca322350090ebb99e62b55dab93587094da429bb5b3f30",
+            ),
+            (
+                "large_1e17",
+                1e17_f64,
+                "586ef9e61c70c070e2c01777578bca6bc069ce9722cc05715dc059c0714e122e",
+            ),
+        ];
+        for (name, amount, expected) in cases {
+            let mut e = fixture_entry();
+            e.entry_id = "entry-0001".into();
+            e.from_compositor = "a".repeat(64);
+            e.to_compositor = "b".repeat(64);
+            e.work_item_id = "work-0001".into();
+            e.icp_envelope_hash = "envhash-0001".into();
+            e.amount_credits = *amount;
+            let got = hex::encode(canonical_sign_bytes(&e, ROLE_EARNER).expect(name));
+            assert_eq!(&got, expected, "digest mismatch for {name}");
+        }
+    }
+
+    /// Non-finite amounts have NO digest on either side: both refuse. This is
+    /// the fixture for a value that used to be SIGNABLE in Python and would
+    /// have produced a different digest here ("nan" vs "NaN").
+    #[test]
+    fn non_finite_amounts_have_no_digest_on_either_side() {
+        for bad in [f64::NAN, f64::INFINITY] {
+            let mut e = fixture_entry();
+            e.amount_credits = bad;
+            assert!(
+                canonical_sign_bytes(&e, ROLE_EARNER).is_err(),
+                "{bad} must have no digest"
+            );
+        }
+    }
+
     #[test]
     fn canonical_sign_bytes_role_distinct() {
         let e = fixture_entry();

@@ -82,3 +82,57 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+def numeric_edge_fixtures() -> None:
+    """Numeric edge cases for the digest, matching Rust's `fixture_entry()`.
+
+    Only entry_id, amount, work_item_id, icp_envelope_hash and role enter
+    the digest, so the compositor pubkeys are irrelevant here.
+
+    The pre-existing `amount_canonical_six_decimals` test checked four
+    trivial values (0.5, 0.0, 1.234567, 0.000001) against HAND-WRITTEN
+    strings, and its own comment admits it dodged the hard case. These are
+    values that could actually separate two float formatters.
+    """
+    def entry(amount: float) -> LedgerEntry:
+        return LedgerEntry(
+            entry_id="entry-0001",
+            from_compositor="a" * 64,
+            to_compositor="b" * 64,
+            amount_credits=amount,
+            work_item_id="work-0001",
+            icp_envelope_hash="envhash-0001",
+            model_identifier="mock-eval",
+            tokens_out=100,
+            duration_ms=500,
+            created_at_ns=1_700_000_000_000_000_000,
+        )
+
+    cases = [
+        ("neg_zero", -0.0),
+        ("denormal_min", 5e-324),
+        ("f64_max", 1.7976931348623157e308),
+        ("half_even_lo", 0.1234565),
+        ("half_even_hi", 0.1234575),
+        ("fp_artifact", 0.1 + 0.2),
+        ("large_1e17", 1e17),
+    ]
+    print()
+    print("# ---- NUMERIC EDGE FIXTURES (commit 3) ----")
+    print("# paste into gyza-settlement/src/lib.rs::tests")
+    for name, v in cases:
+        d = canonical_sign_bytes(entry(v), "earner").hex()
+        lit = repr(v).replace("e+", "e").replace("inf", "f64::INFINITY")
+        print(f'            ("{name}", {lit}_f64, "{d}"),')
+    print()
+    print("# NON-FINITE values are REFUSED on both sides and have no digest:")
+    for name, v in [("nan", float("nan")), ("inf", float("inf"))]:
+        try:
+            canonical_sign_bytes(entry(v), "earner")
+            print(f"#   {name}: UNEXPECTEDLY SIGNED -- guard regression")
+        except ValueError as e:
+            print(f"#   {name}: refused ({e})")
+
+
+if __name__ == "__main__":
+    numeric_edge_fixtures()
