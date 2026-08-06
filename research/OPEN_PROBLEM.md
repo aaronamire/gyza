@@ -485,6 +485,65 @@ way is untested.
 
 ---
 
+### 4.6 Re-adding claim emission — what would justify it
+
+**State: emission REMOVED, verifiers KEPT.** The five netd send paths used to
+build a `SendClaim` on every send and store it on `last_send_claim`. Measured
+2026-08-06: that attribute was **read at zero sites anywhere in the
+repository, including tests**. The honest triple was
+**0.8333 composable / 1.0000 emitted / 0.0000 consumed**.
+
+**Why the producer went rather than a consumer arriving.** The obvious move is
+to wire `gyza verify`. It is not available, and the reason is structural:
+`last_send_claim` is a mutable attribute on a live client object and appears
+nowhere in `icp.py`, `runner.py`, `blackboard.py`, `audit.py` or
+`evidence.py`. **A verifier reading it would verify this process's memory, not
+the record** — S5 B3's self-reporting circularity one layer up, where a
+producer attests to itself. Two further defects made it worse than unread: it
+was never initialised, so a consumer reading it before the first send got an
+`AttributeError` where it expected a value (*an error is not a value*); and it
+was a single slot overwritten per send, so only the last of N sends survived
+even in-process.
+
+Cost removed: a BLAKE3 over the wire payload on every send — **3.56 µs at
+256 B rising to 320 µs at 1 MB** — plus a full extra `SerializeToString()` on
+the three protobuf paths.
+
+> **This did NOT improve verification coverage. Coverage was zero and is still
+> zero.** What changed is that the system no longer pays for zero. Reporting
+> the removal as progress on verification would be the wrong claim.
+
+**What would justify re-adding it — all three, not any one:**
+
+1. **The claim must be persisted into the signed chain**, not hung off a live
+   object. A claim a verifier can only obtain from the producer's memory is
+   the producer's self-report. This changes what gets signed and is a real
+   design change, not a wiring change.
+2. **A consumer that fails on a real divergence**, not a synthetic mutant. The
+   acceptance test already exists and is kept:
+   `test_POWER_a_sender_reporting_INTENT_is_caught` — a stale-buffer sender
+   hashing what it *meant* to send. A consumer that cannot fail this is
+   decoration.
+3. **A caller-supplied policy.** Every path recorded
+   `policy_id = "no-policy-declared"` and no caller ever supplied one, so the
+   policy predicate was exercised only in tests. A policy authored in the
+   module whose sends it checks is the oracle-embedding species (R14).
+
+**The retrieval claim was NOT removed**, and the asymmetry is deliberate.
+`retrieve_similar(emit_claim=False)` is opt-in, so it costs nothing unless
+asked for; `last_retrieval_claim` **is** correctly initialised to `None` with
+the semantics recorded (`None` means no claim was produced, never "the claim
+was empty"); and it has a consumer in the test suite. It is dormant machinery
+behind an explicit opt-in, not an unconditional write into a void. The
+argument that removed the send producer does not apply to it.
+
+**The verifiers are kept in both cases.** `verify_send_claim` and
+`verify_retrieval_claim` are proven against three real divergences (D1, D2,
+D3) in shipped code and cost nothing while dormant. Deleting a proven checker
+because its producer left would throw away the expensive half.
+
+---
+
 ## §5 — The traps
 
 Each entry below would have produced a specific false headline.

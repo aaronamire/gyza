@@ -182,9 +182,13 @@ def _retrieval_case():
 def _send_case():
     """B4: exercised against a REAL PRODUCED claim, not a hand-built fixture.
 
-    `_emit_send_claim` is the same function the four netd send paths call, so
-    this proves production and verification are connected rather than merely
-    both present.
+    `_emit_send_claim` is the claim CONSTRUCTOR. It USED TO BE the function
+    the netd send paths called, and this docstring used to say that proved
+    production and verification were connected. THAT IS NO LONGER TRUE:
+    emission was removed because nothing consumed it (OPEN_PROBLEM 4.6), so
+    no production path builds a SendClaim today. What this still proves is
+    that the REGISTERED verifier executes against a constructed claim --
+    artifact #16's check -- not that anything in production produces one.
     """
     from gyza.network.netd_client import _emit_send_claim
 

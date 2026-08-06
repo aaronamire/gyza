@@ -441,7 +441,13 @@ def test_a_producer_cannot_emit_a_claim_missing_a_parameter():
                        returned_ids=())
 
 
-def test_send_paths_emit_a_claim_whose_hash_is_over_the_EMITTED_bytes():
+def test_send_claim_hash_is_over_the_EMITTED_bytes():
+    """NOTE (consumption-gap commit): the send paths NO LONGER CALL this.
+    Emission was removed because nothing consumed it -- see
+    research/OPEN_PROBLEM.md 4.6. `_emit_send_claim` is retained as the claim
+    CONSTRUCTOR, and this exercises the constructor, not a production path.
+    Do not restore the old name: it asserted a wiring that does not exist.
+    """
     from gyza.network.netd_client import NO_POLICY_DECLARED, _emit_send_claim
 
     emitted = b"the exact bytes handed to the transport"
@@ -451,10 +457,14 @@ def test_send_paths_emit_a_claim_whose_hash_is_over_the_EMITTED_bytes():
     assert claim.policy_id == NO_POLICY_DECLARED
 
 
-def test_POWER_a_wired_sender_reporting_INTENT_is_caught():
-    """B2's binding check. If the producer hashed what it MEANT to send, the
-    wiring would be silently useless -- S5 B3's circularity at the send
-    boundary. The claim is built from the same object passed to the stub."""
+def test_POWER_a_sender_reporting_INTENT_is_caught():
+    """D3's power case, and the reason the VERIFIER is kept after emission was
+    removed. If a producer hashed what it MEANT to send, the check would be
+    silently useless -- S5 B3's circularity at the send boundary.
+
+    This is the acceptance test any future consumer must still pass. It is a
+    real bug shape (a stale buffer), not a synthetic mutant.
+    """
     from gyza.network.netd_client import _emit_send_claim
 
     intended = b"payload-v2"

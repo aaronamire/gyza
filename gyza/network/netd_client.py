@@ -109,7 +109,31 @@ def _resolve_daemon_binary(binary_path: str | None) -> str:
 # ---------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------- #
-#  SendClaim emission (S5 B3's circularity, at the send boundary)              #
+#  SendClaim CONSTRUCTOR -- retained; emission REMOVED                         #
+# --------------------------------------------------------------------------- #
+#
+# The five send paths used to call `_emit_send_claim` unconditionally and
+# store the result on `self.last_send_claim`. That attribute was READ AT ZERO
+# SITES anywhere in the repository, including tests, so every send paid a
+# BLAKE3 over the wire payload -- 3.56us at 256B rising to 320us at 1MB, plus
+# a full EXTRA `SerializeToString()` on the three protobuf paths -- for a
+# value nothing could observe.
+#
+# WIRING A CONSUMER WAS NOT AVAILABLE, which is why the producer went instead.
+# `last_send_claim` is a mutable attribute on the client object; it appears
+# nowhere in icp.py, runner.py, blackboard.py, audit.py or evidence.py. A
+# verifier reading it would verify THIS PROCESS'S MEMORY, not the record --
+# S5 B3's self-reporting circularity one layer up. It was also never
+# initialised (reading it before the first send raised AttributeError, so a
+# consumer got an ERROR where it expected a VALUE), and it was a single slot
+# overwritten on every send, so only the last of N sends survived even
+# in-process.
+#
+# The claim TYPE and its VERIFIER are kept: `verify_send_claim` is proven
+# against a real divergence (D3, the stale-buffer sender-intent case) and
+# costs nothing while dormant. What would justify re-adding emission is
+# recorded in research/OPEN_PROBLEM.md 4.6 -- in short, the claim must be
+# persisted into the signed chain, not hung off a live object.
 # --------------------------------------------------------------------------- #
 NO_POLICY_DECLARED = "no-policy-declared"
 """Recorded in the claim when no caller supplied a policy.
@@ -366,8 +390,6 @@ class NetdClient:
         """
         stub = netd_pb2_grpc.DiscoveryServiceStub(self._ensure_channel())
         msg = ad.to_proto()
-        self.last_send_claim = _emit_send_claim(
-            msg.SerializeToString(), destination="dht:/gyza/agents")
         result = stub.PublishAgent(msg)
         if not result.success:
             raise RuntimeError(f"PublishAgent failed: {result.error}")
@@ -524,7 +546,6 @@ class NetdClient:
             )
         stub = netd_pb2_grpc.MessageServiceStub(self._ensure_channel())
         emitted = bytes(payload)                     # the bytes that LEAVE
-        self.last_send_claim = _emit_send_claim(emitted, destination=peer_id)
         result = stub.Send(netd_pb2.SendRequest(
             peer_id=peer_id,
             message_type=message_type,
@@ -549,7 +570,6 @@ class NetdClient:
             )
         stub = netd_pb2_grpc.MessageServiceStub(self._ensure_channel())
         emitted = bytes(payload)                     # the bytes that LEAVE
-        self.last_send_claim = _emit_send_claim(emitted, destination="broadcast")
         result = stub.Broadcast(netd_pb2.BroadcastRequest(
             message_type=message_type,
             payload=emitted,
@@ -979,8 +999,6 @@ class GossipClient:
         """
         stub = netd_pb2_grpc.GossipServiceStub(self._ensure())
         msg = netd_pb2.PublishDeltaRequest(delta=delta.to_proto())
-        self.last_send_claim = _emit_send_claim(
-            msg.SerializeToString(), destination="gossip:deltas")
         result = stub.PublishDelta(msg)
         if not result.success:
             raise RuntimeError(f"PublishDelta failed: {result.error}")
@@ -1173,8 +1191,6 @@ class CapabilityClient:
         """Publish a netd_pb2.AttestationCert. Returns the DHT key on
         success. Raises RuntimeError on rejection."""
         stub = netd_pb2_grpc.CapabilityServiceStub(self._ensure())
-        self.last_send_claim = _emit_send_claim(
-            cert_proto.SerializeToString(), destination="dht:/gyza/attestations")
         result = stub.PublishAttestation(cert_proto)
         if not result.success:
             raise RuntimeError(f"PublishAttestation failed: {result.error}")
