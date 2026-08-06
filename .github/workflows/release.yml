@@ -146,6 +146,33 @@ jobs:
           minisign -Sm "$tarball" -s /tmp/minisign.key
           rm -f /tmp/minisign.key
           ls -la "$tarball.minisig"
+      # FAIL CLOSED on the signature. Without this the job was fail-OPEN:
+      # when MINISIGN_SECRET_KEY is unset the sign step is skipped, the
+      # .minisig glob below matches nothing (upload-artifact only WARNS on
+      # an unmatched path), and `publish` ships an UNSIGNED release while
+      # reporting success. `fail_on_unmatched_files` does not catch it —
+      # that flag fires only if `release/*` itself matches nothing, and the
+      # tarballs are always there.
+      #
+      # An unsigned release from a provenance project is worse than no
+      # release: install.sh would fall back to checksum-only, which
+      # authenticates the bytes against the same host that served them.
+      # So refuse, loudly, and say exactly what is missing.
+      - name: refuse to ship unsigned (fail closed)
+        run: |
+          tarball="gyza-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}.tar.gz"
+          if [[ ! -f "$tarball.minisig" ]]; then
+            echo "::error title=Refusing to publish unsigned::No minisign signature for $tarball."
+            echo "MINISIGN_SECRET_KEY is not configured in this repository's secrets."
+            echo "Required to cut a signed release (all three are user-owned):"
+            echo "  1. minisign -G                      # generate the keypair"
+            echo "  2. gh secret set MINISIGN_SECRET_KEY < minisign.key"
+            echo "  3. commit the PUBLIC key into scripts/install.sh"
+            echo "     (GYZA_MINISIGN_PUBKEY) and packaging/gyza-release.pub"
+            exit 1
+          fi
+          echo "signature present: $tarball.minisig"
+
       - uses: actions/upload-artifact@v4
         with:
           name: gyza-onedir-${{ matrix.arch }}
