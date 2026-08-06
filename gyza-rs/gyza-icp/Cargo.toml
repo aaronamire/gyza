@@ -8,6 +8,7 @@ license.workspace = true
 
 [dependencies]
 gyza-crypto = { path = "../gyza-crypto" }
+gyza-canonjson = { path = "../gyza-canonjson" }
 serde.workspace = true
 serde_json.workspace = true
 hex.workspace = true

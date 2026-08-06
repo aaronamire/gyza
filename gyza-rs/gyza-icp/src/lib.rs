@@ -10,7 +10,7 @@
 //! Canonical-JSON discipline:
 //!
 //!   - Python: `json.dumps(d, sort_keys=True, separators=(",", ":"))`
-//!   - Rust  : `serde_json::to_string(payload)` with the struct's
+//!   - Rust  : `gyza_canonjson::to_vec(payload)` with the struct's
 //!     field order matching alphabetized key order.
 //!
 //! That second clause is **load-bearing**. The [`EnvelopePayload`]
@@ -18,6 +18,17 @@
 //! `sort_keys=True` would produce. Reordering the struct fields breaks
 //! the canonical bytes and silently invalidates every signature
 //! produced by the Python implementation.
+//!
+//! **Field order was only HALF the requirement, and the other half was
+//! wrong until 2026-08-06.** This used bare `serde_json`, which emits raw
+//! UTF-8, while Python's `json.dumps` defaults to `ensure_ascii=True` and
+//! escapes. Any envelope with one non-ASCII byte in any string field
+//! therefore hashed differently on the two sides, so a Python signature did
+//! not verify in Rust and vice versa — and the failure reads as tampering,
+//! not as an encoding bug. All four parity fixtures used ASCII-only
+//! payloads, so they agreed trivially and could never surface it
+//! (`research/respecification/FINDINGS_SURVEY.md`). Encoding now goes
+//! through [`gyza_canonjson`], which has one implementation of the rule.
 //!
 //! ASCII-only invariant: in practice no ICPEnvelope field contains
 //! non-ASCII characters (all are UUIDs, hex strings, or identifiers
@@ -113,8 +124,12 @@ pub struct SignedEnvelope {
 /// BLAKE3-hashed and signed.
 ///
 /// Python equivalent: `gyza.icp::_payload_bytes(envelope)`.
+///
+/// Encoding goes through [`gyza_canonjson`] rather than bare `serde_json`
+/// so non-ASCII is escaped exactly as Python's `ensure_ascii=True` does.
+/// Using `serde_json::to_vec` here is the divergence and must not return.
 pub fn canonical_bytes(payload: &EnvelopePayload) -> Result<Vec<u8>, IcpError> {
-    Ok(serde_json::to_vec(payload)?)
+    Ok(gyza_canonjson::to_vec(payload)?)
 }
 
 /// BLAKE3-hex of an envelope's canonical bytes — the envelope's

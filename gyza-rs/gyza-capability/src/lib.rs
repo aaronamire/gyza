@@ -41,7 +41,7 @@
 //! Canonical-JSON discipline (mirrors `gyza-icp`):
 //!
 //!   - Python: `json.dumps(d, sort_keys=True, separators=(",", ":"))`
-//!   - Rust  : `serde_json::to_string(payload)` with the struct's
+//!   - Rust  : `gyza_canonjson::to_vec(payload)` with the struct's
 //!     field order matching alphabetized key order.
 //!
 //! That second clause is **load-bearing**. Every payload struct here
@@ -166,7 +166,7 @@ pub struct Challenge {
 ///
 /// Python equivalent: `gyza.network.capability_protocol::_challenge_canonical_bytes`.
 pub fn challenge_canonical_bytes(payload: &ChallengePayload) -> Result<Vec<u8>, CapabilityError> {
-    Ok(serde_json::to_vec(payload)?)
+    Ok(gyza_canonjson::to_vec(payload)?)
 }
 
 // ---------------------------------------------------------------------------
@@ -194,7 +194,7 @@ pub struct AttestationCertPayload {
 pub fn attestation_payload_canonical_bytes(
     payload: &AttestationCertPayload,
 ) -> Result<Vec<u8>, CapabilityError> {
-    Ok(serde_json::to_vec(payload)?)
+    Ok(gyza_canonjson::to_vec(payload)?)
 }
 
 // ---------------------------------------------------------------------------
@@ -260,7 +260,7 @@ pub struct ChallengeResponse {
 pub fn response_canonical_bytes(
     payload: &ChallengeResponsePayload,
 ) -> Result<Vec<u8>, CapabilityError> {
-    Ok(serde_json::to_vec(payload)?)
+    Ok(gyza_canonjson::to_vec(payload)?)
 }
 
 // ---------------------------------------------------------------------------
