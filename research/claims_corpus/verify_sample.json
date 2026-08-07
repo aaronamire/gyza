@@ -1,0 +1,397 @@
+[
+ {
+  "claim_id": "pandas#66522-1",
+  "text": "Two separate off-by-a-dimension mistakes combine to cause it: 1.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66522,
+  "url": "https://github.com/pandas-dev/pandas/issues/66522",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Window",
+   "numba"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34472-1",
+  "text": "And after fitting, estimators_ is never empty either.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34472,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34472",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34086-0",
+  "text": "In line 530, sklearn/svm/src/libsvm/svm.cpp, it is said \"An SMO algorithm in Fan et al., JMLR 6(2005), p. 1889--1918\", but this paper does not appear in the page of the main author URL I noticed that the pages, publishing year and issues are just the same to another work: Fan RE, Chen PH, Lin CJ.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34086,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34086",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "pandas#66542-1",
+  "text": "CODE and CODE both validate this keyword at the entry point and raise a clear CODE .",
+  "repo": "pandas-dev/pandas",
+  "issue": 66542,
+  "url": "https://github.com/pandas-dev/pandas/issues/66542",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65892-1",
+  "text": "These are then considered empty/notset, consistent with many other class/method argument defaults.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65892,
+  "url": "https://github.com/pandas-dev/pandas/issues/65892",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Strings",
+   "replace"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33870-0",
+  "text": "When calling array API utilities such as CODE CODE , etc. on DPNP GPU arrays, it returns incorrect namespaces and devices.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33870,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33870",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34511-1",
+  "text": "As far as I can tell it first appeared in 2015 and was never explicitly discussed \u2014 the surrounding conversations are all about the apply method.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34511,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34511",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Sprint"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34672-1",
+  "text": "These have no effect on the results and should be omitted, since they effectively aren't components, just padding, but scikit-learn doesn't discard them.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34672,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34672",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33744-2",
+  "text": "CODE is one of the most commonly used functions in scikit-learn.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33744,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33744",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34270-1",
+  "text": "There are several estimators that transform CODE internally (e.g.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34270,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34270",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Needs Decision",
+   "Metadata Routing"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34563-0",
+  "text": "asv_runner has a fun hack now: Unfortunately this detects the CODE function in CODE as not needing parameters, which breaks benchmarks.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34563,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34563",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33760-0",
+  "text": "CODE with CODE raises a CODE when target labels are strings.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33760,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33760",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34616-2",
+  "text": "A solution is available at URL",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34616,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34616",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66359-1",
+  "text": "Why is CODE unshashable? 2.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66359,
+  "url": "https://github.com/pandas-dev/pandas/issues/66359",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34319-2",
+  "text": "I just checked 2 pages and found 2 broken links. 1. link: URL - found in CODE - Sponsors where added here: URL 2. link: URL found in CODE (This one not as critical) ----- For history purposes: URL PRs URL URL I'll open a PR to fix the two links above but this is what I found so far: <img width=\"1559\" height=\"877\" alt=\"Image\" src=\" URL />",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34319,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34319",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "pandas#66266-0",
+  "text": "Ref: URL The value passed to CODE on the last line here is CODE , which is currently being treated the same way a list would in r = test_frame.resample(\"h\")[[\"A\", \"B\"]] This should instead be treated as accessing a MultiIndex with levels CODE and CODE (which does not exist here, raising a KeyError instead).",
+  "repo": "pandas-dev/pandas",
+  "issue": 66266,
+  "url": "https://github.com/pandas-dev/pandas/issues/66266",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Resample",
+   "Deprecate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34140-2",
+  "text": "Callbacks should leave public attributes in estimator objects after calls to CODE , maybe under a common attribute CODE where there would be a list with the used callbacks.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34140,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34140",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Decision",
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34596-2",
+  "text": "Further, since lots of other Python libraries offer scikit-learn-compatible objects, it would be quite useful to have official documentation from scikit-learn about what needs or doesn't need to be thread-safe in order to develop scikit-learn-compatible classes.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34596,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34596",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Investigation",
+   "free-threading"
+  ]
+ },
+ {
+  "claim_id": "pandas#66009-0",
+  "text": "In this example, we have 2 Series with the same indexes.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66009,
+  "url": "https://github.com/pandas-dev/pandas/issues/66009",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Indexing",
+   "Closing Candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33822-0",
+  "text": "The logic for array API was recently modified to allow 'y' inputs of a potentially different type than 'X', particularly when it comes to classifiers where 'y' might be strings.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33822,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33822",
+  "issue_state": "open",
+  "issue_state_reason": "reopened",
+  "issue_labels": [
+   "Documentation",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33870-1",
+  "text": "Note that these objects have all the necessary info specified by the array API standard: <img width=\"637\" height=\"474\" alt=\"Image\" src=\" URL />",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33870,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33870",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66377-0",
+  "text": "In the 1st and the 2nd cases the \"intersection\" goes to the _index_ names. 2.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66377,
+  "url": "https://github.com/pandas-dev/pandas/issues/66377",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "API Design",
+   "IO CSV",
+   "IO Excel",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#66550-0",
+  "text": "ts = pd.Timestamp(\"1677-09-21 09:31:42.145224192\") ts.tz_localize(\"Asia/Tokyo\")",
+  "repo": "pandas-dev/pandas",
+  "issue": 66550,
+  "url": "https://github.com/pandas-dev/pandas/issues/66550",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Timezones"
+  ]
+ },
+ {
+  "claim_id": "pandas#66564-0",
+  "text": "Homepage for example: URL or URL",
+  "repo": "pandas-dev/pandas",
+  "issue": 66564,
+  "url": "https://github.com/pandas-dev/pandas/issues/66564",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Docs",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65765-0",
+  "text": "[Data.csv]( URL Here my dataset.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65765,
+  "url": "https://github.com/pandas-dev/pandas/issues/65765",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Reshaping"
+  ]
+ },
+ {
+  "claim_id": "pandas#66377-1",
+  "text": "In the 3rd and the 4th cases the \"intersection\" goes to the _columns_ names. 3.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66377,
+  "url": "https://github.com/pandas-dev/pandas/issues/66377",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "API Design",
+   "IO CSV",
+   "IO Excel",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#65870-0",
+  "text": "When creating a DataFrame from an Index or Series containing an ExtensionArray, Copy-on-Write does not track references correctly.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65870,
+  "url": "https://github.com/pandas-dev/pandas/issues/65870",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Duplicate Report",
+   "Constructors",
+   "Copy / view semantics"
+  ]
+ },
+ {
+  "claim_id": "pandas#65881-0",
+  "text": "Needs consensus that this is worth doing.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65881,
+  "url": "https://github.com/pandas-dev/pandas/issues/65881",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Frequency",
+   "Deprecate",
+   "Needs Discussion"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34175-1",
+  "text": "Since a tree can be simultaneously used from multiple threads: 1.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34175,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34175",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66571-0",
+  "text": "Partial-string slicing on a CODE whose frequency is anchored to a month that does not line up with calendar quarters resolves the string bounds one period too early, so the slice is shifted and includes an extra label at the start.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66571,
+  "url": "https://github.com/pandas-dev/pandas/issues/66571",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Indexing",
+   "Period"
+  ]
+ }
+]

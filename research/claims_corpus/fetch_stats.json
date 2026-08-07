@@ -1,0 +1,14 @@
+{
+ "scikit-learn/scikit-learn": {
+  "raw_items": 1000,
+  "excluded_pull_requests": 789,
+  "excluded_empty_body": 0,
+  "kept_issues": 211
+ },
+ "pandas-dev/pandas": {
+  "raw_items": 1000,
+  "excluded_pull_requests": 825,
+  "excluded_empty_body": 0,
+  "kept_issues": 175
+ }
+}
