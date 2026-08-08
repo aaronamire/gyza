@@ -1,0 +1,26 @@
+{
+ "baseline_f": 0.20710059171597633,
+ "a1_f": 0.28994082840236685,
+ "a5_f": 0.17159763313609466,
+ "both_f": 0.25443786982248523,
+ "judgement_calls": 98,
+ "a1_flips": 19,
+ "a1_flips_moving_f": 14,
+ "a5_flips": 6,
+ "a1_categories": {
+  "population-of-practice": 2,
+  "external-referent": 1,
+  "quality-judgement": 4,
+  "security-reachability": 1,
+  "hardware-dependent": 2,
+  "user-expectation": 2,
+  "expressive": 1,
+  "user-population": 1,
+  "unbuilt-artifact": 2,
+  "unnamed-criterion": 1,
+  "unnamed-referent": 1,
+  "no-threshold": 1
+ },
+ "verdict_a1": "FAVOURABLE",
+ "verdict_both": "FAVOURABLE"
+}
