@@ -395,3 +395,70 @@ def test_credits_are_folded_in_micros_not_via_the_display_property():
     code = "\n".join(l.split("#")[0] for l in src.splitlines())
     assert ".micros" in code
     assert ".value" not in code and ".credits" not in code
+
+
+# --------------------------------------------------------------------------- #
+#  The registry's ADVERTISED partition vs the engine's ENFORCED filter.
+#
+#  These are TWO EXPRESSIONS OF ONE RULE, written in two files:
+#
+#    InvariantRegistry.interior()/promotion_only()  (invariants.py:100,104)
+#        -> what concurrency_plan() ADVERTISES to the scheduler and to O-3
+#    engine.evaluate()'s phase filter               (engine.py:109)
+#        -> what is actually ENFORCED at evaluation time
+#
+#  Nothing asserted they agree. That is the same shape as the Python<->Rust
+#  canonical-bytes divergence: one logical rule, two implementations, free to
+#  drift, and a drift here would be SILENT -- concurrency_plan() would publish
+#  a partition the engine does not honour, and the scheduler would act on it.
+# --------------------------------------------------------------------------- #
+
+def _interior_defers(cls) -> bool:
+    """What the ENGINE actually does with a `cls` invariant in the interior."""
+    h, i = _reg(bound=5.0, cls=cls)
+    d = GuardEngine(h, i).evaluate(S(0), S(99), "read", Phase.INTERIOR)
+    assert (d.deferred == ["INV-X"]) != (d.evaluated == ["INV-X"]), (
+        "an invariant must be either deferred or evaluated, never both/neither")
+    return d.deferred == ["INV-X"]
+
+
+@pytest.mark.parametrize("cls", list(InvariantClass))
+def test_engine_filter_MATCHES_registry_advertised_partition(cls):
+    """The partition concurrency_plan() publishes must be the one evaluate()
+    enforces, for every class -- not just for the two that happen to be
+    registered in gyza_model today."""
+    h, i = _reg(bound=5.0, cls=cls)
+    advertised_promotion_only = [x.id for x in i.promotion_only()]
+    enforced_deferral = _interior_defers(cls)
+
+    assert enforced_deferral == ("INV-X" in advertised_promotion_only), (
+        f"{cls.value}: registry advertises promotion_only="
+        f"{advertised_promotion_only} but the engine "
+        f"{'defers' if enforced_deferral else 'evaluates'} it in the interior")
+
+
+def test_NEGATIVE_CONTROL_a_divergent_partition_is_CAUGHT():
+    """A guard that has never refused anything has no demonstrated power.
+
+    Construct the exact drift the test above exists to catch -- a registry
+    whose advertised partition disagrees with the engine's filter -- and show
+    the comparison FAILS. Without this, the test above could be vacuously true.
+    """
+    h, i = _reg(bound=5.0, cls=InvariantClass.CUMULATIVE)
+
+    class _LyingRegistry:
+        """Advertises the cumulative invariant as interior-safe."""
+        def __init__(self, real): self._real = real
+        def promotion_only(self): return []                  # the lie
+        def interior(self): return list(self._real)
+        def __getattr__(self, n): return getattr(self._real, n)
+
+    lying = _LyingRegistry(i)
+    advertised = [x.id for x in lying.promotion_only()]
+    enforced_deferral = _interior_defers(InvariantClass.CUMULATIVE)
+
+    assert enforced_deferral is True, "engine still defers -- it reads the tag"
+    assert "INV-X" not in advertised, "the registry now lies about the partition"
+    assert enforced_deferral != ("INV-X" in advertised), (
+        "the consistency check MUST catch this divergence; if it does not, "
+        "test_engine_filter_MATCHES_registry_advertised_partition is vacuous")
