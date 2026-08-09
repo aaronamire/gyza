@@ -1,0 +1,313 @@
+{
+ "counts": {
+  "native": 13,
+  "human_specs": 3,
+  "no_verifier": 2,
+  "unmigratable": 16,
+  "would_be_refused": 14,
+  "migrated": 2,
+  "unresolved_witnesses": 0
+ },
+ "refused_by_condition": {
+  "(i)": 13,
+  "(iii)": 6
+ },
+ "entries": [
+  {
+   "claim_type": "envelope_signature",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/icp.py"
+  },
+  {
+   "claim_type": "envelope_chain",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all",
+    "(iii) takes a movable reference set ['envelopes'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "takes a movable reference set ['envelopes'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)",
+   "witness_detail": "witness resolves to gyza/icp.py"
+  },
+  {
+   "claim_type": "envelope_dag",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all",
+    "(iii) takes a movable reference set ['envelopes'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "takes a movable reference set ['envelopes'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)",
+   "witness_detail": "witness resolves to gyza/icp.py"
+  },
+  {
+   "claim_type": "manifest_identity",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/identity.py"
+  },
+  {
+   "claim_type": "enforcement_within_manifest",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/sandbox/config.py"
+  },
+  {
+   "claim_type": "delegation_attenuation",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all",
+    "(iii) takes a movable reference set ['chain'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "takes a movable reference set ['chain'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)",
+   "witness_detail": "witness resolves to gyza/economy/delegation.py"
+  },
+  {
+   "claim_type": "ledger_entry_signatures",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/economy/ledger.py"
+  },
+  {
+   "claim_type": "balance_fold",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all",
+    "(iii) takes a movable reference set ['entries'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "takes a movable reference set ['entries'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)",
+   "witness_detail": "witness resolves to gyza/economy/wallet.py"
+  },
+  {
+   "claim_type": "market_capital_fold",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/economy/market.py"
+  },
+  {
+   "claim_type": "artifact_content_address",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/network/artifact_store.py"
+  },
+  {
+   "claim_type": "unit_test_execution",
+   "source": "NATIVE",
+   "declared_carrier": "TEST",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter; carrier TEST is not PROOF",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "non-file witness 'V-3 adapter (finite sample)'; not checkable"
+  },
+  {
+   "claim_type": "memory_retrieval_relevance",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all",
+    "(iii) takes a movable reference set ['candidates'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "takes a movable reference set ['candidates'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)",
+   "witness_detail": "witness resolves to gyza/verification/respec.py"
+  },
+  {
+   "claim_type": "external_send_content",
+   "source": "NATIVE",
+   "declared_carrier": "PROOF",
+   "missing_fields": [
+    "attestation",
+    "success_condition",
+    "frame",
+    "obligations",
+    "invariant_class"
+   ],
+   "refused_by": [
+    "(i) no authorship field on Verifier at all"
+   ],
+   "carrier_detail": "no declared sampling parameter",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": "witness resolves to gyza/verification/respec.py"
+  },
+  {
+   "claim_type": "hlc_ordering",
+   "source": "HUMAN_SPECS",
+   "declared_carrier": "SPEC",
+   "missing_fields": [
+    "carrier",
+    "success_condition",
+    "frame",
+    "obligations",
+    "witness",
+    "version"
+   ],
+   "refused_by": [],
+   "carrier_detail": "no declared sampling parameter; carrier SPEC is not PROOF",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": null
+  },
+  {
+   "claim_type": "reputation_score",
+   "source": "HUMAN_SPECS",
+   "declared_carrier": "SPEC",
+   "missing_fields": [
+    "carrier",
+    "success_condition",
+    "frame",
+    "obligations",
+    "witness",
+    "version"
+   ],
+   "refused_by": [],
+   "carrier_detail": "no declared sampling parameter; carrier SPEC is not PROOF",
+   "frame_detail": "no declared movable reference set",
+   "witness_detail": null
+  },
+  {
+   "claim_type": "work_claim_exclusivity",
+   "source": "HUMAN_SPECS",
+   "declared_carrier": "SPEC",
+   "missing_fields": [
+    "carrier",
+    "success_condition",
+    "frame",
+    "obligations",
+    "witness",
+    "version"
+   ],
+   "refused_by": [
+    "(iii) takes a movable reference set ['claims'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)"
+   ],
+   "carrier_detail": "no declared sampling parameter; carrier SPEC is not PROOF",
+   "frame_detail": "takes a movable reference set ['claims'] but names no immutable frame: a bound measured from an origin that can move is not a bound (G4'/SR-5)",
+   "witness_detail": null
+  }
+ ],
+ "migrated": [
+  "hlc_ordering",
+  "reputation_score"
+ ]
+}
