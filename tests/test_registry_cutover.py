@@ -99,6 +99,58 @@ def test_the_expiry_condition_is_now_SPECIFIED_and_currently_UNMET():
     assert fallback_scope() != {}, "gap closed -- the fallback may now be removed"
 
 
+def test_the_expiry_condition_IS_SATISFIABLE_when_the_defect_is_actually_fixed(
+        monkeypatch):
+    """B4 — THE CHECK NOBODY HAD RUN: can `fallback_scope()` ever return {}?
+
+    A condition that cannot go false is a proxy, not a gate, and this program
+    has shipped that defect before (the version-integer monotonicity check).
+    Deriving the condition from registry state is only worth something if the
+    state can actually reach the terminal value.
+
+    Demonstrated by applying the REAL remedy -- binding the caller-chosen
+    policy parameters so each claim names what it proves -- and observing the
+    scope empty. Note that merely clearing `blocked_reason` does NOT suffice:
+    the authority's determinacy screen still refuses the unbound signatures.
+    That is the guard being the gate rather than the annotation being the gate.
+    """
+    def dag_bound(envelopes, require_closed):          # named, no default
+        from gyza.icp import verify_dag
+        return bool(verify_dag(envelopes, require_closed=require_closed).valid)
+
+    def send_bound(claim, emitted, policy):            # named, no default
+        from gyza.verification.respec import verify_send_claim
+        return verify_send_claim(claim, emitted, policy)
+
+    fix = {"envelope_dag": dag_bound, "external_send_content": send_bound}
+    patched = [SpecDraft(**{**d.__dict__, "blocked_reason": None,
+                            "fn": fix[d.claim_type]})
+               if d.claim_type in fix else d
+               for d in M.DRAFTS]
+    monkeypatch.setattr(M, "DRAFTS", patched)
+    monkeypatch.setattr(M, "BY_CLAIM_TYPE", {x.claim_type: x for x in patched})
+
+    auth, _ = governed_registry(load_attestations())
+    assert len(auth.claim_types()) == 16          # 14 -> 16
+    assert fallback_scope() == {}                 # the condition GOES FALSE
+
+
+def test_clearing_blocked_reason_alone_does_NOT_satisfy_it(monkeypatch):
+    """The negative control for the test above: the annotation is not the gate.
+
+    If clearing `blocked_reason` were enough, the expiry condition would be
+    testing a LABEL rather than the protected quantity -- the fourth instance
+    of that species in this program. It is not: the signatures are still
+    unbound, so the authority still refuses them.
+    """
+    patched = [SpecDraft(**{**d.__dict__, "blocked_reason": None})
+               if d.blocked_reason and d.fn is not None else d
+               for d in M.DRAFTS]
+    monkeypatch.setattr(M, "DRAFTS", patched)
+    monkeypatch.setattr(M, "BY_CLAIM_TYPE", {x.claim_type: x for x in patched})
+    assert tuple(sorted(fallback_scope())) == GAP     # still held open
+
+
 def test_the_gap_is_exactly_the_blocked_entries_not_unattested_ones():
     """Every structurally-ready draft IS attested, so nothing sits in the gap
     merely awaiting a signature."""
