@@ -75,6 +75,24 @@ MOVABLE_REFERENCE_PARAMS = frozenset({
 VALID_CARRIERS = ("PROOF", "SPEC", "TEST")
 ATTESTATION_METHODS = ("SELF_ASSERTED", "KEY_BOUND")
 
+# WHAT A REGISTERED CARRIER ACTUALLY RESTS ON. Recorded on every registration so
+# a reader of the registry can tell whether PROOF was VERIFIED or DECLARED,
+# without having to find a findings document. The registry must not imply a
+# guarantee it does not provide.
+#
+# The screens are one-directional signature checks: they refuse a verifier that
+# ANNOUNCES sampling (a finite case-set parameter) or that lets the CALLER pick
+# the proposition (variadic or defaulted parameters). Neither decides whether an
+# arbitrary callable recomputes, and a read-set analysis was measured
+# (research/spec_authority/FINDINGS_CARRIER_ENFORCEMENT.md) to be
+# SCREENING-ONLY -- it falsely flags a correct entry, so it is NOT a gate.
+CARRIER_ASSURANCE = (
+    "DECLARED-UNDER-ATTESTATION — screened one-directionally against the "
+    "verifier's SIGNATURE (sampling parameters, variadic/defaulted policy). "
+    "NOT verified to recompute; the attester takes responsibility for the "
+    "carrier claim."
+)
+
 
 # --------------------------------------------------------------------------- #
 #  Refusals — one type per condition, so a caller can catch precisely          #
@@ -528,6 +546,7 @@ class SpecAuthority:
         self._log.append({
             "claim_type": rec.claim_type, "version": rec.version,
             "digest": rec.digest(), "carrier": rec.carrier,
+            "carrier_assurance": CARRIER_ASSURANCE,
             "author": rec.attestation.author,
             "attestation_method": rec.attestation.method,
             "witness_screen": check_witness_resolves(rec.witness).detail,
@@ -567,6 +586,7 @@ class SpecAuthority:
                 "attestation_method": r.attestation.method,
             })
         return {"n": len(rows), "entries": rows,
+                "carrier_assurance": CARRIER_ASSURANCE,
                 "unresolved_witnesses": [x["claim_type"] for x in rows
                                          if not x["witness_resolves"]],
                 "self_asserted": [x["claim_type"] for x in rows
@@ -609,4 +629,5 @@ __all__ = [
     "check_witness_resolves",
     "weakening", "sign_attestation", "verify_attestation",
     "SAMPLING_PARAMS", "MOVABLE_REFERENCE_PARAMS", "VALID_CARRIERS",
+    "CARRIER_ASSURANCE",
 ]
