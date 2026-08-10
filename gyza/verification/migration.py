@@ -390,6 +390,59 @@ def governed_registry(attestations: Mapping[str, Attestation],
     return auth, skipped
 
 
+def fallback_scope() -> dict[str, str]:
+    """The claim types the ungoverned fallback still covers, and WHY each.
+
+    THE EXPIRY CONDITION, WHICH WAS NEVER ACTUALLY WRITTEN. The DUAL_READ
+    policy shipped with marking (`UNGOVERNED FALLBACK` in the routing reason)
+    and counting (`TierRouter.governance`), and the test that introduced it says
+    "an unmarked fallback is a fallback that never expires" -- but NO expiry
+    condition was ever specified. Marking and counting are visibility; they are
+    not a termination condition. That is an unenforced invariant inside the
+    mechanism built to enforce invariants, and this function is the fix: the
+    fallback's scope is now ENUMERATED, so "is the migration finished" has an
+    answer instead of a vibe.
+
+    THE FALLBACK MAY BE REMOVED WHEN THIS RETURNS {}. Not before.
+    """
+    from gyza.verification.adapters import build_registries
+    v, s = build_registries()
+    ungoverned = set(v.claim_types()) | set(s.claim_types())
+    governed = set(governed_registry(load_attestations())[0].claim_types())
+    gap = {}
+    for ct in sorted(ungoverned - governed):
+        d = BY_CLAIM_TYPE.get(ct)
+        gap[ct] = (d.blocked_reason if d and d.blocked_reason
+                   else "AWAITING ATTESTATION")
+    return gap
+
+
+def governed_router(policy=None):
+    """THE LIVE CONSTRUCTION POINT: a router reading the ATTESTED registry.
+
+    This is the wiring. Before it, `TierRouter` could accept an authority and
+    nothing ever passed one, so twenty attested records governed nothing.
+
+    Default policy is FAIL_CLOSED, and the reasoning is not "safest by
+    default": the two claim types outside the governed set are blocked because
+    their SUCCESS CONDITION IS NOT FIXED BY THE REGISTRY -- the verifier proves
+    a different proposition depending on the call site. Routing those to tier 3
+    is the correct verdict, not a conservative one. Under DUAL_READ they would
+    keep tier 1 on a carrier claim nobody attested, which is exactly the state
+    the authority exists to end.
+
+    DUAL_READ remains available and is NOT removed, because the gap is real
+    (see `fallback_scope`). Selecting a policy is not the same as deleting the
+    mechanism.
+    """
+    from gyza.verification.adapters import build_registries
+    from gyza.verification.router import CutoverPolicy, TierRouter
+    v, s = build_registries()
+    auth, _ = governed_registry(load_attestations())
+    return TierRouter(v, s, authority=auth,
+                      policy=policy or CutoverPolicy.FAIL_CLOSED)
+
+
 def manifest() -> dict[str, Any]:
     """The migration manifest: every entry, structure filled, attestation empty."""
     rows = []
@@ -427,4 +480,5 @@ def manifest() -> dict[str, Any]:
 
 __all__ = ["SpecDraft", "DRAFTS", "BY_CLAIM_TYPE", "governed_registry",
            "load_attestations", "ATTESTATIONS_PATH",
+           "fallback_scope", "governed_router",
            "manifest", "MEASURED", "JUDGEMENT", "UNCLASSIFIABLE"]
