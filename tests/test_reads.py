@@ -175,7 +175,7 @@ def test_a_verifier_that_reads_unnamed_state_STILL_REGISTERS():
     SpecAuthority().register(SpecRecord(
         claim_type="c1", success_condition="value is within an unnamed bound",
         fn=fn, carrier="PROOF", invariant_class=InvariantClass.CONSERVATION,
-        attestation=Attestation("test-human", "SELF_ASSERTED"),
+        attestation=Attestation("test-human", "SELF_ASSERTED", "unit test"),
         frame=NotApplicable("scalar by value"),
         obligations=frozenset({"o1"}), version=1,
         witness="gyza/verification/reads.py:1"))       # ACCEPTED
@@ -194,7 +194,7 @@ def test_registration_records_that_the_carrier_is_declared_not_verified():
         claim_type="c1", success_condition="a stated property holds",
         fn=lambda x, y: x == y, carrier="PROOF",
         invariant_class=InvariantClass.CONSERVATION,
-        attestation=Attestation("test-human", "SELF_ASSERTED"),
+        attestation=Attestation("test-human", "SELF_ASSERTED", "unit test"),
         frame=NotApplicable("by value"), obligations=frozenset({"o1"}),
         version=1, witness="gyza/verification/authority.py:1"))
     assert a.registration_log()[0]["carrier_assurance"] == CARRIER_ASSURANCE

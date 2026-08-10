@@ -42,7 +42,7 @@ def _over_movable_set(claim, candidates) -> bool:
 
 
 def _att(author: str = "xan") -> Attestation:
-    return Attestation(author=author, method="SELF_ASSERTED")
+    return Attestation(author=author, method="SELF_ASSERTED", basis="test basis: constructed in a unit test")
 
 
 def _rec(**kw) -> SpecRecord:
@@ -79,7 +79,7 @@ def test_a_well_formed_spec_registers():
 def test_negative_control_unattested_spec_is_refused():
     """R14: a model-authored spec measured BELOW a one-line type check."""
     with pytest.raises(AttestationRefused):
-        Attestation(author="", method="SELF_ASSERTED")
+        Attestation(author="", method="SELF_ASSERTED", basis="test basis: constructed in a unit test")
 
 
 def test_negative_control_spec_without_an_attestation_object_is_refused():
@@ -93,7 +93,7 @@ def test_negative_control_key_bound_attestation_that_does_not_verify_is_refused(
     tmp = _rec()
     sig = sign_attestation(tmp, sk)
     wrong_pub = other.public_key().public_bytes_raw().hex()
-    rec = _rec(attestation=Attestation("xan", "KEY_BOUND", wrong_pub, sig))
+    rec = _rec(attestation=Attestation("xan", "KEY_BOUND", "t", wrong_pub, sig))
     with pytest.raises(AttestationRefused, match="does not verify"):
         SpecAuthority().register(rec)
 
@@ -101,16 +101,16 @@ def test_negative_control_key_bound_attestation_that_does_not_verify_is_refused(
 def test_key_bound_attestation_round_trips():
     sk = Ed25519PrivateKey.generate()
     pub = sk.public_key().public_bytes_raw().hex()
-    unsigned = _rec(attestation=Attestation("xan", "KEY_BOUND", pub, "00" * 64))
+    unsigned = _rec(attestation=Attestation("xan", "KEY_BOUND", "t", pub, "00" * 64))
     sig = sign_attestation(unsigned, sk)
-    rec = _rec(attestation=Attestation("xan", "KEY_BOUND", pub, sig))
+    rec = _rec(attestation=Attestation("xan", "KEY_BOUND", "t", pub, sig))
     assert verify_attestation(rec)
     SpecAuthority().register(rec)          # accepted
 
 
 def test_key_bound_without_a_signature_is_refused_at_construction():
     with pytest.raises(AttestationRefused, match="requires both"):
-        Attestation("xan", "KEY_BOUND", pubkey_hex="ab" * 32)
+        Attestation("xan", "KEY_BOUND", "t", pubkey_hex="ab" * 32)
 
 
 # --------------------------------------------------------------------------- #

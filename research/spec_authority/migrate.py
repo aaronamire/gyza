@@ -96,7 +96,8 @@ def main() -> None:
                 fn=s.fn,
                 carrier="SPEC",
                 invariant_class=s.cls,
-                attestation=Attestation(s.authored_by, "SELF_ASSERTED"),
+                attestation=Attestation(s.authored_by, "SELF_ASSERTED",
+                                    "[MIGRATION DRY RUN] old PartialSpec.human_attested boolean"),
                 frame=NotApplicable(
                     "migration: old schema had no frame field; NOT verified as "
                     "immutable, only unexamined"),

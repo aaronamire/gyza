@@ -192,15 +192,30 @@ class Attestation:
 
     NOTHING HERE ESTABLISHES THAT A HUMAN WROTE THE TEXT, and no mechanism
     available in this codebase could.
+
+    `basis` is REQUIRED and is the substance of the attestation: it says on what
+    grounds the attester takes responsibility. "I re-derived every carrier" and
+    "an agent classified these and I accepted them" are different
+    responsibility records, and an attestation that does not distinguish them
+    records less than it appears to. It is folded into the signed canonical
+    bytes, so a KEY_BOUND attestation signs its own basis and the basis cannot
+    be edited after signing.
     """
     author: str
     method: str
+    basis: str
     pubkey_hex: str | None = None
     signature_hex: str | None = None
 
     def __post_init__(self):
         if not self.author or not self.author.strip():
             raise AttestationRefused("a human attestation needs a human")
+        if not self.basis or not self.basis.strip():
+            raise AttestationRefused(
+                "an attestation must state its BASIS -- on what grounds the "
+                "attester takes responsibility. An unstated basis lets a "
+                "reader assume independent verification that may not have "
+                "happened, which is the failure R14 makes expensive.")
         if self.method not in ATTESTATION_METHODS:
             raise AttestationRefused(
                 f"attestation method {self.method!r} unknown; "
@@ -302,6 +317,7 @@ class SpecRecord:
             "version": self.version,
             "witness": self.witness,
             "author": self.attestation.author,
+            "attestation_basis": self.attestation.basis,
         }).encode()
 
     def digest(self) -> str:
@@ -549,6 +565,7 @@ class SpecAuthority:
             "carrier_assurance": CARRIER_ASSURANCE,
             "author": rec.attestation.author,
             "attestation_method": rec.attestation.method,
+            "attestation_basis": rec.attestation.basis,
             "witness_screen": check_witness_resolves(rec.witness).detail,
             "superseded": sorted(supersede.dropped) if supersede else [],
         })

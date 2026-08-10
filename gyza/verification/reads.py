@@ -102,7 +102,11 @@ def analyze(fn: Callable[..., Any], *, depth: int = 1,
             _seen: frozenset[int] | None = None) -> ReadSet:
     """Partition what `fn` reads. Sound in the conservative direction only."""
     seen = _seen or frozenset()
-    name = getattr(fn, "__name__", repr(fn))
+    # A display label only. Deliberately NOT repr(): the repr-comparison
+    # tripwire (tests/test_canonical_comparison.py) flags any repr construction
+    # so that none can drift into a comparison, and a label is not worth an
+    # exemption -- the exemption list is only useful while it stays short.
+    name = getattr(fn, "__name__", type(fn).__name__)
     try:
         code = fn.__code__                                  # type: ignore[attr-defined]
         glb = fn.__globals__                                # type: ignore[attr-defined]

@@ -89,7 +89,7 @@ def _rec(fn, carrier="PROOF"):
     return SpecRecord(
         claim_type="c1", success_condition="a stated property holds", fn=fn,
         carrier=carrier, invariant_class=InvariantClass.CONSERVATION,
-        attestation=Attestation("test-human", "SELF_ASSERTED"),
+        attestation=Attestation("test-human", "SELF_ASSERTED", "unit test"),
         frame=NotApplicable("operands by value"),
         obligations=frozenset({"o1"}), version=1,
         witness="gyza/verification/authority.py:1")

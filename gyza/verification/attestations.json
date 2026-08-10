@@ -1,0 +1,29 @@
+{
+ "_README": "Attestations supplied by the repository owner. NOT authored by an agent. The basis field is the substance: it states on what grounds responsibility is taken, and it is folded into each SpecRecord's signed canonical bytes. See research/spec_authority/FINDINGS_ATTESTATION.md.",
+ "attester": "Aaron (repository owner)",
+ "method": "SELF_ASSERTED",
+ "authorized_on": "2026-08-10",
+ "basis": "Classified by Claude Code from the verifier implementations; reviewed and accepted by the repository owner, who takes responsibility for the classifications. The owner did not independently re-derive them.",
+ "transfers": "RESPONSIBILITY, not KNOWLEDGE. This record says who is accountable if a classification is wrong. It does NOT assert that a human re-derived each carrier.",
+ "carrier_assurance": "DECLARED. The carrier is supplied under this attestation. The registry's screens are one-directional signature checks; the read-set analysis reached SCREENING-ONLY and was deliberately NOT wired as a gate because it falsely flags a correct entry.",
+ "claim_types": [
+  "envelope_signature",
+  "manifest_identity",
+  "artifact_content_address",
+  "envelope_chain",
+  "enforcement_within_manifest",
+  "delegation_attenuation",
+  "ledger_entry_signatures",
+  "balance_fold",
+  "market_capital_fold",
+  "unit_test_execution",
+  "memory_retrieval_relevance",
+  "hlc_ordering",
+  "reputation_score",
+  "work_claim_exclusivity",
+  "envelope_dag",
+  "external_send_content",
+  "execution_output_content",
+  "routing_match_quality"
+ ]
+}

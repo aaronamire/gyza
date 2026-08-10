@@ -24,7 +24,7 @@ from gyza.verification.router import CutoverPolicy, TierRouter
 
 
 def _att(who="test-human"):
-    return Attestation(author=who, method="SELF_ASSERTED")
+    return Attestation(author=who, method="SELF_ASSERTED", basis="unit test")
 
 
 # --------------------------------------------------------------------------- #
@@ -215,3 +215,76 @@ def test_attesting_more_entries_monotonically_grows_the_governed_tier():
         r = TierRouter(v, s, authority=auth, policy=CutoverPolicy.FAIL_CLOSED)
         seen.append(r.governance(all_claim_types())["governed"])
     assert seen == [0, 1, 2]
+
+
+# --------------------------------------------------------------------------- #
+#  The OWNER-SUPPLIED attestation                                              #
+# --------------------------------------------------------------------------- #
+def test_an_attestation_must_state_its_basis():
+    """The basis is the substance: 'I re-derived every carrier' and 'an agent
+    classified these and I accepted them' are different responsibility records,
+    and an attestation that cannot distinguish them records less than it looks
+    like it does."""
+    from gyza.verification.authority import AttestationRefused
+    with pytest.raises(AttestationRefused, match="BASIS"):
+        Attestation(author="someone", method="SELF_ASSERTED", basis="  ")
+
+
+def test_the_basis_is_inside_the_signed_canonical_bytes():
+    """So a KEY_BOUND attestation signs its own basis and the basis cannot be
+    edited after signing."""
+    from gyza.verification.migration import BY_CLAIM_TYPE
+    d = BY_CLAIM_TYPE["reputation_score"]
+    a = d.to_record(Attestation("x", "SELF_ASSERTED", "basis one"))
+    b = d.to_record(Attestation("x", "SELF_ASSERTED", "basis two"))
+    assert a.digest() != b.digest()
+
+
+def test_the_owner_attestation_file_loads_and_covers_every_draft():
+    from gyza.verification.migration import load_attestations
+    att = load_attestations()
+    assert set(att) == {d.claim_type for d in DRAFTS}
+
+
+def test_the_recorded_basis_does_not_claim_independent_verification():
+    """A false basis would defeat the mechanism more thoroughly than an absent
+    one. This pins the honest wording against future drift."""
+    from gyza.verification.migration import load_attestations
+    b = load_attestations()["reputation_score"].basis
+    assert "did not independently re-derive" in b
+    assert "Classified by Claude Code" in b
+
+
+def test_the_owner_attestation_registers_14_and_refuses_the_4_blocked():
+    """Attestation does NOT override the structural conditions."""
+    from gyza.verification.migration import load_attestations
+    auth, skipped = governed_registry(load_attestations())
+    assert len(auth.claim_types()) == 14
+    assert sorted(ct for ct, _ in skipped) == [
+        "envelope_dag", "execution_output_content", "external_send_content",
+        "routing_match_quality"]
+    assert all(why.startswith("BLOCKED:") for _, why in skipped)
+
+
+def test_the_basis_is_carried_into_the_registration_log():
+    from gyza.verification.migration import load_attestations
+    auth, _ = governed_registry(load_attestations())
+    row = auth.registration_log()[0]
+    assert "did not independently re-derive" in row["attestation_basis"]
+    assert row["author"] == "Aaron (repository owner)"
+    assert "NOT verified" in row["carrier_assurance"]
+
+
+def test_unit_test_execution_is_attested_as_TEST_not_PROOF():
+    """The one sampling verifier must not be laundered into PROOF by the act
+    of attesting it. SR-3: a mislabelled PROOF composes at 0.000."""
+    from gyza.verification.migration import load_attestations
+    auth, _ = governed_registry(load_attestations())
+    assert auth.get("unit_test_execution").carrier == "TEST"
+
+
+def test_a_missing_attestation_file_yields_an_empty_registry_not_a_default():
+    from pathlib import Path
+
+    from gyza.verification.migration import load_attestations
+    assert load_attestations(Path("/nonexistent/attestations.json")) == {}

@@ -29,7 +29,9 @@ column is authored, and its fraction is reported rather than hidden.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from gyza.containment.invariants import InvariantClass
@@ -338,6 +340,28 @@ DRAFTS: list[SpecDraft] = _drafts()
 BY_CLAIM_TYPE: dict[str, SpecDraft] = {x.claim_type: x for x in DRAFTS}
 
 
+ATTESTATIONS_PATH = Path(__file__).resolve().parent / "attestations.json"
+
+
+def load_attestations(path: Path | None = None) -> dict[str, Attestation]:
+    """Load the OWNER-SUPPLIED attestations. Returns {} if none exist.
+
+    NOT AUTHORED HERE, AND THAT IS THE DESIGN. This function reads a file the
+    repository owner wrote; it cannot manufacture one. If the file is absent the
+    governed registry is empty, which is the correct state for a standard nobody
+    has signed -- an agent filling this in would defeat the mechanism at the
+    moment of adoption (R14), and would do it invisibly, because a self-asserted
+    attestation records whatever it is given.
+    """
+    p = path or ATTESTATIONS_PATH
+    if not p.exists():
+        return {}
+    d = json.loads(p.read_text())
+    att = Attestation(author=d["attester"], method=d["method"],
+                      basis=d["basis"])
+    return {ct: att for ct in d["claim_types"]}
+
+
 def governed_registry(attestations: Mapping[str, Attestation],
                       *, versions: Mapping[str, int] | None = None
                       ) -> tuple[SpecAuthority, list[tuple[str, str]]]:
@@ -402,4 +426,5 @@ def manifest() -> dict[str, Any]:
 
 
 __all__ = ["SpecDraft", "DRAFTS", "BY_CLAIM_TYPE", "governed_registry",
+           "load_attestations", "ATTESTATIONS_PATH",
            "manifest", "MEASURED", "JUDGEMENT", "UNCLASSIFIABLE"]
