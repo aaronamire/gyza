@@ -57,6 +57,33 @@ These are measured, not assumed. Any design that violates one is wrong regardles
                           human-authored
                           per claim type
                              │
+> **⚠ CORRECTION — 2026-08-10, `reversibility-correction`. The diagram's phrase
+> "everything reversible" is WRONG and the prior text is preserved below
+> unedited.**
+>
+> **CLAIMED:** the interior is safe to run ungated because everything in it is
+> *reversible*.
+> **MEASURED** (`research/reversibility/coverage.json`, 19 action types):
+> **ZERO action types have a per-action undo operation.** The only undo is
+> `StagingArea.rollback()` (`gyza/containment/staging.py:148`), which abandons a
+> whole staged range at the promotion boundary and is not addressable from an
+> individual action. Append-only storage makes state **DURABLE, not UNDOABLE** —
+> nothing is destroyed and nothing can be un-appended.
+> **CORRECTED MECHANISM:** the interior is ungated because nothing in it is
+> **COMMITTED**, not because anything is reversible. `staging.py`'s own header
+> already says this correctly — *"the interior can be ungated because nothing in
+> it is irreversible (C9)"* — and the diagram is the place that drifted.
+>
+> **TWO CONSEQUENCES THAT DO NOT FOLLOW FROM "REVERSIBLE" AND DO FOLLOW FROM
+> "UNCOMMITTED":**
+> 1. **ABANDONMENT IS COARSE.** You discard everything staged since the last
+>    promotion, not one action. There is no selective undo.
+> 2. **PAST THE GATE THERE IS NO RECOVERY AT ALL.** Promotion moves the
+>    watermark; prior events are permanently beyond `rollback()`'s reach.
+>
+> Anything that implied fine-grained undo or post-promotion recovery is wrong,
+> not merely imprecise.
+
                              ▼
               ┌──────────────────────────────┐
               │  APPEND-ONLY STAGING (interior)│  ← unbounded autonomy,
@@ -259,6 +286,15 @@ K-1 task representation → **SR-3** (tier algebra — do this before K-5, the a
 H-1 escalation queue → O-2/O-3 metrics and alarms → S5 reproducible builds and attestation → **one external person runs it** → real-environment test.
 
 **Recommended first real environment:** software engineering. Git is append-only by construction, the interior is fully reversible, and there is exactly one gated egress (merge/deploy). The architecture fits it almost without adaptation.
+
+> **⚠ CORRECTION — 2026-08-10.** The sentence above is **true of Git and false of
+> this architecture**, and using it to argue "fits almost without adaptation"
+> conflates the two. `git revert` gives a genuine **per-commit** undo; Gyza's
+> interior has **no per-action undo at all** (see the correction at the
+> architecture diagram). **The adaptation is not almost-nothing: Git offers
+> selective reversal where Gyza offers only coarse abandonment before a gate.**
+> The environment is still a good first choice — one gated egress is the part
+> that matters — but for the *egress* reason, not the *reversibility* reason.
 
 ---
 

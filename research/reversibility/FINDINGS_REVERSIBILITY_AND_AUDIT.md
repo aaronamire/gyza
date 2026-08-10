@@ -1,5 +1,48 @@
 # Reversibility coverage, and the audit economics instantiated
 
+---
+
+> # ⚠ CORRECTION BLOCK — 2026-08-10, `reversibility-correction`
+>
+> **This document's own §A3 count is corrected. Prior text preserved unedited.**
+>
+> **CLAIMED below:** *"the operationally meaningful reversible count is 4, not
+> 7"* — the four append-only actions `rollback()` can reach.
+>
+> **MEASURED, under the criterion this program already fixed** (*"here is the
+> undo operation", not "could be undone in principle"*): **ZERO of 19 action
+> types have a PER-ACTION undo.** `StagingArea.rollback()` abandons a **whole
+> staged range** since the last promotion; it takes no action identifier and
+> cannot target one. So the 4 are **within reach of a coarse batch
+> abandonment**, which is not the same predicate as *reversible*.
+>
+> | reading | count |
+> |---|---|
+> | declared `REVERSIBLE_INTERIOR` | 7 / 19 |
+> | ~~state-changing AND undoable~~ → **within reach of COARSE batch abandonment** | **4 / 19** |
+> | **action types with a PER-ACTION undo** | **0 / 19** |
+>
+> **DEFINITIONAL, not a new measurement:** it follows from reading
+> `rollback()`'s signature (`staging.py:148`) — it takes a `reason` string and
+> nothing else. **No re-derivation was required; the prior count answered a
+> weaker question than the one that matters.**
+>
+> **CORRECTED MECHANISM:** the interior is unbounded because it is
+> **UNCOMMITTED**, not because it is reversible. Two consequences that do not
+> follow from "reversible": **abandonment is coarse**, and **past the promotion
+> gate there is no recovery at all.**
+>
+> **What is UNCHANGED:** every by-call-site number (2 production sites total,
+> residue 0), the A3 storage split, and all of Part B. Those did not depend on
+> the per-action reading.
+>
+> **A number in the task that does not match the tree:** the task states *"zero
+> of thirteen action types"*. The vocabulary is **19**, not 13, verified by
+> executing `ReversibilityTable().vocabulary`. The **zero** is right; the
+> denominator is not.
+
+---
+
 **Branch `costless-measurements`.** **Zero credits** — source inspection and
 arithmetic over committed data. No generation. No production code changed.
 

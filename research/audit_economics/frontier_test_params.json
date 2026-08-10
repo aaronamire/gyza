@@ -1,0 +1,379 @@
+{
+ "PARAMETER_STATUS": "TEST VALUES \u2014 not derived, not measured, not for deployment",
+ "measured_q_f": {
+  "in-competence": {
+   "tpr": 0.818,
+   "fpr": 0.041,
+   "n": 433,
+   "cite": "FINDINGS_R6.md:48 (6B cell-a)"
+  },
+  "out-of-competence": {
+   "tpr": 0.556,
+   "fpr": 0.444,
+   "n": 36,
+   "cite": "FINDINGS_R6.md:49 (6B cell-b)"
+  }
+ },
+ "j_out_calibrated": 0.11200000000000004,
+ "epsilon_tiers_TEST_VALUES": {
+  "reversible-by-a-third-party": 0.01,
+  "irreversible-but-recoverable": 0.0001,
+  "irreversible-and-consequential": 1e-06
+ },
+ "gw_sweep_TEST_VALUES": [
+  5.0,
+  10.0,
+  20.0
+ ],
+ "b_over_w_TEST_VALUES": [
+  10.0,
+  100.0,
+  1000.0
+ ],
+ "grid": [
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 10.0,
+   "gw": 5.0,
+   "p_required": 0.6112469437652812,
+   "p_cap": 2.4390243902439024,
+   "feasible": true
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 10.0,
+   "gw": 10.0,
+   "p_required": 1.2224938875305624,
+   "p_cap": 2.4390243902439024,
+   "feasible": false
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 10.0,
+   "gw": 20.0,
+   "p_required": 2.444987775061125,
+   "p_cap": 2.4390243902439024,
+   "feasible": false
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 100.0,
+   "gw": 5.0,
+   "p_required": 0.06112469437652812,
+   "p_cap": 0.2439024390243902,
+   "feasible": true
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 100.0,
+   "gw": 10.0,
+   "p_required": 0.12224938875305624,
+   "p_cap": 0.2439024390243902,
+   "feasible": true
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 100.0,
+   "gw": 20.0,
+   "p_required": 0.24449877750611249,
+   "p_cap": 0.2439024390243902,
+   "feasible": false
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 1000.0,
+   "gw": 5.0,
+   "p_required": 0.006112469437652812,
+   "p_cap": 0.024390243902439025,
+   "feasible": true
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 1000.0,
+   "gw": 10.0,
+   "p_required": 0.012224938875305624,
+   "p_cap": 0.024390243902439025,
+   "feasible": true
+  },
+  {
+   "regime": "in-competence",
+   "q_source": "M",
+   "B_over_w": 1000.0,
+   "gw": 20.0,
+   "p_required": 0.02444987775061125,
+   "p_cap": 0.024390243902439025,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 10.0,
+   "gw": 5.0,
+   "p_required": 4.464285714285712,
+   "p_cap": 0.2252252252252252,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 10.0,
+   "gw": 10.0,
+   "p_required": 8.928571428571423,
+   "p_cap": 0.2252252252252252,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 10.0,
+   "gw": 20.0,
+   "p_required": 17.857142857142847,
+   "p_cap": 0.2252252252252252,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 100.0,
+   "gw": 5.0,
+   "p_required": 0.44642857142857123,
+   "p_cap": 0.022522522522522525,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 100.0,
+   "gw": 10.0,
+   "p_required": 0.8928571428571425,
+   "p_cap": 0.022522522522522525,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 100.0,
+   "gw": 20.0,
+   "p_required": 1.785714285714285,
+   "p_cap": 0.022522522522522525,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 1000.0,
+   "gw": 5.0,
+   "p_required": 0.04464285714285712,
+   "p_cap": 0.0022522522522522522,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 1000.0,
+   "gw": 10.0,
+   "p_required": 0.08928571428571425,
+   "p_cap": 0.0022522522522522522,
+   "feasible": false
+  },
+  {
+   "regime": "out-of-competence",
+   "q_source": "M",
+   "B_over_w": 1000.0,
+   "gw": 20.0,
+   "p_required": 0.1785714285714285,
+   "p_cap": 0.0022522522522522522,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 10.0,
+   "gw": 5.0,
+   "p_required": 1.0,
+   "p_cap": 1.0,
+   "feasible": true
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 10.0,
+   "gw": 10.0,
+   "p_required": 2.0,
+   "p_cap": 1.0,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 10.0,
+   "gw": 20.0,
+   "p_required": 4.0,
+   "p_cap": 1.0,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 100.0,
+   "gw": 5.0,
+   "p_required": 0.1,
+   "p_cap": 0.1,
+   "feasible": true
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 100.0,
+   "gw": 10.0,
+   "p_required": 0.2,
+   "p_cap": 0.1,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 100.0,
+   "gw": 20.0,
+   "p_required": 0.4,
+   "p_cap": 0.1,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 1000.0,
+   "gw": 5.0,
+   "p_required": 0.01,
+   "p_cap": 0.01,
+   "feasible": true
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 1000.0,
+   "gw": 10.0,
+   "p_required": 0.02,
+   "p_cap": 0.01,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.50)",
+   "q_source": "A",
+   "B_over_w": 1000.0,
+   "gw": 20.0,
+   "p_required": 0.04,
+   "p_cap": 0.01,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 10.0,
+   "gw": 5.0,
+   "p_required": 2.5,
+   "p_cap": 1.0,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 10.0,
+   "gw": 10.0,
+   "p_required": 5.0,
+   "p_cap": 1.0,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 10.0,
+   "gw": 20.0,
+   "p_required": 10.0,
+   "p_cap": 1.0,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 100.0,
+   "gw": 5.0,
+   "p_required": 0.25,
+   "p_cap": 0.1,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 100.0,
+   "gw": 10.0,
+   "p_required": 0.5,
+   "p_cap": 0.1,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 100.0,
+   "gw": 20.0,
+   "p_required": 1.0,
+   "p_cap": 0.1,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 1000.0,
+   "gw": 5.0,
+   "p_required": 0.025,
+   "p_cap": 0.01,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 1000.0,
+   "gw": 10.0,
+   "p_required": 0.05,
+   "p_cap": 0.01,
+   "feasible": false
+  },
+  {
+   "regime": "EGRESS (assumed q=0.20)",
+   "q_source": "A",
+   "B_over_w": 1000.0,
+   "gw": 20.0,
+   "p_required": 0.1,
+   "p_cap": 0.01,
+   "feasible": false
+  }
+ ],
+ "tiers": [
+  {
+   "tier": "reversible-by-a-third-party",
+   "epsilon_TEST_VALUE": 0.01,
+   "max_e0_for_audit_to_reach": 0.045662100456621,
+   "verdict": "plausible"
+  },
+  {
+   "tier": "irreversible-but-recoverable",
+   "epsilon_TEST_VALUE": 0.0001,
+   "max_e0_for_audit_to_reach": 0.0004566210045662101,
+   "verdict": "requires an already-near-perfect system -> HUMAN GATE"
+  },
+  {
+   "tier": "irreversible-and-consequential",
+   "epsilon_TEST_VALUE": 1e-06,
+   "max_e0_for_audit_to_reach": 4.566210045662101e-06,
+   "verdict": "requires an already-near-perfect system -> HUMAN GATE"
+  }
+ ]
+}

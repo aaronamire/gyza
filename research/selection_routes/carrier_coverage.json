@@ -46,6 +46,12 @@
    "witness": "gyza/icp.py:82"
   },
   {
+   "claim_type": "external_send_content",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/verification/respec.py:196"
+  },
+  {
    "claim_type": "ledger_entry_signatures",
    "tier": 1,
    "carrier": "PROOF",
@@ -62,6 +68,12 @@
    "tier": 1,
    "carrier": "PROOF",
    "witness": "gyza/economy/market.py:CapitalEntry fold"
+  },
+  {
+   "claim_type": "memory_retrieval_relevance",
+   "tier": 1,
+   "carrier": "PROOF",
+   "witness": "gyza/verification/respec.py:124"
   },
   {
    "claim_type": "unit_test_execution",
@@ -94,19 +106,7 @@
    "witness": "no verifier \u2014 semantic (competence bound)"
   },
   {
-   "claim_type": "memory_retrieval_relevance",
-   "tier": 3,
-   "carrier": "NONE",
-   "witness": "no verifier \u2014 semantic (competence bound)"
-  },
-  {
    "claim_type": "routing_match_quality",
-   "tier": 3,
-   "carrier": "NONE",
-   "witness": "no verifier \u2014 semantic (competence bound)"
-  },
-  {
-   "claim_type": "external_send_content",
    "tier": 3,
    "carrier": "NONE",
    "witness": "no verifier \u2014 semantic (competence bound)"
@@ -114,79 +114,79 @@
  ],
  "isolated": {
   "n": 18,
-  "tier_1": 11,
-  "fraction_tier_1": 0.6111,
+  "tier_1": 13,
+  "fraction_tier_1": 0.7222,
   "by_carrier": {
-   "PROOF": 10,
+   "PROOF": 12,
    "TEST": 1,
    "SPEC": 3,
-   "NONE": 4
+   "NONE": 2
   },
   "fraction_by_carrier": {
-   "PROOF": 0.5556,
+   "PROOF": 0.6667,
    "TEST": 0.0556,
    "SPEC": 0.1667,
-   "NONE": 0.2222
+   "NONE": 0.1111
   }
  },
  "chains": [
   {
    "depth": 1,
-   "tier_1": 0.555556,
+   "tier_1": 0.666667,
    "tier_2": 0.166667,
-   "tier_3": 0.277778,
-   "any_correctness_claim": 0.722222,
+   "tier_3": 0.166667,
+   "any_correctness_claim": 0.833333,
    "_p": {
-    "proof_t1": 0.555556,
+    "proof_t1": 0.666667,
     "spec": 0.166667,
     "test": 0.055556,
-    "none": 0.222222
+    "none": 0.111111
    }
   },
   {
    "depth": 2,
-   "tier_1": 0.308642,
-   "tier_2": 0.212963,
-   "tier_3": 0.478395,
-   "any_correctness_claim": 0.521605,
+   "tier_1": 0.444444,
+   "tier_2": 0.25,
+   "tier_3": 0.305556,
+   "any_correctness_claim": 0.694444,
    "_p": {
-    "proof_t1": 0.555556,
+    "proof_t1": 0.666667,
     "spec": 0.166667,
     "test": 0.055556,
-    "none": 0.222222
+    "none": 0.111111
    }
   },
   {
    "depth": 4,
-   "tier_1": 0.09526,
-   "tier_2": 0.176812,
-   "tier_3": 0.727928,
-   "any_correctness_claim": 0.272072,
+   "tier_1": 0.197531,
+   "tier_2": 0.284722,
+   "tier_3": 0.517747,
+   "any_correctness_claim": 0.482253,
    "_p": {
-    "proof_t1": 0.555556,
+    "proof_t1": 0.666667,
     "spec": 0.166667,
     "test": 0.055556,
-    "none": 0.222222
+    "none": 0.111111
    }
   },
   {
    "depth": 8,
-   "tier_1": 0.009074,
-   "tier_2": 0.064949,
-   "tier_3": 0.925977,
-   "any_correctness_claim": 0.074023,
+   "tier_1": 0.039018,
+   "tier_2": 0.19355,
+   "tier_3": 0.767432,
+   "any_correctness_claim": 0.232568,
    "_p": {
-    "proof_t1": 0.555556,
+    "proof_t1": 0.666667,
     "spec": 0.166667,
     "test": 0.055556,
-    "none": 0.222222
+    "none": 0.111111
    }
   }
  ],
  "tier1_ceiling_after_all_possible_upgrades": {
-  "1": 0.777778,
-  "2": 0.604938,
-  "4": 0.36595,
-  "8": 0.13392
+  "1": 0.888889,
+  "2": 0.790123,
+  "4": 0.624295,
+  "8": 0.389744
  }
 }
