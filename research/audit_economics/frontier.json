@@ -1,0 +1,66 @@
+{
+ "operating_points": {
+  "in-competence": {
+   "tpr": 0.818,
+   "fpr": 0.041,
+   "n": 433,
+   "cite": "FINDINGS_R6.md:48 (6B cell-a)"
+  },
+  "out-of-competence": {
+   "tpr": 0.556,
+   "fpr": 0.444,
+   "n": 36,
+   "cite": "FINDINGS_R6.md:49 (6B cell-b)"
+  }
+ },
+ "lr_in": 19.95121951219512,
+ "lr_out_raw": 1.2522522522522523,
+ "lr_out_calibrated": 0.25225225225225234,
+ "parameters": [
+  {
+   "name": "q",
+   "meaning": "detection probability given audit",
+   "kind": "MEASURABLE",
+   "note": "0.818 in-competence / 0.556 out (FINDINGS_R6.md:48-49). NOTE the calibrated model uses q_out = J_out = 0.111, not the raw TPR (MODEL.md:50), because out-of-competence detection is bounded by the actionable edge."
+  },
+  {
+   "name": "f",
+   "meaning": "false-conviction rate",
+   "kind": "MEASURABLE",
+   "note": "0.041 in-competence / 0.444 out (same source)."
+  },
+  {
+   "name": "g",
+   "meaning": "gain to an agent from a false claim",
+   "kind": "BUSINESS DECISION",
+   "note": "What a lie is worth. Denominated in the same unit as w."
+  },
+  {
+   "name": "w",
+   "meaning": "honest profit per claim",
+   "kind": "BUSINESS DECISION",
+   "note": "What honest work pays. Only the RATIO g/w enters feasibility."
+  },
+  {
+   "name": "B",
+   "meaning": "bond posted per claim",
+   "kind": "BUSINESS DECISION",
+   "note": "CANCELS from the feasibility condition (PROPOSITIONS.md:303). Needed only to convert a feasible region into an audit probability p."
+  }
+ ],
+ "residue_action_types": [
+  "delete_artifact",
+  "external_send",
+  "publish_agent",
+  "publish_attestation",
+  "publish_delta",
+  "rotate_key",
+  "send_message",
+  "update_guard_config",
+  "write_outside_sandbox"
+ ],
+ "residue_n": 9,
+ "residue_fraction_of_vocabulary": 0.4737,
+ "residue_production_call_sites": 0,
+ "total_production_call_sites": 2
+}
