@@ -1,0 +1,47 @@
+{
+ "_status": "SCOPING ONLY -- zero credits spent, no measurement run",
+ "n_egress_types": 6,
+ "note_on_count": "The task said eight. coverage.json says six; the residue of 9 is 6 EGRESS + 3 IRREVERSIBLE.",
+ "criterion": "research/claims_corpus/PREREGISTRATION_CLAIMS_CENSUS.md:28-47, applied verbatim to the CORRECTNESS component only",
+ "types": {
+  "publish_delta": {
+   "class": "INTERNAL", "production_call_site": "gyza/network/network_blackboard.py:521",
+   "integrity": "checkable: delta bytes",
+   "correctness": "payload == diff(local_state, last_published) -- a function of stored state",
+   "checker": "recompute and compare; mechanical, no model",
+   "q": "1.0 DEFINITIONAL (total recompute)", "f": "0 DEFINITIONAL", "lr": "unbounded"},
+  "send_message": {
+   "class": "INTERNAL", "production_call_site": "gyza/economy/settlement.py:535,833,992",
+   "integrity": "checkable: payload hash",
+   "correctness": "message type and payer_peer_id determined by the settlement state machine over stored ledger state",
+   "checker": "COUNTERFACTUAL -- could be written, is not written",
+   "q": "1.0 DEFINITIONAL IF BUILT", "f": "0 modulo protocol nondeterminism", "lr": "unbounded"},
+  "external_send": {
+   "class": "EXOGENOUS", "production_call_site": "claim type external_send_content (ungoverned)",
+   "integrity": "ALREADY CHECKED -- verify_send_claim, respec.py:204",
+   "correctness": "was sending this artifact, to this destination, now, right?",
+   "checker": "NONE for correctness. THE TRAP: the implemented checker decides INTEGRITY ONLY and would score q~1",
+   "q": "UNMEASURABLE", "f": "UNMEASURABLE", "lr": "undefined",
+   "why_not_underdetermined": "restricting to 'complies with policy P' is CLAIM SUBSTITUTION, which Q3 forbids"},
+  "publish_agent": {
+   "class": "EXOGENOUS", "production_call_site": "gyza/network/global_cluster.py:521",
+   "integrity": "checkable: advertisement bytes; attributes are derived from local state",
+   "correctness": "whether to advertise is discretionary; no stored predicate settles it",
+   "checker": "NONE for correctness",
+   "q": "UNMEASURABLE", "f": "UNMEASURABLE", "lr": "undefined"},
+  "publish_attestation": {
+   "class": "EXOGENOUS", "production_call_site": "gyza/cli.py:1539",
+   "integrity": "checkable: k-of-n cert signatures",
+   "correctness": "does the agent actually have the attested capability -- a claim about future behaviour",
+   "checker": "NONE for correctness (competence bound, terminal)",
+   "q": "UNMEASURABLE", "f": "UNMEASURABLE", "lr": "undefined"},
+  "write_outside_sandbox": {
+   "class": "NO_CLAIM", "production_call_site": "NONE -- appears only in gyza/containment/reversibility.py:54",
+   "integrity": null, "correctness": null,
+   "checker": "n/a -- an action the sandbox PREVENTS, not one the system performs",
+   "q": "n/a", "f": "n/a", "lr": "n/a"}
+ },
+ "distribution": {"INTERNAL": 2, "EXOGENOUS": 3, "UNDERDETERMINED": 0, "CONTESTED": 0, "NO_CLAIM": 1},
+ "verdict": "SPLIT: q is definitional-and-trivial for the 2 INTERNAL types, and UNMEASURABLE for the 3 EXOGENOUS types. No single verdict covers egress.",
+ "credit_gate": "NOT REACHED -- no measurement is proposed, because none can be safely made"
+}
