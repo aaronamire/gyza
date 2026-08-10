@@ -101,6 +101,16 @@ class CarrierRefused(SpecRefused):
     """(ii) -- a sampling verifier declared PROOF."""
 
 
+class UnderdeterminedClaim(SpecRefused):
+    """(iv) -- the verifier decides a proposition the CALLER chooses.
+
+    Distinct from CarrierRefused on purpose. Sampling and underdetermination
+    are different defects with different fixes, and the exception type is where
+    that distinction has to survive: a caller catching CarrierRefused is
+    handling "this samples", which no amount of parameter-naming repairs.
+    """
+
+
 class FrameRefused(SpecRefused):
     """(iii) -- a movable reference set with no immutable frame identifier."""
 
@@ -322,6 +332,62 @@ def check_carrier_claim(fn: Callable[..., Any], carrier: str) -> ScreenResult:
                         + (f"; carrier {carrier} is not PROOF" if carrier != "PROOF" else ""))
 
 
+def check_claim_determinacy(fn: Callable[..., Any], carrier: str) -> ScreenResult:
+    """Does the verifier decide EXACTLY ONE proposition, or a caller-chosen one?
+
+    THE DISTINCTION THIS ENFORCES, AND WHY IT IS NOT THE SAMPLING CHECK.
+    Two different defects were being collapsed under "carrier", and they have
+    different consequences:
+
+      SAMPLING (fails TOTALITY) -- the verifier examines a proper subset of the
+        claim's domain and generalises. `all(fn(x) == y for x, y in cases)` is
+        about three points; the claim is about the function. SR-3 measured this
+        composing at 0.000, because behaviour outside the sample is
+        unconstrained. Naming a parameter does not fix it.
+
+      UNDERDETERMINATION (fails DETERMINACY) -- the verifier TOTALLY decides
+        some proposition, but the claim does not say WHICH. Every link is fully
+        decided, so this does not compose at 0.000; what fails is that you
+        cannot compose the MEANINGS. Naming the parameter fixes it completely.
+
+    A verifier whose signature admits `**kwargs`, or carries a parameter with a
+    default, lets the CALLER choose the proposition. That is mechanical and
+    conclusive: `_envelope_dag(envelopes, **kw)` forwards `require_closed`,
+    which production sets both ways (`audit.py:101` True,
+    `resilience.py:202` False), so "the DAG verified" is two claims with two
+    verdicts and records neither (RESPEC-4).
+
+    ONE-DIRECTIONAL, like the other screens: a defaulted or variadic parameter
+    is conclusive evidence of caller-chosen policy; its absence does not prove
+    the claim names everything that moves the verdict. A parameter bound to a
+    module constant deeper in the call graph is FIXED-UNNAMED -- it does not
+    vary per call site, so it is not refused, but the success condition should
+    still state it. That grade is not detectable from this signature alone.
+    """
+    if carrier == "TEST":
+        return ScreenResult(True, "TEST carriers are not held to determinacy: "
+                                  "they already claim only what they sampled")
+    try:
+        sig = inspect.signature(fn)
+    except (TypeError, ValueError):
+        return ScreenResult(True, "signature unavailable; not checkable")
+    variadic = [p.name for p in sig.parameters.values()
+                if p.kind is inspect.Parameter.VAR_KEYWORD]
+    defaulted = [p.name for p in sig.parameters.values()
+                 if p.default is not inspect.Parameter.empty]
+    if variadic or defaulted:
+        return ScreenResult(
+            False,
+            f"the caller chooses the proposition: "
+            f"{'**' + variadic[0] + ' forwards arbitrary policy' if variadic else ''}"
+            f"{' and ' if variadic and defaulted else ''}"
+            f"{'defaulted parameter(s) ' + str(sorted(defaulted)) if defaulted else ''}"
+            f". A claim that does not name every verdict-changing parameter is "
+            f"UNDERDETERMINED -- it is not sampling, and naming the parameter "
+            f"fixes it (RESPEC-4)")
+    return ScreenResult(True, "no variadic or defaulted parameter; one proposition")
+
+
 def check_frame_requirement(fn: Callable[..., Any],
                             frame: FrameRef | NotApplicable) -> ScreenResult:
     """(iii) — does a declared movable reference set go unpinned?"""
@@ -414,6 +480,16 @@ class SpecAuthority:
                 f"spec for {rec.claim_type!r} REFUSED: {carrier_screen.detail}. "
                 f"Register it as carrier=TEST, which is what it is.")
 
+        # (iv) determinacy -- checked AFTER the carrier screen, because
+        # "this samples" is the more fundamental defect and should be the
+        # message a mislabelled sampler gets.
+        det_screen = check_claim_determinacy(rec.fn, rec.carrier)
+        if not det_screen.no_declared_evidence:
+            raise UnderdeterminedClaim(
+                f"spec for {rec.claim_type!r} REFUSED: {det_screen.detail}. "
+                f"Bind the parameter at the adapter, or split the claim type "
+                f"so each names its own policy.")
+
         # (iii) frame
         frame_screen = check_frame_requirement(rec.fn, rec.frame)
         if not frame_screen.no_declared_evidence:
@@ -484,6 +560,7 @@ class SpecAuthority:
             rows.append({
                 "claim_type": ct,
                 "carrier": check_carrier_claim(r.fn, r.carrier).detail,
+                "determinacy": check_claim_determinacy(r.fn, r.carrier).detail,
                 "frame": check_frame_requirement(r.fn, r.frame).detail,
                 "witness": check_witness_resolves(r.witness).detail,
                 "witness_resolves": check_witness_resolves(r.witness).no_declared_evidence,
@@ -525,10 +602,11 @@ def verify_attestation(rec: SpecRecord) -> bool:
 
 __all__ = [
     "SpecRefused", "MissingField", "AttestationRefused", "CarrierRefused",
-    "FrameRefused", "WeakeningRefused",
+    "FrameRefused", "WeakeningRefused", "UnderdeterminedClaim",
     "NotApplicable", "FrameRef", "Attestation", "SupersedeAck", "SpecRecord",
     "ScreenResult", "SpecAuthority",
-    "check_carrier_claim", "check_frame_requirement", "check_witness_resolves",
+    "check_carrier_claim", "check_claim_determinacy", "check_frame_requirement",
+    "check_witness_resolves",
     "weakening", "sign_attestation", "verify_attestation",
     "SAMPLING_PARAMS", "MOVABLE_REFERENCE_PARAMS", "VALID_CARRIERS",
 ]

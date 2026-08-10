@@ -123,10 +123,10 @@
   },
   {
    "claim_type": "delegation_attenuation",
-   "success_condition": "For every hop i in the chain, manifest(h_i) is a subset of manifest(h_0); depth is bounded and no cycle exists.",
+   "success_condition": "For every hop i in the chain, manifest(h_i) is a subset of manifest(h_0); the chain is acyclic; and its depth is at most max_depth = 8 (MAX_DELEGATION_DEPTH, gyza/economy/delegation.py). THE VALUE 8 IS PART OF THE CLAIM: it is a defaulted parameter of verify_delegation that moves the verdict, and a claim that says only 'depth is bounded' does not say which bound was checked.",
    "carrier": "PROOF",
    "carrier_basis": "MEASURED",
-   "carrier_reason": "verify_delegation iterates every hop; the bound is structural, not sampled",
+   "carrier_reason": "verify_delegation iterates every hop; the bound is structural, not sampled. FIXED-UNNAMED under the carrier rule: max_depth has a default, but the adapter does not expose it, so the verdict cannot vary per call site -- PROOF stands, and the remedy is naming the value here rather than refusing the entry",
    "invariant_class": "MONOTONE_NON_CUMULATIVE",
    "reference_set_can_move": true,
    "frame_identifier": "delegation_root_manifest_hash",
@@ -134,7 +134,7 @@
    "obligations": [
     "acyclic",
     "authority_non_increasing_per_hop",
-    "depth_bounded"
+    "depth_at_most_8"
    ],
    "witness": "gyza/economy/delegation.py:213",
    "structurally_ready": true,

@@ -1,5 +1,70 @@
 # Carrier coverage, and why the coverage fraction is not a composition budget
 
+---
+
+> # ⚠ CORRECTION BLOCK — 2026-08-10, `carrier-corrections`
+>
+> **Every number below this block is STALE. Prior text is preserved unedited;
+> nothing has been silently changed.**
+>
+> **Cause — and it is NOT a carrier reclassification.** No entry's carrier was
+> ever corrected from PROOF to TEST. This document was computed **before the
+> respecification** (`60081f4`, *"respecify: move 2 claim types out of
+> NO_VERIFIER"*), which moved **`memory_retrieval_relevance`** and
+> **`external_send_content`** from semantic/NONE into registered PROOF-carried
+> verifiers (`gyza/verification/respec.py`). The document then drifted from its
+> own generator: `selection_routes/carrier_coverage.py` recomputes these numbers
+> from the live registry and **now disagrees with the table below.**
+>
+> | quantity | committed below | **recomputed from the registry** | |
+> |---|---|---|---|
+> | carriers | PROOF 10 · TEST 1 · SPEC 3 · **NONE 4** | **PROOF 12 · TEST 1 · SPEC 3 · NONE 2** | DEFINITIONAL |
+> | tier-1 **claim types** | 11/18 = **61.1%** | **13/18 = 72.2%** | DEFINITIONAL |
+> | depth-1 **chain** tier-1 | 0.5556 (implied) | **0.6667** | DEFINITIONAL |
+> | depth 2 | 0.309 | **0.4444** | DEFINITIONAL |
+> | depth 4 | 0.095 | **0.1975** | DEFINITIONAL |
+> | **depth 8** | **0.009** | **0.0390** | DEFINITIONAL — **4.3× higher** |
+> | depth-8 "any correctness claim" | 0.074 | **0.2326** | DEFINITIONAL |
+> | depth-8 ceiling after all upgrades | 0.134 | **0.3897** | DEFINITIONAL |
+> | *"4 of 18 claim types are semantic"* | 4 | **2** | DEFINITIONAL |
+>
+> **All DEFINITIONAL:** each follows arithmetically from the registry
+> composition under the unchanged uniform-sampling assumption. **Nothing was
+> re-derived and no new measurement was taken.**
+>
+> **The direction matters: every corrected figure is more favourable.** The
+> committed numbers *understate* coverage. A stale pessimistic number is still
+> wrong, and this one was load-bearing in two other documents.
+>
+> **A SECOND DEFECT IN THE TABLE BELOW, and it is artifact #17 inside a single
+> column.** The row labelled *"isolated (depth 1) — 61.1%"* is a count of
+> **CLAIM TYPES** (11/18), while every row beneath it is a **CHAIN PROBABILITY**
+> (powers of 10/18: 0.5556² = 0.3086 ≈ the 30.9% shown). **The first row is a
+> different quantity from the rest of its own column**, which is exactly the
+> species `ARTIFACT_LEDGER.md` #17 records. The corrected figures above keep the
+> two separate and are labelled accordingly.
+>
+> **What is NOT affected:**
+> - **AR-1 is untouched.** It measured the *audited* path, whose five claim
+>   types (`envelope_signature`, `envelope_chain`, `artifact_content_address`,
+>   `manifest_identity`, `enforcement_within_manifest` — `run_ar1.py:33-39`)
+>   are all genuine recomputers and **do not include** either respecified type.
+>   Its `p_proof = 1.0000` stands.
+> - **`ARTIFACT_LEDGER.md` #17 is NOT edited.** It records a *reasoning defect*
+>   that occurred with these numbers; correcting the numbers does not unmake the
+>   defect, and the ledger's definition must stay intact.
+> - **`ENGINEERING_STATUS.md` and `OPEN_PROBLEM.md`** carry the same table and
+>   **already mark it as superseded prior framing** (struck through, pointing at
+>   AR-1). They inherit this correction; they are not separately edited, because
+>   their rows are already labelled as not-current.
+>
+> **The qualitative conclusion below SURVIVES.** Multiplicative decay with depth
+> is unchanged, the ceiling still binds, and the design guidance (minimise depth;
+> keep semantic stages at boundaries; optimise for PROOF-or-SPEC carriage, not
+> tier) is unaffected. **What changes is the magnitude, not the shape.**
+
+---
+
 **Analytic, not measured.** Every number below follows from the `TIER_ALGEBRA.md`
 rules plus the V-1/V-4 registry's composition. Labelled DEFINITIONAL throughout:
 it illustrates a consequence, it does not confirm a theory. Computed by

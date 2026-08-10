@@ -180,15 +180,22 @@ def _drafts() -> list[SpecDraft]:
 
     native("delegation_attenuation",
            "For every hop i in the chain, manifest(h_i) is a subset of "
-           "manifest(h_0); depth is bounded and no cycle exists.",
+           "manifest(h_0); the chain is acyclic; and its depth is at most "
+           "max_depth = 8 (MAX_DELEGATION_DEPTH, gyza/economy/delegation.py). "
+           "THE VALUE 8 IS PART OF THE CLAIM: it is a defaulted parameter of "
+           "verify_delegation that moves the verdict, and a claim that says "
+           "only 'depth is bounded' does not say which bound was checked.",
            "PROOF", MEASURED,
            "verify_delegation iterates every hop; the bound is structural, "
-           "not sampled",
+           "not sampled. FIXED-UNNAMED under the carrier rule: max_depth has a "
+           "default, but the adapter does not expose it, so the verdict cannot "
+           "vary per call site -- PROOF stands, and the remedy is naming the "
+           "value here rather than refusing the entry",
            InvariantClass.MONOTONE_NON_CUMULATIVE,
            FrameRef("delegation_root_manifest_hash",
                     "PENDING — the root manifest hash pins the origin the "
                     "attenuation is measured FROM"),
-           ["authority_non_increasing_per_hop", "depth_bounded", "acyclic"])
+           ["authority_non_increasing_per_hop", "depth_at_most_8", "acyclic"])
 
     native("ledger_entry_signatures",
            "Every required role signature on the entry verifies over the "
