@@ -1,0 +1,110 @@
+{
+ "_status": "ESTIMATE, not a measurement. Components are ASSUMED.",
+ "measured": {
+  "base_fail": 0.1173,
+  "fail_revisiting": 0.1273,
+  "conserving_prevalence": 0.0782,
+  "obs_records_needed": 1150,
+  "source": "research/corpus/FINDINGS_SR1.md"
+ },
+ "assumptions": {
+  "tok_decompose": {
+   "value": 3000,
+   "meaning": "tokens to produce one decomposition (prompt+output)"
+  },
+  "tok_subtask": {
+   "value": 12000,
+   "meaning": "tokens to execute ONE subtask, incl. context reload"
+  },
+  "n_subtask_conserving": {
+   "value": 3.0,
+   "meaning": "subtasks per decomposition, CONSERVING arm (MEASURED-ish: 11/14 conserving were depth 3)"
+  },
+  "n_subtask_revisiting": {
+   "value": 8.0,
+   "meaning": "subtasks per decomposition, REVISITING arm (MEASURED: corpus mean 8.0, median 5)"
+  },
+  "retry_rate": {
+   "value": 0.25,
+   "meaning": "fraction of subtasks needing one retry"
+  },
+  "usd_per_1k_tok": {
+   "value": 0.009,
+   "meaning": "blended in/out price at a frontier tier"
+  }
+ },
+ "power": [
+  {
+   "effect": 0.03,
+   "n_per_arm": 1738,
+   "n_2arm": 3476,
+   "n_3arm": 5214
+  },
+  {
+   "effect": 0.05,
+   "n_per_arm": 576,
+   "n_2arm": 1152,
+   "n_3arm": 1728
+  },
+  {
+   "effect": 0.08,
+   "n_per_arm": 195,
+   "n_2arm": 390,
+   "n_3arm": 585
+  },
+  {
+   "effect": 0.1,
+   "n_per_arm": 111,
+   "n_2arm": 222,
+   "n_3arm": 333
+  },
+  {
+   "effect": 0.12,
+   "n_per_arm": 68,
+   "n_2arm": 136,
+   "n_3arm": 204
+  }
+ ],
+ "n_per_arm_at_0.08": 195,
+ "cost_total_usd": 300,
+ "cost_range_usd": [
+  155,
+  590
+ ],
+ "sensitivity": [
+  {
+   "component": "tok_decompose",
+   "total": 311,
+   "ratio": 1.04
+  },
+  {
+   "component": "tok_subtask",
+   "total": 590,
+   "ratio": 1.96
+  },
+  {
+   "component": "n_subtask_conserving",
+   "total": 379,
+   "ratio": 1.26
+  },
+  {
+   "component": "n_subtask_revisiting",
+   "total": 511,
+   "ratio": 1.7
+  },
+  {
+   "component": "retry_rate",
+   "total": 358,
+   "ratio": 1.19
+  },
+  {
+   "component": "usd_per_1k_tok",
+   "total": 600,
+   "ratio": 2.0
+  }
+ ],
+ "pilot": {
+  "n_per_arm": 40,
+  "cost_usd": 62
+ }
+}
