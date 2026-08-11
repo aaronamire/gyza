@@ -393,6 +393,42 @@ def test_a_higher_version_that_loosens_is_refused_by_the_ordinary_path():
     assert st.config.bounds == {"spend": 10.0}
 
 
+def test_the_loosening_refusal_names_every_bound_that_moved_and_by_how_much():
+    """D2. A refusal that says only "something loosened" cannot be acted on.
+
+    The message must carry the bound id and both magnitudes, per bound, so an
+    operator can tell a typo from an escalation without re-deriving the diff.
+    """
+    sk, pk = _keys()
+    st = GuardConfigStore(pk)
+    v1 = {"version": 1, "bounds": {"spend": 100.0, "irreversible": 1.0},
+          "tier_assignments": {}}
+    st.load(v1, sign_config(v1, sk))
+
+    v2 = {"version": 2, "bounds": {"spend": 250.0, "irreversible": 4.0},
+          "tier_assignments": {}}
+    with pytest.raises(GuardConfigError) as e:
+        st.load(v2, sign_config(v2, sk))
+    msg = str(e.value)
+    assert "2 bound(s) LOOSEN" in msg
+    for named in ("spend: 100.0 -> 250.0", "irreversible: 1.0 -> 4.0"):
+        assert named in msg, f"refusal does not name the movement: {named}"
+
+
+def test_negative_control_the_refusal_check_can_actually_fail():
+    """A guard that has never been seen to refuse has no demonstrated power.
+
+    Here the control runs the other way: it proves the ASSERTION above would
+    catch a message that omitted the magnitudes, rather than passing vacuously
+    because the substring happened to be present.
+    """
+    silent = "refusing to install: 2 bound(s) LOOSEN"
+    assert "spend: 100.0 -> 250.0" not in silent
+    detailed = ("refusing to install: 2 bound(s) LOOSEN "
+                "(spend: 100.0 -> 250.0, irreversible: 1.0 -> 4.0)")
+    assert "spend: 100.0 -> 250.0" in detailed
+
+
 def test_loosening_requires_a_separately_signed_record_and_raises_an_alarm():
     from gyza.containment.guardconfig import LooseningRecord, sign_loosening
     sk, pk = _keys()

@@ -155,14 +155,14 @@ def test_every_other_entry_with_a_verifier_is_determinate():
 def test_delegation_attenuation_names_its_depth_bound():
     """FIXED-UNNAMED, found by applying the rule and MISSED by the hand pass.
 
-    verify_delegation carries max_depth=8; the adapter does not expose it, so
+    verify_delegation carries max_depth=3; the adapter does not expose it, so
     the verdict cannot vary per call site and PROOF stands. But a claim saying
     only 'depth is bounded' does not say WHICH bound was checked, so the value
     belongs in the success condition.
     """
     d = BY_CLAIM_TYPE["delegation_attenuation"]
-    assert "8" in d.success_condition
-    assert "depth_at_most_8" in d.obligations
+    assert "3" in d.success_condition
+    assert "depth_at_most_3" in d.obligations
     assert d.carrier == "PROOF"
 
 

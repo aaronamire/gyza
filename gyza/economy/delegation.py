@@ -63,7 +63,23 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 # strictly-decreasing credit budget; depth is the cheap structural
 # backstop. Conservative on purpose; raise deliberately, never
 # silently.
-MAX_DELEGATION_DEPTH = 8
+#
+# 3 IS A CHOSEN VALUE, NOT A DERIVED ONE. It was RECOMMENDED BY THE ASSISTANT
+# AND ACCEPTED BY THE REPOSITORY OWNER on 2026-08-11; nothing measured it and no
+# experiment supports 3 over 4 or over the previous 8. The reasoning is
+# auditability, not an outcome: grant chains are where authority accumulates
+# quietly, and three hops permit real delegation while staying short enough for
+# a human to follow end to end.
+#
+# WHAT THIS IS NOT: it is not the attenuation property. Attenuation
+# (manifest(h_i) subset of manifest(h_0) at every hop) is PROVEN and is checked
+# independently below — a chain of 40 hops can satisfy attenuation perfectly and
+# still be unauditable, which is precisely why a depth cap exists as a separate
+# structural backstop rather than as a consequence of the subset check.
+#
+# Lowering 8 -> 3 is a TIGHTENING, which the previous comment's "raise
+# deliberately, never silently" explicitly permits as the safe direction.
+MAX_DELEGATION_DEPTH = 3
 
 
 @dataclass(frozen=True)
