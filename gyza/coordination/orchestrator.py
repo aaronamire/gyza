@@ -2,16 +2,25 @@
 K-4 executor pool, K-5 combiner, K-6 scheduler, H-1 escalation queue,
 O-2 metrics, O-3 alarms.
 
-K-2 (decomposer) and K-3 (allocator) and K-7 (retry) are NOT here: their
-selection routes could not be run, and the reason is recorded in
-research/selection_routes/BLOCKED_SR1_SR2_SR4.md. They are declared below as
-explicit stubs that RAISE rather than as plausible defaults, because a default
-nobody chose is worse than an absence somebody noticed.
+K-3 (allocator) IS selected, by SR-2. K-7 (retry) is not, and raises.
+
+K-2 (decomposer) is now SPLIT, and the split is the point:
+
+  * its STRATEGY is selected -- `DEFAULT_DECOMPOSITION_STRATEGY` = CONSERVING,
+    on a CONTAINMENT basis, with its outcome effect explicitly UNMEASURED;
+  * its IMPLEMENTATION still raises, for a reason that has nothing to do with
+    strategy: nothing assigns a `claim_type` to a natural task, and `TaskSpec`
+    carries no file list for a file-partitioned strategy to partition over.
+
+A default nobody chose is worse than an absence somebody noticed -- and a
+default that IMPLIES an outcome basis it lacks is worse than both. Hence the
+basis is exported beside the constant, not buried in a findings document.
 """
 from __future__ import annotations
 
 import threading
 from dataclasses import dataclass, field
+from enum import Enum
 
 from gyza.containment.engine import GuardEngine, Phase
 from gyza.containment.invariants import InvariantClass
@@ -28,12 +37,61 @@ class NotSelectedError(NotImplementedError):
 # --------------------------------------------------------------------------- #
 #  K-2 / K-3 / K-7 — declared, not defaulted                                   #
 # --------------------------------------------------------------------------- #
+class DecompositionStrategy(str, Enum):
+    """K-2's strategy space, as SR-1 measured it on real decompositions."""
+
+    CONSERVING = "CONSERVING"      # no file is touched by two subtasks
+    REVISITING = "REVISITING"      # unconstrained; what 92.2% of humans do
+
+
+#: K-2's SELECTED DEFAULT, and the basis is the whole value of naming it.
+#:
+#:   CONSERVING is the default because the architectural principle mandates
+#:   partitioning on CONTAINMENT grounds. Its effect on task success is
+#:   UNMEASURED -- the causal comparison is blocked on ground truth, not budget.
+#:
+#: READ THAT SECOND SENTENCE BEFORE CITING THIS CONSTANT. Nothing here says
+#: CONSERVING produces better outcomes. SR-1 could not test that: its CONSERVING
+#: arm reached n=14 against a preregistered floor of 15, and 11 of those 14 were
+#: depth 3, so structure and depth were entangled and the comparison would have
+#: been depth-confounded even at adequate n (research/corpus/FINDINGS_SR1.md).
+#: What SR-1 did measure is that only 7.8% of real human decompositions conserve
+#: -- so choosing CONSERVING means diverging from 92.2% of observed practice,
+#: for containment reasons, with the outcome cost unknown.
+DEFAULT_DECOMPOSITION_STRATEGY = DecompositionStrategy.CONSERVING
+
+DEFAULT_DECOMPOSITION_BASIS = (
+    "CONSERVING is the default because the architectural principle mandates "
+    "partitioning on containment grounds. Its effect on task success is "
+    "UNMEASURED -- the causal comparison is blocked on ground truth, not budget."
+)
+
+
 def decompose(task: TaskSpec):
+    """K-2. STILL RAISES, and the strategy question is no longer why.
+
+    THE STRATEGY IS SELECTED: `DEFAULT_DECOMPOSITION_STRATEGY` is CONSERVING,
+    on the basis above. That half of the blocker is resolved.
+
+    WHAT REMAINS IS INDEPENDENT OF SR-1 AND IS NOT A STRATEGY QUESTION:
+    nothing assigns a `claim_type` to a natural task. `TaskSpec.claim_type` is
+    required (`task.py:35`) and `grep claim_type gyza/` finds it declared there
+    and produced nowhere. `TaskSpec` also carries no file list, so a
+    FILE-PARTITIONED strategy has nothing to partition over -- CONSERVING is
+    not mechanically applicable to the input this function receives.
+
+    So a working decomposer is not one strategy decision away. Returning a
+    fabricated decomposition here would be worse than raising: the stub was
+    honest about not knowing, and a default that silently implied an outcome
+    basis it lacks would be the failure mode this module exists to avoid.
+    """
     raise NotSelectedError(
-        "K-2 requires SR-1, which is blocked: nothing assigns a claim type to a "
-        "task, and any corpus authored here would be measured instead of the "
-        "strategies (the R14 Part B4 failure). See "
-        "research/selection_routes/BLOCKED_SR1_SR2_SR4.md")
+        f"K-2 strategy IS selected ({DEFAULT_DECOMPOSITION_STRATEGY.value}; "
+        f"{DEFAULT_DECOMPOSITION_BASIS}). K-2 remains unimplementable for a "
+        f"DIFFERENT and independent reason: nothing assigns a claim_type to a "
+        f"natural task, and TaskSpec carries no file list for a "
+        f"file-partitioned strategy to operate over. See "
+        f"research/selection_routes/BLOCKED_SR1_SR2_SR4.md")
 
 
 _rr_cursor = {"i": 0}

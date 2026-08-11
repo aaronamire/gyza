@@ -84,6 +84,33 @@ def test_unselected_components_raise_and_name_the_blocking_artifact():
         assert "BLOCKED_SR1_SR2_SR4.md" in str(e.value)
 
 
+def test_k2_strategy_is_selected_even_though_k2_still_raises():
+    """The split: the STRATEGY question is answered, the IMPLEMENTATION is not,
+    and the raise names the second rather than the first."""
+    from gyza.coordination import (
+        DEFAULT_DECOMPOSITION_BASIS, DEFAULT_DECOMPOSITION_STRATEGY,
+        DecompositionStrategy,
+    )
+    assert DEFAULT_DECOMPOSITION_STRATEGY is DecompositionStrategy.CONSERVING
+    with pytest.raises(NotSelectedError) as e:
+        decompose(_task("x"))
+    msg = str(e.value)
+    assert "strategy IS selected" in msg
+    assert "claim_type" in msg, "the raise must name the REMAINING blocker"
+
+
+def test_the_default_basis_does_not_claim_an_outcome_benefit():
+    """A4: if a reader could come away believing CONSERVING was chosen because
+    it produces better task outcomes, the wording has failed. Pinned, because
+    this is the property most likely to be softened by a later edit."""
+    from gyza.coordination import DEFAULT_DECOMPOSITION_BASIS as B
+    assert "UNMEASURED" in B
+    assert "containment" in B.lower()
+    for forbidden in ("better outcome", "improves", "more successful",
+                      "higher success", "outperform"):
+        assert forbidden not in B.lower(), f"basis implies an outcome claim: {forbidden}"
+
+
 def test_k3_allocator_is_round_robin_per_sr2():
     """SR-2 measured type-routing 13pp WORSE than round-robin (0.3261 vs
     0.4565): a taxonomy too coarse to discriminate converts a spread into a bet
