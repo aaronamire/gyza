@@ -1,0 +1,37 @@
+{
+ "_status": "MEASURED from cached samples. Zero credits, no generation.",
+ "source": "consistency_defensibility/cache_A/*__SC__s1.json (2 samples per item per model, temp 0.7) + route3_attractor/items.json",
+ "k": 1,
+ "strata": {
+  "i_classic": {
+   "n_usable": 77,
+   "n_nonanswer": 3,
+   "attempt0_wrong": 11,
+   "recovered": 4,
+   "recovery_rate": 0.36363636363636365,
+   "attempt0_right": 66,
+   "newly_broken": 3,
+   "break_rate": 0.045454545454545456
+  },
+  "ii_noop": {
+   "n_usable": 159,
+   "n_nonanswer": 1,
+   "attempt0_wrong": 22,
+   "recovered": 4,
+   "recovery_rate": 0.18181818181818182,
+   "attempt0_right": 137,
+   "newly_broken": 9,
+   "break_rate": 0.06569343065693431
+  },
+  "iii_substitution": {
+   "n_usable": 78,
+   "n_nonanswer": 2,
+   "attempt0_wrong": 9,
+   "recovered": 1,
+   "recovery_rate": 0.1111111111111111,
+   "attempt0_right": 69,
+   "newly_broken": 2,
+   "break_rate": 0.028985507246376812
+  }
+ }
+}

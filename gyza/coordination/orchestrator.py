@@ -2,7 +2,9 @@
 K-4 executor pool, K-5 combiner, K-6 scheduler, H-1 escalation queue,
 O-2 metrics, O-3 alarms.
 
-K-3 (allocator) IS selected, by SR-2. K-7 (retry) is not, and raises.
+K-3 (allocator) IS selected, by SR-2. K-7 (retry) IS selected -- SR-4's
+question turned out DERIVABLE (exchangeable resamples cannot change expected
+accuracy without a verifier) and the derivation is confirmed on cached data.
 
 K-2 (decomposer) is now SPLIT, and the split is the point:
 
@@ -46,24 +48,28 @@ class DecompositionStrategy(str, Enum):
 
 #: K-2's SELECTED DEFAULT, and the basis is the whole value of naming it.
 #:
-#:   CONSERVING is the default because the architectural principle mandates
-#:   partitioning on CONTAINMENT grounds. Its effect on task success is
-#:   UNMEASURED -- the causal comparison is blocked on ground truth, not budget.
+#: NOTHING HERE SAYS CONSERVING PRODUCES BETTER OUTCOMES. The outcome effect has
+#: since been MEASURED and is NOT SIGNIFICANT -- depth-matched over n=480 real
+#: PRs, +0.0710 with overlapping CIs (research/sr1_matched/). That is an
+#: UNDERPOWERED NULL: the design's smallest detectable difference is 0.167, so a
+#: real effect below that could not have been seen, and the comparison is
+#: observational so it cannot be causal either way.
 #:
-#: READ THAT SECOND SENTENCE BEFORE CITING THIS CONSTANT. Nothing here says
-#: CONSERVING produces better outcomes. SR-1 could not test that: its CONSERVING
-#: arm reached n=14 against a preregistered floor of 15, and 11 of those 14 were
-#: depth 3, so structure and depth were entangled and the comparison would have
-#: been depth-confounded even at adequate n (research/corpus/FINDINGS_SR1.md).
-#: What SR-1 did measure is that only 7.8% of real human decompositions conserve
-#: -- so choosing CONSERVING means diverging from 92.2% of observed practice,
-#: for containment reasons, with the outcome cost unknown.
+#: What IS measured is that only ~8% of real human decompositions conserve, so
+#: choosing CONSERVING means diverging from ~92% of observed practice -- for
+#: CONTAINMENT reasons, with the outcome cost bounded but not zero.
 DEFAULT_DECOMPOSITION_STRATEGY = DecompositionStrategy.CONSERVING
 
 DEFAULT_DECOMPOSITION_BASIS = (
     "CONSERVING is the default because the architectural principle mandates "
-    "partitioning on containment grounds. Its effect on task success is "
-    "UNMEASURED -- the causal comparison is blocked on ground truth, not budget."
+    "partitioning on containment grounds. Its effect on task success is now "
+    "MEASURED AND NOT SIGNIFICANT, not unmeasured: depth-matched over n=480 "
+    "real PRs, CONSERVING failed at 0.0732 (3/41) against REVISITING 0.1441 "
+    "(32/222), a difference of +0.0710 with OVERLAPPING confidence intervals. "
+    "THAT IS AN UNDERPOWERED NULL, NOT EVIDENCE OF NO EFFECT -- the design's own "
+    "smallest detectable difference is 0.167, so a real effect below that could "
+    "not have been seen. The observational comparison also cannot be causal: "
+    "structure was not assigned. No outcome benefit is claimed."
 )
 
 
@@ -118,10 +124,51 @@ def allocate(task: TaskSpec, handlers: list[str]) -> str:
     return h
 
 
-def retry_policy(task: TaskSpec, attempts: int):
-    raise NotSelectedError(
-        "K-7 requires SR-4, which needs an executor with reproducible failures. "
-        "See BLOCKED_SR1_SR2_SR4.md")
+class RetryPolicy(str, Enum):
+    """K-7's variants, exactly as SR-4 specified them (BUILD_PLAN.md:234)."""
+
+    NO_RETRY = "NO_RETRY"                  # (a) fail to escalation immediately
+    BOUNDED_RETRY = "BOUNDED_RETRY"        # (b) k attempts, then escalate
+    RETRY_WITH_DECOMPOSITION = "RETRY_WITH_DECOMPOSITION"   # (c) decompose, retry parts
+
+
+#: K-7's SELECTED DEFAULT. Unlike K-2's, this basis IS measured.
+DEFAULT_RETRY_POLICY = RetryPolicy.NO_RETRY
+
+DEFAULT_RETRY_BASIS = (
+    "NO_RETRY is the default because retry WITHOUT A VERIFIER cannot improve "
+    "expected accuracy: independent resamples are EXCHANGEABLE, so a retry is "
+    "as likely to break a correct answer as to fix a wrong one. MEASURED on 314 "
+    "cached sample-pairs -- 9 recovered vs 14 broken, McNemar exact p = 0.4049, "
+    "consistent with a net effect of ZERO. This is NOT a claim that NO_RETRY "
+    "produces better outcomes; it is a claim that retry produces NO DIFFERENT "
+    "outcome, and SR-4's own decision rule then picks (a) because it is simpler "
+    "and cheaper. Escalation target is H-1."
+)
+
+
+def retry_policy(task: TaskSpec, attempts: int) -> RetryPolicy:
+    """K-7 — NO_RETRY, and the basis is DERIVED then confirmed on cached data.
+
+    SR-4 asked whether retry recovers failures or burns budget on reproducible
+    errors, with an equivalence bound of 3 percentage points on recovery rate
+    (BUILD_PLAN.md:232-238). It never ran. **The question turned out derivable.**
+
+    THE DERIVATION: two samples drawn from the same model at the same
+    temperature are EXCHANGEABLE. There is nothing that makes the first one
+    "the attempt" and the second "the retry". So P(fix a wrong answer) and
+    P(break a right one) are equal in expectation, and swapping in a resample
+    cannot change expected accuracy. **Retry helps only if you can SELECT the
+    better attempt -- and selecting requires a verifier, which is the
+    competence bound.**
+
+    CONFIRMED, not assumed: 9 recovered vs 14 broken over 23 discordant pairs
+    (McNemar exact p = 0.4049). See research/sr4_scope/.
+
+    WHAT THIS DOES NOT SAY: that retry is harmful. The net is statistically
+    indistinguishable from zero, which is exactly why the cheaper variant wins.
+    """
+    return DEFAULT_RETRY_POLICY
 
 
 # --------------------------------------------------------------------------- #

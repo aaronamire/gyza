@@ -76,12 +76,71 @@ def test_task_carries_carrier_and_knows_whether_it_composes():
 #  K-2 / K-3 / K-7 are DECLARED, not defaulted                                 #
 # --------------------------------------------------------------------------- #
 def test_unselected_components_raise_and_name_the_blocking_artifact():
-    """A default nobody chose is worse than an absence somebody noticed."""
-    for fn, args in ((decompose, (_task("x"),)),
-                     (retry_policy, (_task("x"), 1))):
-        with pytest.raises(NotSelectedError) as e:
-            fn(*args)
-        assert "BLOCKED_SR1_SR2_SR4.md" in str(e.value)
+    """A default nobody chose is worse than an absence somebody noticed.
+
+    Only K-2's IMPLEMENTATION still qualifies. K-7 no longer raises: SR-4's
+    question turned out derivable, so retry_policy ships a default.
+    """
+    with pytest.raises(NotSelectedError) as e:
+        decompose(_task("x"))
+    assert "BLOCKED_SR1_SR2_SR4.md" in str(e.value)
+
+
+def test_k7_ships_no_retry_on_a_derived_and_confirmed_basis():
+    """SR-4 asked whether retry recovers failures. Exchangeable resamples
+    cannot change expected accuracy without a verifier, and the cached data
+    confirms it: 9 recovered vs 14 broken, McNemar p=0.4049."""
+    from gyza.coordination import (
+        DEFAULT_RETRY_BASIS, DEFAULT_RETRY_POLICY, RetryPolicy,
+    )
+    assert DEFAULT_RETRY_POLICY is RetryPolicy.NO_RETRY
+    assert retry_policy(_task("x"), 1) is RetryPolicy.NO_RETRY
+    assert "exchangeable" in DEFAULT_RETRY_BASIS.lower()
+    assert "McNemar" in DEFAULT_RETRY_BASIS
+
+
+def _benefit_claimed(text: str) -> bool:
+    """Does the text ASSERT an outcome benefit, as opposed to DENYING one?
+
+    A bare substring scan cannot tell the two apart -- K-7's basis contains the
+    words "produces better outcomes" inside the sentence "This is NOT a claim
+    that NO_RETRY produces better outcomes". The first version of this guard
+    failed on exactly that, which is the label-versus-quantity species inside
+    the guard itself: it tested the presence of a phrase rather than the
+    property the phrase was standing in for.
+
+    So the check is per SENTENCE, and a sentence carrying a negation is not an
+    assertion of benefit.
+    """
+    phrases = ("better outcome", "improves", "more successful",
+               "higher success", "outperform")
+    for sentence in text.replace(";", ".").split("."):
+        s = sentence.lower()
+        if any(p in s for p in phrases) and " not " not in f" {s} ":
+            return True
+    return False
+
+
+def test_neither_default_claims_an_outcome_benefit():
+    """The property most likely to be softened by a later edit, for BOTH
+    defaults. K-7's basis must say retry makes NO DIFFERENCE, not that
+    NO_RETRY is better."""
+    from gyza.coordination import (
+        DEFAULT_DECOMPOSITION_BASIS, DEFAULT_RETRY_BASIS,
+    )
+    assert not _benefit_claimed(DEFAULT_DECOMPOSITION_BASIS)
+    assert not _benefit_claimed(DEFAULT_RETRY_BASIS)
+    assert "NOT SIGNIFICANT" in DEFAULT_DECOMPOSITION_BASIS
+    assert "NOT a claim" in DEFAULT_RETRY_BASIS
+
+
+def test_the_guard_itself_detects_a_real_benefit_claim():
+    """NEGATIVE CONTROL. A guard that has never refused anything has no
+    demonstrated power, and this one was just shown to fire on the wrong thing.
+    """
+    assert _benefit_claimed("CONSERVING improves task success.")
+    assert _benefit_claimed("Chosen because it produces better outcomes.")
+    assert not _benefit_claimed("This is NOT a claim that it improves anything.")
 
 
 def test_k2_strategy_is_selected_even_though_k2_still_raises():
@@ -99,16 +158,16 @@ def test_k2_strategy_is_selected_even_though_k2_still_raises():
     assert "claim_type" in msg, "the raise must name the REMAINING blocker"
 
 
-def test_the_default_basis_does_not_claim_an_outcome_benefit():
-    """A4: if a reader could come away believing CONSERVING was chosen because
-    it produces better task outcomes, the wording has failed. Pinned, because
-    this is the property most likely to be softened by a later edit."""
+def test_the_k2_basis_reports_the_measurement_rather_than_claiming_ignorance():
+    """A6. The basis used to say the outcome effect was UNMEASURED. It is now
+    measured and NOT SIGNIFICANT, and the basis must say the stronger, true
+    thing -- while still refusing to call an underpowered null 'no effect'."""
     from gyza.coordination import DEFAULT_DECOMPOSITION_BASIS as B
-    assert "UNMEASURED" in B
     assert "containment" in B.lower()
-    for forbidden in ("better outcome", "improves", "more successful",
-                      "higher success", "outperform"):
-        assert forbidden not in B.lower(), f"basis implies an outcome claim: {forbidden}"
+    assert "NOT SIGNIFICANT" in B
+    assert "UNDERPOWERED NULL" in B and "NOT EVIDENCE OF NO EFFECT" in B
+    assert "0.167" in B, "the detectable floor must stay visible"
+    assert not _benefit_claimed(B)
 
 
 def test_k3_allocator_is_round_robin_per_sr2():
