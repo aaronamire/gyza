@@ -124,6 +124,15 @@ conda/pip/openblas/MKL variants (`outcome_source` in `decompositions.json`).
 > **scikit-learn's suite is ~20 minutes per run on good hardware; 390 runs is
 > 130+ hours there and far worse here.**
 
+**And there is no substitute corpus.** Checked rather than assumed: a filesystem
+search for a SWE-bench-style corpus returned **nothing**, and the four cached
+datasets are `ai2_arc`, `hendrycks_math`, `mbpp`, `truthfulqa`. **None admits
+meaningful decomposition** — ARC and TruthfulQA are single-answer, hendrycks_math
+is a single final value, and MBPP is one function per problem (its completions
+measured ~150 tokens in 1.E). **A task you cannot decompose cannot test a
+decomposition strategy**, so the 181 human PRs are the only corpus in reach, and
+their ground truth exists only for the human work that produced them.
+
 **So SR-1 causal is blocked the same way SR-1 observational was, and the same
 way egress q is: not on budget, on GROUND TRUTH.** `BLOCKED_SR1_SR2_SR4.md`
 identified this originally — *"no task corpus with ground-truth outcomes"* — and
