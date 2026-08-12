@@ -17,7 +17,10 @@ from gyza.containment import (
 from gyza.containment.guardconfig import (
     GuardConfigError, GuardConfigStore, sign_config,
 )
-from gyza.containment.log import AppendOnlyLog, KIND_ROLLBACK
+from gyza.canon import values_equal
+from gyza.containment.log import (
+    KIND_ROLLBACK, KIND_WINDOW_OPEN, AppendOnlyLog,
+)
 from gyza.containment.staging import (
     NotInteriorError, PromotionGate, StagingArea,
 )
@@ -496,3 +499,88 @@ def test_guard_loosening_always_raises_an_o3_alarm():
     fired = alarms(m, invariants_evaluated=1, invariants_enforced=1,
                    guard_loosenings=["GUARD-LOOSENED (requested by 'op'): spend: 100.0 -> 250.0"])
     assert any("GUARD-LOOSENED" in a for a in fired)
+
+
+# --------------------------------------------------------------------------- #
+#  A — THE ACCOUNTING WINDOW HAS AN IDENTITY, AND THE ORIGIN CANNOT RE-BASE    #
+# --------------------------------------------------------------------------- #
+def test_a_window_id_is_the_marker_seq_and_is_immutable():
+    """The id is an append-only log seq, so there is no operation that could
+    change it. Immutable by construction rather than by discipline."""
+    st, _ = _staged()
+    assert st.current_window() == 0, "genesis is a real window, not a missing one"
+    w = st.open_window("period 1")
+    assert st.current_window() == w
+    for _ in range(5):
+        st.stage("p", "stage_artifact", {"delta": -1.0})
+        assert st.current_window() == w, "staging must not move the window"
+
+
+def test_two_evaluations_agree_on_which_window_they_measure_over():
+    """A2's property, stated as the test it is: if a caller can change the
+    answer by acting at a different moment, the frame still moves."""
+    st, gate = _staged()
+    w = st.open_window("period 1")
+    st.stage("p", "stage_artifact", {"delta": -1.0})
+    first_id, first_origin = st.current_window(), st.window_origin_state()
+    for _ in range(4):
+        st.stage("p", "stage_artifact", {"delta": -1.0})
+        gate.promote()
+    assert st.current_window() == first_id
+    assert values_equal(st.window_origin_state().total, first_origin.total), \
+        "promoting re-based the window origin -- the frame moved"
+
+
+def test_frequent_promotion_cannot_re_base_the_window_origin():
+    """A3. THE FIFTH INSTANCE of the moving-origin species is what this
+    prevents: promote() is public, so anchoring a cumulative bound to a
+    promotion anchors it to a caller's timing."""
+    st, gate = _staged()
+    st.open_window("period 1")
+    st.stage("p", "stage_artifact", {"delta": -1.0})
+    origin_before = st.window_origin_state()
+    for _ in range(10):
+        st.stage("p", "stage_artifact", {"delta": -1.0})
+        gate.promote()
+    assert values_equal(st.window_origin_state().total, origin_before.total)
+
+
+def test_negative_control_the_moving_checkpoint_DOES_re_base():
+    """The control that gives the test above its meaning.
+
+    `baseline_state()` is the rollback checkpoint and it MOVES on every
+    promotion -- exactly the frame SR-5 found the gate wrongly using. If this
+    assertion ever fails, the test above is passing vacuously because nothing
+    in the fixture moves at all.
+    """
+    st, gate = _staged()
+    st.open_window("period 1")
+    st.stage("p", "stage_artifact", {"delta": -1.0})
+    baseline_before = st.baseline_state()
+    st.stage("p", "stage_artifact", {"delta": -1.0})
+    gate.promote()
+    assert not values_equal(st.baseline_state().total, baseline_before.total), \
+        "the checkpoint did not move; this fixture cannot detect re-basing"
+
+
+def test_promotions_are_recorded_against_their_window():
+    st, gate = _staged()
+    st.stage("p", "stage_artifact", {"delta": -1.0}); gate.promote()
+    w1 = st.open_window("period 1")
+    st.stage("p", "stage_artifact", {"delta": -1.0}); gate.promote()
+    st.stage("p", "stage_artifact", {"delta": -1.0}); gate.promote()
+    ws = st.windows()
+    assert [x["window_id"] for x in ws] == [0, w1]
+    assert len(ws[0]["promotions"]) == 1
+    assert len(ws[1]["promotions"]) == 2, "promotions land in the open window"
+
+
+def test_the_window_marker_is_a_control_event_and_stays_out_of_domain_folds():
+    """A window boundary is accounting metadata, not work. If it leaked into
+    the domain fold every bound would count its own frame markers."""
+    st, _ = _staged()
+    st.stage("p", "stage_artifact", {"delta": -1.0})
+    st.open_window("period 1")
+    assert all(e.kind != KIND_WINDOW_OPEN for e in st.log.events())
+    assert any(e.kind == KIND_WINDOW_OPEN
+               for e in st.log.events(include_control=True))

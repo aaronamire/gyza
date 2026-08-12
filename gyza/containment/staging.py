@@ -33,7 +33,7 @@ from typing import Callable
 
 from gyza.containment.engine import Decision, GuardEngine, Phase
 from gyza.containment.log import (
-    KIND_PROMOTE, KIND_ROLLBACK, AppendOnlyLog, Event,
+    KIND_PROMOTE, KIND_ROLLBACK, KIND_WINDOW_OPEN, AppendOnlyLog, Event,
 )
 from gyza.containment.reversibility import Reversibility, ReversibilityTable
 
@@ -100,6 +100,70 @@ class StagingArea:
         return [e for e in self._log.events()
                 if e.seq <= upto and e.seq not in self._abandoned]
 
+    # -- the accounting window (C-6 frame identity) ------------------------
+    def open_window(self, reason: str = "") -> int:
+        """Open a new accounting window. Returns its immutable identifier.
+
+        THE IDENTIFIER IS THE MARKER'S SEQ, and that is why it cannot move:
+        `AppendOnlyLog.append` assigns `seq = len(self._events)` and never
+        rewrites one, so a window id is fixed the moment it exists.
+
+        WHAT THIS DECOUPLES, and it is the point. Cumulative bounds are stated
+        "per window". Before this, no window existed as a named thing, so the
+        only available boundary was a promotion -- and `promote()` is a public
+        method any caller may invoke at any moment. A bound anchored there is
+        anchored to a caller's timing. Windows now close ONLY on an explicit
+        `open_window`, so promoting more often does not re-base anything.
+        """
+        e = self._log.append("__control__", KIND_WINDOW_OPEN,
+                             {"reason": reason})
+        return e.seq
+
+    def current_window(self) -> int:
+        """The id of the window in force. DERIVED from the log, never stored.
+
+        0 means "the genesis window" -- no marker has been appended, so the
+        accounting origin is the run origin. That is a real window, not a
+        missing one, and it is why this returns 0 rather than None: an absent
+        window must not read as "unbounded" (the empty-record hole).
+        """
+        # include_control=True is REQUIRED: events() hides control kinds by
+        # default, so without it the marker is invisible and every window
+        # silently reads as genesis -- an absent frame reading as the most
+        # permissive one. Caught by the frame-stability check, not by review.
+        opens = [e.seq for e in self._log.events(include_control=True)
+                 if e.kind == KIND_WINDOW_OPEN]
+        return opens[-1] if opens else 0
+
+    def window_origin_state(self) -> object:
+        """State as of the CURRENT window's origin.
+
+        Distinct from `baseline_state()` (the moving rollback checkpoint) and
+        from `origin_state()` (the run origin). A cumulative bound stated "per
+        window" must be measured from here, and this value is constant for the
+        window's whole lifetime because `current_window()` is.
+        """
+        w = self.current_window()
+        return self._project([e for e in self._live(self._log.last_seq)
+                              if e.seq < w])
+
+    def windows(self) -> list[dict]:
+        """Append-only record of every window and the promotions inside it.
+
+        Reconstructed by folding the log rather than kept as a side table, so
+        it cannot disagree with the log it summarises.
+        """
+        out: list[dict] = [{"window_id": 0, "opened_at_seq": 0,
+                            "reason": "genesis", "promotions": []}]
+        for e in self._log.events(include_control=True):
+            if e.kind == KIND_WINDOW_OPEN:
+                out.append({"window_id": e.seq, "opened_at_seq": e.seq,
+                            "reason": e.payload.get("reason", ""),
+                            "promotions": []})
+            elif e.kind == KIND_PROMOTE:
+                out[-1]["promotions"].append(e.seq)
+        return out
+
     def origin_state(self) -> object:
         """State at the ORIGIN of the accounting period.
 
@@ -164,8 +228,11 @@ class StagingArea:
         return len(victims)
 
     def _mark_promoted(self, batch: int) -> None:
+        # The window id is recorded ON the promotion so the association is in
+        # the append-only record rather than inferred later from ordering.
         self._log.append("__control__", KIND_PROMOTE,
-                         {"through_seq": self._log.last_seq, "batch": batch})
+                         {"through_seq": self._log.last_seq, "batch": batch,
+                          "window_id": self.current_window()})
         self._watermark = self._log.last_seq
 
 

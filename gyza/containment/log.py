@@ -43,7 +43,18 @@ import blake3
 # Control events. Domain folds skip these; the audit view does not.
 KIND_PROMOTE = "__promote__"
 KIND_ROLLBACK = "__rollback__"
-CONTROL_KINDS = frozenset({KIND_PROMOTE, KIND_ROLLBACK})
+# An ACCOUNTING WINDOW boundary. A cumulative bound stated "per window" needs a
+# window that exists as a named thing; before this marker the boundary was
+# implicit in whenever a caller happened to invoke promote(), which made the
+# origin of every cumulative measurement caller-timed rather than fixed.
+#
+# It is a LOG EVENT, not a field on the staging area, and that is the whole
+# design: the window's identity is its marker's `seq`, and an append-only log
+# never rewrites a seq. So the origin cannot re-base for the lifetime of the
+# window -- not by discipline, but because there is no operation that would do
+# it. Derived-not-stored, applied to the frame itself.
+KIND_WINDOW_OPEN = "__window_open__"
+CONTROL_KINDS = frozenset({KIND_PROMOTE, KIND_ROLLBACK, KIND_WINDOW_OPEN})
 
 GENESIS = "0" * 64
 
