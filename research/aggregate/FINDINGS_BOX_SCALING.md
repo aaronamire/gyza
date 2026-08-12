@@ -163,7 +163,107 @@ text stands unedited there; this is the correction of record.
 
 ---
 
-## 7. What would close it
+## 7. THE CHEAPNESS IS REDISTRIBUTION, NOT CREATION — correcting §4a
+
+§4a says the floor decays as 1/(m−1) and calls the constraint cheap at scale.
+**That is true per participant and false in aggregate.**
+
+| M | individual floor `L` | **aggregate floor `(m−1)L`** |
+|---|---|---|
+| 2 | 13.33333 | **13.3333** |
+| 10 | 1.48148 | **13.3333** |
+| 100 | 0.13468 | **13.3333** |
+| 1000 | 0.01335 | **13.3333** |
+| 10000 | 0.00133 | **13.3333** |
+
+> **`(m−1)L = U(1−κ)/κ` is invariant in m.** The federation's total committed
+> floor never shrinks — it is **redistributed** over more participants.
+
+**This is still the right shape for planetary scale** — a fixed collective cost
+spread across a billion participants is individually negligible, which is how
+planetary systems work at all. **But "it gets cheaper with scale" was too
+generous and is withdrawn.** It gets cheaper *per participant*. It does not get
+cheaper.
+
+Pinned by `test_the_AGGREGATE_floor_is_INVARIANT_in_m`.
+
+---
+
+## 8. THE EXIT HOLE — the sharp edge of the entire result
+
+§4c establishes that **underestimating m is conservative**. The converse is the
+danger, and it is severe:
+
+> **`L` is DECREASING in m. So a floor that was safe at m = 1000 is
+> catastrophically unsafe at m = 100.** Underestimating is safe; **the estimate
+> going stale downward is not.**
+
+| assumed M | actual M | enforced floor | worst-case concentration | |
+|---|---|---|---|---|
+| 1000 | 100 | 0.0133 | **0.9380** | breach (κ = 0.60) |
+| 1000 | 10 | 0.0133 | **0.9940** | breach |
+| 100 | 3 | 0.1347 | **0.9867** | breach |
+
+**Not a marginal breach — near-total concentration.**
+
+> ### So "no coordination required" is not quite the claim. The honest claim is: **no coordination required except a membership failure detector.**
+>
+> Reliable failure detection at planetary scale is a **classically hard**
+> problem — you cannot distinguish a slow participant from a departed one. This
+> is a **real dependency**, and it is the thing most likely to be attacked in
+> diligence.
+
+**One mitigating observation, recorded as design rather than result:** Gyza's
+network layer already carries `AgentAdvertisement` with `ttl_seconds` and
+`last_seen`. **TTL expiry is an exit detector with a bounded staleness window**,
+which is exactly the shape required — the floor must track the count of
+*unexpired* advertisements. **Not built, not tested, and it converts the problem
+from "unsolvable" to "bounded by TTL."**
+
+Pinned by `test_underestimating_the_federation_size_is_conservative` and
+`test_negative_control_m_FALLING_breaks_the_box`.
+
+---
+
+## 9. THE BOUNDARY — this result does not extend to cumulative quantities
+
+**C7 (`BUILD_PLAN.md:32`, from R13) stands unchanged:**
+
+> *"**Statelessness ⊥ cumulative bounding.** No stateless local check bounds a
+> cumulative quantity. Cumulative bounds require a serialization point."*
+
+And AG-3 says so of its own data: *"the cumulative column is a CONTROL and is
+**DEFINITIONAL**. No guard here bounds cumulative drain."*
+
+| quantity class | example | locally boundable? |
+|---|---|---|
+| **instantaneous ratio** | concentration — max share of the federation | ✅ **yes, via the box, at any scale** |
+| **cumulative** | total value drained over a trajectory | ❌ **no, at any scale, without serialization** |
+
+Pinned by `test_the_box_is_a_statement_about_an_INSTANTANEOUS_quantity_only`.
+
+---
+
+## 10. THE ANSWER, STATED PRECISELY
+
+> **Instantaneous ratio harms — "no agent controls too much" — are boundable at
+> planetary scale, with no coordination, at a fixed collective cost spread
+> arbitrarily thin, PROVIDED exits are detected.**
+>
+> **Cumulative harms — "no more than X total damage" — are not boundable at any
+> scale without a serialization point.**
+
+**Note which is which.** The boundable class is a *distribution* property. The
+unboundable class is the one people usually mean by *"beneficial."*
+
+**On the trajectory of this claim**, recorded because it matters: I said
+*obstructed*, then *favourable*, now this. **The first two were single global
+verdicts and both were wrong.** This one decomposes by quantity class and names
+its dependency, and that is why I expect it to hold.
+
+---
+
+## 11. What would close it
 
 **A federation environment that expresses M > 3.** That is a *build*, not a
 sweep — `principals` and `arena` must generalise, and building it means
