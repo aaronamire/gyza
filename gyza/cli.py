@@ -595,6 +595,9 @@ def cmd_status(args: argparse.Namespace) -> int:
     # ledger DB hasn't been created.
     _print_economy_section(cfg)
 
+    # C-8 — the declared harm model and whether its bounds are signed.
+    _print_containment_section(cfg)
+
     print()
     print("recent work items:")
     for r in recent:
@@ -770,6 +773,55 @@ def _print_global_section(cfg: GyzaConfig) -> None:
         for p in peers[:5]:
             tier_label = f"T{p.attestation_tier}" if p.attestation_tier else "T0"
             print(f"    - {p.compositor_pubkey[:16]}…  {tier_label}  {p.multiaddr}")
+
+
+def _print_containment_section(cfg: GyzaConfig) -> None:
+    """The declared harm model, its bounds, and WHO SIGNED THEM.
+
+    This section exists because the gap it reports was previously invisible.
+    The bounds sat in an ordinary repo file, `readiness()` answered
+    `can_claim_containment: True` over them, and nothing anywhere told a reader
+    that the trust root of the whole containment argument was a text file. A
+    gap an operator cannot see is one nobody closes.
+    """
+    try:
+        from gyza.containment.engine import GuardEngine
+        from gyza.containment.gyza_model import UNMODELLED, build_registries
+        harm, inv = build_registries()
+        r = GuardEngine(harm, inv).readiness()
+    except Exception:  # noqa: BLE001 - status must work on a broken install
+        return
+
+    prov = r["bounds_provenance"]
+    print()
+    print("containment (declared harm model):")
+    for c in harm:
+        try:
+            print(f"  {c.id:22s} bound {harm.bound(c.id):>10.2f}")
+        except Exception:  # noqa: BLE001
+            print(f"  {c.id:22s} bound   UNDECLARED")
+    for cid, why in UNMODELLED.items():
+        print(f"  {cid:22s} NOT MODELLED — {why.split('(')[0].strip()}")
+
+    if prov["trusted"]:
+        print(f"  bounds: SIGNED (v{prov['version']}, authority "
+              f"{prov['authority_pubkey'][:16]}…)")
+    else:
+        print(f"  bounds: NOT SIGNED — {prov['source']}")
+        print("    The guard configuration is the trust root of every "
+              "containment claim.")
+        print("    Unsigned, it can be edited by the system it constrains, so "
+              "the claim")
+        print("    has no base case. Sign it: scripts/sign_guard_config.py "
+              "--generate-key")
+    print(f"  can claim containment: "
+          f"{'YES' if r['can_claim_containment'] else 'NO'}")
+    # Do not let "the model is bounded" read as "the model is enforced".
+    print("  NOTE: no runtime gate consults these bounds yet — they are "
+          "measurable,")
+    print("        not enforced. Authority containment IS enforced, separately,"
+          " by")
+    print("        the per-work-item gate in gyza/runner.py.")
 
 
 def _print_economy_section(cfg: GyzaConfig) -> None:

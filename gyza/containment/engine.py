@@ -127,13 +127,29 @@ class GuardEngine:
         }
 
     def readiness(self) -> dict:
-        """What this guard can and cannot currently claim."""
+        """What this guard can and cannot currently claim.
+
+        `can_claim_containment` REQUIRES SIGNED BOUNDS (C-8), and that is a
+        strengthening, not a formality. Every containment argument here is an
+        induction over admitted transitions; if the constrained system can
+        rewrite the bound, the induction has no base case. Bounds read from an
+        ordinary repo file are exactly that case, so a guard holding them may
+        report its levels and must not claim containment over them.
+
+        The three obstacles are reported separately -- unbounded classes,
+        uncovered classes, unsigned bounds -- because they have different
+        remedies and a single boolean would hide which one is in force.
+        """
+        prov = self._harm.bounds_provenance
         return {
             "harm_classes": [c.id for c in self._harm],
             "unbounded": self._harm.unbounded(),
             "mutable_frames": self._harm.mutable_frames(),
             "uncovered": self._inv.uncovered([c.id for c in self._harm]),
+            "bounds_provenance": prov.as_dict(),
+            "bounds_signed": prov.trusted,
             "can_claim_containment": (not self._harm.unbounded()
                                       and not self._inv.uncovered(
-                                          [c.id for c in self._harm])),
+                                          [c.id for c in self._harm])
+                                      and prov.trusted),
         }

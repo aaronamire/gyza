@@ -293,6 +293,25 @@ class GuardConfigStore:
         return cfg
 
     def apply_to(self, harm_registry) -> None:
-        """Push verified bounds into C-1. Bounds reach the harm registry ONLY
-        through a verified configuration."""
-        harm_registry.load_bounds(self.config.bounds)
+        """Push verified bounds into C-1, stamped with their provenance.
+
+        THE SENTENCE THIS USED TO CARRY -- "Bounds reach the harm registry ONLY
+        through a verified configuration" -- WAS FALSE. `load_bounds` and
+        `load_bounds_file` are public and `gyza_model.build_registries` called
+        the file loader directly, so bounds reached C-1 without ever passing
+        here. An unenforced invariant is an assumption.
+
+        It is now checkable rather than asserted: this is the only call site
+        that stamps SIGNED provenance, and `can_claim_containment` reads it. Any
+        other route leaves the registry UNSIGNED and unable to claim
+        containment.
+        """
+        from gyza.containment.harm import BoundsProvenance
+        cfg = self.config
+        harm_registry.load_bounds(cfg.bounds, BoundsProvenance(
+            source="SIGNED",
+            detail=f"verified against authority {self._authority.hex()[:16]}…",
+            authority_pubkey_hex=cfg.authority_pubkey_hex,
+            version=cfg.version,
+            config_hash=cfg.config_hash,
+        ))

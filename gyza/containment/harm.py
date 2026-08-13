@@ -29,6 +29,53 @@ class UnsetBoundError(RuntimeError):
     bound. FAILS CLOSED: an undeclared bound is not an infinite bound."""
 
 
+class UnsignedBoundsError(RuntimeError):
+    """Raised when signed bounds were required and the source was not signed."""
+
+
+@dataclass(frozen=True)
+class BoundsProvenance:
+    """HOW the bounds got here — a first-class fact, never an assumption.
+
+    C-8's whole argument is an induction: the invariant holds at s0 and every
+    admitted transition preserves it. **If the constrained system can rewrite
+    the bound, there is no base case.** So "what is the bound" and "who says so"
+    are different questions and the registry must be able to answer the second.
+
+    `GuardConfigStore.apply_to` documented that "bounds reach the harm registry
+    ONLY through a verified configuration" -- and that was FALSE, because
+    `load_bounds`/`load_bounds_file` are public and `gyza_model.build_registries`
+    called the file loader directly. An unenforced invariant is an assumption.
+    This type is what makes the sentence checkable.
+
+    `UNSET` and `UNSIGNED_FILE` are both untrusted, and they are kept DISTINCT:
+    "no bounds at all" and "bounds nobody signed" are different states and
+    collapsing them would hide one behind the other.
+    """
+    source: str                       # SIGNED | UNSIGNED_FILE | UNSET
+    detail: str = ""
+    authority_pubkey_hex: str = ""
+    version: int | None = None
+    config_hash: str = ""
+
+    @property
+    def trusted(self) -> bool:
+        """Only a verified configuration is trusted. Note there is no default
+        that returns True: an absent provenance must never read as a signed
+        one."""
+        return self.source == "SIGNED"
+
+    def as_dict(self) -> dict:
+        return {"source": self.source, "detail": self.detail,
+                "authority_pubkey": self.authority_pubkey_hex,
+                "version": self.version, "config_hash": self.config_hash,
+                "trusted": self.trusted}
+
+
+UNSET_PROVENANCE = BoundsProvenance(
+    source="UNSET", detail="no bounds have been loaded")
+
+
 @dataclass(frozen=True)
 class HarmClass:
     id: str
@@ -52,6 +99,7 @@ class HarmClass:
 class HarmModelRegistry:
     def __init__(self) -> None:
         self._classes: dict[str, HarmClass] = {}
+        self._provenance: BoundsProvenance = UNSET_PROVENANCE
 
     def register(self, hc: HarmClass) -> None:
         if hc.id in self._classes:
@@ -74,11 +122,24 @@ class HarmModelRegistry:
         return self._classes[cid]
 
     # -- bounds: LOADED, never invented ------------------------------------
-    def load_bounds(self, bounds: dict[str, float]) -> None:
+    @property
+    def bounds_provenance(self) -> BoundsProvenance:
+        """Who declared the bounds in force, and whether they were signed."""
+        return self._provenance
+
+    def load_bounds(self, bounds: dict[str, float],
+                    provenance: BoundsProvenance | None = None) -> None:
         """Apply declared bound levels. This is the ONLY way a bound enters the
         registry; nothing here derives a default. Unknown ids are an error
         rather than a silent no-op, because a typo'd id would leave the class
-        it was meant to bound silently unbounded."""
+        it was meant to bound silently unbounded.
+
+        `provenance` is RECORDED, not checked here -- this module imports
+        nothing from any guard module (the C-1 gate), so it cannot verify a
+        signature and must not pretend to. Omitting it records UNSIGNED, which
+        is the honest reading of "someone called the public setter": the caller
+        held no verified configuration, or it would have passed one.
+        """
         for cid, level in bounds.items():
             if cid not in self._classes:
                 raise KeyError(f"bound declared for unknown harm class {cid!r}")
@@ -90,10 +151,23 @@ class HarmModelRegistry:
                 frame=hc.frame, frame_mutable=hc.frame_mutable,
                 code_path=hc.code_path, bound=float(level),
             )
+        self._provenance = provenance or BoundsProvenance(
+            source="UNSIGNED_FILE",
+            detail="load_bounds() was called without a verified configuration")
 
     def load_bounds_file(self, path: str | Path) -> None:
+        """Load bounds from a PLAIN, UNSIGNED file.
+
+        Kept, and deliberately not made to fail: a declared-but-unsigned model
+        is the honest development state and refusing it would only push callers
+        to hardcode levels. What changed is that it no longer passes silently --
+        the provenance records UNSIGNED_FILE, `readiness()` reports it, and
+        `can_claim_containment` is False. Use
+        `GuardConfigStore.apply_to(registry)` for the trusted path.
+        """
         data = json.loads(Path(path).read_text())
-        self.load_bounds(data.get("bounds", data))
+        self.load_bounds(data.get("bounds", data), BoundsProvenance(
+            source="UNSIGNED_FILE", detail=f"plain file {Path(path).name}"))
 
     def bound(self, cid: str) -> float:
         hc = self.get(cid)

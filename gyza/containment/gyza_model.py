@@ -102,6 +102,7 @@ DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
 
 def build_registries(
     bounds_file: str | Path | None = DEFAULT_BOUNDS_FILE,
+    authority_pubkey: bytes | None = None,
 ) -> tuple[HarmModelRegistry, InvariantRegistry]:
     harm = HarmModelRegistry()
     harm.register(HarmClass(
@@ -163,6 +164,38 @@ def build_registries(
     # D1 — bounds are LOADED, never invented here. Passing bounds_file=None
     # yields an unbounded registry that refuses everything, which is the
     # correct behaviour before a model is declared.
+    #
+    # C-8 — WHICH LOADER RUNS IS THE WHOLE QUESTION. With an authority key the
+    # bounds must arrive through a VERIFIED configuration, and an unsigned file
+    # is refused outright: a guard whose bounds the constrained system can edit
+    # has no base case for its induction. Without one they still load, but the
+    # registry records UNSIGNED and `readiness()` will not claim containment.
+    if authority_pubkey is not None:
+        from gyza.containment.guardconfig import GuardConfigError, GuardConfigStore
+        from gyza.containment.harm import UnsignedBoundsError
+        if bounds_file is None or not Path(bounds_file).exists():
+            raise UnsignedBoundsError(
+                f"an authority key was supplied but no configuration exists at "
+                f"{bounds_file!r}. Refusing to run unconfigured: an absent "
+                f"policy is not a permissive policy")
+        store = GuardConfigStore(authority_pubkey)
+        try:
+            store.load_file(bounds_file)
+        except (KeyError, TypeError) as e:
+            # A PLAIN bounds file has no "config"/"signature" envelope. Naming
+            # that specifically matters: the failure is "these bounds are
+            # unsigned", not "the signature is wrong", and the remedies differ.
+            raise UnsignedBoundsError(
+                f"{Path(bounds_file).name} is not a SIGNED configuration "
+                f"({type(e).__name__}: {e}). Sign it with "
+                f"scripts/sign_guard_config.py, or omit authority_pubkey to "
+                f"run with unsigned bounds and no containment claim") from None
+        except GuardConfigError as e:
+            raise UnsignedBoundsError(
+                f"the guard configuration did not verify: {e}") from None
+        store.apply_to(harm)
+        return harm, inv
+
     if bounds_file is not None and Path(bounds_file).exists():
         harm.load_bounds_file(bounds_file)
     return harm, inv

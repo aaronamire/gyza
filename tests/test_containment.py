@@ -239,12 +239,23 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     assert r["uncovered"] == []
 
 
-def test_declared_bounds_file_lifts_the_d1_gate():
-    """The declared model (guard_bounds.json, user decision 2026-07-31)."""
+def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
+    """The declared model (guard_bounds.json, user decision 2026-07-31).
+
+    D1 IS LIFTED AND C-8 IS NOT, and separating them is the point. The bounds
+    are declared, so nothing is unbounded or uncovered — but they come from an
+    ordinary repo file, and a guard whose bounds the constrained system can
+    rewrite has no base case for its induction. Containment is therefore
+    REPORTABLE and not CLAIMABLE. `tests/test_guard_config_c8.py` shows the
+    signed path lifting it.
+    """
     h, i = build_registries()
     r = GuardEngine(h, i).readiness()
-    assert r["can_claim_containment"] is True
     assert r["unbounded"] == []
+    assert r["uncovered"] == []
+    assert r["bounds_signed"] is False
+    assert r["can_claim_containment"] is False, (
+        "unsigned bounds must not support a containment claim (C-8)")
     assert h.bound("H4_authority") == 0.0, (
         "authority exceedance is a BREACH, not a budget — the attenuation "
         "theorem says it cannot happen at all")
