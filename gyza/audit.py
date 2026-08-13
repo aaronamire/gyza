@@ -33,7 +33,10 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
+
+if TYPE_CHECKING:                    # no runtime import: see `governed` below
+    from gyza.verification.ledger import LedgerReport
 
 import blake3
 
@@ -66,6 +69,12 @@ class AuditReport:
     actions: list[ActionAudit]
     valid: bool                 # dag.valid AND every action row ok
     summary: str
+    # Present only when audited with ``governed=True``. It records, for every
+    # check this audit performed, whether the check's SPECIFICATION is under
+    # attestation -- a strictly separate question from whether the check
+    # passed. ``valid`` above is computed identically either way and never
+    # reads this field; see ``audit_provenance``.
+    governance: "LedgerReport | None" = None
 
 
 def audit_provenance(
@@ -75,9 +84,29 @@ def audit_provenance(
     resolve_manifest: ManifestResolver,
     require_closed: bool = True,
     require_all_artifacts: bool = True,
+    governed: bool = False,
 ) -> AuditReport:
     """
     Audit a whole workflow in one call.
+
+    ``governed`` (opt-in) additionally records every check this audit performs
+    as a typed claim, routes each through the ATTESTED specification registry,
+    and returns the result on ``report.governance``. It answers a question the
+    verdict cannot: *is the specification of the check I just ran under
+    attestation?*
+
+    **It cannot change the verdict.** ``valid`` is computed identically with
+    the flag on or off (pinned by test), for two reasons. Gating the product
+    surface on the governance layer would change when an audit passes, which is
+    a semantic change to a forensic verdict rather than wiring. And the two
+    answer different questions: ``valid`` reports what was REQUIRED and met,
+    ``governance`` reports what was PROVED and under whose attested spec. An
+    audit run with ``require_all_artifacts=False`` on a partial replica is
+    legitimately VALID while leaving content-address claims UNEVALUATED, and
+    collapsing those would destroy the distinction.
+
+    Off by default: with the flag unset nothing in ``gyza.verification`` is
+    imported or executed, so the audit path is unchanged byte for byte.
 
     ``require_closed`` is forwarded to ``verify_dag`` (every non-root
     spine parent must be held — DAG-form tamper/loss detection).
@@ -100,10 +129,37 @@ def audit_provenance(
     envs = list(envelopes)
     dag = verify_dag(envs, require_closed=require_closed)
 
+    ledger = None
+    if governed:
+        from gyza.verification.ledger import ClaimLedger
+        ledger = ClaimLedger()
+        # `require_closed` is a VERDICT-CHANGING PARAMETER, so the claim names
+        # it. An unnamed one is the determinacy failure the carrier rule
+        # refuses -- the same verifier would prove a different proposition
+        # depending on a value the claim did not carry.
+        ledger.emit("envelope_dag", envs, require_closed=require_closed,
+                    note=f"{len(envs)} envelopes")
+
     rows: list[ActionAudit] = []
     for env in envs:
         eh = compute_envelope_hash(env)
         art = resolve_artifact(env.output_hash)
+
+        if ledger is not None:
+            try:
+                pk = bytes.fromhex(env.agent_pubkey)
+            except ValueError:
+                # A malformed key is UNEVALUABLE, not a forgery. Passing None
+                # makes the verifier raise, which the ledger records as
+                # UNEVALUATED -- never as a refutation.
+                pk = None
+            ledger.emit("envelope_signature", env, pk, note=env.action_id)
+            # `art` is None when the artifact did not resolve. The registered
+            # verifier REFUSES a non-bytes input, so that lands as UNEVALUATED
+            # ("could not check") rather than REFUTED ("the bytes are wrong"),
+            # which is exactly the distinction `reason` draws below.
+            ledger.emit("artifact_content_address", art, env.output_hash,
+                        note=env.action_id)
 
         binding_ok = (
             art is not None
@@ -145,6 +201,11 @@ def audit_provenance(
                     )
                     if not within_bounds:
                         reason = f"out of bounds: {why}"
+                if ledger is not None and manifest is not None:
+                    ledger.emit("manifest_identity", manifest,
+                                env.capability_manifest_hash, note=env.action_id)
+                    ledger.emit("enforcement_within_manifest", enf, manifest,
+                                note=env.action_id)
 
         # A missing artifact fails closed under require_all_artifacts (a
         # withheld artifact could conceal an over-bound execution); with the
@@ -164,6 +225,8 @@ def audit_provenance(
             ok=row_ok, reason=reason,
         ))
 
+    # NOTE the ordering: `valid` is computed from `dag` and `rows` alone. The
+    # governance fold happens afterwards and feeds nothing back.
     valid = dag.valid and all(r.ok for r in rows)
     n_exec = sum(1 for r in rows if r.is_execution)
     summary = (
@@ -172,7 +235,16 @@ def audit_provenance(
         f"dag={'VALID' if dag.valid else 'INVALID'}; "
         f"verdict={'VALID' if valid else 'INVALID'}"
     )
-    return AuditReport(dag=dag, actions=rows, valid=valid, summary=summary)
+
+    governance = None
+    if ledger is not None:
+        from gyza.verification.adapters import build_registries
+        from gyza.verification.migration import governed_router
+        verifiers, _specs = build_registries()
+        governance = ledger.verify_all(governed_router(), verifiers)
+
+    return AuditReport(dag=dag, actions=rows, valid=valid, summary=summary,
+                       governance=governance)
 
 
 def audit_from_store(
@@ -231,6 +303,32 @@ def render_audit_report(
         lines.append(f"  [{kind}] {mark}  {r.action_id}")
         if not r.ok:
             lines.append(f"           reason: {r.reason}")
+    g = report.governance
+    if g is not None:
+        lines.append(thin)
+        lines.append("Specification governance (separate from the verdict):")
+        lines.append(
+            f"  {g.n_claims} checks recorded — {g.counts.get('VERIFIED', 0)} "
+            f"verified, {g.counts.get('REFUTED', 0)} refuted, "
+            f"{g.counts.get('UNEVALUATED', 0)} unevaluated")
+        if g.fully_governed:
+            lines.append(
+                f"  All {g.n_governed} run under an ATTESTED specification.")
+        else:
+            lines.append(
+                f"  {g.n_governed}/{g.n_claims} run under an attested "
+                f"specification.")
+            lines.append(
+                f"  NOT ATTESTED: {', '.join(g.ungoverned_types)}")
+            lines.append(
+                "  These checks RAN and are reported above. What is missing is "
+                "a signed")
+            lines.append(
+                "  specification fixing what they prove — so their result is "
+                "not")
+            lines.append(
+                "  independently interpretable. This does NOT weaken the "
+                "verdict below.")
     lines.append(thin)
     if report.valid:
         lines.append("VERDICT: VALID")

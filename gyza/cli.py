@@ -644,7 +644,13 @@ def cmd_audit(args: argparse.Namespace) -> int:
         return 1
 
     store = ArtifactStore(base_path="~/.gyza/artifacts")
-    report = audit_from_store(envelopes, store, require_closed=True)
+    # `governed=True`: route every check this audit performs through the
+    # attested specification registry and print the coverage alongside the
+    # verdict. It cannot change the verdict — an evaluator is told which checks
+    # rest on a signed spec and which do not, rather than being asked to
+    # assume.
+    report = audit_from_store(envelopes, store, require_closed=True,
+                              governed=True)
     print(render_audit_report(report, title=f"GYZA AUDIT — {args.intent_id}"))
     return 0 if report.valid else 1
 

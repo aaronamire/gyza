@@ -108,6 +108,29 @@ class LedgerReport:
                 f"-> chain tier {self.chain_tier}, "
                 f"{'ADMISSIBLE' if self.admissible else 'REFUSED'}")
 
+    # GOVERNANCE COVERAGE IS A SEPARATE AXIS FROM THE VERDICT, and conflating
+    # them would be the error this whole layer exists to prevent. A claim can
+    # be VERIFIED by a verifier whose SPECIFICATION nobody has attested: the
+    # check ran and passed, but what proposition it establishes is not fixed by
+    # the registry. That is a weaker thing than an attested pass and must not
+    # be reported as the same thing -- nor as a failure.
+    @property
+    def n_governed(self) -> int:
+        return sum(1 for v in self.verdicts if v.governed)
+
+    @property
+    def ungoverned_types(self) -> list[str]:
+        """Claim types whose spec is not attested, in first-seen order."""
+        seen: list[str] = []
+        for v in self.verdicts:
+            if not v.governed and v.claim_type not in seen:
+                seen.append(v.claim_type)
+        return seen
+
+    @property
+    def fully_governed(self) -> bool:
+        return bool(self.verdicts) and not self.ungoverned_types
+
 
 class ClaimLedger:
     """Collects typed claims and answers what they jointly establish.
