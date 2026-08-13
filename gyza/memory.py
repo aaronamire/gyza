@@ -408,6 +408,12 @@ class EpisodicMemory:
         # Set only when retrieve_similar(emit_claim=True) is used; None means
         # NO CLAIM WAS PRODUCED, never "the claim was empty".
         self.last_retrieval_claim = None
+        # THE CONSUMER. Optional, and None means claims are recorded nowhere --
+        # which is the state this attribute exists to end. A claim stashed on
+        # `last_retrieval_claim` and read by nobody is not verification; it is
+        # an assertion with a nice type. Attach a `ClaimLedger` and the claim
+        # carries the arguments needed to RECHECK it.
+        self.claim_ledger = None
 
         # Try LanceDB first; fall back to SQLite if anything in the
         # initialization path raises (missing wheel, schema mismatch,
@@ -508,6 +514,18 @@ class EpisodicMemory:
         if emit_claim:
             self.last_retrieval_claim = self._build_retrieval_claim(
                 results, k, min_similarity, success_only)
+            if self.claim_ledger is not None:
+                # The claim type comes from the OPERATION, not from classifying
+                # the task -- `retrieve_similar` emits this type because that is
+                # what it did. (BLOCKED_SR1's "assigning a claim type is itself
+                # tier-3" binds decomposition, not emission.)
+                self.claim_ledger.emit(
+                    "memory_retrieval_relevance",
+                    self.last_retrieval_claim,
+                    [(e.episode_id, e.task_embedding, bool(e.success))
+                     for e in self._backend.all_for_agent()],
+                    q_vec,
+                    note=f"retrieve_similar k={k} thr={min_similarity}")
         return results
 
     def _build_retrieval_claim(self, results, k, min_similarity, success_only):
@@ -572,7 +590,14 @@ def build_enriched_prompt(
     current_task: str,
     max_episodes: int = 5,
 ) -> str:
-    episodes = memory.retrieve_similar(current_task, k=max_episodes)
+    # THE PRODUCTION RETRIEVAL PATH (AgentRunner._execute -> here). Emit the
+    # claim exactly when a consumer is attached: `retrieve_similar` documents
+    # that claim construction is O(corpus) and must not sit on the hot path, so
+    # attaching a ledger is the deliberate opt-in that docstring asks for. With
+    # no ledger the cost and the behaviour are unchanged.
+    episodes = memory.retrieve_similar(
+        current_task, k=max_episodes,
+        emit_claim=memory.claim_ledger is not None)
     if not episodes:
         return base_prompt
     few_shot = memory.format_as_few_shot(episodes)

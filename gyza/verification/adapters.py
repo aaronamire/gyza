@@ -68,6 +68,14 @@ def _market_capital_fold(market, pubkey, expected) -> bool:
 
 def _artifact_content_address(data: bytes, address: str) -> bool:
     import blake3
+    # `blake3.blake3(None)` DOES NOT RAISE -- it returns the digest of the
+    # EMPTY string, so without this guard a claim that ABSENT content sits at
+    # the empty address VERIFIED, at tier 1, PROOF-carried. Absent content and
+    # empty content are different claims and must not share an address.
+    if not isinstance(data, (bytes, bytearray, memoryview)):
+        raise TypeError(
+            f"content address is defined over bytes; got {type(data).__name__}. "
+            f"This is UNEVALUATED, not a refutation.")
     return blake3.blake3(data).hexdigest() == address
 
 
@@ -75,11 +83,21 @@ def _unit_test_execution(fn, cases) -> bool:
     """The unit-test adapter. Deliberately labelled TEST-carried at the call
     site: SR-3 measured that a finite sample catches NOTHING under composition
     (0.000, n=4), so a chain containing this adapter is tier 3 per the tier
-    algebra even though the adapter itself is mechanical."""
-    try:
-        return all(fn(x) == y for x, y in cases)
-    except Exception:
-        return False
+    algebra even though the adapter itself is mechanical.
+
+    THE CATCH IS NARROWED TO THE CALL. A function that raises on a case has
+    genuinely failed that case, so `False` is the right verdict there. A
+    MALFORMED `cases` is a harness error and must propagate -- the blanket
+    `except Exception` reported "the claim is false" for both, which are
+    opposite claims (artifact #16's species).
+    """
+    for x, y in cases:                       # malformed cases raise, correctly
+        try:
+            if fn(x) != y:
+                return False
+        except Exception:                    # noqa: BLE001 - a raising case failed
+            return False
+    return True
 
 
 def _memory_retrieval_topk(claim, candidates, query_vec) -> bool:
