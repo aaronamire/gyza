@@ -88,12 +88,22 @@ def _market(idn):
 # --------------------------------------------------------------------------- #
 #  C-1 harm quantities                                                         #
 # --------------------------------------------------------------------------- #
-class _S:
-    owner = "A"
-    entries: list = []
-    active_holds = 0.0
-    capital = 100.0
-    authority_violations: tuple = ()
+def _S():
+    """The PRODUCTION state type, not a local stand-in.
+
+    This used to be a hand-rolled class carrying `.capital` and
+    `.authority_violations`. **No production object carried either**, so both
+    quantities read a `getattr` default of 0.0 and this test — the one written
+    to enforce "registering a checker is not evidence that it runs" — passed
+    against a shape production never produced. A fixture the suite invents is
+    not evidence about a registry.
+    """
+    from gyza.containment.projection import project_now
+    from gyza.economy.market import BondedMarket
+    return project_now(
+        owner="aa" * 32, ledger_entries=[], active_holds=0.0,
+        capital_entries=BondedMarket(
+            initial_capital={"aa" * 32: 100.0}).capital_entries())
 
 
 def test_every_registered_harm_quantity_executes():

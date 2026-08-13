@@ -218,6 +218,18 @@ class Decision:
 # The market
 # ======================================================================
 
+def fold_capital(entries, pubkey: str) -> float:
+    """THE capital fold. One implementation, so the market and any external
+    gate cannot drift apart.
+
+    `capital_of` calls this and so does the H2 harm quantity
+    (`gyza/containment/gyza_model.py`). Frame alignment stops being something
+    a reviewer checks and becomes something the call graph enforces: there is
+    no second expression to disagree with.
+    """
+    return sum(e.delta for e in entries if e.agent_pubkey == pubkey)
+
+
 @dataclass(frozen=True)
 class CapitalEntry:
     """One append-only movement of market capital.
@@ -287,7 +299,7 @@ class BondedMarket:
         return list(self._entries)
 
     def capital_of(self, pubkey: str) -> float:
-        return sum(e.delta for e in self._entries if e.agent_pubkey == pubkey)
+        return fold_capital(self._entries, pubkey)
 
     def total_capital(self) -> float:
         return sum(e.delta for e in self._entries)

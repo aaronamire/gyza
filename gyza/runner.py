@@ -43,6 +43,7 @@ import blake3
 import numpy as np
 
 from gyza.blackboard import Blackboard
+from gyza.containment.projection import AuthorityViolation
 from gyza.demand import LSHIndex
 from gyza.drift import SpecializationTracker
 from gyza.icp import ICPEnvelope, compute_envelope_hash
@@ -131,6 +132,11 @@ class AgentRunner:
             else bool(require_enforcement)
         )
         self._identity = identity
+        # H4's measurand. APPEND-ONLY and never cleared: authority exceedance
+        # is monotone non-cumulative -- once exceeded it cannot be un-exceeded
+        # -- so a counter that could be reset would be a bound whose origin
+        # moves, which is not a bound (ledger artifact #13).
+        self._authority_violations: list[AuthorityViolation] = []
         self._bb = blackboard
         self._mem = memory
         self._spec = specialization
@@ -393,6 +399,15 @@ class AgentRunner:
                 best = it
         return best, best_score
 
+    @property
+    def authority_violations(self) -> list[AuthorityViolation]:
+        """H4's measurand, for a guard to project into `GyzaState`.
+
+        A copy: the list is append-only and the caller must not be able to
+        shorten the thing a bound is measured over.
+        """
+        return list(self._authority_violations)
+
     def _gather_inputs(self, item: WorkItem) -> list[Artifact]:
         out: list[Artifact] = []
         for h in item.input_hashes:
@@ -449,6 +464,20 @@ class AgentRunner:
                 enforcement, self._identity.manifest,
             )
             if not ok:
+                # RECORD BEFORE REFUSING. H4's quantity is "count of executed
+                # actions whose enforcement exceeded the manifest", and until
+                # now nothing anywhere produced that count -- the harm class
+                # read `getattr(s, "authority_violations", ())`, measured 0
+                # against a bound of 0, and passed by measuring nothing.
+                #
+                # The work ALREADY RAN outside its declared bounds; refusing to
+                # sign withholds the attestation but does not un-run it. So the
+                # breach is recorded here, at the point of detection, and the
+                # refusal below is unchanged.
+                self._authority_violations.append(AuthorityViolation(
+                    action_id=item.id, agent_pubkey=self._identity.agent_id,
+                    reason=why, at_ns=time.time_ns(),
+                ))
                 raise RuntimeError(
                     f"refusing to sign — sandbox enforcement is not "
                     f"consistent with the agent manifest: {why}"

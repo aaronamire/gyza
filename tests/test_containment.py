@@ -352,7 +352,10 @@ def test_every_registered_gyza_harm_quantity_actually_EXECUTES():
 
     Registering a quantity is not evidence that it runs.
     """
-    from gyza.economy.wallet import Credits
+    from gyza.containment.projection import (
+        AuthorityViolation, WindowOrigin, project_at_origin, project_now,
+    )
+    from gyza.economy.market import BondedMarket
 
     class _E:
         def __init__(self, frm, to, amt):
@@ -361,18 +364,20 @@ def test_every_registered_gyza_harm_quantity_actually_EXECUTES():
             self.entry_id = f"{frm}{to}{amt}"
             self.from_signature = self.to_signature = "x"
 
-    class _S:
-        owner = "A"
-        entries: list = []
-        active_holds = 0.0
-        capital = 100.0
-        authority_violations: tuple = ()
+    # The PRODUCTION state type. The prior version of this test rolled its own
+    # class with a `.capital` scalar; no production object had one, so H2 and
+    # H4 read `getattr` defaults and this test could not see it.
+    market = BondedMarket(initial_capital={"A": 100.0})
+    origin = WindowOrigin(ledger_ns=0,
+                          capital_seq=len(market.capital_entries()))
+    _proj = dict(owner="A", capital_entries=market.capital_entries())
 
-    s0 = _S()
-    s1 = _S()
-    s1.entries = [_E("A", "B", 10.0)]
-    s1.capital = 90.0
-    s1.authority_violations = ("hop2",)
+    s0 = project_at_origin(ledger_entries=[], origin=origin, **_proj)
+    market._credit("A", -10.0, "stake")          # H2 moves by 10
+    s1 = project_now(
+        ledger_entries=[_E("A", "B", 10.0)], active_holds=0.0,
+        authority_violations=[AuthorityViolation("a1", "B", "over", 1)],
+        owner="A", capital_entries=market.capital_entries())
 
     h, _i = build_registries()
     for hc in h:

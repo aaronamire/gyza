@@ -46,9 +46,9 @@ def _credits_at_risk(s0: object, s: object) -> float:
     pinned at `s0` (R9 condition 2).
     """
     from gyza.economy.wallet import Wallet
-    before = Wallet(getattr(s0, "entries", [])).net_balance(s0.owner)
-    after = Wallet(getattr(s, "entries", [])).net_balance(s.owner)
-    holds = float(getattr(s, "active_holds", 0.0))
+    before = Wallet(s0.entries).net_balance(s0.owner)
+    after = Wallet(s.entries).net_balance(s.owner)
+    holds = float(s.active_holds)
     # Fold in MICROS -- `Credits.value` is display-only and the class says so
     # explicitly ("Never fold with this"). An earlier version of this function
     # read a non-existent `.credits` attribute and therefore RAISED on every
@@ -61,20 +61,40 @@ def _credits_at_risk(s0: object, s: object) -> float:
 
 
 def _market_capital_at_risk(s0: object, s: object) -> float:
-    """H2 -- market capital. The draft's anti-pattern: a MUTABLE dict mutated
-    in place at four sites with no gate reading it. Declared here so the
-    exposure is measurable at all; the real fix is representational (route P&L
-    through LedgerEntry so it lands inside the fold the gate already reads),
-    not a second gate."""
-    return float(getattr(s0, "capital", 0.0)) - float(getattr(s, "capital", 0.0))
+    """H2 -- market capital drawdown over the accounting window.
+
+    READS THE APPEND-ONLY ENTRIES AND FOLDS THEM WITH THE MARKET'S OWN
+    FUNCTION, exactly as H1 folds `LedgerEntry` with the production `Wallet`.
+
+    WHAT THIS REPLACED, because the defect is instructive. This used to read
+    `getattr(s0, "capital", 0.0) - getattr(s, "capital", 0.0)`, a MUTABLE
+    STORED SCALAR. H2 was then fixed representationally -- `_capital` became
+    the append-only `CapitalEntry` fold -- and this quantity was never updated,
+    so **no production object exposed `.capital` at all**. The two `getattr`
+    defaults meant the class measured 0.0 against a bound of 100.0 and passed
+    by measuring nothing. The only objects in the tree carrying `.capital` were
+    two test stubs, so the suite could not see it either.
+
+    Hence the direct attribute access: a missing field must RAISE. An absent
+    measurement is UNEVALUATED, never a passing one.
+    """
+    from gyza.economy.market import fold_capital
+    return (fold_capital(s0.capital_entries, s0.owner)
+            - fold_capital(s.capital_entries, s.owner))
 
 
 def _authority_exceedance(s0: object, s: object) -> float:
     """H4 -- authority. A MEASURE, not the draft's boolean (C5): the count of
     executed actions whose enforcement exceeded the delegation root's manifest.
     Zero is the intended operating point; a count gives the dial a boolean
-    lacks."""
-    return float(len(getattr(s, "authority_violations", ()) or ()))
+    lacks.
+
+    Same correction as H2: `getattr(s, "authority_violations", ()) or ()`
+    defaulted to the empty tuple, so a state that recorded nothing measured 0
+    against a bound of 0 and PASSED. Direct access now; an unrecorded field is
+    an error, not a clean bill of health.
+    """
+    return float(len(s.authority_violations))
 
 
 DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
@@ -96,9 +116,13 @@ def build_registries(
         id="H2_market_capital",
         description="market capital exposure",
         quantity=_market_capital_at_risk,
-        frame="agent pubkey in BondedMarket._capital",
+        frame="agent pubkey, over the append-only CapitalEntry log",
         frame_mutable=False,
-        code_path="gyza/economy/market.py:231 _capital (mutated :287/:325/:332/:345)",
+        # Was "market.py:231 _capital (mutated :287/:325/:332/:345)" — a
+        # citation to a field the H2 fix deleted. A stale citation is worse
+        # than none, and this one described the anti-pattern as though it were
+        # still live.
+        code_path="gyza/economy/market.py fold_capital; entries via capital_entries()",
     ))
     harm.register(HarmClass(
         id="H4_authority",
