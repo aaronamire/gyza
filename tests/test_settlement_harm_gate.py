@@ -302,3 +302,55 @@ def test_a_guard_REQUIRES_a_frame():
     with pytest.raises(ValueError, match="owner"):
         SettlementGuard(GuardEngine(harm, inv), owner="",
                         origin=ledger_genesis_origin())
+
+
+# --------------------------------------------------------------------------- #
+#  7. THE BOUND AGAINST THE REAL COST MODEL                                    #
+#                                                                              #
+#  R-D1b: the suite settles only at `mock` rates, which land at or under the   #
+#  declared bound. Nothing exercised a REAL model's pricing, so a bound that    #
+#  refuses every real model's FIRST action survived 1068 passing tests.        #
+# --------------------------------------------------------------------------- #
+def _first_action_verdict(model, tokens_out=1000, duration_ms=2000):
+    from gyza.economy.ledger import LedgerEntry, compute_task_cost
+    harm, inv = build_registries()
+    g = SettlementGuard(GuardEngine(harm, inv), owner="aa" * 32,
+                        origin=ledger_genesis_origin())
+    cost = compute_task_cost(model, tokens_out, duration_ms)
+    e = LedgerEntry(
+        entry_id="e1", from_compositor="aa" * 32, to_compositor="bb" * 32,
+        amount_credits=cost, work_item_id="w", icp_envelope_hash="cc" * 32,
+        model_identifier=model, tokens_out=tokens_out,
+        duration_ms=duration_ms, created_at_ns=1, to_signature="s")
+    return cost, g.check_payment([], e)          # empty ledger = first action
+
+
+def test_the_declared_bound_REFUSES_every_real_model_first_action():
+    """DOCUMENTS A LIVE MISCALIBRATION rather than asserting correct behaviour.
+
+    On an EMPTY ledger — the whole budget available — the declared B = 100.0
+    refuses a single 1000-token action from every real model, including a local
+    3B. Only `mock` passes, and only because it prices at exactly the bound.
+
+    This test will FAIL when B or the cost model is recalibrated (memo M2), and
+    that failure is the point: it is the alarm, not the contract.
+    """
+    from gyza.containment.gyza_model import build_registries as _bh
+    bound = _bh()[0].bound("H1_credits")
+
+    refused = {}
+    for m in ("llama.cpp:qwen2.5-3b-q4_k_m", "anthropic:claude-sonnet-4-5",
+              "anthropic:claude-opus-4-5", "openai:gpt-4o"):
+        cost, d = _first_action_verdict(m)
+        assert cost > bound, f"{m}: cost {cost} no longer exceeds bound {bound}"
+        refused[m] = d.admit
+    assert not any(refused.values()), (
+        f"a real model's first action now settles under B={bound} — "
+        f"recalibrate this test, the miscalibration it documents is fixed: {refused}")
+
+
+def test_mock_is_the_ONLY_model_the_bound_funds():
+    """The counter-control. If everything were refused, the test above would be
+    measuring a broken guard rather than a miscalibrated bound."""
+    cost, d = _first_action_verdict("mock")
+    assert d.admit, f"even mock ({cost}) is refused — the guard, not the bound, is wrong"
