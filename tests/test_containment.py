@@ -252,10 +252,10 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     """
     h, i = build_registries()
     r = GuardEngine(h, i).readiness()
-    # D1 is lifted for every class the file DECLARES a level for. H5 storage
-    # growth is registered WITHOUT one on purpose -- how many bytes an operator
-    # will retain is a user decision -- so it stays unbounded and visible.
-    assert r["unbounded"] == ["H5_storage_growth"], r["unbounded"]
+    # D1 is fully lifted: every registered class now has a declared level,
+    # H5's transcribed from the operator's own GyzaConfig.max_artifact_store_gb.
+    # So ONLY C-8 provenance blocks the claim, which is this test's whole point.
+    assert r["unbounded"] == [], r["unbounded"]
     assert r["uncovered"] == []
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False, (

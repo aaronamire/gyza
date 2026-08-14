@@ -646,7 +646,8 @@ def cmd_audit(args: argparse.Namespace) -> int:
               file=sys.stderr)
         return 1
 
-    store = ArtifactStore(base_path="~/.gyza/artifacts")
+    store = ArtifactStore(base_path="~/.gyza/artifacts",
+                          max_bytes=int(cfg.max_artifact_store_gb * 1e9))
     # `governed=True`: route every check this audit performs through the
     # attested specification registry and print the coverage alongside the
     # verdict. It cannot change the verdict — an evaluator is told which checks
@@ -787,7 +788,14 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     try:
         from gyza.containment.engine import GuardEngine
         from gyza.containment.gyza_model import UNMODELLED, build_registries
-        harm, inv = build_registries()
+        # C-8: when an authority key is configured, bounds must come through a
+        # VERIFIED configuration and an unsigned file is refused outright.
+        pub = (cfg.guard_authority_pubkey or "").strip()
+        if pub:
+            harm, inv = build_registries(bounds_file=cfg.guard_bounds_path,
+                                         authority_pubkey=bytes.fromhex(pub))
+        else:
+            harm, inv = build_registries()
         r = GuardEngine(harm, inv).readiness()
     except Exception:  # noqa: BLE001 - status must work on a broken install
         return
@@ -817,11 +825,12 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     print(f"  can claim containment: "
           f"{'YES' if r['can_claim_containment'] else 'NO'}")
     # Do not let "the model is bounded" read as "the model is enforced".
-    print("  NOTE: no runtime gate consults these bounds yet — they are "
-          "measurable,")
-    print("        not enforced. Authority containment IS enforced, separately,"
-          " by")
-    print("        the per-work-item gate in gyza/runner.py.")
+    # This line was written before the settlement gate existed and said NO
+    # bound was consulted; that is no longer true and a stale reassurance is
+    # worse than none.
+    print("  ENFORCED at runtime: H1 (settlement payer path), and authority")
+    print("    containment separately by the per-work-item gate in runner.py.")
+    print("  MEASURED but NOT enforced: H2, H4, H5 — no runtime gate reads them.")
 
 
 def _print_economy_section(cfg: GyzaConfig) -> None:

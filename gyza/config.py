@@ -46,6 +46,13 @@ class GyzaConfig:
     netd_listen_port: int = 7749
     netd_bootstrap_peers: list[str] = field(default_factory=list)
     netd_ledger_db_path: str = "~/.gyza/ledger.db"
+    # C-8 — the guard configuration's trust domain. When the pubkey is set,
+    # bounds MUST arrive through a verified configuration and an unsigned file
+    # is refused. Empty means unsigned bounds load and no containment claim is
+    # available (which is the honest default, not a lax one).
+    guard_authority_pubkey: str = field(
+        default_factory=lambda: os.environ.get("GYZA_GUARD_AUTHORITY", ""))
+    guard_bounds_path: str = "gyza/containment/guard_bounds.signed.json"
     enable_relay: bool = False
     attestation_tier: int = 1
     # Above this debt level, the runner refuses additional remote work for

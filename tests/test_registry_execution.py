@@ -139,9 +139,9 @@ def test_every_registered_invariant_predicate_executes():
         assert isinstance(r, bool)
         ran += 1
     assert ran + unbounded == len(inv) > 0
-    assert unbounded == 1, (
-        f"expected exactly one deliberately-unbounded class (H5), got "
-        f"{unbounded} -- a new one appeared without a declared level")
+    assert unbounded == 0, (
+        f"{unbounded} class(es) have no declared level. Every registered class "
+        f"should carry one; a new class without a level is the D1 gap.")
 
 
 # --------------------------------------------------------------------------- #

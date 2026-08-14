@@ -32,7 +32,8 @@ from gyza.containment.guardconfig import (
 from gyza.containment.gyza_model import DEFAULT_BOUNDS_FILE, build_registries
 from gyza.containment.harm import UnsignedBoundsError
 
-BOUNDS = {"H1_credits": 100.0, "H2_market_capital": 100.0, "H4_authority": 0.0}
+BOUNDS = {"H1_credits": 100.0, "H2_market_capital": 100.0,
+          "H4_authority": 0.0, "H5_storage_growth": 1e10}
 
 
 def _authority():
@@ -65,9 +66,8 @@ def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     assert r["bounds_provenance"]["source"] == "UNSIGNED_FILE"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
-    # PROVENANCE is what blocks it here. H5 is unbounded by design (its level is
-    # a user decision), so the check is that nothing ELSE is missing.
-    assert r["unbounded"] == ["H5_storage_growth"] and r["uncovered"] == []
+    # PROVENANCE is the ONLY thing blocking it: every class has a level.
+    assert r["unbounded"] == [] and r["uncovered"] == []
     assert h.bound("H1_credits") == 100.0
 
 
@@ -77,12 +77,9 @@ def test_SIGNED_bounds_lift_the_claim(tmp_path):
                       authority_pubkey=pub)
     assert r["bounds_provenance"]["source"] == "SIGNED"
     assert r["bounds_signed"] is True
-    # Signing lifts C-8. It does NOT lift D1 for a class the file declares no
-    # level for -- H5 has none, so containment still cannot be claimed. Two
-    # independent gates, and this pins that signing does not paper over the
-    # other one.
-    assert r["can_claim_containment"] is False
-    assert r["unbounded"] == ["H5_storage_growth"]
+    # With every level declared AND the config verified, both gates are open.
+    assert r["can_claim_containment"] is True
+    assert r["unbounded"] == []
     assert r["bounds_provenance"]["authority_pubkey"] == pub.hex()
     assert len(r["bounds_provenance"]["config_hash"]) == 64
 
@@ -158,7 +155,7 @@ def test_NO_bounds_is_a_DISTINCT_state_from_UNSIGNED_bounds():
     assert r["can_claim_containment"] is False
     # and it is distinguishable: here EVERY class is genuinely unbounded,
     # including the ones the file would otherwise have declared
-    assert set(r["unbounded"]) == set(BOUNDS) | {"H5_storage_growth"}
+    assert set(r["unbounded"]) == set(BOUNDS)
 
 
 # --------------------------------------------------------------------------- #
@@ -227,8 +224,11 @@ def test_gyza_status_does_NOT_let_measurable_read_as_enforced(capsys):
 
     _print_containment_section(GyzaConfig())
     out = capsys.readouterr().out
-    assert "no runtime gate consults these bounds" in out
-    assert "not enforced" in out
+    # The old text claimed NO bound was consulted, which stopped being true when
+    # the settlement gate landed. A stale reassurance is worse than none, so the
+    # property pinned now is that enforced and measured are DISTINGUISHED.
+    assert "ENFORCED at runtime" in out and "H1" in out
+    assert "MEASURED but NOT enforced" in out
 
 
 def test_a_correctly_signed_TIGHTENING_installs(tmp_path):
