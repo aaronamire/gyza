@@ -285,6 +285,37 @@ class GlobalCluster:
                 self._blackboard, evidence_store,
             )
             LOG.info("[global] settlement audit-before-cosign: ENABLED")
+        # C-1/C-8 — the declared harm model, on the one production path where a
+        # declared quantity actually moves. H1 (credits at risk) changes when
+        # this node cosigns as payer, and that path is already serialized, so
+        # the cumulative bound has the serialization point C7 requires.
+        #
+        # Bounds load UNSIGNED here, and that is honest rather than sloppy: the
+        # levels are in force either way and only the CLAIM depends on the
+        # signature (C-8). `gyza status` reports which state is in effect.
+        harm_guard = None
+        try:
+            from gyza.containment.engine import GuardEngine
+            from gyza.containment.gates import (
+                SettlementGuard, ledger_genesis_origin,
+            )
+            from gyza.containment.gyza_model import build_registries
+            harm, inv = build_registries()
+            harm_guard = SettlementGuard(
+                GuardEngine(harm, inv),
+                owner=self._ledger.compositor_pubkey,
+                origin=ledger_genesis_origin(),
+            )
+            LOG.info("[global] settlement harm bound (H1): ENABLED, "
+                     "bound=%.2f credits, origin=ledger genesis",
+                     harm.bound("H1_credits"))
+        except Exception as e:  # noqa: BLE001
+            # An unbounded service is the prior behaviour, not a new hazard --
+            # but it must be LOUD. A guard that silently fails to install is
+            # indistinguishable from one that is working.
+            LOG.error("[global] settlement harm bound NOT installed (%s: %s) — "
+                      "settlements proceed UNBOUNDED", type(e).__name__, e)
+
         self._settlement = LedgerSettlementService(
             ledger=self._ledger,
             netd=self._netd,
@@ -292,6 +323,7 @@ class GlobalCluster:
             acceptance_policy=acceptance_policy,
             evidence_store=evidence_store,
             blackboard=self._blackboard,
+            harm_guard=harm_guard,
         )
         self._settlement.start()
 

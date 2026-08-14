@@ -382,7 +382,18 @@ class LedgerSettlementService:
         acceptance_policy: "AcceptancePolicy | None" = None,
         evidence_store=None,
         blackboard=None,
+        harm_guard: "object | None" = None,
     ):
+        # THE DECLARED HARM BOUND, evaluated on the payer path. Optional and
+        # None by default so an unguarded service behaves exactly as before;
+        # `GlobalCluster` installs one, which is what makes this the first
+        # consequence bound in Gyza that a production path actually enforces.
+        #
+        # It is NOT constructed here. The bound levels and their accounting
+        # origin are declared, not derived, and a service that built its own
+        # guard would be choosing its own bound -- the circularity the harm
+        # model exists to avoid.
+        self._harm_guard = harm_guard
         self._ledger = ledger
         self._netd = netd
         self._resolve_envelope = envelope_resolver
@@ -811,6 +822,29 @@ class LedgerSettlementService:
                     )
                     self._bump_dispute(entry.to_compositor)
                     _obs_dispute("acceptance_declined")
+                    return
+
+            # THE DECLARED HARM BOUND (H1). Last check before the commit, and
+            # the ordering is deliberate: everything above establishes that the
+            # entry is well-formed, honestly priced and worth paying for. This
+            # asks a different question -- whether paying it stays inside the
+            # drawdown WE declared. `sign_as_payer` settles the entry, so this
+            # is the final instant at which the answer can still be no.
+            #
+            # A REFUSAL HERE IS NOT A DISPUTE. The peer did nothing wrong; we
+            # hit our own bound. Bumping their reputation would punish a
+            # counterparty for our budget, and would corrupt the one signal the
+            # dispute counter is supposed to carry.
+            if self._harm_guard is not None:
+                decision = self._harm_guard.check_payment(
+                    self._ledger.all_entries(), entry)
+                if not decision.admit:
+                    LOG.warning(
+                        "[settlement] REFUSING to cosign entry %s — declared "
+                        "harm bound: %s", entry.entry_id,
+                        "; ".join(decision.reasons),
+                    )
+                    _obs_dispute("harm_bound_refused")
                     return
 
             try:
