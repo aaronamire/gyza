@@ -56,7 +56,7 @@ class _Rig:
         self.payer_bus.close(); self.earner_bus.close()
 
 
-def _rig(tmp_path, *, guarded=True, origin=None):
+def _rig(tmp_path, *, guarded=True, origin=None, enforce=False):
     payer = _compositor(tmp_path, "payer")
     earner = _compositor(tmp_path, "earner")
     payer_l = _ledger(tmp_path, payer, "payer")
@@ -76,7 +76,7 @@ def _rig(tmp_path, *, guarded=True, origin=None):
 
     payer_svc = LedgerSettlementService(
         ledger=payer_l, netd=pbus, envelope_resolver=penv.get,
-        reputation_store=rep, harm_guard=guard)
+        reputation_store=rep, harm_guard=guard, harm_enforce=enforce)
     earner_svc = LedgerSettlementService(
         ledger=earner_l, netd=ebus, envelope_resolver={}.get)
     payer_svc.start(); earner_svc.start()
@@ -117,7 +117,7 @@ def test_the_payment_that_CROSSES_the_bound_is_REFUSED(tmp_path):
     """CUMULATIVE, not per-transaction. Each payment is individually legal; it
     is the running total that crosses, which is exactly the class of bound that
     needs a serialization point (C7)."""
-    rig = _rig(tmp_path)
+    rig = _rig(tmp_path, enforce=True)
     try:
         a = _settle(rig, "w1", 600)            # 60 -> total 60, admitted
         assert _wait_until(lambda: _settled(rig, a))
@@ -154,7 +154,7 @@ def test_UNGUARDED_settlement_is_UNCHANGED(tmp_path):
 #     notices on the next one — bounding vs lagging by one.                    #
 # --------------------------------------------------------------------------- #
 def test_a_SINGLE_payment_over_the_bound_is_refused_on_the_FIRST_attempt(tmp_path):
-    rig = _rig(tmp_path)
+    rig = _rig(tmp_path, enforce=True)
     try:
         e = _settle(rig, "w1", 5000)           # 500 credits, alone over 100
         assert not _wait_until(lambda: _settled(rig, e), timeout_s=0.6), \
@@ -169,7 +169,7 @@ def test_the_bound_is_exactly_the_declared_level(tmp_path):
     """A payment landing precisely ON the bound must be admitted: the predicate
     is `h <= bound`, and an off-by-one here would silently tighten a level the
     user declared."""
-    rig = _rig(tmp_path)
+    rig = _rig(tmp_path, enforce=True)
     try:
         e = _settle(rig, "w1", 1000)           # exactly 100.0 == BOUND
         assert _wait_until(lambda: _settled(rig, e)), \
@@ -185,7 +185,7 @@ def test_the_refusal_does_NOT_dispute_the_peer(tmp_path):
     """The peer did nothing wrong; we hit our own budget. Bumping their
     reputation would punish a counterparty for our declaration and corrupt the
     only signal the dispute counter carries."""
-    rig = _rig(tmp_path)
+    rig = _rig(tmp_path, enforce=True)
     try:
         e = _settle(rig, "w1", 5000)
         assert not _wait_until(lambda: _settled(rig, e), timeout_s=0.6)
@@ -354,3 +354,74 @@ def test_mock_is_the_ONLY_model_the_bound_funds():
     measuring a broken guard rather than a miscalibrated bound."""
     cost, d = _first_action_verdict("mock")
     assert d.admit, f"even mock ({cost}) is refused — the guard, not the bound, is wrong"
+
+
+# --------------------------------------------------------------------------- #
+#  8. RECORD-ONLY IS THE DEFAULT                                               #
+#                                                                              #
+#  What shipped yesterday enforced a bound smaller than a single real-model     #
+#  action, so it blocked all real settlement. Recording keeps the mechanism     #
+#  exercised on every settlement while a miscalibrated level cannot halt the    #
+#  system — and the record is what makes the level decidable.                   #
+# --------------------------------------------------------------------------- #
+def test_record_only_LETS_TRAFFIC_THROUGH_and_still_sees_the_bound(tmp_path):
+    rig = _rig(tmp_path)                       # guarded, default record-only
+    try:
+        ents = [_settle(rig, f"w{i}", 600) for i in range(4)]   # 4x60 = 240 vs B=100
+        for e in ents:
+            _wait_until(lambda: _settled(rig, e), timeout_s=1.5)
+        assert all(_settled(rig, e) for e in ents), \
+            "record-only mode blocked settlement"
+
+        s = rig.payer_svc.harm_summary()
+        assert s["enforcing"] is False
+        assert s["evaluations"] == 4
+        assert s["would_have_refused"] == 3, s
+        assert s["peak_measured"]["H1_credits"] == pytest.approx(240.0)
+    finally:
+        rig.stop()
+
+
+def test_ENFORCING_still_refuses_exactly_as_before(tmp_path):
+    """The refusal path is unchanged and still tested — record-only is a
+    default, not a removal."""
+    rig = _rig(tmp_path, enforce=True)
+    try:
+        a = _settle(rig, "w1", 600)
+        assert _wait_until(lambda: _settled(rig, a))
+        b = _settle(rig, "w2", 600)
+        assert not _wait_until(lambda: _settled(rig, b), timeout_s=0.6), \
+            "enforcing mode failed to refuse"
+        s = rig.payer_svc.harm_summary()
+        assert s["enforcing"] is True and s["would_have_refused"] >= 1
+    finally:
+        rig.stop()
+
+
+def test_the_record_keeps_NEAR_MISSES_not_just_refusals(tmp_path):
+    """`would_have_refused` is the counterfactual the calibration rests on.
+    Recording only the admitted evaluations would leave the question this
+    mechanism exists to answer unanswerable."""
+    rig = _rig(tmp_path)
+    try:
+        e = _settle(rig, "w1", 5000)           # 500 credits, far over
+        _wait_until(lambda: _settled(rig, e), timeout_s=1.5)
+        recs = rig.payer_svc.harm_records
+        assert len(recs) == 1 and recs[0].admitted is False
+        assert recs[0].measured["H1_credits"] > 100.0
+        assert recs[0].reasons, "a refusal record must carry its reason"
+    finally:
+        rig.stop()
+
+
+def test_the_record_cannot_be_SHORTENED_by_a_caller(tmp_path):
+    rig = _rig(tmp_path)
+    try:
+        e = _settle(rig, "w1", 600)
+        _wait_until(lambda: _settled(rig, e), timeout_s=1.5)
+        got = rig.payer_svc.harm_records
+        got.clear()
+        assert len(rig.payer_svc.harm_records) == 1, \
+            "a caller mutated the record a calibration decision rests on"
+    finally:
+        rig.stop()
