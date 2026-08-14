@@ -131,7 +131,7 @@ def build_registries(
         quantity=_authority_exceedance,
         frame="delegation chain root manifest",
         frame_mutable=False,
-        code_path="gyza/economy/delegation.py:213-289 verify_delegation",
+        code_path="gyza/economy/delegation.py:229 verify_delegation",
     ))
 
     inv = InvariantRegistry()

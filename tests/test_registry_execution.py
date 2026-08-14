@@ -282,3 +282,60 @@ def test_no_registry_entry_is_left_unexercised(idn):
         "verifier registry and this test's inputs have diverged")
     assert covered["spec"] == set(specs.claim_types()), (
         "spec registry and this test's inputs have diverged")
+
+
+# --------------------------------------------------------------------------- #
+#  WITNESS CITATIONS MUST RESOLVE TO THE SYMBOL THEY NAME                      #
+# --------------------------------------------------------------------------- #
+def test_every_witness_citation_resolves_to_the_symbol_it_names():
+    """`VerifierRegistry.register` REFUSES an uncited verifier because "an
+    uncited verifier cannot be audited". That makes the citation load-bearing --
+    and load-bearing is exactly what nothing was checking.
+
+    Two had drifted when this was written (2026-08-14). `delegation_attenuation`
+    cited `delegation.py:213`, sixteen lines stale after the depth 8->3 commit
+    moved `verify_delegation` to :229. `ledger_entry_signatures` cited
+    `ledger.py:348` -- inside `sign_as_payer`, the SIGNER -- while the adapter
+    calls `verify_entry`, so an auditor following the witness landed on the
+    wrong function entirely.
+
+    SOUND IN ONE DIRECTION. A citation naming a symbol that does not contain the
+    cited line is DEFINITELY wrong; one that resolves is not thereby verified.
+    """
+    import ast
+    import pathlib
+    import re
+
+    from gyza.containment.gyza_model import build_registries as _bh
+    from gyza.verification.adapters import build_registries as _bv
+
+    named = re.compile(r'((?:gyza|netd|tests|scripts)[\w/\-.]*\.py):(\d+)'
+                       r'(?:-\d+)?\s+([A-Za-z_]\w*)')
+    cites = []
+    v, _s = _bv()
+    for ct in v.claim_types():
+        cites.append((ct, v.get(ct).witness))
+    h, _i = _bh()
+    for hc in h:
+        cites.append((hc.id, hc.code_path))
+
+    checked = 0
+    for ident, wit in cites:
+        m = named.search(wit or "")
+        if m is None:
+            continue                      # no symbol named: nothing to check
+        path, line, symbol = m.group(1), int(m.group(2)), m.group(3)
+        src = pathlib.Path(path)
+        assert src.is_file(), f"{ident}: cited file {path} does not exist"
+        tree = ast.parse(src.read_text())
+        enclosing = None
+        for n in ast.walk(tree):
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if n.lineno <= line <= (n.end_lineno or n.lineno):
+                    enclosing = n.name
+        assert enclosing == symbol, (
+            f"{ident}: witness says {path}:{line} {symbol}, but that line is "
+            f"inside {enclosing!r}. A stale citation is worse than none.")
+        checked += 1
+
+    assert checked >= 3, f"only {checked} symbol-anchored citations were checked"

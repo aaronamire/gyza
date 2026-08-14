@@ -137,9 +137,12 @@ NATIVE: list[Verifier] = [
     Verifier("enforcement_within_manifest", _enforcement_within_manifest,
              "gyza/sandbox/config.py:286"),
     Verifier("delegation_attenuation", _delegation_attenuation,
-             "gyza/economy/delegation.py:213"),
+             "gyza/economy/delegation.py:229 verify_delegation"),
+    # Cited :348 (inside `sign_as_payer`) until 2026-08-14 — the SIGNER, not
+    # the checker. The adapter calls `verify_entry`, so an auditor following the
+    # witness landed on the wrong function entirely.
     Verifier("ledger_entry_signatures", _ledger_entry_signatures,
-             "gyza/economy/ledger.py:348"),
+             "gyza/economy/ledger.py:387 verify_entry"),
     Verifier("balance_fold", _balance_fold, "gyza/economy/wallet.py:274"),
     Verifier("market_capital_fold", _market_capital_fold,
              "gyza/economy/market.py:CapitalEntry fold"),
