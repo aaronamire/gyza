@@ -68,6 +68,13 @@ class GyzaState:
     capital_entries: Sequence[object]       # H2: append-only CapitalEntry
     authority_violations: tuple[AuthorityViolation, ...] = field(
         default_factory=tuple)
+    # H5: bytes retained by the content-addressed store. The architectural
+    # principle's stated price -- "nothing is ever freed" -- made measurable.
+    # Defaulted because it is the newest field and every existing caller
+    # predates it; the quantity below reads it directly, so a state that
+    # genuinely has no store measures zero growth rather than raising, which
+    # is the correct reading for "no artifacts were stored".
+    stored_bytes: int = 0
 
     def __post_init__(self) -> None:
         if not self.owner:
@@ -114,6 +121,7 @@ def project_now(
     active_holds: float,
     capital_entries: Sequence[object],
     authority_violations: Sequence[AuthorityViolation] = (),
+    stored_bytes: int = 0,
 ) -> GyzaState:
     """State as of now — the `s_next` of a guard evaluation."""
     return GyzaState(
@@ -122,6 +130,7 @@ def project_now(
         active_holds=float(active_holds),
         capital_entries=list(capital_entries),
         authority_violations=tuple(authority_violations),
+        stored_bytes=int(stored_bytes),
     )
 
 
@@ -132,6 +141,7 @@ def project_at_origin(
     capital_entries: Sequence[object],
     origin: WindowOrigin,
     authority_violations: Sequence[AuthorityViolation] = (),
+    stored_bytes_at_origin: int = 0,
 ) -> GyzaState:
     """State as of the accounting window's origin — the `s0`.
 
@@ -147,6 +157,11 @@ def project_at_origin(
         capital_entries=_capital_before(capital_entries, origin),
         authority_violations=tuple(
             v for v in authority_violations if v.at_ns < origin.ledger_ns),
+        # Storage is APPEND-ONLY and has no per-entry timestamp to filter on,
+        # so the origin value must be CAPTURED when the window opens rather
+        # than reconstructed. An origin that cannot be recomputed must be
+        # recorded; inferring one would be the moving-frame defect again.
+        stored_bytes=int(stored_bytes_at_origin),
     )
 
 

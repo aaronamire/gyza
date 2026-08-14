@@ -65,8 +65,9 @@ def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     assert r["bounds_provenance"]["source"] == "UNSIGNED_FILE"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
-    # and it is PROVENANCE that blocks it, not a missing or uncovered class
-    assert r["unbounded"] == [] and r["uncovered"] == []
+    # PROVENANCE is what blocks it here. H5 is unbounded by design (its level is
+    # a user decision), so the check is that nothing ELSE is missing.
+    assert r["unbounded"] == ["H5_storage_growth"] and r["uncovered"] == []
     assert h.bound("H1_credits") == 100.0
 
 
@@ -76,7 +77,12 @@ def test_SIGNED_bounds_lift_the_claim(tmp_path):
                       authority_pubkey=pub)
     assert r["bounds_provenance"]["source"] == "SIGNED"
     assert r["bounds_signed"] is True
-    assert r["can_claim_containment"] is True
+    # Signing lifts C-8. It does NOT lift D1 for a class the file declares no
+    # level for -- H5 has none, so containment still cannot be claimed. Two
+    # independent gates, and this pins that signing does not paper over the
+    # other one.
+    assert r["can_claim_containment"] is False
+    assert r["unbounded"] == ["H5_storage_growth"]
     assert r["bounds_provenance"]["authority_pubkey"] == pub.hex()
     assert len(r["bounds_provenance"]["config_hash"]) == 64
 
@@ -88,8 +94,15 @@ def test_the_BOUNDS_THEMSELVES_are_identical_either_way(tmp_path):
     unsigned, _ = _readiness(bounds_file=DEFAULT_BOUNDS_FILE)
     signed, _ = _readiness(bounds_file=_signed_file(tmp_path, seed),
                            authority_pubkey=pub)
-    assert ({c.id: unsigned.bound(c.id) for c in unsigned}
-            == {c.id: signed.bound(c.id) for c in signed})
+    def _levels(reg):
+        out = {}
+        for c in reg:
+            try:
+                out[c.id] = reg.bound(c.id)
+            except Exception:
+                out[c.id] = "UNSET"
+        return out
+    assert _levels(unsigned) == _levels(signed)
 
 
 # --------------------------------------------------------------------------- #
@@ -143,8 +156,9 @@ def test_NO_bounds_is_a_DISTINCT_state_from_UNSIGNED_bounds():
     assert r["bounds_provenance"]["source"] == "UNSET"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
-    # and it is distinguishable: here the classes are genuinely unbounded
-    assert set(r["unbounded"]) == set(BOUNDS)
+    # and it is distinguishable: here EVERY class is genuinely unbounded,
+    # including the ones the file would otherwise have declared
+    assert set(r["unbounded"]) == set(BOUNDS) | {"H5_storage_growth"}
 
 
 # --------------------------------------------------------------------------- #

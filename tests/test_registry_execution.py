@@ -120,15 +120,28 @@ def test_every_registered_harm_quantity_executes():
 #  C-2 invariant predicates                                                    #
 # --------------------------------------------------------------------------- #
 def test_every_registered_invariant_predicate_executes():
+    """A class with NO declared bound must RAISE rather than default, so it is
+    counted separately here instead of being silently skipped -- a predicate
+    that never runs because its bound is missing is still an unexercised
+    registry entry, and saying so is the point of this file."""
+    from gyza.containment.harm import UnsetBoundError
+
     harm, inv = build_harm()
-    ran = 0
+    ran = unbounded = 0
     for i in inv:
-        bound = harm.bound(i.harm_class)
+        try:
+            bound = harm.bound(i.harm_class)
+        except UnsetBoundError:
+            unbounded += 1
+            continue
         h = harm.get(i.harm_class).measure(_S(), _S())
         r = i.predicate(h, bound, _S(), _S())   # must not raise
         assert isinstance(r, bool)
         ran += 1
-    assert ran == len(inv) > 0
+    assert ran + unbounded == len(inv) > 0
+    assert unbounded == 1, (
+        f"expected exactly one deliberately-unbounded class (H5), got "
+        f"{unbounded} -- a new one appeared without a declared level")
 
 
 # --------------------------------------------------------------------------- #

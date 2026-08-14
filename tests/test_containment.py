@@ -235,7 +235,8 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     h, i = build_registries(bounds_file=None)
     r = GuardEngine(h, i).readiness()
     assert r["can_claim_containment"] is False
-    assert set(r["unbounded"]) == {"H1_credits", "H2_market_capital", "H4_authority"}
+    assert set(r["unbounded"]) == {"H1_credits", "H2_market_capital",
+                                   "H4_authority", "H5_storage_growth"}
     assert r["uncovered"] == []
 
 
@@ -251,7 +252,10 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     """
     h, i = build_registries()
     r = GuardEngine(h, i).readiness()
-    assert r["unbounded"] == []
+    # D1 is lifted for every class the file DECLARES a level for. H5 storage
+    # growth is registered WITHOUT one on purpose -- how many bytes an operator
+    # will retain is a user decision -- so it stays unbounded and visible.
+    assert r["unbounded"] == ["H5_storage_growth"], r["unbounded"]
     assert r["uncovered"] == []
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False, (

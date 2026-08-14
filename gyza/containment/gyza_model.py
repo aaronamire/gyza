@@ -97,6 +97,29 @@ def _authority_exceedance(s0: object, s: object) -> float:
     return float(len(s.authority_violations))
 
 
+def _storage_growth(s0: object, s: object) -> float:
+    """H5 -- bytes retained by the content-addressed store, since the origin.
+
+    THE ARCHITECTURAL PRINCIPLE'S OWN PRICE, made measurable.
+    `ARCHITECTURAL_PRINCIPLE.md` states the cost of append-only plainly --
+    "nothing is ever freed" -- and until now no function anywhere computed it,
+    so the one cost the architecture openly accepts was the one nobody could
+    see.
+
+    WHY THIS CLASS AND NOT ANOTHER (R-B1). Storage growth is NOT CONSERVED:
+    appending CREATES bytes and no other frame loses them. So bounding it
+    EXTINGUISHES the harm rather than transferring it -- unlike H1, which is the
+    only bound currently enforced and which R-B1 classifies as TRANSFERS. This
+    is the first declared quantity where a bound would actually remove harm.
+
+    It reads the store's own fold (`ArtifactStore.total_size_bytes`) captured
+    into the projection, never a private reimplementation -- the same
+    frame-alignment discipline H1 gets from `Wallet` and H2 from
+    `fold_capital`.
+    """
+    return float(s.stored_bytes - s0.stored_bytes)
+
+
 DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
 
 
@@ -134,6 +157,16 @@ def build_registries(
         code_path="gyza/economy/delegation.py:229 verify_delegation",
     ))
 
+    harm.register(HarmClass(
+        id="H5_storage_growth",
+        description="bytes retained by the content-addressed store since the "
+                    "accounting origin (the append-only principle's own price)",
+        quantity=_storage_growth,
+        frame="the local artifact store",
+        frame_mutable=False,
+        code_path="gyza/network/artifact_store.py:115 total_size_bytes",
+    ))
+
     inv = InvariantRegistry()
     inv.register(Invariant(
         id="INV-H1-drain",
@@ -161,6 +194,27 @@ def build_registries(
             "and the property is per-action and stateless, so it composes "
             "concurrently in the interior (C6)."),
     ))
+    inv.register(Invariant(
+        id="INV-H5-storage",
+        harm_class="H5_storage_growth",
+        cls=InvariantClass.CUMULATIVE,
+        description=(
+            "retained bytes stay within the declared bound. CUMULATIVE: a "
+            "monotone total over one store, so like H1 it is valid only at a "
+            "serialization point and does not compose concurrently (C6/C7)."),
+    ))
+    # H5 HAS NO DECLARED BOUND, DELIBERATELY. `guard_bounds.json` carries no
+    # level for it, so `harm.bound("H5_storage_growth")` raises UnsetBoundError
+    # and the engine refuses any action touching the class. That is the correct
+    # state: how many bytes an operator is willing to retain is a USER DECISION
+    # (BUILD_PLAN D1), and inventing one here would make the containment claim
+    # unfalsifiable -- the exact circularity this module's docstring forbids.
+    #
+    # Registering it UNBOUNDED is not an oversight either. It moves the gap from
+    # invisible to reported: `readiness()` now lists H5 under `unbounded`, and
+    # `gyza status` prints it. `HARM_MODEL_GAP.md` had storage growth as
+    # "declarable, existing code: none" -- this is the code.
+    #
     # D1 — bounds are LOADED, never invented here. Passing bounds_file=None
     # yields an unbounded registry that refuses everything, which is the
     # correct behaviour before a model is declared.

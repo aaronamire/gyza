@@ -83,7 +83,8 @@ def test_every_registered_quantity_measures_REAL_production_state(tmp_path):
         assert isinstance(v, float) and v == v, hc.id      # not NaN
         measured[hc.id] = v
 
-    assert set(measured) == {"H1_credits", "H2_market_capital", "H4_authority"}
+    assert set(measured) == {"H1_credits", "H2_market_capital", "H4_authority",
+                             "H5_storage_growth"}
     # H1 must SEE the 10-credit outflow. If it did not, this whole file would
     # be measuring a shape rather than a quantity.
     assert measured["H1_credits"] == pytest.approx(10.0), measured
