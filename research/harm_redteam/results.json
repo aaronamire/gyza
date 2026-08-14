@@ -1,0 +1,40 @@
+[
+  {
+    "attack": "A3 honest control",
+    "D1_unpaid_delivered_work": 0.0,
+    "D2_lockout_breadth": 0,
+    "declared_measured": {
+      "H1_credits": 60.0,
+      "H2_market_capital": 0.0,
+      "H4_authority": 0.0
+    },
+    "guard_violated": false
+  },
+  {
+    "attack": "A1 exhaust-then-refuse",
+    "D1_unpaid_delivered_work": 180.0,
+    "D2_lockout_breadth": 2,
+    "declared_measured": {
+      "H1_credits": 90.0,
+      "H2_market_capital": 0.0,
+      "H4_authority": 0.0
+    },
+    "declared_bounds": {
+      "H1_credits": 100.0,
+      "H2_market_capital": 100.0,
+      "H4_authority": 0.0
+    },
+    "guard_violated": false
+  },
+  {
+    "attack": "A2 frame multiplication (N=3)",
+    "D3_frame_multiplied_drain": 300.0,
+    "per_compositor_H1": {
+      "db99c67a9227": 100.0,
+      "8006c25cd41a": 100.0,
+      "884804f02154": 100.0
+    },
+    "declared_bound_H1": 100.0,
+    "guard_violated": false
+  }
+]
