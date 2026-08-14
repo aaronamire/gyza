@@ -236,7 +236,8 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     r = GuardEngine(h, i).readiness()
     assert r["can_claim_containment"] is False
     assert set(r["unbounded"]) == {"H1_credits", "H2_market_capital",
-                                   "H4_authority", "H5_storage_growth"}
+                                   "H4_authority", "H5_storage_growth",
+                                   "H6_unsupervised_actions"}
     assert r["uncovered"] == []
 
 

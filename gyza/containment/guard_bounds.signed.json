@@ -4,10 +4,11 @@
       "H1_credits": 100.0,
       "H2_market_capital": 100.0,
       "H4_authority": 0.0,
-      "H5_storage_growth": 10000000000.0
+      "H5_storage_growth": 10000000000.0,
+      "H6_unsupervised_actions": 10000
     },
     "tier_assignments": {},
     "version": 1
   },
-  "signature": "4c6809252c73984248961443b5922c8f20e1e455cb1ceb0840568437c860d52fc9e85a84564a2ed634d42c5fafbc1e63344a404e9adaa7b7273b0d6fb8bba302"
+  "signature": "e54ce09f87685bb2038e880cf17c1ae777349f535c07bb4d6a914d8f55d5009100b5b2d16d5057466f81690b1b833d63ab232ed62d82b2994b704544e8963509"
 }

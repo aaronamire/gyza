@@ -84,7 +84,7 @@ def test_every_registered_quantity_measures_REAL_production_state(tmp_path):
         measured[hc.id] = v
 
     assert set(measured) == {"H1_credits", "H2_market_capital", "H4_authority",
-                             "H5_storage_growth"}
+                             "H5_storage_growth", "H6_unsupervised_actions"}
     # H1 must SEE the 10-credit outflow. If it did not, this whole file would
     # be measuring a shape rather than a quantity.
     assert measured["H1_credits"] == pytest.approx(10.0), measured
@@ -333,3 +333,51 @@ def test_the_window_origin_separates_LEDGER_ns_from_CAPITAL_seq(tmp_path):
                     capital_entries=entries)
     assert len(s0.capital_entries) == 1 and len(s.capital_entries) == 2
     assert _measure(s0, s, "H2_market_capital") == pytest.approx(30.0)
+
+
+# --------------------------------------------------------------------------- #
+#  H6 — THE REVIEW CADENCE, folded from the durable envelope log               #
+# --------------------------------------------------------------------------- #
+def test_H6_counts_REAL_envelopes_and_survives_a_restart(tmp_path):
+    """The cadence measurand must be DERIVED, not counted in memory.
+
+    An in-process counter resets on restart, which is a cumulative bound whose
+    origin moves — ledger artifact #13, the defect that bought unlimited drain.
+    This folds the append-only envelope log, so a fresh process over the same
+    database sees the same number.
+    """
+    from tests.test_audit import _honest_workflow
+
+    from gyza.blackboard import Blackboard
+
+    envs, _a, _m, _ = _honest_workflow(tmp_path)
+    db = str(tmp_path / "bb.db")
+    bb = Blackboard(db)
+    for e in envs:
+        bb.store_envelope(e)
+
+    n = bb.count_envelopes_since(0)
+    assert n == len(envs) > 0
+
+    # a FRESH Blackboard over the same file — as after a restart
+    assert Blackboard(db).count_envelopes_since(0) == n, \
+        "the count reset across processes — the origin moved"
+
+    harm, _inv = build_registries()
+    kw = dict(owner=A, capital_entries=[], ledger_entries=[], active_holds=0.0)
+    s0 = project_now(signed_envelope_count=0, **kw)
+    s = project_now(signed_envelope_count=n, **kw)
+    assert harm.get("H6_unsupervised_actions").measure(s0, s) == pytest.approx(n)
+    assert harm.bound("H6_unsupervised_actions") == 10000
+
+
+def test_H6_is_the_cadence_in_ACTIONS_not_credits():
+    """The whole point of splitting it out of H1: credits are TOKEN_IS_FAKE, so
+    a bound denominated in them cannot be checked against anything."""
+    import inspect
+
+    from gyza.containment import gyza_model
+    src = inspect.getsource(gyza_model._unsupervised_actions)
+    assert "signed_envelope_count" in src
+    assert "credit" not in src.split('"""')[2].lower(), \
+        "the cadence quantity must not read a credit figure"

@@ -33,7 +33,8 @@ from gyza.containment.gyza_model import DEFAULT_BOUNDS_FILE, build_registries
 from gyza.containment.harm import UnsignedBoundsError
 
 BOUNDS = {"H1_credits": 100.0, "H2_market_capital": 100.0,
-          "H4_authority": 0.0, "H5_storage_growth": 1e10}
+          "H4_authority": 0.0, "H5_storage_growth": 1e10,
+          "H6_unsupervised_actions": 10000}
 
 
 def _authority():

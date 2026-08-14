@@ -120,6 +120,32 @@ def _storage_growth(s0: object, s: object) -> float:
     return float(s.stored_bytes - s0.stored_bytes)
 
 
+def _unsupervised_actions(s0: object, s: object) -> float:
+    """H6 -- signed envelopes since the accounting origin: THE CADENCE.
+
+    This is the quantity the operator's review cadence is denominated in.
+    "Look every 10,000 actions" is a statement about THIS number, and about
+    nothing else -- which is why it is a separate class from H1 rather than a
+    credit figure in disguise.
+
+    WHY IT IS NOT DENOMINATED IN CREDITS. `TOKEN_IS_FAKE = True`: credits are
+    "internal, non-redeemable, no external value", so a bound expressed in them
+    cannot be checked against anything and 100 could be generous or absurd. An
+    action count is interpretable without a conversion table, and it is what a
+    human's attention is actually spent on.
+
+    NOT CONSERVED, PREVENTABLE (R-B1) -- so bounding it EXTINGUISHES rather than
+    transfers: signing CREATES a non-repudiable claim and no other party holds
+    one fewer. Refusing to sign means the claim does not exist, not that someone
+    else bears it.
+
+    DERIVED FROM THE APPEND-ONLY ENVELOPE LOG via
+    `Blackboard.count_envelopes_since`, never an in-process counter -- a counter
+    resets on restart, and a cumulative bound whose origin moves is not a bound.
+    """
+    return float(s.signed_envelope_count - s0.signed_envelope_count)
+
+
 DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
 
 
@@ -167,6 +193,16 @@ def build_registries(
         code_path="gyza/network/artifact_store.py:115 total_size_bytes",
     ))
 
+    harm.register(HarmClass(
+        id="H6_unsupervised_actions",
+        description="signed envelopes since the accounting origin — the review "
+                    "cadence, in the unit a human's attention is spent in",
+        quantity=_unsupervised_actions,
+        frame="the local envelope log",
+        frame_mutable=False,
+        code_path="gyza/blackboard.py count_envelopes_since",
+    ))
+
     inv = InvariantRegistry()
     inv.register(Invariant(
         id="INV-H1-drain",
@@ -201,6 +237,15 @@ def build_registries(
         description=(
             "retained bytes stay within the declared bound. CUMULATIVE: a "
             "monotone total over one store, so like H1 it is valid only at a "
+            "serialization point and does not compose concurrently (C6/C7)."),
+    ))
+    inv.register(Invariant(
+        id="INV-H6-cadence",
+        harm_class="H6_unsupervised_actions",
+        cls=InvariantClass.CUMULATIVE,
+        description=(
+            "actions since the origin stay within the declared review cadence. "
+            "CUMULATIVE: a running count over one log, so it is valid only at a "
             "serialization point and does not compose concurrently (C6/C7)."),
     ))
     # H5 HAS NO DECLARED BOUND, DELIBERATELY. `guard_bounds.json` carries no

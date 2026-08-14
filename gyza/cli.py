@@ -822,6 +822,19 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
               "the claim")
         print("    has no base case. Sign it: scripts/sign_guard_config.py "
               "--generate-key")
+    # THE CADENCE, in the unit the operator actually chose. A bound nobody can
+    # see their position against is a bound nobody can act on.
+    try:
+        from pathlib import Path as _P
+        bb_path = _P(_resolve(cfg.blackboard_db_path))
+        if bb_path.exists():
+            from gyza.blackboard import Blackboard
+            n = Blackboard(str(bb_path)).count_envelopes_since(0)
+            cad = harm.bound("H6_unsupervised_actions")
+            print(f"  review cadence: {n:,} of {cad:,.0f} actions used "
+                  f"({n/cad:.2%}) — a human is due in {max(cad-n,0):,.0f}")
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        pass
     print(f"  can claim containment: "
           f"{'YES' if r['can_claim_containment'] else 'NO'}")
     # Do not let "the model is bounded" read as "the model is enforced".
@@ -830,7 +843,8 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     # worse than none.
     print("  ENFORCED at runtime: H1 (settlement payer path), and authority")
     print("    containment separately by the per-work-item gate in runner.py.")
-    print("  MEASURED but NOT enforced: H2, H4, H5 — no runtime gate reads them.")
+    print("  MEASURED but NOT enforced: H2, H4, H5, H6 — no runtime gate")
+    print("    reads them; H6 is the cadence and is reported above.")
 
 
 def _print_economy_section(cfg: GyzaConfig) -> None:

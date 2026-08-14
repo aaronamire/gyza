@@ -75,6 +75,9 @@ class GyzaState:
     # genuinely has no store measures zero growth rather than raising, which
     # is the correct reading for "no artifacts were stored".
     stored_bytes: int = 0
+    # H6: signed envelopes since the origin — the cadence measurand. Folded
+    # from the append-only envelope log, never an in-process counter.
+    signed_envelope_count: int = 0
 
     def __post_init__(self) -> None:
         if not self.owner:
@@ -104,6 +107,7 @@ class WindowOrigin:
     """
     ledger_ns: int          # ledger entries with created_at_ns < this
     capital_seq: int        # capital entries with seq < this
+    envelope_ns: int = 0    # signed envelopes with timestamp_ns >= this
 
 
 def _ledger_before(entries: Sequence[object], origin: WindowOrigin):
@@ -122,6 +126,7 @@ def project_now(
     capital_entries: Sequence[object],
     authority_violations: Sequence[AuthorityViolation] = (),
     stored_bytes: int = 0,
+    signed_envelope_count: int = 0,
 ) -> GyzaState:
     """State as of now — the `s_next` of a guard evaluation."""
     return GyzaState(
@@ -131,6 +136,7 @@ def project_now(
         capital_entries=list(capital_entries),
         authority_violations=tuple(authority_violations),
         stored_bytes=int(stored_bytes),
+        signed_envelope_count=int(signed_envelope_count),
     )
 
 

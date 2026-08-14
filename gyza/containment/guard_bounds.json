@@ -20,7 +20,9 @@
     "C-8: this file will move into the signed guard-configuration trust domain.",
     "Until then it is an ordinary repo file and is NOT tamper-evident.",
     "",
-    "H5_storage_growth: 1e10 bytes = 10 GB. NOT a level invented here -- it is transcribed from GyzaConfig.max_artifact_store_gb, which the operator had already declared and which nothing read (it was printed by `gyza status` as an enforced cap while ArtifactStore.max_bytes stayed None everywhere)."
+    "H5_storage_growth: 1e10 bytes = 10 GB. NOT a level invented here -- it is transcribed from GyzaConfig.max_artifact_store_gb, which the operator had already declared and which nothing read (it was printed by `gyza status` as an enforced cap while ArtifactStore.max_bytes stayed None everywhere).",
+    "",
+    "H6_unsupervised_actions: 10000. THE REVIEW CADENCE, chosen by the operator 2026-08-15: how many signed actions may occur before a human looks. Stated in actions rather than credits because TOKEN_IS_FAKE -- a credit bound cannot be checked against anything, an action count can."
   ],
   "version": 1,
   "declared": "2026-07-31",
@@ -28,6 +30,7 @@
     "H1_credits": 100.0,
     "H2_market_capital": 100.0,
     "H4_authority": 0.0,
-    "H5_storage_growth": 10000000000.0
+    "H5_storage_growth": 10000000000.0,
+    "H6_unsupervised_actions": 10000
   }
 }

@@ -613,6 +613,21 @@ class Blackboard:
         )
         return env_hash
 
+    def count_envelopes_since(self, origin_ns: int = 0) -> int:
+        """Signed envelopes recorded at or after `origin_ns`.
+
+        H6's measurand, and it is DERIVED rather than counted in memory on
+        purpose. An in-process counter resets on restart, which is a cumulative
+        bound whose origin moves -- ledger artifact #13, the defect that bought
+        unlimited drain. The envelope log is append-only and durable, so folding
+        it cannot be reset by restarting the process.
+        """
+        row = self._conn().execute(
+            "SELECT COUNT(*) AS n FROM icp_envelopes WHERE timestamp_ns >= ?",
+            (int(origin_ns),),
+        ).fetchone()
+        return int(row["n"] if row is not None else 0)
+
     def get_envelope(self, envelope_hash: str):
         """Retrieve an ICPEnvelope by hash, or None if absent."""
         from gyza.icp import ICPEnvelope
