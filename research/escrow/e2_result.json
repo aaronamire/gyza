@@ -1,0 +1,49 @@
+[
+  {
+    "arm": "control",
+    "unpaid_delivered_work": 80.0,
+    "lockout_breadth": 0,
+    "drawdown": 100.0,
+    "settled_credits": 100.0,
+    "peak_idle_escrow": 0.0,
+    "forgone_commissions": 0,
+    "forgone_credits": 0.0,
+    "refusals": 9
+  },
+  {
+    "arm": "escrow",
+    "unpaid_delivered_work": 0.0,
+    "lockout_breadth": 0,
+    "drawdown": 100.0,
+    "settled_credits": 100.0,
+    "peak_idle_escrow": 20.0,
+    "forgone_commissions": 4,
+    "forgone_credits": 80.0,
+    "mean_idle_escrow": 11.11111111111111,
+    "refusals": 5
+  },
+  {
+    "arm": "escrow(batch=2)",
+    "unpaid_delivered_work": 0.0,
+    "lockout_breadth": 0,
+    "drawdown": 100.0,
+    "settled_credits": 100.0,
+    "peak_idle_escrow": 40.0,
+    "forgone_commissions": 4,
+    "forgone_credits": 80.0,
+    "mean_idle_escrow": 40.0,
+    "refusals": 5
+  },
+  {
+    "arm": "escrow(batch=5)",
+    "unpaid_delivered_work": 0.0,
+    "lockout_breadth": 0,
+    "drawdown": 100.0,
+    "settled_credits": 100.0,
+    "peak_idle_escrow": 100.0,
+    "forgone_commissions": 4,
+    "forgone_credits": 80.0,
+    "mean_idle_escrow": 100.0,
+    "refusals": 5
+  }
+]

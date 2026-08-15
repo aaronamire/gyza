@@ -117,6 +117,44 @@ so the gap stays reported.
 **Correction:** `research/planetary/R_D1b_FINDINGS.md` (`923a388`), retirement
 in `a29f2e5`.
 
+## 9. `aggregate/FINDINGS_RESERVATION.md` — **NARROWED to M ≤ 3**
+
+**Stands as measured.** Every cell in it ran at M ≤ 3, because
+`env_federation.principals` silently sliced a fixed 3-tuple.
+
+**Now known:** reservation is exact at M = 2 because there is exactly **one**
+other principal, so no other-caused change exists inside a round and its pinned
+origin cannot be stale. The mechanism §3 correctly identified needs **≥ 2 other
+actors** and first appears at M = 4 — where reservation becomes
+**indistinguishable from no guard at all** (0.975 vs naive's 0.975) and stays so
+to M = 512. `PARTITIONED_READ` dominates it at every M ≥ 4.
+
+`RESERVATION-PARTIAL` is therefore not wrong; it was measured in the one regime
+where the guard's own failure mode is unreachable.
+
+**Correction:** `research/escrow/FINDINGS.md` §2.
+
+## 10. `harm_redteam/damage.py` D2 `lockout_breadth` — **UNDER-REPORTS**
+
+D2 is `{earners who delivered} − {earners who were paid}`, so an earner paid for
+*some* entries and not others counts as not locked out. Measured **0.0 while D1
+was 80.0** — in exactly the case it was built to illuminate. Sound only for
+earners paid nothing at all.
+
+**Correction:** `research/escrow/FINDINGS.md` §3.4.
+
+## 11. "Bounding a consequence TRANSFERS harm" — **third refinement**
+
+Entry #4 narrowed this from a general blocker to a consequence of conservation.
+It now has a constructive counterpart *and* its limit, both measured: escrow
+drives `unpaid_delivered_work` to exactly 0, but the same 80 credits reappear as
+work **never commissioned**. Escrow converts a **realized loss** into a
+**forgone gain**; it does not make the counterparty whole. Under R-B1's
+quantity taxonomy that is an EXTINGUISHES conversion; under a welfare measure it
+is still a transfer, and **no one has chosen which measure governs.**
+
+**Correction:** `research/escrow/FINDINGS.md` §3.2.
+
 ---
 
 ## Predictions I made and got wrong
@@ -129,6 +167,20 @@ running the discipline it claims.
 | **P-D1c** amortization is a *larger* lever than human capacity | **WRONG** — `H` and `A` enter as a product; identical. The real asymmetry is that one is bounded by hiring and the other by the harm bound. |
 | **P-A1** `A` is order 1–100, "the lever is near-unused" | **WRONG** — measured 0.0008–1.0. Not near-unused; *inverted*. |
 | **P1** (arena) violation rate falls monotonically in M | **REFUTED** — flat from M=8 to M=512. |
+| **P-E1** reservation's violation rate is roughly flat in M | **REFUTED at the M=2→4 step** (0.000 → 0.975). Flat only *above* the step. |
+| **P-E2b** `idle_escrow` ≥ 25% of the bound | **MALFORMED, not merely wrong.** The quantity is a free deployment parameter: 20% / 40% / 100% for 1 / 2 / 5 items in flight. A single number could not have been right. |
+
+## Decision rules that failed their own feasibility check
+
+Standing rule #4 now has **four** instances, and the fourth is a new species of
+the same error.
+
+| rule | defect |
+|---|---|
+| R10 θ\* | threshold unreachable under the environment's parameters |
+| R10 TUNABLE clause | trivially satisfiable |
+| R11 economy bar 0.40 | exceeded what *any* router could achieve on 2 of 6 MBPP cells |
+| **E1-HOLDS** ("within 2× of the M=2 value") | **the BASELINE was exactly 0.000, so the ratio is undefined and the rule is unscorable.** I checked the feasibility ceiling of the measured quantity and not of the baseline the rule divides by. |
 
 ## Apparatus defects found in my own instruments
 
@@ -139,3 +191,16 @@ that cannot move a ratio, and a float boundary at exactly `L` — which I
 diagnosed in print as a "seed effect" in the same output whose data refuted it.
 
 Detail: `research/arena/FINDINGS.md` §4.
+
+**Five more in the escrow route**, same direction. Three in the coupled arena: a
+rotating target (so concentration could not accumulate and *all three arms*
+scored 0.0000 at M ≥ 8), an ungated pool drain (so every arm scored identically),
+and shedders that could not divest their pool claim (so the box looked sound at
+M ≥ 4 for reasons internal to the instrument). Two in E2, **both of the AN ERROR
+IS NOT A VALUE species**: a harm class registered with no invariant, and
+`float(Credits)` raising inside the quantity function — the engine reported each
+through the same channel as a bound breach, and **the two runs produced
+byte-identical tables.** Neither was visible in the result; both were found only
+in stderr.
+
+Detail: `research/escrow/FINDINGS.md` §6.

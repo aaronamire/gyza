@@ -1,0 +1,317 @@
+{
+  "kappa": 0.6,
+  "rounds": 40,
+  "seeds": 20,
+  "rates": {
+    "1": {
+      "2": {
+        "naive": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.59999999976
+        },
+        "reserved": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.59999999976
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.59999999976
+        }
+      },
+      "4": {
+        "naive": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.62176165708717
+        },
+        "reserved": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.62176165708717
+        },
+        "partitioned": {
+          "violation_rate": 0.925,
+          "below_floor_rate": 0.925,
+          "peak": 0.6013519885134605
+        }
+      },
+      "8": {
+        "naive": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.6670864900863027
+        },
+        "reserved": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.6670864900863027
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199999
+        }
+      },
+      "16": {
+        "naive": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.975,
+          "peak": 0.6309923713446148
+        },
+        "reserved": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.975,
+          "peak": 0.6309923713446148
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199999
+        }
+      },
+      "32": {
+        "naive": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.95,
+          "peak": 0.6271109403696957
+        },
+        "reserved": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.95,
+          "peak": 0.6271109403696957
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199995
+        }
+      },
+      "64": {
+        "naive": {
+          "violation_rate": 0.925,
+          "below_floor_rate": 0.925,
+          "peak": 0.609182506109723
+        },
+        "reserved": {
+          "violation_rate": 0.925,
+          "below_floor_rate": 0.925,
+          "peak": 0.609182506109723
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.599999999519999
+        }
+      },
+      "128": {
+        "naive": {
+          "violation_rate": 0.9,
+          "below_floor_rate": 0.9,
+          "peak": 0.6031991057924532
+        },
+        "reserved": {
+          "violation_rate": 0.9,
+          "below_floor_rate": 0.9,
+          "peak": 0.6031991057924532
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.599999999519998
+        }
+      },
+      "256": {
+        "naive": {
+          "violation_rate": 0.875,
+          "below_floor_rate": 0.9,
+          "peak": 0.6016690900262682
+        },
+        "reserved": {
+          "violation_rate": 0.875,
+          "below_floor_rate": 0.9,
+          "peak": 0.6016690900262682
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199959
+        }
+      },
+      "512": {
+        "naive": {
+          "violation_rate": 0.875,
+          "below_floor_rate": 0.875,
+          "peak": 0.6012232911229772
+        },
+        "reserved": {
+          "violation_rate": 0.875,
+          "below_floor_rate": 0.875,
+          "peak": 0.6012232911229772
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199918
+        }
+      }
+    },
+    "4": {
+      "2": {
+        "naive": {
+          "violation_rate": 1.0,
+          "below_floor_rate": 1.0,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.59999999976
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.59999999976
+        }
+      },
+      "4": {
+        "naive": {
+          "violation_rate": 1.0,
+          "below_floor_rate": 1.0,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.6217616570871719
+        },
+        "partitioned": {
+          "violation_rate": 0.85,
+          "below_floor_rate": 0.875,
+          "peak": 0.6032342847849467
+        }
+      },
+      "8": {
+        "naive": {
+          "violation_rate": 1.0,
+          "below_floor_rate": 1.0,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.6670864900863029
+        },
+        "partitioned": {
+          "violation_rate": 0.825,
+          "below_floor_rate": 0.85,
+          "peak": 0.6023612470417802
+        }
+      },
+      "16": {
+        "naive": {
+          "violation_rate": 1.0,
+          "below_floor_rate": 1.0,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.6780508204795596
+        },
+        "partitioned": {
+          "violation_rate": 0.8,
+          "below_floor_rate": 0.8,
+          "peak": 0.6003655315913301
+        }
+      },
+      "32": {
+        "naive": {
+          "violation_rate": 1.0,
+          "below_floor_rate": 1.0,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.6844630488479708
+        },
+        "partitioned": {
+          "violation_rate": 0.7,
+          "below_floor_rate": 0.7,
+          "peak": 0.6000090987472751
+        }
+      },
+      "64": {
+        "naive": {
+          "violation_rate": 1.0,
+          "below_floor_rate": 1.0,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.95,
+          "peak": 0.6287848380144279
+        },
+        "partitioned": {
+          "violation_rate": 0.525,
+          "below_floor_rate": 0.525,
+          "peak": 0.6000000055980319
+        }
+      },
+      "128": {
+        "naive": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 1.0
+        },
+        "reserved": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.95,
+          "peak": 0.6282246686896269
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199935
+        }
+      },
+      "256": {
+        "naive": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.9976566034457288
+        },
+        "reserved": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.95,
+          "peak": 0.6278710447610562
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199842
+        }
+      },
+      "512": {
+        "naive": {
+          "violation_rate": 0.975,
+          "below_floor_rate": 0.975,
+          "peak": 0.9841664807103215
+        },
+        "reserved": {
+          "violation_rate": 0.95,
+          "below_floor_rate": 0.95,
+          "peak": 0.617118648186048
+        },
+        "partitioned": {
+          "violation_rate": 0.0,
+          "below_floor_rate": 0.0,
+          "peak": 0.5999999995199679
+        }
+      }
+    }
+  }
+}
