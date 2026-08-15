@@ -59,3 +59,24 @@ claim only became available once H5's level was loaded, and that level was
 **transcribed from `GyzaConfig.max_artifact_store_gb`**, a value the operator had
 already declared and which nothing read: `gyza status` printed it as an enforced
 cap while `ArtifactStore.max_bytes` stayed `None` everywhere.
+
+---
+
+## Where the authority key lives — decided 2026-08-15
+
+**The key stays on this machine, and that is a deliberate decision with a
+trigger, not an oversight.** Gyza is not deployed. Nothing signs for a third
+party, no peer trusts this key, and moving it to separate custody before there
+is anything to protect buys ceremony rather than security.
+
+**The trigger is DEPLOYMENT, not time.** The moment any of the following becomes
+true, the key must move to custody the running system cannot read:
+
+1. a daemon reachable from a network other than loopback trusts a signature made
+   by this key,
+2. any third party is asked to verify a Gyza claim against it, or
+3. a release binary is signed under it.
+
+Recorded here rather than in a session note because the condition outlives any
+session, and a deferred security decision with no written trigger is
+indistinguishable from a forgotten one.
