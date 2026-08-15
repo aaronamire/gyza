@@ -143,6 +143,32 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 16. `margin/FINDINGS.md` — its constructive result needs ENFORCEMENT, not compliance
+
+Not a refutation. R-M1's finding that bounded activity makes a cross-principal
+aggregate unreachable is intact — **among principals that run the check.** Every
+cell assumed universal compliance.
+
+**Now known:** **one** principal ignoring its guard breaks the bound at every
+scale to M = 512 (k\* = 1, 1, 2), because its damage travels through the
+**shared pool**, not through its own term in `max/sum`. Impact is O(1), not the
+O(1/M) I derived. A node running *old* software (floor but no margin) is far more
+tolerable — 23 of them at M = 512 — so honest heterogeneity is survivable and
+malice is not.
+
+**Correction:** `research/defector/FINDINGS.md`.
+
+## 17. Both closed forms in this program have now failed
+
+R-M1 §2c was conservative by ≈2× and **changed sign at the feasibility
+boundary**. A2 §1a predicted φ\* ∈ [0.409, 0.586] at M = 8 against a measured
+**0.1429**, because it computed a ceiling against a denominator held at `U·M`
+while the compliant population was simultaneously shrinking it.
+
+Recorded together because the species is one: **a closed form derived over the
+wrong denominator looks exactly like a correct one until it is measured.** Both
+stand unpatched; the simulator is ground truth in both routes.
+
 ## 14. `HARM_MODEL_DRAFT.md` §H3 "external network sends" — **MIS-CLASSIFIED**
 
 Cites `send_message`, `publish_agent`, `publish_delta` and `publish_attestation`
