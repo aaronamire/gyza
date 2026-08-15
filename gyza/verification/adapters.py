@@ -27,10 +27,31 @@ def _envelope_chain(envelopes) -> bool:
     return ok
 
 
-def _envelope_dag(envelopes, **kw) -> bool:
+def _envelope_dag_closed(envelopes) -> bool:
+    """DAG intact WITH closed parent linkage: every non-root spine parent held.
+
+    THE SPLIT, and why it was needed. One `envelope_dag` entry forwarded
+    `require_closed` to `verify_dag`, and production calls it BOTH ways --
+    `audit.py` passes True, `resilience.py` and two demos pass False. So the
+    registered entry proved a DIFFERENT PROPOSITION depending on the call site,
+    which is the determinacy failure the carrier rule refuses. Naming the
+    parameter is the repair (parameter ADDITION, not claim substitution), and
+    here it is named by having two claim types instead of one caller-chosen
+    kwarg.
+    """
     from gyza.icp import verify_dag
-    res = verify_dag(envelopes, **kw)
-    return bool(getattr(res, "valid", res))
+    return bool(verify_dag(envelopes, require_closed=True).valid)
+
+
+def _envelope_dag_open(envelopes) -> bool:
+    """DAG intact WITHOUT requiring parents to be held.
+
+    The partial-replica reading: a node mid-gossip legitimately lacks spine
+    parents. A WEAKER claim than the closed one and a DIFFERENT one -- which is
+    the whole point of splitting rather than defaulting.
+    """
+    from gyza.icp import verify_dag
+    return bool(verify_dag(envelopes, require_closed=False).valid)
 
 
 def _manifest_identity(manifest, expected_hash) -> bool:
@@ -115,7 +136,7 @@ def _memory_retrieval_topk(claim, candidates, query_vec) -> bool:
     return verify_retrieval_claim(claim, candidates, query_vec)
 
 
-def _external_send_content(claim, emitted: bytes, policy=None) -> bool:
+def _external_send_content(claim, emitted: bytes) -> bool:
     """RESPECIFIED. Was in NO_VERIFIER: "the right content was sent" has no
     mechanical check. The restated claim binds a content hash to the bytes that
     ACTUALLY LEFT -- not to a value the sender computed from what it intended,
@@ -124,15 +145,30 @@ def _external_send_content(claim, emitted: bytes, policy=None) -> bool:
     What the restatement loses: whether sending was a good idea. Containment
     ends at emission regardless (C15), so non-repudiation of WHAT LEFT is close
     to the whole of what is obtainable at that boundary.
+
+    THE POLICY PARAMETER IS BOUND OUT, and that is the determinacy repair.
+    `verify_send_claim`'s `policy` defaults to None, and when it is None the
+    policy clause is SKIPPED -- so the registered entry verified hash+length at
+    some call sites and hash+length+policy at others, proving a different
+    proposition depending on the caller. This entry now proves EXACTLY ONE
+    thing: the emitted bytes hash and length match what the claim states.
+
+    A policy-carrying claim is a DIFFERENT proposition. It needs its own claim
+    type and its own attestation, and it is deliberately not created here --
+    nothing in production supplies a policy today, so inventing the type would
+    register a checker with no caller.
     """
     from gyza.verification.respec import verify_send_claim
-    return verify_send_claim(claim, emitted, policy)
+    return verify_send_claim(claim, emitted, policy=None)
 
 
 NATIVE: list[Verifier] = [
     Verifier("envelope_signature", _envelope_signature, "gyza/icp.py:82"),
     Verifier("envelope_chain", _envelope_chain, "gyza/icp.py:105"),
-    Verifier("envelope_dag", _envelope_dag, "gyza/icp.py:217"),
+    Verifier("envelope_dag_closed", _envelope_dag_closed,
+             "gyza/icp.py:217 verify_dag (require_closed=True)"),
+    Verifier("envelope_dag_open", _envelope_dag_open,
+             "gyza/icp.py:217 verify_dag (require_closed=False)"),
     Verifier("manifest_identity", _manifest_identity, "gyza/identity.py:101"),
     Verifier("enforcement_within_manifest", _enforcement_within_manifest,
              "gyza/sandbox/config.py:286"),

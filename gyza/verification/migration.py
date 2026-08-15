@@ -145,28 +145,29 @@ def _drafts() -> list[SpecDraft]:
                     "was verified; not currently carried by the claim"),
            ["all_links_resolve", "all_signatures_verify"])
 
-    native("envelope_dag",
-           "Every envelope's parents resolve within the supplied set and each "
-           "signature verifies. NOTE: closure is NOT checked unless the caller "
-           "passes require_closed=True.",
+    native("envelope_dag_closed",
+           "Every envelope's parents resolve within the supplied set, every "
+           "signature verifies, AND every non-root spine parent is held "
+           "(require_closed=True, bound by the adapter).",
            "PROOF", MEASURED,
            "gyza.icp.verify_dag traverses every node; no sampling",
            _na("a structural postcondition over the supplied set"),
-           FrameRef("dag_root_set_digest",
-                    "PENDING — nothing currently pins WHICH envelopes were "
-                    "supplied; see blocked_reason"),
+           FrameRef("dag_supplied_set",
+                    "the envelopes passed by value in the call; the claim is "
+                    "over exactly that set and nothing outside it"),
+           ["all_parents_resolve", "all_signatures_verify", "closure_holds"])
+    native("envelope_dag_open",
+           "Every envelope's parents resolve within the supplied set and every "
+           "signature verifies. Closure is NOT required "
+           "(require_closed=False, bound by the adapter) -- the partial-replica "
+           "reading, a strictly WEAKER claim than the closed one.",
+           "PROOF", MEASURED,
+           "gyza.icp.verify_dag traverses every node; no sampling",
+           _na("a structural postcondition over the supplied set"),
+           FrameRef("dag_supplied_set",
+                    "the envelopes passed by value in the call; the claim is "
+                    "over exactly that set and nothing outside it"),
            ["all_parents_resolve", "all_signatures_verify"])
-    d[-1] = SpecDraft(**{**d[-1].__dict__,
-                         "blocked_reason":
-                         "SUCCESS CONDITION IS NOT FIXED BY THE REGISTRY. The "
-                         "adapter forwards **kw to verify_dag, whose "
-                         "require_closed defaults to False (gyza/icp.py:220). "
-                         "Production calls it BOTH ways -- audit.py:101 and "
-                         "demo/ddil_partition.py:616 pass True, "
-                         "resilience.py:202 and two demos pass False -- so the "
-                         "registered entry proves a DIFFERENT PROPOSITION "
-                         "depending on the call site. Split into two claim "
-                         "types or bind the kwarg before attesting."})
 
     # --- capability / authority -------------------------------------------
     native("enforcement_within_manifest",
@@ -270,15 +271,15 @@ def _drafts() -> list[SpecDraft]:
            _na("containment ends at emission (C15); nothing accumulates after"),
            _na("the emitted bytes are passed by value"),
            ["wire_digest_matches", "byte_count_matches"])
-    d[-1] = SpecDraft(**{**d[-1].__dict__,
-                         "blocked_reason":
-                         "SUCCESS CONDITION IS NOT FIXED BY THE REGISTRY. The "
-                         "`policy` parameter defaults to None "
-                         "(respec.py:195), and when it is None the policy "
-                         "clause is SKIPPED. So the registered entry verifies "
-                         "hash+length alone at some call sites and "
-                         "hash+length+policy at others. Bind the policy or "
-                         "split the claim type before attesting."})
+    # BLOCKER REPAIRED 2026-08-15. The `policy` kwarg is BOUND OUT in the
+    # adapter (`_external_send_content` calls verify_send_claim with
+    # policy=None), so this entry now proves exactly one proposition: the
+    # emitted bytes match the claimed hash and length. Previously the parameter
+    # defaulted to None and the policy clause was SKIPPED when it did, so the
+    # entry verified hash+length at some call sites and hash+length+policy at
+    # others. A policy-carrying claim is a DIFFERENT proposition and needs its
+    # own claim type; it is deliberately not created, because nothing in
+    # production supplies a policy and the type would have no caller.
 
     # --- human partial specs ------------------------------------------------
     def spec(ct, success, reason, frame, obligations, basis=MEASURED):
@@ -357,9 +358,29 @@ def load_attestations(path: Path | None = None) -> dict[str, Attestation]:
     if not p.exists():
         return {}
     d = json.loads(p.read_text())
-    att = Attestation(author=d["attester"], method=d["method"],
-                      basis=d["basis"])
-    return {ct: att for ct in d["claim_types"]}
+
+    # GROUPS, so entries attested on DIFFERENT GROUNDS cannot share a basis.
+    # The flat form applies one `basis` to every claim type, which was fine
+    # while one person had reviewed them all. It stops being fine the moment
+    # entries are added on weaker grounds: extending the list would silently
+    # apply "reviewed and accepted by the repository owner" to entries the
+    # owner never saw. `Attestation.basis` documents exactly this -- "'I
+    # re-derived every carrier' and 'an agent classified these and I accepted
+    # them' are different responsibility records, and an attestation that does
+    # not distinguish them records less than it appears to."
+    #
+    # The flat form is still read, unchanged, so existing files keep working.
+    out: dict[str, Attestation] = {}
+    groups = d.get("groups")
+    if groups is None:
+        groups = [{k: d[k] for k in ("attester", "method", "basis",
+                                     "claim_types")}]
+    for g in groups:
+        att = Attestation(author=g["attester"], method=g["method"],
+                          basis=g["basis"])
+        for ct in g["claim_types"]:
+            out[ct] = att
+    return out
 
 
 def governed_registry(attestations: Mapping[str, Attestation],

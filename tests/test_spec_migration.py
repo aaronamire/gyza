@@ -63,7 +63,11 @@ def test_attesting_a_blocked_draft_still_does_not_admit_it():
     vouch' does not fix which proposition it proves."""
     auth, skipped = governed_registry({"envelope_dag": _att()})
     assert "envelope_dag" not in auth
-    assert dict(skipped)["envelope_dag"].startswith("BLOCKED:")
+    # `envelope_dag` and `external_send_content` were BLOCKED on determinacy
+    # and are repaired (split / policy bound out). What remains blocked is the
+    # irreducibly-semantic pair, which no attestation can admit — which is the
+    # property this test is actually about.
+    assert dict(skipped)["execution_output_content"].startswith("BLOCKED:")
 
 
 # --------------------------------------------------------------------------- #
@@ -255,14 +259,22 @@ def test_the_recorded_basis_does_not_claim_independent_verification():
     assert "Classified by Claude Code" in b
 
 
-def test_the_owner_attestation_registers_14_and_refuses_the_4_blocked():
+def test_the_owner_attestation_registers_17_and_refuses_the_2_semantic():
     """Attestation does NOT override the structural conditions."""
     from gyza.verification.migration import load_attestations
     auth, skipped = governed_registry(load_attestations())
-    assert len(auth.claim_types()) == 14
+    # 14 -> 17 as two determinacy blockers were repaired (2026-08-15):
+    # `envelope_dag` split into closed/open, `external_send_content` had its
+    # policy bound out. The two IRREDUCIBLY SEMANTIC drafts are still refused,
+    # and no attestation can admit them — that is the invariant here, not the
+    # count.
+    assert len(auth.claim_types()) == 17
+    # `envelope_dag` and `external_send_content` were blocked on DETERMINACY
+    # and were repaired 2026-08-15 (split / policy bound out). What remains is
+    # the IRREDUCIBLY SEMANTIC pair, which no attestation can admit — and that
+    # is the property this test is about, not the count.
     assert sorted(ct for ct, _ in skipped) == [
-        "envelope_dag", "execution_output_content", "external_send_content",
-        "routing_match_quality"]
+        "execution_output_content", "routing_match_quality"]
     assert all(why.startswith("BLOCKED:") for _, why in skipped)
 
 

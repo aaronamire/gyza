@@ -133,12 +133,14 @@ def audit_provenance(
     if governed:
         from gyza.verification.ledger import ClaimLedger
         ledger = ClaimLedger()
-        # `require_closed` is a VERDICT-CHANGING PARAMETER, so the claim names
-        # it. An unnamed one is the determinacy failure the carrier rule
-        # refuses -- the same verifier would prove a different proposition
-        # depending on a value the claim did not carry.
-        ledger.emit("envelope_dag", envs, require_closed=require_closed,
-                    note=f"{len(envs)} envelopes")
+        # `require_closed` is a VERDICT-CHANGING PARAMETER, so the CLAIM TYPE
+        # names it rather than a kwarg carrying it. One entry forwarding the
+        # flag proved a different proposition per call site, which is the
+        # determinacy failure the carrier rule refuses; the repair is parameter
+        # ADDITION, and two claim types is what that looks like here.
+        ledger.emit("envelope_dag_closed" if require_closed
+                    else "envelope_dag_open",
+                    envs, note=f"{len(envs)} envelopes")
 
     rows: list[ActionAudit] = []
     for env in envs:

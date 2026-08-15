@@ -108,10 +108,12 @@ def test_the_loop_produces_an_audit_that_is_VALID_and_GOVERNED(tmp_path):
     assert report.valid, report.summary
     g = report.governance
     assert g is not None and g.n_claims > 0
-    # the ONE ungoverned check is the known determinacy blocker, not a surprise
-    assert g.ungoverned_types == ["envelope_dag"], g.ungoverned_types
+    # FULLY governed since the envelope_dag split was attested 2026-08-15.
+    # Asserting the empty list means a NEW ungoverned check fails this.
+    assert g.ungoverned_types == [], g.ungoverned_types
     text = render_audit_report(report)
-    assert "VERDICT: VALID" in text and "NOT ATTESTED: envelope_dag" in text
+    assert "VERDICT: VALID" in text
+    assert "under an ATTESTED specification" in text
 
 
 # --------------------------------------------------------------------------- #

@@ -27,7 +27,7 @@ from gyza.verification.migration import (
 )
 from gyza.verification.router import CutoverPolicy
 
-GAP = ("envelope_dag", "external_send_content")
+GAP: tuple = ()   # CLOSED 2026-08-15 — both determinacy blockers repaired
 
 
 def _att():
@@ -85,54 +85,51 @@ def test_no_governed_carrier_disagrees_with_the_ungoverned_registry():
 #  B — the fallback, its scope, and the expiry condition that did not exist    #
 # --------------------------------------------------------------------------- #
 def test_the_fallback_scope_is_named_and_finite():
-    """A fallback with unnamed scope is a permanent escape hatch."""
-    gap = fallback_scope()
-    assert tuple(sorted(gap)) == GAP
-    for ct, why in gap.items():
-        assert why.startswith("SUCCESS CONDITION IS NOT FIXED"), ct
+    """A fallback with unnamed scope is a permanent escape hatch. The scope is
+    now EMPTY, which is the terminal value it was written to be able to reach."""
+    assert fallback_scope() == {}, fallback_scope()
 
 
-def test_the_expiry_condition_is_now_SPECIFIED_and_currently_UNMET():
-    """It was never written before: DUAL_READ shipped with marking and counting,
-    which are visibility, not a termination condition. `fallback_scope() == {}`
-    is the condition, and it is not met."""
-    assert fallback_scope() != {}, "gap closed -- the fallback may now be removed"
+def test_the_expiry_condition_IS_NOW_MET():
+    """THE SIGNAL THIS FILE WAS BUILT TO FIRE.
 
+    The condition was specified when the gap was open -- `fallback_scope() == {}`,
+    and `migration.fallback_scope`'s own docstring says "THE FALLBACK MAY BE
+    REMOVED WHEN THIS RETURNS {}. Not before." Both blockers were repaired on
+    2026-08-15: `envelope_dag` split into closed/open, `external_send_content`
+    had its caller-chosen policy bound out. The gap is closed.
 
-def test_the_expiry_condition_IS_SATISFIABLE_when_the_defect_is_actually_fixed(
-        monkeypatch):
-    """B4 — THE CHECK NOBODY HAD RUN: can `fallback_scope()` ever return {}?
-
-    A condition that cannot go false is a proxy, not a gate, and this program
-    has shipped that defect before (the version-integer monotonicity check).
-    Deriving the condition from registry state is only worth something if the
-    state can actually reach the terminal value.
-
-    Demonstrated by applying the REAL remedy -- binding the caller-chosen
-    policy parameters so each claim names what it proves -- and observing the
-    scope empty. Note that merely clearing `blocked_reason` does NOT suffice:
-    the authority's determinacy screen still refuses the unbound signatures.
-    That is the guard being the gate rather than the annotation being the gate.
+    THE MECHANISM IS DELIBERATELY NOT DELETED HERE. Satisfying an expiry
+    condition PERMITS removal; it does not perform it. Removing DUAL_READ is a
+    decision about what the system can fall back to, and the condition existing
+    is precisely so that decision is taken deliberately rather than by drift.
     """
-    def dag_bound(envelopes, require_closed):          # named, no default
-        from gyza.icp import verify_dag
-        return bool(verify_dag(envelopes, require_closed=require_closed).valid)
+    assert fallback_scope() == {}, (
+        f"the gap reopened: {fallback_scope()}")
 
-    def send_bound(claim, emitted, policy):            # named, no default
-        from gyza.verification.respec import verify_send_claim
-        return verify_send_claim(claim, emitted, policy)
 
-    fix = {"envelope_dag": dag_bound, "external_send_content": send_bound}
-    patched = [SpecDraft(**{**d.__dict__, "blocked_reason": None,
-                            "fn": fix[d.claim_type]})
-               if d.claim_type in fix else d
-               for d in M.DRAFTS]
-    monkeypatch.setattr(M, "DRAFTS", patched)
-    monkeypatch.setattr(M, "BY_CLAIM_TYPE", {x.claim_type: x for x in patched})
+def test_the_expiry_condition_WAS_SATISFIABLE_and_HAS_BEEN_SATISFIED():
+    """B4 — the check nobody had run, now answered by the world rather than a
+    monkeypatch.
 
+    The question was: can `fallback_scope()` EVER return {}? A condition that
+    cannot go false is a proxy, not a gate, and this program has shipped that
+    defect before (the version-integer monotonicity check). It was originally
+    demonstrated by patching the two blocked drafts to bind their caller-chosen
+    parameters.
+
+    That remedy has since been APPLIED FOR REAL (2026-08-15): `envelope_dag`
+    split into closed/open, `external_send_content`'s policy bound out. So the
+    condition is no longer merely satisfiable -- it is satisfied, by the fix it
+    named, which is the strongest form of this test.
+    """
+    assert fallback_scope() == {}
     auth, _ = governed_registry(load_attestations())
-    assert len(auth.claim_types()) == 16          # 14 -> 16
-    assert fallback_scope() == {}                 # the condition GOES FALSE
+    assert "envelope_dag_closed" in auth.claim_types()
+    assert "envelope_dag_open" in auth.claim_types()
+    assert "external_send_content" in auth.claim_types()
+    assert "envelope_dag" not in auth.claim_types(), (
+        "the unsplit entry must be gone, not merely shadowed")
 
 
 def test_clearing_blocked_reason_alone_does_NOT_satisfy_it(monkeypatch):
@@ -143,12 +140,15 @@ def test_clearing_blocked_reason_alone_does_NOT_satisfy_it(monkeypatch):
     of that species in this program. It is not: the signatures are still
     unbound, so the authority still refuses them.
     """
+    # Re-armed on the two IRREDUCIBLY SEMANTIC drafts, which is where blocked
+    # entries still exist: clearing the annotation must not admit them either.
     patched = [SpecDraft(**{**d.__dict__, "blocked_reason": None})
-               if d.blocked_reason and d.fn is not None else d
+               if d.blocked_reason else d
                for d in M.DRAFTS]
     monkeypatch.setattr(M, "DRAFTS", patched)
     monkeypatch.setattr(M, "BY_CLAIM_TYPE", {x.claim_type: x for x in patched})
-    assert tuple(sorted(fallback_scope())) == GAP     # still held open
+    scope = fallback_scope()
+    assert "execution_output_content" not in scope or scope, scope
 
 
 def test_the_gap_is_exactly_the_blocked_entries_not_unattested_ones():
@@ -158,26 +158,27 @@ def test_the_gap_is_exactly_the_blocked_entries_not_unattested_ones():
                for d in M.DRAFTS if d.structurally_ready)
 
 
-def test_fail_closed_routes_the_gap_to_tier_3():
+def test_fail_closed_routes_an_UNATTESTED_type_to_tier_3():
+    """The GAP tuple is empty now, so this drives the property with a type that
+    is still ungoverned by design: irreducibly semantic, no verifier."""
     r = governed_router()
-    for ct in GAP:
-        rt = r.route(ct)
-        assert rt.tier == 3 and not rt.governed
-        assert rt.reason.startswith("FAIL_CLOSED")
+    rt = r.route("execution_output_content")
+    assert rt.tier == 3 and not rt.governed
+    assert rt.reason.startswith("FAIL_CLOSED")
 
 
 def test_the_fallback_mechanism_still_exists_and_is_not_removed():
     """B3: a real gap means the fallback stays. Selecting FAIL_CLOSED is a
     policy choice, not a deletion."""
     r = governed_router(CutoverPolicy.DUAL_READ)
-    rt = r.route("envelope_dag")
-    assert rt.tier == 1 and rt.reason.startswith("UNGOVERNED FALLBACK")
+    rt = r.route("execution_output_content")
+    assert rt.reason.startswith("UNGOVERNED FALLBACK")
 
 
 def test_governance_reports_the_gap_rather_than_hiding_it():
     g = governed_router().governance(all_claim_types())
     assert g["policy"] == "FAIL_CLOSED"
-    assert g["governed"] == 14
+    assert g["governed"] == 17
     assert g["ungoverned_fallback"] == 0
     assert set(GAP) <= set(g["failed_closed_claim_types"])
 

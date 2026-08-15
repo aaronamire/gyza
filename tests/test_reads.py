@@ -107,7 +107,10 @@ def test_none_of_the_recomputing_five_is_falsely_flagged():
 def test_the_flagged_set_on_the_live_registry_is_exactly_the_two_false_positives():
     flagged = sorted(d.claim_type for d in DRAFTS if d.fn is not None
                      and analyze(d.fn, depth=2).reads_unnamed_state)
-    assert flagged == ["envelope_dag", "memory_retrieval_relevance"]
+    # `envelope_dag` is gone: split into closed/open, each binding
+    # require_closed internally, so the read analyser no longer sees a
+    # caller-chosen kwarg to flag conservatively.
+    assert flagged == ["memory_retrieval_relevance"], flagged
 
 
 def test_the_memory_retrieval_flag_is_a_FALSE_POSITIVE():
@@ -123,15 +126,21 @@ def test_the_memory_retrieval_flag_is_a_FALSE_POSITIVE():
     assert "filter_predicate" in inspect.get_annotations(RetrievalClaim)
 
 
-def test_the_envelope_dag_flag_is_a_CONSERVATIVE_DEFAULT_not_a_state_read():
-    """It fires on `getattr` over a RETURNED object, not on ambient state. The
-    entry is separately and correctly refused by the determinacy screen for a
-    different reason (**kw), so the read analysis adds nothing here."""
-    d = next(x for x in DRAFTS if x.claim_type == "envelope_dag")
-    r = analyze(d.fn, depth=2)
-    assert r.dynamic == frozenset({"getattr"})
-    assert not r.closure_data and not r.global_data
+def test_the_envelope_dag_flag_is_GONE_because_the_kwarg_was_BOUND():
+    """WAS: `envelope_dag` was flagged by the read analyser as a conservative
+    default -- the analyser could not tell a caller-chosen kwarg from a state
+    read, so it flagged rather than clearing it.
 
+    NOW: the entry no longer exists. It was split into `envelope_dag_closed`
+    and `envelope_dag_open` on 2026-08-15, each binding `require_closed`
+    internally, so there is no caller-chosen parameter left to be conservative
+    about. The flag disappearing is the DEFECT being fixed, not the analyser
+    being weakened -- `memory_retrieval_relevance` is still flagged, which is
+    the control.
+    """
+    types = {x.claim_type for x in DRAFTS}
+    assert "envelope_dag" not in types
+    assert {"envelope_dag_closed", "envelope_dag_open"} <= types
 
 def test_true_positive_count_on_the_live_registry_is_zero():
     """Diagnosed, not reported bare: both flags are false positives, so the

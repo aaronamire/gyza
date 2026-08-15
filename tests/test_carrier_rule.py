@@ -143,13 +143,18 @@ def test_the_rule_refuses_exactly_the_two_entries_found_by_hand():
     ENFORCED one: the hand pass was discipline, this is a guard."""
     variable = [d.claim_type for d in DRAFTS if d.fn is not None
                 and not check_claim_determinacy(d.fn, d.carrier).no_declared_evidence]
-    assert sorted(variable) == ["envelope_dag", "external_send_content"]
+    # BOTH REPAIRED 2026-08-15: `envelope_dag` split into closed/open so the
+    # claim TYPE names what the kwarg used to choose, `external_send_content`
+    # had its caller-supplied policy bound out. The rule found them by hand and
+    # they are now fixed, so the set it refuses is EMPTY -- which is the outcome
+    # the rule existed to produce, not a weakening of it.
+    assert sorted(variable) == [], sorted(variable)
 
 
 def test_every_other_entry_with_a_verifier_is_determinate():
     ok = [d.claim_type for d in DRAFTS if d.fn is not None
           and check_claim_determinacy(d.fn, d.carrier).no_declared_evidence]
-    assert len(ok) == 14
+    assert len(ok) == 17   # 14 + the dag split + external_send_content
 
 
 def test_delegation_attenuation_names_its_depth_bound():

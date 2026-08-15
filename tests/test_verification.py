@@ -146,8 +146,8 @@ def test_coverage_is_computed_from_the_registry_and_divergence_is_explained():
     r = TierRouter(v, s)
     cov = r.coverage(all_claim_types())
 
-    assert cov["n"] == 18
-    assert cov["tier_1"] == 13
+    assert cov["n"] == 19   # 18 -> 19: envelope_dag split into closed/open
+    assert cov["tier_1"] == 14   # +1: the dag split yields two tier-1 types
     assert cov["tier_2"] == 3
     assert cov["tier_3"] == len(NO_VERIFIER) == 2
 
@@ -159,8 +159,14 @@ def test_coverage_is_computed_from_the_registry_and_divergence_is_explained():
     assert not (respecified & set(NO_VERIFIER))
 
     # the three named changes account for the WHOLE difference from R14
-    assert cov["tier_1"] - 1 - len(respecified) == 10, "R14 Part C's native count"
-    assert cov["n"] - 1 == 17, "R14 Part C's type count"
+    # R14 Part C counted 10 native tier-1 types. The count is now 11 because
+    # `envelope_dag` was SPLIT into closed/open on 2026-08-15 to repair a
+    # determinacy failure — one entry proving two propositions became two
+    # entries proving one each. A split raises the count without adding any
+    # new verification capability, so this asserts the split rather than a gain.
+    assert cov["tier_1"] - 1 - len(respecified) == 11, (
+        "R14 Part C's native count, +1 for the envelope_dag split")
+    assert cov["n"] - 1 == 18, "R14 Part C's type count, +1 for the envelope_dag split"
 
 
 def test_unit_test_adapter_is_tier_1_alone_but_forces_tier_3_in_a_chain():

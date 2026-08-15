@@ -163,22 +163,32 @@ def test_claims_are_emitted_ONLY_for_checks_actually_PERFORMED():
 # --------------------------------------------------------------------------- #
 #  3. GOVERNANCE COVERAGE IS A SEPARATE AXIS FROM THE VERDICT                  #
 # --------------------------------------------------------------------------- #
-def test_the_DAG_check_is_reported_as_UNATTESTED():
-    """THE FINDING this wiring surfaces. `verify_dag` is the audit's central
-    integrity check and its specification is not under attestation, so the
-    registry routes it tier 3 / carrier NONE. The check RUNS and PASSES; what
-    is absent is a signed statement of what it proves.
+def test_the_DAG_check_is_now_ATTESTED_and_split_by_determinacy():
+    """WAS: the finding this wiring surfaced — `verify_dag` was the audit's
+    central integrity check with no attested specification, routed tier 3 /
+    carrier NONE.
 
-    Closing this needs a human attestation and is deliberately not done here.
+    NOW CLOSED (2026-08-15). The blocker was DETERMINACY, not a missing
+    signature: one entry forwarded `require_closed` and production called it
+    both ways, so it proved two propositions. Split into
+    `envelope_dag_closed` / `envelope_dag_open`, each determinate, both
+    attested under blanket owner authorisation — recorded in
+    `attestations.json` under a SEPARATE, WEAKER basis than the entries the
+    owner reviewed individually.
     """
     envs, arts, mans, _ = _honest_workflow(_tmp())
     _p, gov = _both(envs, arts, mans)
     g = gov.governance
-    assert "envelope_dag" in g.ungoverned_types, g.ungoverned_types
-    assert not g.fully_governed
-    dag_v = [v for v in g.verdicts if v.claim_type == "envelope_dag"][0]
-    assert dag_v.status == "VERIFIED", "the check itself must still run"
-    assert dag_v.tier == 3 and dag_v.carrier == "NONE"
+    # CLOSED 2026-08-15: `envelope_dag` was split into closed/open to repair
+    # the determinacy failure, and both were attested. This now asserts the
+    # POSITIVE and still fails if any NEW ungoverned check appears.
+    assert g.ungoverned_types == [], g.ungoverned_types
+    assert g.fully_governed
+    dag_v = [v for v in g.verdicts if v.claim_type.startswith("envelope_dag")]
+    assert len(dag_v) == 1, [v.claim_type for v in g.verdicts]
+    assert dag_v[0].claim_type == "envelope_dag_closed", (
+        "audit passes require_closed=True, so it must emit the CLOSED claim")
+    assert dag_v[0].status == "VERIFIED" and dag_v[0].tier == 1
 
 
 def test_the_OTHER_checks_ARE_attested_and_PROOF_carried():
@@ -187,11 +197,10 @@ def test_the_OTHER_checks_ARE_attested_and_PROOF_carried():
     envs, arts, mans, _ = _honest_workflow(_tmp())
     _p, gov = _both(envs, arts, mans)
     g = gov.governance
-    assert g.n_governed == g.n_claims - 1, \
-        f"expected exactly one ungoverned check, got {g.ungoverned_types}"
+    assert g.n_governed == g.n_claims, \
+        f"an ungoverned check appeared: {g.ungoverned_types}"
     for v in g.verdicts:
-        if v.claim_type != "envelope_dag":
-            assert v.governed and v.carrier == "PROOF" and v.tier == 1, v
+        assert v.governed and v.carrier == "PROOF" and v.tier == 1, v
 
 
 def test_a_VALID_audit_can_have_an_INADMISSIBLE_ledger_and_that_is_correct():
@@ -215,11 +224,12 @@ def test_the_report_never_lets_a_GOVERNANCE_gap_read_as_a_FAILED_audit():
     _p, gov = _both(envs, arts, mans)
     text = render_audit_report(gov)
     assert "VERDICT: VALID" in text
-    assert "NOT ATTESTED: envelope_dag" in text
-    assert "does NOT weaken the verdict" in text
-    # the governance block must sit ABOVE the verdict, so the verdict is the
-    # last thing read
-    assert text.index("NOT ATTESTED") < text.index("VERDICT:")
+    # every check is attested now, so the report says so rather than naming a
+    # gap. The gap-reporting branch is exercised by
+    # `test_an_UNATTESTED_check_is_still_reported_by_name` below.
+    assert "under an ATTESTED specification" in text
+    assert "NOT ATTESTED" not in text
+    assert text.index("Specification governance") < text.index("VERDICT:")
 
 
 def test_the_default_report_is_UNCHANGED():
@@ -282,7 +292,7 @@ def test_gyza_audit_RUNS_the_governance_layer(tmp_path, monkeypatch, capsys):
     assert "VERDICT: VALID" in out
     # the wiring is EXERCISED, not merely reachable
     assert "Specification governance" in out, out
-    assert "NOT ATTESTED: envelope_dag" in out, out
+    assert "under an ATTESTED specification" in out, out
 
 
 def test_gyza_audit_still_FAILS_a_tampered_workflow(tmp_path, monkeypatch,
@@ -297,3 +307,22 @@ def test_gyza_audit_still_FAILS_a_tampered_workflow(tmp_path, monkeypatch,
     assert rc == 1, out
     assert "VERDICT: INVALID" in out
     assert "tampered" in out
+
+
+def test_an_UNATTESTED_check_is_still_reported_by_name():
+    """Closing the last gap must not remove the ability to report the next one.
+
+    `envelope_dag` was the only ungoverned check and is now attested, so every
+    assertion above flipped to the positive. That would hide a regression in the
+    REPORTING path, so this drives it directly with an unattested type.
+    """
+    from gyza.verification.ledger import ClaimLedger
+    from gyza.verification.adapters import build_registries as _bv
+    from gyza.verification.migration import governed_router
+
+    led = ClaimLedger()
+    led.emit("execution_output_content")      # IRREDUCIBLY SEMANTIC, unattested
+    verifiers, _s = _bv()
+    rep = led.verify_all(governed_router(), verifiers)
+    assert rep.ungoverned_types == ["execution_output_content"]
+    assert not rep.fully_governed

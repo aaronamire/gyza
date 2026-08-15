@@ -162,7 +162,9 @@ def _verifier_inputs(idn):
     return {
         "envelope_signature": ((e0, pk), {}),
         "envelope_chain": (([e0],), {}),
-        "envelope_dag": (([e0, e1],), {}),
+        # the SPLIT: two determinate types where one caller-chosen kwarg was
+        "envelope_dag_closed": (([e0],), {}),
+        "envelope_dag_open": (([e0, e1],), {}),
         "manifest_identity": ((idn.manifest, manifest_hash_hex(idn.manifest)), {}),
         "enforcement_within_manifest": ((enf, idn.manifest), {}),
         "delegation_attenuation": (([DelegationHop("r", root, root, None),

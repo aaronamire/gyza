@@ -1,29 +1,45 @@
 {
- "_README": "Attestations supplied by the repository owner. NOT authored by an agent. The basis field is the substance: it states on what grounds responsibility is taken, and it is folded into each SpecRecord's signed canonical bytes. See research/spec_authority/FINDINGS_ATTESTATION.md.",
- "attester": "Aaron (repository owner)",
- "method": "SELF_ASSERTED",
- "authorized_on": "2026-08-10",
- "basis": "Classified by Claude Code from the verifier implementations; reviewed and accepted by the repository owner, who takes responsibility for the classifications. The owner did not independently re-derive them.",
- "transfers": "RESPONSIBILITY, not KNOWLEDGE. This record says who is accountable if a classification is wrong. It does NOT assert that a human re-derived each carrier.",
- "carrier_assurance": "DECLARED. The carrier is supplied under this attestation. The registry's screens are one-directional signature checks; the read-set analysis reached SCREENING-ONLY and was deliberately NOT wired as a gate because it falsely flags a correct entry.",
- "claim_types": [
-  "envelope_signature",
-  "manifest_identity",
-  "artifact_content_address",
-  "envelope_chain",
-  "enforcement_within_manifest",
-  "delegation_attenuation",
-  "ledger_entry_signatures",
-  "balance_fold",
-  "market_capital_fold",
-  "unit_test_execution",
-  "memory_retrieval_relevance",
-  "hlc_ordering",
-  "reputation_score",
-  "work_claim_exclusivity",
-  "envelope_dag",
-  "external_send_content",
-  "execution_output_content",
-  "routing_match_quality"
- ]
+  "_README": "Attestations supplied by the repository owner. NOT authored by an agent. The basis field is the substance: it states on what grounds responsibility is taken, and it is folded into each SpecRecord's signed canonical bytes. See research/spec_authority/FINDINGS_ATTESTATION.md.",
+  "_FORMAT": "GROUPS. Each group carries its OWN basis, because entries attested on different grounds must not share one. Extending a single flat list would silently apply the first group's 'reviewed and accepted by the repository owner' to entries the owner never saw. See Attestation.basis in gyza/verification/authority.py.",
+  "groups": [
+    {
+      "attester": "Aaron (repository owner)",
+      "method": "SELF_ASSERTED",
+      "authorized_on": "2026-08-10",
+      "basis": "Classified by Claude Code from the verifier implementations; reviewed and accepted by the repository owner, who takes responsibility for the classifications. The owner did not independently re-derive them.",
+      "transfers": "RESPONSIBILITY, not KNOWLEDGE. This record says who is accountable if a classification is wrong. It does NOT assert that a human re-derived each carrier.",
+      "carrier_assurance": "DECLARED. The carrier is supplied under this attestation. The registry's screens are one-directional signature checks; the read-set analysis reached SCREENING-ONLY and was deliberately NOT wired as a gate because it falsely flags a correct entry.",
+      "claim_types": [
+        "envelope_signature",
+        "manifest_identity",
+        "artifact_content_address",
+        "envelope_chain",
+        "enforcement_within_manifest",
+        "delegation_attenuation",
+        "ledger_entry_signatures",
+        "balance_fold",
+        "market_capital_fold",
+        "unit_test_execution",
+        "memory_retrieval_relevance",
+        "hlc_ordering",
+        "reputation_score",
+        "work_claim_exclusivity",
+        "execution_output_content",
+        "routing_match_quality"
+      ]
+    },
+    {
+      "attester": "Aaron (repository owner) \u2014 blanket authorisation",
+      "method": "SELF_ASSERTED",
+      "authorized_on": "2026-08-15",
+      "basis": "SELF_ASSERTED, and WEAKER THAN THE GROUP ABOVE -- the difference is the point. (The method taxonomy describes how an attestation is BOUND, typed versus key-signed; it does not describe who reviewed, which is why that lives here. An invented method value was refused by the mechanism, correctly.) These two claim types were created and classified by Claude Code when the single `envelope_dag` entry was split to repair a determinacy failure: production called verify_dag both ways, so one entry proved two propositions. The repository owner gave BLANKET AUTHORISATION on 2026-08-15 for the agent to attest them and did NOT review these specific classifications. This therefore records the owner's AUTHORISATION, not the owner's REVIEW -- unlike the group above, where the owner read and accepted each classification. Anyone relying on these two entries should know that no human has checked that `envelope_dag_closed` and `envelope_dag_open` are PROOF-carried; an agent asserted it under permission. `external_send_content` is here for a RELATED but distinct reason: the owner reviewed it when its success condition still depended on a caller-supplied policy. Binding that policy out NARROWED the proposition it proves, so the owner's acceptance no longer covers what the entry now asserts -- a narrowing is still a change, and silently re-specifying an attested proposition is exactly what this file exists to prevent. Re-attest under review to lift this.",
+      "transfers": "RESPONSIBILITY, not KNOWLEDGE. This record says who is accountable if a classification is wrong. It does NOT assert that a human re-derived each carrier.",
+      "carrier_assurance": "DECLARED. The carrier is supplied under this attestation. The registry's screens are one-directional signature checks; the read-set analysis reached SCREENING-ONLY and was deliberately NOT wired as a gate because it falsely flags a correct entry.",
+      "claim_types": [
+        "envelope_dag_closed",
+        "envelope_dag_open",
+        "external_send_content"
+      ]
+    }
+  ]
 }
