@@ -83,11 +83,11 @@ def test_every_registered_quantity_measures_REAL_production_state(tmp_path):
         assert isinstance(v, float) and v == v, hc.id      # not NaN
         measured[hc.id] = v
 
-    assert set(measured) == {"H1_credits", "H2_market_capital", "H4_authority",
+    assert set(measured) == {"H2_market_capital", "H4_authority",
                              "H5_storage_growth", "H6_unsupervised_actions"}
     # H1 must SEE the 10-credit outflow. If it did not, this whole file would
     # be measuring a shape rather than a quantity.
-    assert measured["H1_credits"] == pytest.approx(10.0), measured
+    assert "H1_credits" not in measured, "H1 was retired 2026-08-15"
 
 
 def test_the_quantities_REFUSE_a_state_missing_their_field(tmp_path):
@@ -146,16 +146,22 @@ def _measure(s0, s, cid):
     return harm.get(cid).measure(s0, s)
 
 
-def test_H1_moves_with_credits_and_with_holds(tmp_path):
-    s0, s, _ = _states(tmp_path)
-    assert _measure(s0, s, "H1_credits") == pytest.approx(0.0)
+def test_H1_IS_RETIRED_and_the_gap_is_REPORTED(tmp_path):
+    """H1 was retired 2026-08-15: credits are TOKEN_IS_FAKE, so no level in
+    them is checkable, and R-B1 classifies the quantity TRANSFERS.
 
-    s0, s, _ = _states(tmp_path / "b", entries=[_entry(A, B, 25.0, 1)])
-    assert _measure(s0, s, "H1_credits") == pytest.approx(25.0)
+    It is listed in UNMODELLED rather than deleted, so the gap is REPORTED
+    rather than absent -- the same treatment H3 gets. A retired class that
+    simply vanished would leave a reader unable to tell it had ever been
+    considered.
+    """
+    from gyza.containment.gyza_model import UNMODELLED
 
-    # a live hold is credits AT RISK even though nothing has settled
-    s0, s, _ = _states(tmp_path / "c", holds=7.0)
-    assert _measure(s0, s, "H1_credits") == pytest.approx(7.0)
+    harm, _inv = build_registries()
+    assert "H1_credits" not in {c.id for c in harm}
+    assert "H1_credits" in UNMODELLED
+    assert "TOKEN_IS_FAKE" in UNMODELLED["H1_credits"]
+    assert "TRANSFERS" in UNMODELLED["H1_credits"]
 
 
 def test_H2_moves_with_REAL_market_capital(tmp_path):

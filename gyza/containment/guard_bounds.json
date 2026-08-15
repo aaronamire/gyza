@@ -22,12 +22,13 @@
     "",
     "H5_storage_growth: 1e10 bytes = 10 GB. NOT a level invented here -- it is transcribed from GyzaConfig.max_artifact_store_gb, which the operator had already declared and which nothing read (it was printed by `gyza status` as an enforced cap while ArtifactStore.max_bytes stayed None everywhere).",
     "",
-    "H6_unsupervised_actions: 10000. THE REVIEW CADENCE, chosen by the operator 2026-08-15: how many signed actions may occur before a human looks. Stated in actions rather than credits because TOKEN_IS_FAKE -- a credit bound cannot be checked against anything, an action count can."
+    "H6_unsupervised_actions: 10000. THE REVIEW CADENCE, chosen by the operator 2026-08-15: how many signed actions may occur before a human looks. Stated in actions rather than credits because TOKEN_IS_FAKE -- a credit bound cannot be checked against anything, an action count can.",
+    "",
+    "H1_credits RETIRED 2026-08-15 (user decision): credits are TOKEN_IS_FAKE, so no level in them is checkable. It is listed in UNMODELLED so the gap is visible rather than absent. Autonomy is bounded by H6 in actions instead."
   ],
   "version": 1,
   "declared": "2026-07-31",
   "bounds": {
-    "H1_credits": 100.0,
     "H2_market_capital": 100.0,
     "H4_authority": 0.0,
     "H5_storage_growth": 10000000000.0,

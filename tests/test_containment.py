@@ -89,7 +89,9 @@ def test_mutable_frame_is_flagged():
     """R9's G4' hazard: a pinned frame is not conservative, it is catastrophic
     (G4' lost 175000 where G4 bounded at 50)."""
     h, _ = build_registries()
-    assert "H1_credits" in h.mutable_frames()
+    assert h.mutable_frames() == [], (
+        "H1 carried the only mutable frame and is retired; a NEW mutable frame "
+        "is R9's G4-prime hazard and must be noticed")
 
 
 # --------------------------------------------------------------------------- #
@@ -235,8 +237,8 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     h, i = build_registries(bounds_file=None)
     r = GuardEngine(h, i).readiness()
     assert r["can_claim_containment"] is False
-    assert set(r["unbounded"]) == {"H1_credits", "H2_market_capital",
-                                   "H4_authority", "H5_storage_growth",
+    assert set(r["unbounded"]) == {"H2_market_capital", "H4_authority",
+                                   "H5_storage_growth",
                                    "H6_unsupervised_actions"}
     assert r["uncovered"] == []
 
@@ -264,7 +266,7 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     assert h.bound("H4_authority") == 0.0, (
         "authority exceedance is a BREACH, not a budget — the attenuation "
         "theorem says it cannot happen at all")
-    assert h.bound("H1_credits") == 100.0
+    assert h.bound("H6_unsupervised_actions") == 10000
 
 
 def test_authority_bound_of_zero_admits_none_and_refuses_one():
@@ -292,7 +294,7 @@ def test_gyza_credit_invariant_is_cumulative_and_lands_at_the_gate():
     """A monotone budget over one pool does not compose (R10 H-CONS, R13)."""
     h, i = build_registries()
     plan = GuardEngine(h, i).concurrency_plan()
-    assert "INV-H1-drain" in plan["promotion_serialized"]
+    assert "INV-H6-cadence" in plan["promotion_serialized"]
     assert "INV-H4-attenuation" in plan["interior_concurrent"]
 
 
@@ -402,7 +404,6 @@ def test_every_registered_gyza_harm_quantity_actually_EXECUTES():
         assert isinstance(v0, float) and isinstance(v1, float)
         assert v0 == 0.0, f"{hc.id} must measure zero harm against itself"
 
-    assert h.get("H1_credits").measure(s0, s1) == pytest.approx(10.0)
     assert h.get("H2_market_capital").measure(s0, s1) == pytest.approx(10.0)
     assert h.get("H4_authority").measure(s0, s1) == pytest.approx(1.0)
 

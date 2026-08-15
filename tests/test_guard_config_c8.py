@@ -32,9 +32,10 @@ from gyza.containment.guardconfig import (
 from gyza.containment.gyza_model import DEFAULT_BOUNDS_FILE, build_registries
 from gyza.containment.harm import UnsignedBoundsError
 
-BOUNDS = {"H1_credits": 100.0, "H2_market_capital": 100.0,
-          "H4_authority": 0.0, "H5_storage_growth": 1e10,
-          "H6_unsupervised_actions": 10000}
+# H1_credits was RETIRED 2026-08-15 — credits are TOKEN_IS_FAKE, so no level
+# in them is checkable. The declared set is what remains.
+BOUNDS = {"H2_market_capital": 100.0, "H4_authority": 0.0,
+          "H5_storage_growth": 1e10, "H6_unsupervised_actions": 10000}
 
 
 def _authority():
@@ -69,7 +70,7 @@ def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     assert r["can_claim_containment"] is False
     # PROVENANCE is the ONLY thing blocking it: every class has a level.
     assert r["unbounded"] == [] and r["uncovered"] == []
-    assert h.bound("H1_credits") == 100.0
+    assert h.bound("H2_market_capital") == 100.0
 
 
 def test_SIGNED_bounds_lift_the_claim(tmp_path):
@@ -111,7 +112,7 @@ def test_TAMPERED_bounds_are_refused(tmp_path):
     seed, pub = _authority()
     p = _signed_file(tmp_path, seed)
     doc = json.loads(p.read_text())
-    doc["config"]["bounds"]["H1_credits"] = 10_000.0     # edit the policy
+    doc["config"]["bounds"]["H2_market_capital"] = 10_000.0     # edit the policy
     p.write_text(json.dumps(doc))
 
     with pytest.raises(UnsignedBoundsError, match="did not verify"):
@@ -192,7 +193,7 @@ def test_the_store_still_REFUSES_a_silent_loosening(tmp_path):
     store = GuardConfigStore(pub)
     store.load_file(_signed_file(tmp_path, seed))
 
-    loose = dict(BOUNDS, H1_credits=500.0)
+    loose = dict(BOUNDS, H2_market_capital=500.0)
     cfg = {"version": 2, "bounds": loose, "tier_assignments": {}}
     with pytest.raises(GuardConfigError, match="LOOSEN"):
         store.load(cfg, sign_config(cfg, seed))
@@ -213,7 +214,7 @@ def test_gyza_status_REPORTS_that_the_bounds_are_unsigned(capsys):
     assert "can claim containment: NO" in out
     assert "sign_guard_config.py" in out, "the report must say what to do"
     # the declared levels are still shown: unsigned is not the same as unknown
-    assert "H1_credits" in out and "100.00" in out
+    assert "H2_market_capital" in out and "100.00" in out
     # H3 is absent from the model and must be reported as absent, never omitted
     assert "H3_irreversible_change" in out and "NOT MODELLED" in out
 
@@ -238,6 +239,6 @@ def test_a_correctly_signed_TIGHTENING_installs(tmp_path):
     seed, pub = _authority()
     store = GuardConfigStore(pub)
     store.load_file(_signed_file(tmp_path, seed))
-    tight = dict(BOUNDS, H1_credits=50.0)
+    tight = dict(BOUNDS, H2_market_capital=50.0)
     cfg = {"version": 2, "bounds": tight, "tier_assignments": {}}
-    assert store.load(cfg, sign_config(cfg, seed)).bounds["H1_credits"] == 50.0
+    assert store.load(cfg, sign_config(cfg, seed)).bounds["H2_market_capital"] == 50.0

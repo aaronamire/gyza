@@ -845,6 +845,13 @@ def _print_global_section(cfg: GyzaConfig) -> None:
             print(f"    - {p.compositor_pubkey[:16]}…  {tier_label}  {p.multiaddr}")
 
 
+#: Declared harm classes a RUNTIME GATE actually consults. Empty since H1 was
+#: retired 2026-08-15: no declared class is enforced, and authority containment
+#: is enforced by a separate mechanism that is not a declared class. Add an id
+#: here ONLY when a gate reads it -- this set is what `gyza status` reports.
+_ENFORCED_HARM_CLASSES: set[str] = set()
+
+
 def _print_containment_section(cfg: GyzaConfig) -> None:
     """The declared harm model, its bounds, and WHO SIGNED THEM.
 
@@ -910,10 +917,21 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     # This line was written before the settlement gate existed and said NO
     # bound was consulted; that is no longer true and a stale reassurance is
     # worse than none.
-    print("  ENFORCED at runtime: H1 (settlement payer path), and authority")
-    print("    containment separately by the per-work-item gate in runner.py.")
-    print("  MEASURED but NOT enforced: H2, H4, H5, H6 — no runtime gate")
-    print("    reads them; H6 is the cadence and is reported above.")
+    # DERIVED, not hardcoded. This line has now gone stale three times as the
+    # model changed -- it claimed no bound was enforced after the settlement
+    # gate landed, then claimed H1 was enforced after H1 was retired. A list
+    # maintained by hand beside a model that moves is a stale reassurance
+    # waiting to happen, and a stale reassurance is worse than none.
+    enforced = sorted(_ENFORCED_HARM_CLASSES & {c.id for c in harm})
+    measured = sorted({c.id for c in harm} - set(enforced))
+    if enforced:
+        print(f"  ENFORCED at runtime: {', '.join(enforced)}")
+    else:
+        print("  ENFORCED at runtime: NONE of the declared classes.")
+    print("    Authority containment IS enforced, separately and "
+          "unconditionally,")
+    print("    by the per-work-item bounds gate in gyza/runner.py.")
+    print(f"  MEASURED but NOT enforced: {', '.join(measured) or 'none'}")
 
 
 def _print_economy_section(cfg: GyzaConfig) -> None:

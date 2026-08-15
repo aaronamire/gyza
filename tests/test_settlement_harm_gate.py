@@ -1,4 +1,26 @@
-"""The first consequence bound Gyza actually ENFORCES on a production path.
+"""The settlement gate MECHANISM, kept alive after H1 was retired.
+
+H1_credits was RETIRED as a harm class on 2026-08-15 (user decision): credits
+are TOKEN_IS_FAKE, so no level in them is checkable -- the declared 100 refused
+every real model's FIRST action -- and R-B1 classifies the quantity TRANSFERS,
+so enforcing it relocated harm onto counterparties rather than removing it.
+`GlobalCluster` no longer installs a settlement guard, because there is nothing
+at that boundary for a declared bound to check.
+
+THE MECHANISM IS NOT RETIRED, and these tests keep it covered: a bound evaluated
+at a serialization point, measured AFTER the pending action rather than before,
+from an immutable origin, recording rather than refusing by default, and never
+disputing the counterparty for our own budget. When credits acquire an external
+referent and a real exposure class is declared, this is where it hangs -- and
+`SettlementGuard` now REFUSES construction against a class that does not exist,
+so it cannot be revived silently.
+
+The tests below therefore register an EXPOSURE class of their own. That is a
+fixture, and it is legitimate here precisely because the subject is the
+mechanism rather than the registry.
+
+Superseded original header:
+The first consequence bound Gyza actually ENFORCES on a production path.
 
 WHY HERE AND NOWHERE ELSE. A census of every checking component in `gyza/`
 found the containment layer at zero production callers, and the obvious next
@@ -25,7 +47,24 @@ from gyza.containment.gates import SettlementGuard, ledger_genesis_origin
 from gyza.containment.gyza_model import build_registries
 from gyza.economy.settlement import LedgerSettlementService
 
-BOUND = 100.0          # guard_bounds.json, user decision 2026-07-31
+BOUND = 100.0          # the exposure level these mechanism tests declare
+
+
+def _exposure_registries():
+    """A bounded exposure class, standing in for H1's future replacement."""
+    from gyza.containment.gyza_model import _credits_at_risk
+    from gyza.containment.harm import HarmClass
+    from gyza.containment.invariants import Invariant, InvariantClass
+    harm, inv = build_registries()
+    harm.register(HarmClass(
+        id="X_exposure", description="settlement exposure (mechanism fixture)",
+        quantity=_credits_at_risk, frame="compositor pubkey",
+        frame_mutable=True, code_path="gyza/economy/wallet.py:274 net_balance"))
+    harm.load_bounds({"X_exposure": BOUND})
+    inv.register(Invariant(id="INV-X-exposure", harm_class="X_exposure",
+                           cls=InvariantClass.CUMULATIVE,
+                           description="exposure within the declared bound"))
+    return harm, inv
 
 
 class _RepStore:
@@ -69,10 +108,11 @@ def _rig(tmp_path, *, guarded=True, origin=None, enforce=False):
 
     guard = None
     if guarded:
-        harm, inv = build_registries()
+        harm, inv = _exposure_registries()
         guard = SettlementGuard(
             GuardEngine(harm, inv), owner=payer.pubkey_hex,
-            origin=origin or ledger_genesis_origin())
+            origin=origin or ledger_genesis_origin(),
+            harm_class="X_exposure")
 
     payer_svc = LedgerSettlementService(
         ledger=payer_l, netd=pbus, envelope_resolver=penv.get,
@@ -207,10 +247,11 @@ def test_RECEIVING_credits_is_never_refused(tmp_path):
         # our node earns from the peer: submit from the "earner" side means the
         # guarded node is the payer, so instead check the guarded node's own
         # earner path directly by settling a large amount TOWARD it.
-        harm, inv = build_registries()
+        harm, inv = _exposure_registries()
         g = SettlementGuard(GuardEngine(harm, inv),
                             owner=rig.payer_c.pubkey_hex,
-                            origin=ledger_genesis_origin())
+                            origin=ledger_genesis_origin(),
+                            harm_class="X_exposure")
         e = _settle(rig, "w1", 5000)
         # flip the direction: the guarded owner is the EARNER on this entry
         import dataclasses
@@ -219,7 +260,7 @@ def test_RECEIVING_credits_is_never_refused(tmp_path):
             to_compositor=rig.payer_c.pubkey_hex)
         d = g.check_payment([], inbound)
         assert d.admit, f"receiving credits was refused: {d.reasons}"
-        assert d.measured["H1_credits"] <= 0.0, d.measured
+        assert d.measured["X_exposure"] <= 0.0, d.measured
     finally:
         rig.stop()
 
@@ -240,16 +281,17 @@ def test_the_origin_is_GENESIS_so_a_restart_does_not_refill_the_budget(tmp_path)
         rig.stop()
 
     # a FRESH guard, as after a restart, over the SAME persistent ledger
-    harm, inv = build_registries()
+    harm, inv = _exposure_registries()
     fresh = SettlementGuard(GuardEngine(harm, inv), owner=rig.payer_c.pubkey_hex,
-                            origin=ledger_genesis_origin())
+                            origin=ledger_genesis_origin(),
+                            harm_class="X_exposure")
     import dataclasses
     pending = dataclasses.replace(entries[0], entry_id="second",
                                   amount_credits=50.0)
     d = fresh.check_payment(entries, pending)
     assert not d.admit, \
         "a restart refilled the drawdown budget — the origin moved"
-    assert d.measured["H1_credits"] == pytest.approx(140.0)
+    assert d.measured["X_exposure"] == pytest.approx(140.0)
 
 
 # --------------------------------------------------------------------------- #
@@ -260,16 +302,25 @@ def test_the_origin_is_GENESIS_so_a_restart_does_not_refill_the_budget(tmp_path)
 #  builds has one — the distinction between a checker being registered and      #
 #  being run. `GlobalCluster` is the only production install site.              #
 # --------------------------------------------------------------------------- #
-def test_GLOBALCLUSTER_installs_the_guard_on_its_settlement_service(tmp_path):
+def test_GLOBALCLUSTER_installs_NO_guard_now_that_H1_is_retired(tmp_path):
+    """Inverted from what it asserted before, and the inversion is the point.
+
+    H1 was the only class the settlement boundary had to check. With it retired
+    there is nothing there for a declared bound to evaluate, so installing a
+    guard would be machinery watching a class that does not exist. This test
+    will FAIL the moment a real exposure class is declared and hung here, which
+    is the reminder to re-point it rather than a regression.
+    """
     from tests.test_global_cluster import (
         _FakeCapability, _FakeGossip, _FakeNetd,
     )
     from tests.test_global_cluster import _compositor as _gc_compositor
+    from tests.test_global_cluster import _run, _start
 
     from gyza.config import GyzaConfig
     from gyza.economy.ledger import ComputeLedger
-    from gyza.network.network_blackboard import NetworkBlackboard
     from gyza.network.global_cluster import GlobalCluster
+    from gyza.network.network_blackboard import NetworkBlackboard
 
     comp = _gc_compositor(tmp_path, "self")
     cfg = GyzaConfig(
@@ -284,24 +335,39 @@ def test_GLOBALCLUSTER_installs_the_guard_on_its_settlement_service(tmp_path):
         netd_client=_FakeNetd(our_pubkey=comp.pubkey_hex),
         gossip_client=_FakeGossip(),
         capability_client_factory=_FakeCapability)
-    # start() is async; test_global_cluster's own helper does the same.
-    from tests.test_global_cluster import _run, _start
     _start(gc)
     try:
-        guard = gc._settlement._harm_guard
-        assert guard is not None, \
-            "the production settlement service has NO harm guard installed"
-        assert guard.owner == comp.pubkey_hex, \
-            "the guard's frame is not this node's compositor key"
+        assert gc._settlement._harm_guard is None, (
+            "a settlement guard is installed but H1 is retired — it would be "
+            "watching a class that does not exist")
     finally:
         _run(gc.stop())
 
 
-def test_a_guard_REQUIRES_a_frame():
+def test_the_guard_REFUSES_construction_against_a_RETIRED_class():
+    """What replaced the miscalibration tests.
+
+    Two tests here used to document that the declared 100-credit bound refused
+    every real model's first action. Retirement resolved that by removing the
+    bound, so the documentation is moot — but the FAILURE MODE it guarded
+    against is not: a guard silently revived against a class nobody registered
+    would admit everything. Construction now fails instead.
+    """
+    from gyza.containment.gyza_model import UNMODELLED
+
     harm, inv = build_registries()
+    assert "H1_credits" in UNMODELLED, "H1 must stay reported, not vanish"
+    with pytest.raises(KeyError, match="H1_credits"):
+        SettlementGuard(GuardEngine(harm, inv), owner="aa" * 32,
+                        origin=ledger_genesis_origin(),
+                        harm_class="H1_credits")
+
+
+def test_a_guard_REQUIRES_a_frame():
+    harm, inv = _exposure_registries()
     with pytest.raises(ValueError, match="owner"):
         SettlementGuard(GuardEngine(harm, inv), owner="",
-                        origin=ledger_genesis_origin())
+                        origin=ledger_genesis_origin(), harm_class="X_exposure")
 
 
 # --------------------------------------------------------------------------- #
@@ -311,49 +377,13 @@ def test_a_guard_REQUIRES_a_frame():
 #  declared bound. Nothing exercised a REAL model's pricing, so a bound that    #
 #  refuses every real model's FIRST action survived 1068 passing tests.        #
 # --------------------------------------------------------------------------- #
-def _first_action_verdict(model, tokens_out=1000, duration_ms=2000):
-    from gyza.economy.ledger import LedgerEntry, compute_task_cost
-    harm, inv = build_registries()
-    g = SettlementGuard(GuardEngine(harm, inv), owner="aa" * 32,
-                        origin=ledger_genesis_origin())
-    cost = compute_task_cost(model, tokens_out, duration_ms)
-    e = LedgerEntry(
-        entry_id="e1", from_compositor="aa" * 32, to_compositor="bb" * 32,
-        amount_credits=cost, work_item_id="w", icp_envelope_hash="cc" * 32,
-        model_identifier=model, tokens_out=tokens_out,
-        duration_ms=duration_ms, created_at_ns=1, to_signature="s")
-    return cost, g.check_payment([], e)          # empty ledger = first action
-
-
-def test_the_declared_bound_REFUSES_every_real_model_first_action():
-    """DOCUMENTS A LIVE MISCALIBRATION rather than asserting correct behaviour.
-
-    On an EMPTY ledger — the whole budget available — the declared B = 100.0
-    refuses a single 1000-token action from every real model, including a local
-    3B. Only `mock` passes, and only because it prices at exactly the bound.
-
-    This test will FAIL when B or the cost model is recalibrated (memo M2), and
-    that failure is the point: it is the alarm, not the contract.
-    """
-    from gyza.containment.gyza_model import build_registries as _bh
-    bound = _bh()[0].bound("H1_credits")
-
-    refused = {}
-    for m in ("llama.cpp:qwen2.5-3b-q4_k_m", "anthropic:claude-sonnet-4-5",
-              "anthropic:claude-opus-4-5", "openai:gpt-4o"):
-        cost, d = _first_action_verdict(m)
-        assert cost > bound, f"{m}: cost {cost} no longer exceeds bound {bound}"
-        refused[m] = d.admit
-    assert not any(refused.values()), (
-        f"a real model's first action now settles under B={bound} — "
-        f"recalibrate this test, the miscalibration it documents is fixed: {refused}")
-
-
-def test_mock_is_the_ONLY_model_the_bound_funds():
-    """The counter-control. If everything were refused, the test above would be
-    measuring a broken guard rather than a miscalibrated bound."""
-    cost, d = _first_action_verdict("mock")
-    assert d.admit, f"even mock ({cost}) is refused — the guard, not the bound, is wrong"
+# The two calibration tests that lived here documented that the declared
+# 100-credit bound refused every real model's FIRST action. H1 was retired
+# 2026-08-15, which resolves the miscalibration by removing the bound, so the
+# documentation is moot. Their successor is
+# `test_the_guard_REFUSES_construction_against_a_RETIRED_class` above, which
+# keeps the failure mode covered: a guard revived against an unregistered class
+# would admit everything.
 
 
 # --------------------------------------------------------------------------- #
@@ -377,7 +407,7 @@ def test_record_only_LETS_TRAFFIC_THROUGH_and_still_sees_the_bound(tmp_path):
         assert s["enforcing"] is False
         assert s["evaluations"] == 4
         assert s["would_have_refused"] == 3, s
-        assert s["peak_measured"]["H1_credits"] == pytest.approx(240.0)
+        assert s["peak_measured"]["X_exposure"] == pytest.approx(240.0)
     finally:
         rig.stop()
 
@@ -408,7 +438,7 @@ def test_the_record_keeps_NEAR_MISSES_not_just_refusals(tmp_path):
         _wait_until(lambda: _settled(rig, e), timeout_s=1.5)
         recs = rig.payer_svc.harm_records
         assert len(recs) == 1 and recs[0].admitted is False
-        assert recs[0].measured["H1_credits"] > 100.0
+        assert recs[0].measured["X_exposure"] > 100.0
         assert recs[0].reasons, "a refusal record must carry its reason"
     finally:
         rig.stop()

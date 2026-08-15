@@ -67,7 +67,20 @@ class SettlementGuard:
     `getattr` defaults that turned an absent measurement into a passing one.
     """
 
-    def __init__(self, engine: GuardEngine, owner: str, origin: WindowOrigin):
+    def __init__(self, engine: GuardEngine, owner: str, origin: WindowOrigin,
+                 harm_class: str = "H1_credits"):
+        # REFUSE TO WATCH A CLASS THAT DOES NOT EXIST. H1 was retired
+        # 2026-08-15 (credits are TOKEN_IS_FAKE, so no level in them is
+        # checkable), and a guard constructed against a retired class would
+        # either raise deep inside a settlement or -- worse -- be made to
+        # tolerate the absence and admit everything. Failing at construction is
+        # the only version that cannot become a silent pass.
+        if harm_class not in engine._harm:
+            raise KeyError(
+                f"cannot guard {harm_class!r}: it is not a registered harm "
+                f"class. If it was retired, this guard should not be installed; "
+                f"if it is new, register it before guarding it.")
+        self._harm_class = harm_class
         if not owner:
             raise ValueError(
                 "a settlement guard needs an owner: H1 is measured over a "
@@ -109,7 +122,8 @@ class SettlementGuard:
             active_holds=0.0, capital_entries=[])
 
         return self._engine.evaluate(
-            s0, s_next, SETTLE, Phase.PROMOTION, harm_classes=["H1_credits"])
+            s0, s_next, SETTLE, Phase.PROMOTION,
+            harm_classes=[self._harm_class])
 
 
 __all__ = ["SettlementGuard", "ledger_genesis_origin", "SETTLE"]

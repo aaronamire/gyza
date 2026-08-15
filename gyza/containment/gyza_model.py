@@ -27,6 +27,18 @@ from gyza.containment.invariants import (
 # Harm classes named in the draft that have NO computable quantity in the
 # codebase. Reported, never silently omitted.
 UNMODELLED: dict[str, str] = {
+    "H1_credits": (
+        "RETIRED as a harm class 2026-08-15 (user decision). The quantity is "
+        "computable and the ledger still records it, but credits are "
+        "TOKEN_IS_FAKE -- 'internal, non-redeemable, no external value' -- so a "
+        "bound denominated in them cannot be checked against anything: the "
+        "declared 100 refused every real model's FIRST action (40,000 credits "
+        "for Sonnet, 120,000 for Opus). R-B1 also classifies it TRANSFERS, so "
+        "enforcing it relocated harm onto counterparties rather than removing "
+        "it, while capping A_system harmonically. Autonomy is now bounded "
+        "directly by H6 in actions. Re-register it when credits have an "
+        "external referent and a real exposure limit can be declared."
+    ),
     "H3_irreversible_change": (
         "no function in gyza/ computes an irreversibility measure "
         "(HARM_MODEL_DRAFT §H3). Sub-classes: signed envelopes emitted, "
@@ -155,14 +167,6 @@ def build_registries(
 ) -> tuple[HarmModelRegistry, InvariantRegistry]:
     harm = HarmModelRegistry()
     harm.register(HarmClass(
-        id="H1_credits",
-        description="credits at risk: settled net balance minus active holds",
-        quantity=_credits_at_risk,
-        frame="compositor pubkey",
-        frame_mutable=True,   # key rotation is deferred (settlement.py:71-72)
-        code_path="gyza/economy/wallet.py:274 net_balance; fold at :169-171",
-    ))
-    harm.register(HarmClass(
         id="H2_market_capital",
         description="market capital exposure",
         quantity=_market_capital_at_risk,
@@ -204,16 +208,6 @@ def build_registries(
     ))
 
     inv = InvariantRegistry()
-    inv.register(Invariant(
-        id="INV-H1-drain",
-        harm_class="H1_credits",
-        cls=InvariantClass.CUMULATIVE,
-        description=(
-            "credits at risk stay within the declared bound. CUMULATIVE: a "
-            "monotone budget over one pool, so it does not compose across "
-            "concurrent agents (R10 H-CONS) or principals (R13) and is valid "
-            "ONLY at the serialized promotion gate."),
-    ))
     inv.register(Invariant(
         id="INV-H2-capital",
         harm_class="H2_market_capital",

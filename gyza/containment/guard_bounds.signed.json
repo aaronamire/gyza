@@ -1,7 +1,6 @@
 {
   "config": {
     "bounds": {
-      "H1_credits": 100.0,
       "H2_market_capital": 100.0,
       "H4_authority": 0.0,
       "H5_storage_growth": 10000000000.0,
@@ -10,5 +9,5 @@
     "tier_assignments": {},
     "version": 1
   },
-  "signature": "e54ce09f87685bb2038e880cf17c1ae777349f535c07bb4d6a914d8f55d5009100b5b2d16d5057466f81690b1b833d63ab232ed62d82b2994b704544e8963509"
+  "signature": "d4d2409deec7c4a573b55c0138a1d0714fb9c8a03afd9e70bbf40ea66c20d1f9bc83bbc19bf1451afbbffd867ff90a5711926da61b92ab71911766368fedda0b"
 }

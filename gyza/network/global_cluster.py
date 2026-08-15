@@ -293,28 +293,18 @@ class GlobalCluster:
         # Bounds load UNSIGNED here, and that is honest rather than sloppy: the
         # levels are in force either way and only the CLAIM depends on the
         # signature (C-8). `gyza status` reports which state is in effect.
+        # H1_credits was RETIRED as a harm class on 2026-08-15 (user decision):
+        # credits are TOKEN_IS_FAKE, so no level in them is checkable, and R-B1
+        # classifies the quantity TRANSFERS -- enforcing it relocated harm onto
+        # counterparties rather than removing it. So there is nothing at the
+        # settlement boundary for a declared bound to check, and no guard is
+        # installed. `SettlementGuard` is kept and tested: when credits acquire
+        # an external referent and a real exposure class is declared, it is the
+        # place to hang it, and it now REFUSES construction against a class that
+        # does not exist so it cannot be revived silently.
+        #
+        # Autonomy is bounded instead by H6 (actions), checked in the runner.
         harm_guard = None
-        try:
-            from gyza.containment.engine import GuardEngine
-            from gyza.containment.gates import (
-                SettlementGuard, ledger_genesis_origin,
-            )
-            from gyza.containment.gyza_model import build_registries
-            harm, inv = build_registries()
-            harm_guard = SettlementGuard(
-                GuardEngine(harm, inv),
-                owner=self._ledger.compositor_pubkey,
-                origin=ledger_genesis_origin(),
-            )
-            LOG.info("[global] settlement harm bound (H1): ENABLED, "
-                     "bound=%.2f credits, origin=ledger genesis",
-                     harm.bound("H1_credits"))
-        except Exception as e:  # noqa: BLE001
-            # An unbounded service is the prior behaviour, not a new hazard --
-            # but it must be LOUD. A guard that silently fails to install is
-            # indistinguishable from one that is working.
-            LOG.error("[global] settlement harm bound NOT installed (%s: %s) — "
-                      "settlements proceed UNBOUNDED", type(e).__name__, e)
 
         self._settlement = LedgerSettlementService(
             ledger=self._ledger,
