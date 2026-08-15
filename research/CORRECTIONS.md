@@ -66,32 +66,39 @@ class; it does not poison the model.
 
 **Correction:** `research/planetary/R_B1_FINDINGS.md` (`270f391`).
 
-## 5. PROOF-carried claim types: **61.1% → 55.6%**
+## 5. PROOF-carried claim types — **DO NOT CITE ANY NUMBER FROM A DOCUMENT**
 
-`OPEN_PROBLEM.md` §2.7 reports **61.1%** (11 of 18). The registry now computes
-**10 of 18 = 0.556**.
+`OPEN_PROBLEM.md` §2.7 reports **61.1%** (11 of 18). That figure moved **three
+times on 2026-08-15 alone**, and I wrote a correction here that was itself stale
+within minutes — which is the actual lesson, so it is recorded rather than
+tidied away.
 
-**Not a regression.** The FAIL_CLOSED cutover moved `envelope_dag` to carrier
-NONE because its success condition is not fixed by the registry — production
-calls `verify_dag` both ways. Refusing to count an unattested carrier claim
-*lowered* the measured number honestly. Attesting it restores +5.6 points.
+| when | value | why it moved |
+|---|---|---|
+| as documented | 11/18 = 0.611 | — |
+| after the FAIL_CLOSED cutover | 10/18 = 0.556 | `envelope_dag` routed to carrier NONE: its success condition was not fixed by the registry, since production called `verify_dag` both ways. Refusing to count an unattested carrier claim **lowered** the number honestly. |
+| after the determinacy repair | 12/19 = 0.632 | `envelope_dag` split into closed/open, each proving one proposition |
+| after attestation landed | **13/19 = 0.684** | `external_send_content`'s policy bound out and attested |
 
-**Always recompute from the registry, never cite the document.**
+**A split raises the count without adding any verification capability.** Read
+these as defects being repaired, not as capability gained.
 
-## 6. `ENGINEERING_STATUS.md` capability paragraph — **WRONG IN BOTH DIRECTIONS**
+> **Recompute from the registry. Never cite a number from any document,
+> including this row — it will be wrong again.**
 
-Says Gyza *"bounds declared harm classes against declared bounds, over a harm
-model currently covering 13.3% of the stateful action vocabulary."*
+## 6. `ENGINEERING_STATUS.md` capability paragraph — **RESOLVED 2026-08-15**
 
-- **Too weak** when written: no runtime path consulted the harm model at all.
-- **Too strong now**: H2 has no production existence, H3 is unmodelled, H1 was
-  **retired** 2026-08-15, and **no declared class is enforced at runtime.**
-  Authority containment *is* enforced, by a separate mechanism that is not a
-  declared class.
+The prior paragraph said Gyza *"bounds declared harm classes against declared
+bounds, over a harm model currently covering 13.3% of the stateful action
+vocabulary."* It was **too weak** when written (no runtime path consulted the
+harm model at all) and **too strong** later (it implied enforced consequence
+bounds; H1 was retired, H2 has no production existence, H3 is unmodelled, and
+**no declared class is enforced at runtime**).
 
-**Correction: pending.** The wording is the owner's; a draft is in
-`research/decisions/DECISION_MEMOS_2026_08_14.md` (M5). **Until it lands, do not
-reuse that paragraph.**
+**Replaced** by an owner-selected statement that leads with the aggregate-
+alignment results, states the substrate as working, and names what is not
+claimed. The prior text stands unedited beneath it. The suspension is lifted:
+the new paragraph **is** the one to reuse.
 
 ## 7. `HARM_MODEL_GAP.md` — two entries now have code
 

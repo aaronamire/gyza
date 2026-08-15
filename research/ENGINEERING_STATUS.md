@@ -6,20 +6,43 @@ the specific gap.
 
 ## 1. The central engineering results of the phase
 
-### THE HONEST DESCRIPTION — ⚠ SUSPENDED 2026-08-15, DO NOT REUSE
+### THE HONEST DESCRIPTION — reuse this paragraph verbatim wherever the system is described
 
-> **This paragraph is wrong in BOTH directions and must not be quoted until it
-> is revised.** It was too weak when written — no runtime path consulted the
-> harm model at all — and it is too strong now: H2 has no production existence,
-> H3 is unmodelled, **H1 was retired 2026-08-15, and no declared harm class is
-> enforced at runtime.** Authority containment *is* enforced, by a separate
-> mechanism that is not a declared class.
+> **The open question in multi-agent AI is not whether one agent behaves — it
+> is what a population does.** Gyza runs a preregistered research program on
+> exactly that, and it has produced results rather than proposals: containment
+> **does not compose across principals** (R13); aggregate bounds **fail under
+> stale reads even when every local check passes** (AG-3); the one class that
+> *is* locally boundable at any scale is a **distributional** property, and its
+> soundness turns out to depend on **single-threaded principals rather than on
+> scale** (arena); and a guard bounding a **conserved** quantity **relocates**
+> harm onto counterparties rather than removing it — measured against our own
+> shipped guard (HARM-IS-TRANSFERRED).
 >
-> The prior text stands unedited below, as this program's convention requires.
-> A replacement draft is in `research/decisions/DECISION_MEMOS_2026_08_14.md`
-> (M5); the wording is the owner's. Index: `research/CORRECTIONS.md` §6.
+> **Gyza is the substrate those results were measured on, and it is a working
+> one.** Agents claim work, execute sandboxed, and sign a per-action provenance
+> record that verifies offline with no trust in the producer. Authority is
+> provably non-increasing down any delegation chain. Memory retrievals carry
+> mechanically re-checkable claims. Nodes coordinate over a libp2p mesh with
+> k-of-n capability attestation and settle bilaterally over an append-only
+> ledger, with a Rust reference implementation at byte-parity.
+>
+> **What it does not claim: that any output is correct.** Cheap verification of
+> natural-language reasoning is closed across six structurally independent
+> mechanism families. Authority containment is enforced unconditionally on every
+> work item; four consequence classes are declared under a signed configuration
+> and are **measured, not yet enforced**.
+>
+> **We publish where our own containment fails.**
 
-### The prior text — reuse this paragraph verbatim wherever the system is described
+**Adopted 2026-08-15**, replacing the paragraph preserved below, which was wrong
+in both directions: too weak when written (no runtime path consulted the harm
+model at all) and too strong later (it implied enforced consequence bounds that
+do not exist). Every clause above is checkable against the tree — the research
+citations resolve to committed findings, and the substrate claims to running
+code. Index of what moved: `research/CORRECTIONS.md`.
+
+### The prior text — SUPERSEDED 2026-08-15, preserved unedited
 
 > **Gyza is a provenance and containment layer.** It proves what ran, under
 > what bounds, in what order, with attribution to a bonded actor — and those

@@ -4,8 +4,9 @@
 >
 > Several claims in this corpus are now known to be **wrong or narrower than
 > they read** — including `FINDINGS_BOX_SCALING` §4b (refuted), the PROOF-carried
-> figure (61.1% → 55.6%), and `ENGINEERING_STATUS`'s capability paragraph (wrong
-> in both directions; **do not reuse it** until it is revised). Superseded text
+> figure (61.1% → 55.6%), and `ENGINEERING_STATUS`'s capability paragraph (replaced
+> 2026-08-15; the new one leads with the aggregate-alignment results).
+> Superseded text
 > stands unedited by design, so the index is the only way to find what moved.
 >
 > Work after 2026-08-13 lives in `research/planetary/` (the scaling equation and
