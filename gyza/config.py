@@ -53,6 +53,7 @@ class GyzaConfig:
     guard_authority_pubkey: str = field(
         default_factory=lambda: os.environ.get("GYZA_GUARD_AUTHORITY", ""))
     guard_bounds_path: str = "gyza/containment/guard_bounds.signed.json"
+    review_db_path: str = "~/.gyza/review.db"
     enable_relay: bool = False
     attestation_tier: int = 1
     # Above this debt level, the runner refuses additional remote work for

@@ -609,6 +609,73 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_review(args: argparse.Namespace) -> int:
+    """The review path: see what is waiting, and resolve it.
+
+    A queue nobody can act on is the same defect as a bound nobody reads. This
+    is the consumer that makes the cadence and the harm bounds mean something.
+    """
+    from gyza.containment.gyza_model import build_registries
+    from gyza.containment.review import HALT, RESUME, ReviewQueue
+
+    cfg = load_config()
+    q = ReviewQueue(cfg.review_db_path)
+
+    if args.escalation_id:
+        decision = HALT if args.halt else RESUME
+        if decision == RESUME and not (args.reviewer and args.note):
+            print("a RESUME needs --reviewer and --note: it advances the "
+                  "accounting origin, and an origin advance nobody is "
+                  "accountable for is how a cumulative bound is defeated "
+                  "silently.", file=sys.stderr)
+            return 1
+        try:
+            r = q.resolve(args.escalation_id, args.reviewer or "",
+                          decision, args.note or "")
+        except (KeyError, ValueError) as e:
+            print(f"refused: {e}", file=sys.stderr)
+            return 1
+        print(f"{r.decision} recorded for {r.record_id} by {r.reviewer!r}")
+        print(f"  note: {r.note}")
+        print(f"  resumes to date: {q.resume_count()} "
+              f"(every one is an appended record, not a reset)")
+        return 0
+
+    # -- otherwise: report. Open a cadence escalation first if one is due.
+    try:
+        from gyza.blackboard import Blackboard
+        from gyza.containment.review import check_cadence
+        harm, _inv = build_registries()
+        bb_path = Path(_resolve(cfg.blackboard_db_path))
+        if bb_path.exists():
+            n = Blackboard(str(bb_path)).count_envelopes_since(0)
+            check_cadence(q, harm, n)
+    except Exception:  # noqa: BLE001 - reporting must survive a broken store
+        pass
+
+    s = q.summary()
+    print(f"review queue ({cfg.review_db_path}):")
+    print(f"  escalations: {s['escalations']}   pending: {s['pending']}   "
+          f"resumes: {s['resumes']}")
+    print(f"  chain: {s['chain']}")
+    pend = q.pending()
+    if not pend:
+        print("  nothing waiting")
+        return 0
+    print()
+    import time as _time
+    for e in pend:
+        age = (_time.time_ns() - e.at_ns) / 1e9
+        print(f"  {e.record_id}")
+        print(f"    {e.harm_class}: measured {e.measured:,.0f} against bound "
+              f"{e.bound:,.0f}   waiting {age:,.0f}s")
+        print(f"    {e.reason}")
+    print()
+    print("  resolve with:  gyza review <id> --reviewer NAME --note 'why'")
+    print("           or:   gyza review <id> --halt")
+    return 0
+
+
 def cmd_audit(args: argparse.Namespace) -> int:
     """Forensically audit a stored workflow: reconstruct its provenance
     DAG from the envelope log and run the unified bounds + integrity
@@ -2511,6 +2578,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="intent to audit; omit to list intents with logged envelopes",
     )
 
+    p_review = sub.add_parser(
+        "review",
+        help="see escalations waiting for a human, and resolve them",
+    )
+    p_review.add_argument("escalation_id", nargs="?",
+                          help="escalation to resolve; omit to list")
+    p_review.add_argument("--reviewer", help="who is deciding (required to resume)")
+    p_review.add_argument("--note", help="why (required to resume)")
+    p_review.add_argument("--halt", action="store_true",
+                          help="halt instead of resuming")
+
     p_run = sub.add_parser(
         "run",
         help="execute one task bounded + flight-recorded: real sandbox, "
@@ -2800,6 +2878,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "review":
+        return cmd_review(args)
     if args.command == "audit":
         return cmd_audit(args)
     if args.command == "run":
