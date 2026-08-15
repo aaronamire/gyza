@@ -158,6 +158,81 @@ def _unsupervised_actions(s0: object, s: object) -> float:
     return float(s.signed_envelope_count - s0.signed_envelope_count)
 
 
+#: Classes that are REGISTERED AND DELIBERATELY UNBOUNDED, with the reason.
+#:
+#: "Measured, not bounded" is a real and honest state, and it is strictly better
+#: than `UNMODELLED`: the quantity is computed on every projection and reported
+#: by `readiness()`, it just has no declared level yet. This map exists so that
+#: state is DECLARED rather than inferred -- a class whose level was simply
+#: FORGOTTEN must still fail `test_every_registered_invariant_predicate_executes`,
+#: and it will, because it is absent here.
+#:
+#: Being listed here costs the containment claim: `can_claim_containment` stays
+#: False while any class is unbounded, signed configuration or not. That price is
+#: correct and is the point -- see research/H3_MESH_EXIT.md §6.
+MEASURED_NOT_BOUNDED: dict[str, str] = {
+    "H3_mesh_exit_sends": (
+        "no level until the attainable range is measured. H1_credits was "
+        "retired because 100 was declared without measuring and refused every "
+        "real model's FIRST action; standing rule #4 (check a threshold "
+        "against its feasibility ceiling BEFORE fixing it) has failed four "
+        "times. Instrument, measure, then declare."
+    ),
+}
+
+
+def storage_cap_bytes(bounds_file: "str | Path | None" = None) -> int | None:
+    """The DECLARED H5 level, in bytes — the single source for the store's cap.
+
+    TWO SOURCES FOR ONE BOUND is what this removes. `guard_bounds.json` declared
+    `H5_storage_growth = 1e10`, while `ArtifactStore.max_bytes` was wired from
+    `GyzaConfig.max_artifact_store_gb` at three CLI sites. They agree today at
+    10 GB by coincidence of transcription -- H5's level was copied FROM the
+    config -- and nothing kept them in step. Editing either alone would leave
+    the enforced cap and the declared bound describing different systems, which
+    is the frame-drift species this program has recorded three times.
+
+    The DECLARED bound wins, because it is the one that becomes tamper-evident
+    under C-8: a signed guard configuration that the store then ignored would be
+    ceremony. Returns None when H5 has no declared level, which `ArtifactStore`
+    reads as unlimited -- and that is the honest reading of "no bound declared",
+    not a silent default.
+    """
+    from gyza.containment.harm import UnsetBoundError
+    harm, _inv = build_registries(
+        bounds_file=DEFAULT_BOUNDS_FILE if bounds_file is None else bounds_file)
+    try:
+        return int(harm.bound("H5_storage_growth"))
+    except (UnsetBoundError, KeyError):
+        return None
+
+
+def _mesh_exit_sends(s0: object, s: object) -> float:
+    """H3 -- sends since the origin that did NOT land on an attested peer.
+
+    THE SUB-CLASS THE DRAFT MIS-CLASSIFIED. `HARM_MODEL_DRAFT` §H3 cites
+    `publish_agent`, `send_message`, `publish_delta` and `publish_attestation`
+    as "external network sends" that "leave the modeled system entirely". All
+    four land on another `gyza-netd`: a libp2p peer, a DHT key under `/gyza/`,
+    a gossipsub topic. They are FEDERATION, not exit.
+
+    So C15's boundary is a property of deployment topology rather than a law,
+    and this is the ONLY declared quantity here that improves with scale -- the
+    set of destinations that lack a model shrinks as the mesh grows, while
+    margin, aggregates and A_system all worsen.
+
+    NOT CONSERVED, PREVENTABLE (R-B1): refusing to emit means the message does
+    not exist, not that another party bears it. So a bound here EXTINGUISHES.
+
+    NO BOUND IS DECLARED, DELIBERATELY. H1 was retired because 100 credits was
+    fixed without measuring the attainable range and refused every real model's
+    first action; standing rule #4 has failed four times. `readiness()` will
+    report this class as unbounded, which is the honest state: measured, not
+    bounded. The level comes after the measurement.
+    """
+    return float(s.mesh_exit_sends - s0.mesh_exit_sends)
+
+
 DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
 
 
@@ -207,7 +282,32 @@ def build_registries(
         code_path="gyza/blackboard.py count_envelopes_since",
     ))
 
+    harm.register(HarmClass(
+        id="H3_mesh_exit_sends",
+        description="sends since the accounting origin that did NOT land on an "
+                    "attested peer — the only declared quantity that shrinks "
+                    "as the mesh grows",
+        quantity=_mesh_exit_sends,
+        frame="the local egress log",
+        frame_mutable=False,
+        code_path="gyza/blackboard.py count_egress_since; "
+                  "classification in gyza/containment/egress.py",
+    ))
+
     inv = InvariantRegistry()
+    inv.register(Invariant(
+        id="INV-H3-mesh-exit",
+        harm_class="H3_mesh_exit_sends",
+        cls=InvariantClass.CUMULATIVE,
+        description=(
+            "sends leaving the attested mesh stay within the declared bound. "
+            "CUMULATIVE: a monotone total over one append-only log, so like H5 "
+            "and H6 it is valid only at a serialization point (C7). Registered "
+            "WITHOUT a declared bound on purpose — E2 established that a harm "
+            "class with no invariant makes the engine refuse every action "
+            "through the same channel as a bound breach, so the invariant must "
+            "exist even while the level does not."),
+    ))
     inv.register(Invariant(
         id="INV-H2-capital",
         harm_class="H2_market_capital",

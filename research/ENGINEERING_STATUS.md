@@ -217,7 +217,8 @@ cost model (one spec per type) does **not** extend to type assignment.
 
 ## 5. What the system can do today
 
-It runs a task through a kernel-enforced sandbox, refuses to sign unless
+It runs a task through an OS-enforced sandbox (bubblewrap: namespaces +
+seccomp), refuses to sign unless
 enforcement is no wider than the signed manifest, and emits a provenance chain
 any third party can verify offline with no trust in the producing machine.
 **That part is unqualified, and AR-1 measured that it composes to arbitrary

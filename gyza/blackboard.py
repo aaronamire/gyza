@@ -105,6 +105,24 @@ CREATE TABLE IF NOT EXISTS icp_envelopes (
 CREATE INDEX IF NOT EXISTS idx_icp_action ON icp_envelopes(action_id);
 CREATE INDEX IF NOT EXISTS idx_icp_intent ON icp_envelopes(intent_id);
 CREATE INDEX IF NOT EXISTS idx_icp_parent ON icp_envelopes(parent_envelope_hash);
+
+-- H3's measurand. APPEND-ONLY AND DURABLE for the same reason the envelope log
+-- is: an in-process send counter resets on restart, and a cumulative bound
+-- whose origin can move is not a bound (ledger artifact #13). `egress_class`
+-- is stored as text rather than derived at read time because the
+-- classification depends on what was known about the destination AT THE MOMENT
+-- OF SENDING -- a peer attested later does not retroactively contain a message
+-- already sent to it.
+CREATE TABLE IF NOT EXISTS egress_log (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    egress_class   TEXT NOT NULL,
+    channel        TEXT NOT NULL,
+    destination    TEXT NOT NULL,
+    byte_count     INTEGER NOT NULL,
+    timestamp_ns   INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_egress_ts ON egress_log(timestamp_ns);
+CREATE INDEX IF NOT EXISTS idx_egress_class ON egress_log(egress_class);
 """
 
 
@@ -626,6 +644,50 @@ class Blackboard:
             "SELECT COUNT(*) AS n FROM icp_envelopes WHERE timestamp_ns >= ?",
             (int(origin_ns),),
         ).fetchone()
+        return int(row["n"] if row is not None else 0)
+
+    def record_egress(self, egress_class: str, channel: str, destination: str,
+                      byte_count: int, timestamp_ns: int | None = None) -> None:
+        """Append one egress event. Called at the moment of sending.
+
+        `egress_class` is one of `gyza.containment.egress.EgressClass`; it is
+        passed in rather than inferred here because the blackboard does not know
+        the attestation state of a peer and should not learn it. The caller
+        classifies, this records.
+        """
+        from gyza.containment.egress import EgressClass
+        if egress_class not in EgressClass.ALL:
+            raise ValueError(
+                f"unknown egress class {egress_class!r}; an unclassified send "
+                f"is not a measurement (must be one of {sorted(EgressClass.ALL)})")
+        ts = int(time.time_ns() if timestamp_ns is None else timestamp_ns)
+        self._conn().execute(
+            "INSERT INTO egress_log "
+            "(egress_class, channel, destination, byte_count, timestamp_ns) "
+            "VALUES (?,?,?,?,?)",
+            (egress_class, channel, destination, int(byte_count), ts),
+        )
+        self._conn().commit()
+
+    def count_egress_since(self, origin_ns: int = 0,
+                           classes: "tuple[str, ...] | list[str] | None" = None) -> int:
+        """Egress events at or after `origin_ns`, optionally restricted to
+        `classes`. Derived from the append-only log, never counted in memory.
+
+        `classes=None` means EVERY class, which is deliberately NOT the same as
+        H3's measurand: H3 excludes sends to attested peers, and a caller that
+        wants H3 must say so. A default that silently included them would make
+        the federated case indistinguishable from the exit case.
+        """
+        sql = "SELECT COUNT(*) AS n FROM egress_log WHERE timestamp_ns >= ?"
+        args: list[object] = [int(origin_ns)]
+        if classes is not None:
+            cs = list(classes)
+            if not cs:
+                return 0
+            sql += f" AND egress_class IN ({','.join('?' * len(cs))})"
+            args += cs
+        row = self._conn().execute(sql, tuple(args)).fetchone()
         return int(row["n"] if row is not None else 0)
 
     def get_envelope(self, envelope_hash: str):

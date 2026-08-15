@@ -143,6 +143,36 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 14. `HARM_MODEL_DRAFT.md` §H3 "external network sends" — **MIS-CLASSIFIED**
+
+Cites `send_message`, `publish_agent`, `publish_delta` and `publish_attestation`
+as sends that *"leave the modeled system entirely"*.
+
+**All four are mesh-INTERNAL.** `send_message` writes to a libp2p `peer_id`;
+`publish_agent` and `publish_attestation` are DHT puts under `/gyza/`;
+`publish_delta` is gossipsub. Every one lands on another `gyza-netd` with its own
+chain and gate. They are federation, not exit.
+
+**Now known:** C15's boundary is a property of **deployment topology, not a
+law** — the set of destinations lacking a model shrinks as the mesh grows,
+making H3 the only declared quantity that *improves* with scale. H3 is
+reclassified three ways (attested / unattested / outside-protocol) and measures
+the latter two.
+
+**Correction:** `research/H3_MESH_EXIT.md`, implemented in
+`gyza/containment/egress.py`.
+
+## 15. `ENGINEERING_STATUS.md` §5 said "kernel-enforced" — **CORRECTED**
+
+The v0.1.2 release swept all five occurrences from `README.md`. **Eleven
+survived elsewhere**, including user-facing `gyza` CLI output and the bounds
+demo. Ten corrected to "OS-enforced (bubblewrap: namespaces + seccomp)".
+
+**One left standing on purpose:** `gyza/sandbox/config.py:382` says *RLIMIT_AS is
+kernel-enforced*, which is **true**. A blanket replace would have introduced an
+error while removing one — the reason this was done per-site rather than by
+`sed`.
+
 ## 13. R-M1 confirms `escrow/FINDINGS.md` §2.6 from an independent instrument
 
 Not a correction — a **cross-instrument confirmation**, recorded because this

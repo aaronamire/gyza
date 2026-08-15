@@ -302,7 +302,7 @@ def run_local_task(
             fs_bits.append(f"read {', '.join(read_paths)}")
         if write_paths:
             fs_bits.append(f"write {', '.join(write_paths)}")
-        print(f"fs:       {' · '.join(fs_bits)}  (kernel-enforced binds)")
+        print(f"fs:       {' · '.join(fs_bits)}  (OS-enforced binds)")
     else:
         print("fs:       none granted (tmpfs cwd; --allow-read/--allow-write "
               "to grant)")
@@ -316,7 +316,7 @@ def run_local_task(
 
     bb = Blackboard(rp["blackboard_db_path"])
     store = ArtifactStore(base_path=artifact_store_base,
-                          max_bytes=int(cfg.max_artifact_store_gb * 1e9))
+                          max_bytes=_declared_storage_cap())
     bb.attach_artifact_store(store)
 
     intent_id = str(_uuid.uuid7())
@@ -511,6 +511,13 @@ def _artifact_store_summary(cfg: GyzaConfig) -> tuple[int, int]:
             except OSError:
                 pass
     return (n, total)
+
+
+def _declared_storage_cap() -> int | None:
+    """The store's cap, read from the DECLARED H5 bound rather than from
+    GyzaConfig. One bound, one source -- see gyza_model.storage_cap_bytes."""
+    from gyza.containment.gyza_model import storage_cap_bytes
+    return storage_cap_bytes()
 
 
 def _human_bytes(n: int) -> str:
@@ -715,7 +722,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
         return 1
 
     store = ArtifactStore(base_path="~/.gyza/artifacts",
-                          max_bytes=int(cfg.max_artifact_store_gb * 1e9))
+                          max_bytes=_declared_storage_cap())
     # `governed=True`: route every check this audit performs through the
     # attested specification registry and print the coverage alongside the
     # verdict. It cannot change the verdict — an evaluator is told which checks
@@ -759,7 +766,7 @@ def cmd_bundle(args: argparse.Namespace) -> int:
         return 1
 
     store = ArtifactStore(base_path="~/.gyza/artifacts",
-                          max_bytes=int(cfg.max_artifact_store_gb * 1e9))
+                          max_bytes=_declared_storage_cap())
 
     def _manifest(h: str) -> "dict | None":
         raw = store.get(h)
@@ -2264,7 +2271,7 @@ def cmd_submit(args: argparse.Namespace) -> int:
         print(bar)
         # Bounds-proof. If the artifact carries an __enforcement__
         # record, the agent's runner executed this work inside a
-        # kernel-enforced sandbox AND refused to sign unless that
+        # OS-enforced sandbox AND refused to sign unless that
         # sandbox was no wider than its capability manifest (see
         # runner._execute). Because the record is INSIDE the hashed
         # artifact, the signature above also commits to it — these
@@ -2275,7 +2282,7 @@ def cmd_submit(args: argparse.Namespace) -> int:
             print(f"  BOUNDS-PROOF (committed in the signed artifact)")
             print(bar)
             print(f"  sandbox:       {enforcement.get('backend', '?')}"
-                  f" (kernel-enforced)")
+                  f" (OS-enforced: namespaces + seccomp)")
             print(f"  fs read:       {ro if ro else 'NONE (no host filesystem)'}")
             print(f"  fs write:      {rw if rw else 'NONE (no host filesystem)'}")
             print(f"  network:       "
@@ -2629,7 +2636,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_run.add_argument(
         "--allow-read", action="append", default=[], metavar="PATH",
-        help="host path the agent may read (repeatable; kernel-enforced "
+        help="host path the agent may read (repeatable; OS-enforced "
              "read-only bind; becomes part of the signed grant)",
     )
     p_run.add_argument(

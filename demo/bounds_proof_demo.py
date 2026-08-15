@@ -3,7 +3,7 @@ Self-contained bounds-proof demonstration.
 
 Shows — with zero external dependencies (no daemon, no network, no API
 key) — that a valid signed Gyza envelope cryptographically IMPLIES the
-work ran inside declared, kernel-enforced bounds, and that an
+work ran inside declared, OS-enforced bounds, and that an
 independent party can verify this with no trust in the runner.
 
 Three acts:
@@ -101,7 +101,7 @@ def _print_manifest_bounds(manifest: dict) -> None:
 
 def _print_enforcement(enf: dict) -> None:
     tree = str(enf.get("runner_source_tree_hash"))[:12]
-    print(f"  sandbox backend:   {enf.get('backend')}  (kernel-enforced)")
+    print(f"  sandbox backend:   {enf.get('backend')}  (OS-enforced: namespaces + seccomp)")
     print(f"  ro_paths:          {enf.get('ro_paths') or 'NONE'}")
     print(f"  rw_paths:          {enf.get('rw_paths') or 'NONE'}")
     print(f"  network:           {'OPEN' if enf.get('requires_network') else 'NONE'}")
@@ -115,7 +115,7 @@ def main() -> int:
     print("GYZA — BOUNDS-PROOF DEMO   (no daemon, no network, no API key)")
     print("=" * 64)
     print("Proves: a valid signed envelope IMPLIES the work ran inside")
-    print("declared, kernel-enforced bounds — re-verifiable by anyone,")
+    print("declared, OS-enforced bounds — re-verifiable by anyone,")
     print("with zero trust in the machine that produced it.")
     print()
 

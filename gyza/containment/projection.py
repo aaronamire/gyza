@@ -78,6 +78,11 @@ class GyzaState:
     # H6: signed envelopes since the origin — the cadence measurand. Folded
     # from the append-only envelope log, never an in-process counter.
     signed_envelope_count: int = 0
+    # H3: sends that did NOT land on an attested peer — folded from the
+    # append-only `egress_log`, for the same durability reason as H6. Excludes
+    # ATTESTED_PEER by construction, which is what makes the quantity shrink as
+    # the mesh grows (see `containment/egress.py`).
+    mesh_exit_sends: int = 0
 
     def __post_init__(self) -> None:
         if not self.owner:
@@ -127,6 +132,7 @@ def project_now(
     authority_violations: Sequence[AuthorityViolation] = (),
     stored_bytes: int = 0,
     signed_envelope_count: int = 0,
+    mesh_exit_sends: int = 0,
 ) -> GyzaState:
     """State as of now — the `s_next` of a guard evaluation."""
     return GyzaState(
@@ -137,6 +143,7 @@ def project_now(
         authority_violations=tuple(authority_violations),
         stored_bytes=int(stored_bytes),
         signed_envelope_count=int(signed_envelope_count),
+        mesh_exit_sends=int(mesh_exit_sends),
     )
 
 
@@ -148,6 +155,7 @@ def project_at_origin(
     origin: WindowOrigin,
     authority_violations: Sequence[AuthorityViolation] = (),
     stored_bytes_at_origin: int = 0,
+    mesh_exit_sends_at_origin: int = 0,
 ) -> GyzaState:
     """State as of the accounting window's origin — the `s0`.
 
@@ -168,6 +176,12 @@ def project_at_origin(
         # than reconstructed. An origin that cannot be recomputed must be
         # recorded; inferring one would be the moving-frame defect again.
         stored_bytes=int(stored_bytes_at_origin),
+        # H3, unlike H5, CAN be recomputed: `egress_log` carries a timestamp per
+        # row, so `count_egress_since(origin_ns, MESH_EXIT)` reconstructs this
+        # exactly. It is still passed in rather than derived here, because this
+        # module must not learn what a blackboard is -- the caller folds, this
+        # projects.
+        mesh_exit_sends=int(mesh_exit_sends_at_origin),
     )
 
 

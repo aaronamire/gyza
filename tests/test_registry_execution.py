@@ -124,24 +124,37 @@ def test_every_registered_invariant_predicate_executes():
     counted separately here instead of being silently skipped -- a predicate
     that never runs because its bound is missing is still an unexercised
     registry entry, and saying so is the point of this file."""
+    from gyza.containment.gyza_model import MEASURED_NOT_BOUNDED
     from gyza.containment.harm import UnsetBoundError
 
     harm, inv = build_harm()
-    ran = unbounded = 0
+    ran = 0
+    undeclared: list[str] = []
     for i in inv:
         try:
             bound = harm.bound(i.harm_class)
         except UnsetBoundError:
-            unbounded += 1
-            continue
+            # AN UNBOUNDED CLASS STILL GETS ITS PREDICATE EXERCISED. The prior
+            # version `continue`d here, so a registered-but-unbounded class had
+            # its predicate skipped entirely -- an unexercised registry entry,
+            # which is the exact defect this file exists to catch (artifact
+            # #16: 785 passing tests missed a quantity that raised on every
+            # input). A probe level runs it without declaring anything.
+            bound = 1.0
+            if i.harm_class not in MEASURED_NOT_BOUNDED:
+                undeclared.append(i.harm_class)
         h = harm.get(i.harm_class).measure(_S(), _S())
         r = i.predicate(h, bound, _S(), _S())   # must not raise
         assert isinstance(r, bool)
         ran += 1
-    assert ran + unbounded == len(inv) > 0
-    assert unbounded == 0, (
-        f"{unbounded} class(es) have no declared level. Every registered class "
-        f"should carry one; a new class without a level is the D1 gap.")
+    assert ran == len(inv) > 0
+    # A class may be unbounded ONLY if it says so, in code, with a reason.
+    # "Measured, not bounded" is honest; a FORGOTTEN level is the D1 gap, and
+    # the two are distinguishable only because the deliberate ones are declared.
+    assert undeclared == [], (
+        f"{undeclared} have no declared level and are not listed in "
+        f"MEASURED_NOT_BOUNDED. Either declare a level, or declare -- with a "
+        f"reason -- that the level is deliberately absent.")
 
 
 # --------------------------------------------------------------------------- #

@@ -68,8 +68,14 @@ def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     assert r["bounds_provenance"]["source"] == "UNSIGNED_FILE"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
-    # PROVENANCE is the ONLY thing blocking it: every class has a level.
-    assert r["unbounded"] == [] and r["uncovered"] == []
+    # TWO blockers now, and separating them matters. Provenance is one; the
+    # other is that H3_mesh_exit_sends is REGISTERED AND UNBOUNDED on purpose
+    # (measured, not bounded — the level waits on the measurement that H1's
+    # retirement bought). Before H3 was declared, this list was empty and the
+    # claim was blocked by provenance alone — not because the gap was smaller,
+    # but because it was UNNAMED.
+    assert r["unbounded"] == ["H3_mesh_exit_sends"]
+    assert r["uncovered"] == []
     assert h.bound("H2_market_capital") == 100.0
 
 
@@ -79,9 +85,12 @@ def test_SIGNED_bounds_lift_the_claim(tmp_path):
                       authority_pubkey=pub)
     assert r["bounds_provenance"]["source"] == "SIGNED"
     assert r["bounds_signed"] is True
-    # With every level declared AND the config verified, both gates are open.
-    assert r["can_claim_containment"] is True
-    assert r["unbounded"] == []
+    # SIGNING DOES NOT MANUFACTURE THE CLAIM. C-8 (provenance) is open; D1
+    # (every class bounded) is not, because H3 has no declared level. Two
+    # independent gates — the property KEY_PROVENANCE.md recorded when H5 was
+    # the unbounded one, now re-exercised by H3.
+    assert r["can_claim_containment"] is False
+    assert r["unbounded"] == ["H3_mesh_exit_sends"]
     assert r["bounds_provenance"]["authority_pubkey"] == pub.hex()
     assert len(r["bounds_provenance"]["config_hash"]) == 64
 
@@ -156,8 +165,11 @@ def test_NO_bounds_is_a_DISTINCT_state_from_UNSIGNED_bounds():
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
     # and it is distinguishable: here EVERY class is genuinely unbounded,
-    # including the ones the file would otherwise have declared
-    assert set(r["unbounded"]) == set(BOUNDS)
+    # including the ones the file would otherwise have declared. H3 is
+    # unbounded in BOTH states, so it is added rather than compared away --
+    # writing `set(BOUNDS) | {"H3..."}` keeps the assertion about the FILE's
+    # effect rather than quietly widening it to whatever is registered.
+    assert set(r["unbounded"]) == set(BOUNDS) | {"H3_mesh_exit_sends"}
 
 
 # --------------------------------------------------------------------------- #

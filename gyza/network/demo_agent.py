@@ -309,7 +309,7 @@ def _build_anthropic_executor_gated(
     derived from this agent's capability manifest
     (``sandbox_config_from_manifest``). The demo agent's manifest
     declares no filesystem paths, so the executor runs with zero
-    access to the host's files — kernel-enforced — and network only
+    access to the host's files — OS-enforced — and network only
     (it must reach api.anthropic.com). That bound is what the
     envelope's capability_manifest_hash now truthfully commits to.
 
@@ -548,7 +548,7 @@ def run_hosted_demo_agent(
     # nonzero. Combined with min_similarity_threshold=-1.0 this
     # makes the agent willing to claim anything.
     # Honest capability declaration. fs_read/write empty → the
-    # executor runs with ZERO host filesystem access (kernel-enforced
+    # executor runs with ZERO host filesystem access (OS-enforced
     # by bwrap; only the OS/runtime baseline is visible). allowed_hosts
     # lists api.anthropic.com because the real-LLM executor must reach
     # it — declared truthfully so the bounds-proof reflects reality.

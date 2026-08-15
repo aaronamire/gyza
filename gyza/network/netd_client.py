@@ -330,9 +330,29 @@ class NetdClient:
     restart loop relies on tear-down/rebuild semantics anyway.
     """
 
-    def __init__(self, socket_path: str = "~/.gyza/netd.sock"):
+    def __init__(self, socket_path: str = "~/.gyza/netd.sock",
+                 egress_recorder: "object | None" = None):
         self._socket_path = _resolve(socket_path)
         self._channel: grpc.Channel | None = None
+        # H3's measurand. INJECTED, not constructed: a gRPC client must not
+        # learn what a blackboard is, the same way the settlement service takes
+        # its harm guard from outside. `None` means unwired -- the send still
+        # happens, because this is a MEASUREMENT surface and not a gate. When a
+        # level is declared the gate goes at this same call site.
+        self._egress = egress_recorder
+
+    def _record_egress(self, channel: str, peer_id: str, n_bytes: int) -> None:
+        """Never let measurement break a send. An exception here would turn a
+        successful transmission into a failure, which is a worse outcome than
+        an unmeasured one -- and it would put an error into the same channel as
+        a measurement, which this program has recorded twice."""
+        if self._egress is None:
+            return
+        try:
+            self._egress.peer_send(channel, peer_id, n_bytes)
+        except Exception:                                    # noqa: BLE001
+            LOG.warning("[netd_client] egress not recorded for %s", channel,
+                        exc_info=True)
 
     # -- channel lifecycle ----------------------------------------------------
 
@@ -393,6 +413,11 @@ class NetdClient:
         result = stub.PublishAgent(msg)
         if not result.success:
             raise RuntimeError(f"PublishAgent failed: {result.error}")
+        # A DHT put is a send to the network, not to one peer. The destination
+        # is the key, and it is classified UNATTESTED because a DHT has no
+        # single attestable counterparty -- whoever holds the bucket holds it.
+        self._record_egress("publish_agent", result.dht_key,
+                            msg.ByteSize())
         return result.dht_key
 
     def find_agents(
@@ -554,6 +579,11 @@ class NetdClient:
         if not result.success:
             LOG.warning("[netd_client] send_message %s -> %s failed: %s",
                         message_type, peer_id, result.error)
+        else:
+            # ONLY ON SUCCESS. A refused write did not leave the machine, and
+            # counting it would measure intent rather than egress.
+            self._record_egress(f"send_message:{message_type}", peer_id,
+                                len(emitted))
         return result.success
 
     def broadcast(
