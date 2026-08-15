@@ -1,5 +1,17 @@
 # Program status — TERMINAL
 
+> ### ⚠ READ `research/CORRECTIONS.md` FIRST
+>
+> Several claims in this corpus are now known to be **wrong or narrower than
+> they read** — including `FINDINGS_BOX_SCALING` §4b (refuted), the PROOF-carried
+> figure (61.1% → 55.6%), and `ENGINEERING_STATUS`'s capability paragraph (wrong
+> in both directions; **do not reuse it** until it is revised). Superseded text
+> stands unedited by design, so the index is the only way to find what moved.
+>
+> Work after 2026-08-13 lives in `research/planetary/` (the scaling equation and
+> its consequences), `research/arena/` (the first environment expressing M > 3),
+> and `research/harm_redteam/` (§4.2, run against the shipped guard).
+
 The verification research program has reached a terminal conclusion. **No further
 experimental round is planned.** This file is the formal closure record; the paper-shaped
 account is `COMPETENCE_BOUND.md`, the publishability audit is `PAPER_READINESS.md`, and the

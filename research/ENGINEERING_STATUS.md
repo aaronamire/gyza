@@ -6,7 +6,20 @@ the specific gap.
 
 ## 1. The central engineering results of the phase
 
-### THE HONEST DESCRIPTION — reuse this paragraph verbatim wherever the system is described
+### THE HONEST DESCRIPTION — ⚠ SUSPENDED 2026-08-15, DO NOT REUSE
+
+> **This paragraph is wrong in BOTH directions and must not be quoted until it
+> is revised.** It was too weak when written — no runtime path consulted the
+> harm model at all — and it is too strong now: H2 has no production existence,
+> H3 is unmodelled, **H1 was retired 2026-08-15, and no declared harm class is
+> enforced at runtime.** Authority containment *is* enforced, by a separate
+> mechanism that is not a declared class.
+>
+> The prior text stands unedited below, as this program's convention requires.
+> A replacement draft is in `research/decisions/DECISION_MEMOS_2026_08_14.md`
+> (M5); the wording is the owner's. Index: `research/CORRECTIONS.md` §6.
+
+### The prior text — reuse this paragraph verbatim wherever the system is described
 
 > **Gyza is a provenance and containment layer.** It proves what ran, under
 > what bounds, in what order, with attribution to a bonded actor — and those
