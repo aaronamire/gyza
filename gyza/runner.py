@@ -107,6 +107,9 @@ class AgentRunner:
         hlc: HLC | None = None,
         reputation_store=None,
         require_enforcement: bool | None = None,
+        review_queue=None,
+        harm_registry=None,
+        cadence_origin_ns: int = 0,
     ):
         # BUILD_PLAN E2 — the fail-open gate.
         #
@@ -137,6 +140,12 @@ class AgentRunner:
         # -- so a counter that could be reset would be a bound whose origin
         # moves, which is not a bound (ledger artifact #13).
         self._authority_violations: list[AuthorityViolation] = []
+        # H6's consumer. None means the cadence is not watched -- which is the
+        # honest default for a runner with no review path attached, not a
+        # silently-disabled guard.
+        self._review_queue = review_queue
+        self._harm_registry = harm_registry
+        self._cadence_origin_ns = int(cadence_origin_ns)
         self._bb = blackboard
         self._mem = memory
         self._spec = specialization
@@ -664,6 +673,23 @@ class AgentRunner:
             except Exception:
                 # Settlement / observability hook — never break completion.
                 pass
+
+        # THE REVIEW CADENCE, checked WHERE THE ACTION HAPPENS. It was first
+        # wired only into `gyza review`, which meant an operator discovered they
+        # were due a review by ASKING WHETHER THEY WERE DUE A REVIEW -- a passive
+        # queue is the same unconsumed-surface defect one layer up.
+        #
+        # One indexed COUNT per signature. `check_cadence` is idempotent, so a
+        # bound already escalated does not re-fire; the cost is the count, not
+        # the escalation.
+        if self._review_queue is not None:
+            try:
+                from gyza.containment.review import check_cadence
+                check_cadence(self._review_queue, self._harm_registry,
+                              self._bb.count_envelopes_since(
+                                  self._cadence_origin_ns))
+            except Exception:  # noqa: BLE001 - never break completion
+                LOG.debug("cadence check failed", exc_info=True)
 
         # Bump the completion counter HERE — before bb.complete_work_item
         # publishes the work item's completion to other nodes via Raft.

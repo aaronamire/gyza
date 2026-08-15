@@ -315,7 +315,8 @@ def run_local_task(
     print(f"executor: {executor_label}")
 
     bb = Blackboard(rp["blackboard_db_path"])
-    store = ArtifactStore(base_path=artifact_store_base)
+    store = ArtifactStore(base_path=artifact_store_base,
+                          max_bytes=int(cfg.max_artifact_store_gb * 1e9))
     bb.attach_artifact_store(store)
 
     intent_id = str(_uuid.uuid7())
@@ -757,7 +758,8 @@ def cmd_bundle(args: argparse.Namespace) -> int:
               file=sys.stderr)
         return 1
 
-    store = ArtifactStore(base_path="~/.gyza/artifacts")
+    store = ArtifactStore(base_path="~/.gyza/artifacts",
+                          max_bytes=int(cfg.max_artifact_store_gb * 1e9))
 
     def _manifest(h: str) -> "dict | None":
         raw = store.get(h)
