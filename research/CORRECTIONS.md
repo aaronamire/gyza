@@ -143,6 +143,28 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 12. `escrow/FINDINGS.md` — `PARTITIONED_READ` "improves with scale" — **REFUTED**
+
+Claimed partitioned-read admission *"strictly dominates at every M ≥ 4 and
+**improves** with scale"* (0.000 from M = 8).
+
+**Now known:** the zeros are a **float-boundary artifact**. Partitioned sheds to
+exactly `L`, and `L` is *defined* as the floor where concentration equals κ, so
+it drives the system to the bound and holds it: M = 512 settles at
+κ − 4.8e-10, M = 64 at κ + 5.6e-9, against a check with a 1e-9 tolerance. The
+gap between "0%" and "98%" is **1e-8 of concentration**. A tolerance sweep flips
+partitioned 0.81 → 0.00 between 1e-9 and 1e-6 while `naive` and `reserved` stay
+flat across nine orders of magnitude. It is also *slower*, not safer: at M = 64 it
+reaches 0.981 given 1000 rounds instead of 40.
+
+**The E1 verdict is unaffected** — it rests on the two tolerance-insensitive arms.
+
+**Fifth float-boundary instance, and the second misdiagnosed as structural**
+(first as a "seed effect", now as a scaling trend). Both readings were the
+flattering one.
+
+**Correction:** `research/escrow/CORRECTION_E1_PARTITIONED.md`.
+
 ## 11. "Bounding a consequence TRANSFERS harm" — **third refinement**
 
 Entry #4 narrowed this from a general blocker to a consequence of conservation.
