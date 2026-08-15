@@ -143,6 +143,18 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 13. R-M1 confirms `escrow/FINDINGS.md` §2.6 from an independent instrument
+
+Not a correction — a **cross-instrument confirmation**, recorded because this
+index is where such things stay discoverable. The escrow route found that
+`env_federation`'s `pool_claim` reads `contrib`, which withdrawal never reduces,
+so a principal cannot fully divest. `research/margin/`, built afterwards and
+transcribing the same arithmetic independently, reproduces it exactly: the pool
+decays geometrically (24 → 18 → 13.5 → 10.1 → 7.6 at M=4) and never empties.
+
+Found because I wrote a test asserting the opposite. **The test was wrong, not
+the code**, in both instruments.
+
 ## 12. `escrow/FINDINGS.md` — `PARTITIONED_READ` "improves with scale" — **REFUTED**
 
 Claimed partitioned-read admission *"strictly dominates at every M ≥ 4 and
