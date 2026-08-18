@@ -401,3 +401,44 @@ byte-identical tables.** Neither was visible in the result; both were found only
 in stderr.
 
 Detail: `research/escrow/FINDINGS.md` §6.
+
+## 26. R-M1's stride defect recurred in R-E, in code written by someone who had recorded it
+
+`research/extensive/run_extensive.py` set the top of its delta scan to
+`(int(ceiling/GRID) - 1) * GRID`. At d=1 the ceiling is 0.5980, so the scan
+stopped at 0.5900 -- and the ONLY feasible delta is 0.5950. The route reported
+**INFEASIBLE at every epsilon for both bound types**, for a feasible band that
+exists.
+
+It was caught by the COVERAGE rule the preregistration itself carries ("every
+INFEASIBLE swept ceiling-down THEN interior"): an exhaustive 119-point grid
+sweep found 1/119 safe, at the point the scan had excluded.
+
+This is the SAME SPECIES as R-M1's original defect -- a scan stride that never
+tests the feasible band -- committed one route after `research/margin/
+CORRECTION_INFEASIBLE.md` was written about it. **Knowing a defect species does
+not prevent it; only the mechanical coverage rule caught it.** Pinned by
+`test_top_of_grid_is_below_ceiling_and_is_the_largest_such_point`.
+
+## 27. `hierarchy/FINDINGS.md` -- the benefit is the LEAF FLOOR, not the internal checks
+
+R-H1 established that a d-level tree of local box checks outperforms a flat
+box. R-E instrumented the internal admission checks over 47,523 divest attempts
+across four (delta, epsilon) configurations and **they fired zero times.**
+
+- Level 1 is unfireable BY CONSTRUCTION: with `want = believed - floor`, the
+  check reduces to `(cum_div - v_div) < 0` and cumulative divestment is
+  monotone non-decreasing.
+- Levels >= 2 never bind because `box_floor_at` scales the floor with the level
+  endowment exactly as that level's value drains.
+
+So the tree's advantage is carried entirely by `kappa_level(d)` tightening every
+LEAF's own floor -- 0.5304 at d=3 against 0.0261 at d=1, a 20x difference.
+**R-H1's result stands; the mechanism attributed to it does not.** A reader who
+concluded "internal nodes catch what leaves miss" would be wrong, and would
+build the checks rather than the floor.
+
+This also mis-specified R-E's own preregistered flat control, which disabled
+internal checks while keeping the d=3 floor and therefore tied 6/6 cells
+exactly. Diagnosed under standing rule #2 rather than reported. Pinned by
+`test_internal_admission_checks_never_fire`.
