@@ -163,15 +163,15 @@ def _external_send_content(claim, emitted: bytes) -> bool:
 
 
 NATIVE: list[Verifier] = [
-    Verifier("envelope_signature", _envelope_signature, "gyza/icp.py:82"),
-    Verifier("envelope_chain", _envelope_chain, "gyza/icp.py:105"),
+    Verifier("envelope_signature", _envelope_signature, "gyza/icp.py:101 verify_envelope"),
+    Verifier("envelope_chain", _envelope_chain, "gyza/icp.py:124 verify_chain"),
     Verifier("envelope_dag_closed", _envelope_dag_closed,
-             "gyza/icp.py:217 verify_dag (require_closed=True)"),
+             "gyza/icp.py:236 verify_dag (require_closed=True)"),
     Verifier("envelope_dag_open", _envelope_dag_open,
-             "gyza/icp.py:217 verify_dag (require_closed=False)"),
-    Verifier("manifest_identity", _manifest_identity, "gyza/identity.py:101"),
+             "gyza/icp.py:236 verify_dag (require_closed=False)"),
+    Verifier("manifest_identity", _manifest_identity, "gyza/identity.py:101 _manifest_payload_hash"),
     Verifier("enforcement_within_manifest", _enforcement_within_manifest,
-             "gyza/sandbox/config.py:286"),
+             "gyza/sandbox/config.py:286 enforcement_satisfies_manifest"),
     Verifier("delegation_attenuation", _delegation_attenuation,
              "gyza/economy/delegation.py:229 verify_delegation"),
     # Cited :348 (inside `sign_as_payer`) until 2026-08-14 — the SIGNER, not
@@ -179,20 +179,20 @@ NATIVE: list[Verifier] = [
     # witness landed on the wrong function entirely.
     Verifier("ledger_entry_signatures", _ledger_entry_signatures,
              "gyza/economy/ledger.py:387 verify_entry"),
-    Verifier("balance_fold", _balance_fold, "gyza/economy/wallet.py:274"),
+    Verifier("balance_fold", _balance_fold, "gyza/economy/wallet.py:274 net_balance"),
     Verifier("market_capital_fold", _market_capital_fold,
              "gyza/economy/market.py:CapitalEntry fold"),
     Verifier("artifact_content_address", _artifact_content_address,
-             "gyza/network/artifact_store.py:47"),
+             "gyza/network/artifact_store.py:47 store"),
     # TEST-carried: tier 1 in isolation, but forces any chain containing it to
     # tier 3. The tier and the carrier disagree here and both are right.
     Verifier("unit_test_execution", _unit_test_execution,
              "V-3 adapter (finite sample)", carrier="TEST"),
     # --- RESPECIFIED out of NO_VERIFIER (route DR's engineering finding) ------
     Verifier("memory_retrieval_relevance", _memory_retrieval_topk,
-             "gyza/verification/respec.py:124"),
+             "gyza/verification/respec.py:124 verify_retrieval_claim"),
     Verifier("external_send_content", _external_send_content,
-             "gyza/verification/respec.py:196"),
+             "gyza/verification/respec.py:196 verify_send_claim"),
 ]
 
 # R14 Part C's CHEAP-PARTIAL bucket: mechanically checkable conservation or

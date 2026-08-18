@@ -339,6 +339,7 @@ def test_every_witness_citation_resolves_to_the_symbol_it_names():
 
     named = re.compile(r'((?:gyza|netd|tests|scripts)[\w/\-.]*\.py):(\d+)'
                        r'(?:-\d+)?\s+([A-Za-z_]\w*)')
+    _pins_a_line = re.compile(r'(?:gyza|netd|tests|scripts)[\w/\-.]*\.py:\d+')
     cites = []
     v, _s = _bv()
     for ct in v.claim_types():
@@ -351,7 +352,19 @@ def test_every_witness_citation_resolves_to_the_symbol_it_names():
     for ident, wit in cites:
         m = named.search(wit or "")
         if m is None:
-            continue                      # no symbol named: nothing to check
+            # A CITATION THAT PINS A LINE BUT NAMES NO SYMBOL IS EXEMPT BY
+            # OMISSION, and that is how two of them went stale unnoticed:
+            # `gyza/icp.py:82` drifted into `compute_envelope_hash` and
+            # `gyza/icp.py:105` into `verify_envelope`, while the checker
+            # skipped both because neither said what it pointed at.
+            #
+            # A line number is the part that rots. Naming a file alone is a
+            # durable citation and stays exempt; naming a LINE without a symbol
+            # is an unverifiable claim and now fails.
+            assert not _pins_a_line.search(wit or ""), (
+                f"{ident}: witness {wit!r} pins a line but names no symbol, so "
+                f"nothing checks it. Add the symbol, or cite the file alone.")
+            continue
         path, line, symbol = m.group(1), int(m.group(2)), m.group(3)
         src = pathlib.Path(path)
         assert src.is_file(), f"{ident}: cited file {path} does not exist"
