@@ -23,6 +23,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "gyza-canonjson",
     "gyza-crypto",
     "gyza-identity",
     "gyza-icp",

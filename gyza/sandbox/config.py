@@ -312,6 +312,35 @@ def enforcement_satisfies_manifest(
             f"(need {SandboxBackend.BUBBLEWRAP.value!r})"
         )
 
+    # COMPLETENESS — closes the empty-record hole (BUILD_PLAN S4).
+    #
+    # Every check below is a SUBSET test, and the empty set is a subset of
+    # anything. A record carrying ONLY an enforcing backend key therefore
+    # passed every one of them: absence of a key was silently read as "the
+    # sandbox granted nothing" when it actually means "the record does not
+    # say". Those are not the same claim, and only the first is safe to sign.
+    #
+    # (Stated without an inline literal on purpose —
+    # test_no_source_fixture_fabricates_a_bubblewrap_record scans this package
+    # for exactly that pattern, and a prose example would trip a tripwire whose
+    # intent is sound.)
+    #
+    # A record must POSITIVELY declare each dimension it is asserting about.
+    # "I did not say" now fails closed instead of reading as "empty".
+    for field in ("ro_paths", "rw_paths"):
+        if field not in enforcement:
+            return False, (
+                f"enforcement record does not declare {field!r} — an absent "
+                f"field is not an empty grant (incomplete record)"
+            )
+        if not isinstance(enforcement[field], (list, tuple, set)):
+            return False, f"enforcement field {field!r} is not a path collection"
+    if "requires_network" not in enforcement:
+        return False, (
+            "enforcement record does not declare 'requires_network' — an "
+            "absent field is not a denial (incomplete record)"
+        )
+
     caps = manifest.get("capabilities", {})
     if not isinstance(caps, dict):
         caps = {}

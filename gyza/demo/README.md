@@ -109,12 +109,16 @@ forensic verdict with no trust in any node:
   resolved (`manifest_hash_hex` binding);
 * a *withheld* artifact fails closed rather than passing silently.
 
-It composes the real verifiers; it reimplements none of them. In
-production the resolvers are wired to the SQLite blackboard
-(`Blackboard.reconstruct_dag(intent_id)` returns the workflow's DAG
-nodes from the envelope log; the artifact store resolves the rest), so
-any stored multi-agent workflow can be audited the same way the demo
-audits its in-memory one.
+It composes the real verifiers; it reimplements none of them. This
+works on real on-disk work, not just the demo: the `AgentRunner`
+persists *both* the output artifact (with its folded enforcement record)
+*and* the agent manifest content-addressed at execution time, and
+`Blackboard.reconstruct_dag(intent_id)` returns the workflow's DAG nodes
+from the envelope log. So `gyza audit <intent_id>` audits a real stored
+workflow exactly the way the demo audits its in-memory one. (It also
+fails *closed*: if the evidence for an action can't be resolved, that
+action fails rather than passing silently — an auditor never passes what
+it can't verify.)
 
 ## The honest claim
 

@@ -15,6 +15,32 @@
 #                                   # for any real enforced workload.
 set -euo pipefail
 
+# ---------------------------------------------------------------------------
+# B1 — OUTPUT-SIDE DETERMINISM. `gyza/release.py:compute_source_tree_hash`
+# already pins the INPUT (which source bytes went in); these pin the OUTPUT
+# (which binary bytes come out), so "same source -> same binary" is checkable
+# rather than asserted.
+#
+# MEASURED ATTRIBUTION, not assumed (packaging/check_reproducible.sh):
+#   PYTHONHASHSEED=0     IS the fix. Without it, `_internal/base_library.zip`
+#                        differs between builds -- same 155 members, same
+#                        content (0 CRC diffs), same timestamps (0 date_time
+#                        diffs), MEMBER ORDER ONLY. That is set-iteration
+#                        order leaking into archive order.
+#   SOURCE_DATE_EPOCH    DID NOT change the outcome here: with it alone, two
+#                        builds still differed. It is retained as a defensive
+#                        control (it is the standard knob and guards against a
+#                        future toolchain that does stamp mtimes), but it is
+#                        recorded as having NO MEASURED EFFECT on this
+#                        toolchain. Crediting it would be crediting a control
+#                        that did nothing.
+# Callers may override; the point is that the default build is reproducible.
+export PYTHONHASHSEED="${PYTHONHASHSEED:-0}"
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1700000000}"
+export PYTHONDONTWRITEBYTECODE=1
+export TZ=UTC
+export LC_ALL=C
+
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY="${PYTHON:-python3}"
 DIST="${DIST:-$REPO/dist}"

@@ -40,6 +40,7 @@ Design points worth understanding:
 from __future__ import annotations
 
 import logging
+import math
 import os
 import sqlite3
 import threading
@@ -135,6 +136,42 @@ class LedgerEntry:
 # Canonical bytes
 # =============================================================================
 
+def _require_signable_amount(amount: float) -> None:
+    """Refuse an amount that must never reach a signature.
+
+    A POSITIVE predicate over the protected quantity: the amount must BE
+    finite and non-negative. It is deliberately not the negation of
+    ``amount < 0``.
+
+    WHY THE SHAPE MATTERS, and it is the whole defect. ``create_entry``
+    guarded with ``if amount < 0: raise``. NaN compares False against every
+    ordering operator, so ``nan < 0`` is False and NaN was **accepted** --
+    as was ``+inf``. Measured: nan ACCEPTED, inf ACCEPTED, -1.0 REJECTED,
+    -inf REJECTED. A guard written as the negation of an ordering test
+    cannot exclude a value that is unordered, and "not negative" is a proxy
+    that merely correlates with "is a valid amount". This is the fourth
+    instance of that species in this program (R9's G4' pinned the frame,
+    SR-5 floated the origin, GuardConfigStore checked the version integer).
+
+    WHY HERE AND NOT ONLY AT create_entry. ``canonical_sign_bytes`` is the
+    chokepoint for the quantity actually protected: both signing paths
+    (:292, :318) and the verification path (:619) funnel through it, and
+    ``LedgerEntry.from_dict`` builds PEER-RELAYED entries straight from the
+    network (``settlement.py:672``) without passing ``create_entry`` at all.
+    Guarding construction alone would guard the path, not the quantity.
+
+    ``wallet.py:83`` already refuses non-finite amounts, but it guards the
+    FOLD -- it decides what a balance projection counts. Guarding the fold
+    is not guarding the signature: a NaN entry rejected by the projection
+    could still be signed, stored, and relayed, carrying a valid signature
+    over bytes the two implementations disagree about.
+    """
+    if isinstance(amount, bool) or not isinstance(amount, (int, float)):
+        raise ValueError(f"amount must be a real number, got {type(amount).__name__}")
+    if not (math.isfinite(amount) and amount >= 0.0):
+        raise ValueError(f"amount must be finite and non-negative, got {amount!r}")
+
+
 def _amount_canonical(amount: float) -> bytes:
     """Six decimal places, UTF-8. Stable across float representations."""
     return f"{amount:.6f}".encode("utf-8")
@@ -149,6 +186,7 @@ def canonical_sign_bytes(entry: LedgerEntry, role: str) -> bytes:
     """
     if role not in ("payer", "earner"):
         raise ValueError(f"role must be 'payer' or 'earner', got {role!r}")
+    _require_signable_amount(entry.amount_credits)
     parts = [
         entry.entry_id.encode("utf-8"),
         _amount_canonical(entry.amount_credits),
@@ -254,8 +292,9 @@ class ComputeLedger:
         payer (we are ``from_compositor``) or as earner (we are
         ``to_compositor``).
         """
-        if amount < 0:
-            raise ValueError(f"negative amount {amount}")
+        # Positive predicate, not `if amount < 0` -- NaN and +inf both pass an
+        # ordering test against zero. See _require_signable_amount.
+        _require_signable_amount(amount)
         if from_compositor == to_compositor:
             raise ValueError(
                 "from_compositor == to_compositor — "
@@ -616,7 +655,16 @@ def _verify_role_signature(
         return False, f"pubkey len {len(pubkey_bytes)} (want 32)"
     if len(sig_bytes) != 64:
         return False, f"sig len {len(sig_bytes)} (want 64)"
-    digest = canonical_sign_bytes(entry, role)
+    # A peer-relayed entry reaches here straight from the network
+    # (settlement.py:672 -> LedgerEntry.from_dict), so a malformed amount is
+    # adversarial input, not a programming error. Verification must REJECT it,
+    # never raise: a network-facing verifier that crashes on a hostile field is
+    # a denial-of-service, and returning (False, reason) is the fail-closed
+    # answer the caller already handles.
+    try:
+        digest = canonical_sign_bytes(entry, role)
+    except ValueError as e:
+        return False, f"unsignable entry: {e}"
     try:
         Ed25519PublicKey.from_public_bytes(pubkey_bytes).verify(sig_bytes, digest)
         return True, ""

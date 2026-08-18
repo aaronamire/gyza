@@ -231,8 +231,64 @@ def is_trusted_release(version: str, source_tree_hash: str) -> tuple[bool, str]:
     return True, ""
 
 
+# ---------------------------------------------------------------------------
+# B3 — BINARY-hash trust, extending the SOURCE-tree trust above.
+#
+# THE CIRCULARITY, STATED RATHER THAN HIDDEN. This function alone is
+# SELF-REPORTING AT A FINER GRAIN. A runner that lies about its source-tree
+# hash can equally lie about its artifact hash; asking a binary which binary it
+# is buys nothing on its own. This check is sound ONLY given:
+#
+#   B1  the build is bit-reproducible, so "the artifact hash for this source"
+#       is a well-defined quantity that an independent party can recompute; and
+#   B2  >= 2 INDEPENDENT rebuilders have signed the same source -> binary
+#       binding, so the trusted set is not just the builder's own assertion.
+#
+# Without B1 the binding cannot be checked by anyone else. Without B2 the
+# trusted set has one signer, which is a trusted third party with extra steps.
+# The function refuses to imply otherwise: it returns the signer count so the
+# caller can surface it, and `gyza verify` prints it.
+# ---------------------------------------------------------------------------
+def is_trusted_binary(version: str, source_tree_hash: str,
+                      artifact_hash: str) -> tuple[bool, str]:
+    """Is this (version, source, BINARY) triple attested by enough rebuilders?
+
+    Returns ``(ok, reason)``. A missing binary attestation is NOT a failure of
+    the source-tree check -- it is a strictly weaker verdict, and the reason
+    string says which one the caller got.
+    """
+    ok_src, why = is_trusted_release(version, source_tree_hash)
+    if not ok_src:
+        return False, why
+    entry = TRUSTED_RELEASES.get(version) or {}
+    attested = entry.get("artifact_hashes")
+    if not attested:
+        return False, (
+            f"version {version!r} has a trusted SOURCE tree but no attested "
+            f"BINARY hash — this is the weaker verdict: the source is known, "
+            f"the bytes executing are self-reported")
+    if artifact_hash not in attested:
+        return False, (
+            f"runner reports artifact hash {artifact_hash[:12]}… which is not "
+            f"attested for version {version!r} (rebuilt, patched, or tampered)")
+    n = int(attested[artifact_hash].get("independent_signers", 0))
+    threshold = int(entry.get("attestation_threshold", 1))
+    if n < threshold:
+        return False, (
+            f"artifact attested by {n} independent signer(s), below this "
+            f"client's threshold of {threshold}")
+    if n < 2:
+        return True, (
+            "ATTESTED BY ONE SIGNER — a trusted third party with extra steps. "
+            "The binding source→binary is asserted, not independently "
+            "reproduced. A second rebuilder on a second machine is what makes "
+            "this meaningful.")
+    return True, f"attested by {n} independent rebuilders"
+
+
 __all__ = [
     "CURRENT_RELEASE",
+    "is_trusted_binary",
     "ReleaseIdentity",
     "TRUSTED_RELEASES",
     "compute_source_tree_hash",

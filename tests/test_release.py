@@ -211,10 +211,20 @@ def test_shipped_trusted_releases_json_pins_the_cut_releases():
     import gyza.release as rel
     loaded = rel._load_trusted_releases()
     assert isinstance(loaded, dict)
-    assert set(loaded) == {"0.1.0", "0.1.1"}, (
+    assert set(loaded) == {"0.1.0", "0.1.1", "0.1.3"}, (
         "trusted_releases.json membership changed — a release was cut or "
         "removed. Update this tripwire to assert the new pinned set."
     )
+    # 0.1.2 IS DELIBERATELY ABSENT, and that is a recorded gap rather than an
+    # oversight. v0.1.2 was tagged without running scripts/cut_release.py, so
+    # no source_tree_hash was ever pinned for it and `+ RUNNER ATTESTED` is
+    # unreachable on that version. Backfilling it now would be ceremony: the
+    # trust model is "trust the copy that shipped in your OWN install", so an
+    # entry added afterwards cannot reach anyone already running 0.1.2, and
+    # anyone installing later takes 0.1.3.
+    assert "0.1.2" not in loaded, (
+        "0.1.2 was tagged without a cut_release run; if it is being backfilled, "
+        "say why here — the trust model makes a retroactive entry inert.")
     assert loaded["0.1.0"]["source_tree_hash"] == (
         "f307afe7dfc6f345cf2cffdba2774ae979bb8fa075a8a545bfa00f0ead004193"
     )

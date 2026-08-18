@@ -302,7 +302,7 @@ def run_local_task(
             fs_bits.append(f"read {', '.join(read_paths)}")
         if write_paths:
             fs_bits.append(f"write {', '.join(write_paths)}")
-        print(f"fs:       {' · '.join(fs_bits)}  (kernel-enforced binds)")
+        print(f"fs:       {' · '.join(fs_bits)}  (OS-enforced binds)")
     else:
         print("fs:       none granted (tmpfs cwd; --allow-read/--allow-write "
               "to grant)")
@@ -315,7 +315,8 @@ def run_local_task(
     print(f"executor: {executor_label}")
 
     bb = Blackboard(rp["blackboard_db_path"])
-    store = ArtifactStore(base_path=artifact_store_base)
+    store = ArtifactStore(base_path=artifact_store_base,
+                          max_bytes=_declared_storage_cap())
     bb.attach_artifact_store(store)
 
     intent_id = str(_uuid.uuid7())
@@ -512,6 +513,13 @@ def _artifact_store_summary(cfg: GyzaConfig) -> tuple[int, int]:
     return (n, total)
 
 
+def _declared_storage_cap() -> int | None:
+    """The store's cap, read from the DECLARED H5 bound rather than from
+    GyzaConfig. One bound, one source -- see gyza_model.storage_cap_bytes."""
+    from gyza.containment.gyza_model import storage_cap_bytes
+    return storage_cap_bytes()
+
+
 def _human_bytes(n: int) -> str:
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if n < 1024 or unit == "TB":
@@ -595,6 +603,9 @@ def cmd_status(args: argparse.Namespace) -> int:
     # ledger DB hasn't been created.
     _print_economy_section(cfg)
 
+    # C-8 — the declared harm model and whether its bounds are signed.
+    _print_containment_section(cfg)
+
     print()
     print("recent work items:")
     for r in recent:
@@ -603,6 +614,73 @@ def cmd_status(args: argparse.Namespace) -> int:
         )
         desc = (r["description"] or "")[:60]
         print(f"  [{state:9s}] r={r['reward']:.2f}  {r['id'][:8]}…  {desc}")
+    return 0
+
+
+def cmd_review(args: argparse.Namespace) -> int:
+    """The review path: see what is waiting, and resolve it.
+
+    A queue nobody can act on is the same defect as a bound nobody reads. This
+    is the consumer that makes the cadence and the harm bounds mean something.
+    """
+    from gyza.containment.gyza_model import build_registries
+    from gyza.containment.review import HALT, RESUME, ReviewQueue
+
+    cfg = load_config()
+    q = ReviewQueue(cfg.review_db_path)
+
+    if args.escalation_id:
+        decision = HALT if args.halt else RESUME
+        if decision == RESUME and not (args.reviewer and args.note):
+            print("a RESUME needs --reviewer and --note: it advances the "
+                  "accounting origin, and an origin advance nobody is "
+                  "accountable for is how a cumulative bound is defeated "
+                  "silently.", file=sys.stderr)
+            return 1
+        try:
+            r = q.resolve(args.escalation_id, args.reviewer or "",
+                          decision, args.note or "")
+        except (KeyError, ValueError) as e:
+            print(f"refused: {e}", file=sys.stderr)
+            return 1
+        print(f"{r.decision} recorded for {r.record_id} by {r.reviewer!r}")
+        print(f"  note: {r.note}")
+        print(f"  resumes to date: {q.resume_count()} "
+              f"(every one is an appended record, not a reset)")
+        return 0
+
+    # -- otherwise: report. Open a cadence escalation first if one is due.
+    try:
+        from gyza.blackboard import Blackboard
+        from gyza.containment.review import check_cadence
+        harm, _inv = build_registries()
+        bb_path = Path(_resolve(cfg.blackboard_db_path))
+        if bb_path.exists():
+            n = Blackboard(str(bb_path)).count_envelopes_since(0)
+            check_cadence(q, harm, n)
+    except Exception:  # noqa: BLE001 - reporting must survive a broken store
+        pass
+
+    s = q.summary()
+    print(f"review queue ({cfg.review_db_path}):")
+    print(f"  escalations: {s['escalations']}   pending: {s['pending']}   "
+          f"resumes: {s['resumes']}")
+    print(f"  chain: {s['chain']}")
+    pend = q.pending()
+    if not pend:
+        print("  nothing waiting")
+        return 0
+    print()
+    import time as _time
+    for e in pend:
+        age = (_time.time_ns() - e.at_ns) / 1e9
+        print(f"  {e.record_id}")
+        print(f"    {e.harm_class}: measured {e.measured:,.0f} against bound "
+              f"{e.bound:,.0f}   waiting {age:,.0f}s")
+        print(f"    {e.reason}")
+    print()
+    print("  resolve with:  gyza review <id> --reviewer NAME --note 'why'")
+    print("           or:   gyza review <id> --halt")
     return 0
 
 
@@ -643,8 +721,15 @@ def cmd_audit(args: argparse.Namespace) -> int:
               file=sys.stderr)
         return 1
 
-    store = ArtifactStore(base_path="~/.gyza/artifacts")
-    report = audit_from_store(envelopes, store, require_closed=True)
+    store = ArtifactStore(base_path="~/.gyza/artifacts",
+                          max_bytes=_declared_storage_cap())
+    # `governed=True`: route every check this audit performs through the
+    # attested specification registry and print the coverage alongside the
+    # verdict. It cannot change the verdict — an evaluator is told which checks
+    # rest on a signed spec and which do not, rather than being asked to
+    # assume.
+    report = audit_from_store(envelopes, store, require_closed=True,
+                              governed=True)
     print(render_audit_report(report, title=f"GYZA AUDIT — {args.intent_id}"))
     return 0 if report.valid else 1
 
@@ -680,7 +765,8 @@ def cmd_bundle(args: argparse.Namespace) -> int:
               file=sys.stderr)
         return 1
 
-    store = ArtifactStore(base_path="~/.gyza/artifacts")
+    store = ArtifactStore(base_path="~/.gyza/artifacts",
+                          max_bytes=_declared_storage_cap())
 
     def _manifest(h: str) -> "dict | None":
         raw = store.get(h)
@@ -764,6 +850,115 @@ def _print_global_section(cfg: GyzaConfig) -> None:
         for p in peers[:5]:
             tier_label = f"T{p.attestation_tier}" if p.attestation_tier else "T0"
             print(f"    - {p.compositor_pubkey[:16]}…  {tier_label}  {p.multiaddr}")
+
+
+#: Declared harm classes a RUNTIME GATE actually consults. Empty since H1 was
+#: retired 2026-08-15: no declared class is enforced, and authority containment
+#: is enforced by a separate mechanism that is not a declared class. Add an id
+#: here ONLY when a gate reads it -- this set is what `gyza status` reports.
+_ENFORCED_HARM_CLASSES: set[str] = set()
+
+
+def _print_containment_section(cfg: GyzaConfig) -> None:
+    """The declared harm model, its bounds, and WHO SIGNED THEM.
+
+    This section exists because the gap it reports was previously invisible.
+    The bounds sat in an ordinary repo file, `readiness()` answered
+    `can_claim_containment: True` over them, and nothing anywhere told a reader
+    that the trust root of the whole containment argument was a text file. A
+    gap an operator cannot see is one nobody closes.
+    """
+    try:
+        from gyza.containment.engine import GuardEngine
+        from gyza.containment.gyza_model import UNMODELLED, build_registries
+        # C-8: when an authority key is configured, bounds must come through a
+        # VERIFIED configuration and an unsigned file is refused outright.
+        pub = (cfg.guard_authority_pubkey or "").strip()
+        if pub:
+            harm, inv = build_registries(bounds_file=cfg.guard_bounds_path,
+                                         authority_pubkey=bytes.fromhex(pub))
+        else:
+            harm, inv = build_registries()
+        r = GuardEngine(harm, inv).readiness()
+    except Exception:  # noqa: BLE001 - status must work on a broken install
+        return
+
+    prov = r["bounds_provenance"]
+    print()
+    print("containment (declared harm model):")
+    for c in harm:
+        try:
+            print(f"  {c.id:22s} bound {harm.bound(c.id):>10.2f}")
+        except Exception:  # noqa: BLE001
+            print(f"  {c.id:22s} bound   UNDECLARED")
+    for cid, why in UNMODELLED.items():
+        print(f"  {cid:22s} NOT MODELLED — {why.split('(')[0].strip()}")
+
+    if prov["trusted"]:
+        print(f"  bounds: SIGNED (v{prov['version']}, authority "
+              f"{prov['authority_pubkey'][:16]}…)")
+    else:
+        print(f"  bounds: NOT SIGNED — {prov['source']}")
+        print("    The guard configuration is the trust root of every "
+              "containment claim.")
+        print("    Unsigned, it can be edited by the system it constrains, so "
+              "the claim")
+        print("    has no base case. Sign it: scripts/sign_guard_config.py "
+              "--generate-key")
+    # THE CADENCE, in the unit the operator actually chose. A bound nobody can
+    # see their position against is a bound nobody can act on.
+    try:
+        from pathlib import Path as _P
+        bb_path = _P(_resolve(cfg.blackboard_db_path))
+        if bb_path.exists():
+            from gyza.blackboard import Blackboard
+            n = Blackboard(str(bb_path)).count_envelopes_since(0)
+            cad = harm.bound("H6_unsupervised_actions")
+            print(f"  review cadence: {n:,} of {cad:,.0f} actions used "
+                  f"({n/cad:.2%}) — a human is due in {max(cad-n,0):,.0f}")
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        pass
+    # PENDING ESCALATIONS BELONG WHERE THE OPERATOR ALREADY LOOKS.
+    #
+    # `pending()` was surfaced ONLY by `gyza review`, so an operator learned
+    # they had an unreviewed escalation by asking whether they had one -- the
+    # same defect already recorded when `check_cadence` was callable only from
+    # `gyza review` and therefore never fired where actions happen. A record-only
+    # cadence whose record is invisible from the status command is a queue
+    # nobody can act on.
+    try:
+        from gyza.containment.review import ReviewQueue
+        pend = ReviewQueue(cfg.review_db_path).pending()
+        if pend:
+            print(f"  ** {len(pend)} UNREVIEWED escalation(s) — "
+                  f"`gyza review` to act; oldest: {pend[0].harm_class} "
+                  f"measured {pend[0].measured:,.0f} against "
+                  f"{pend[0].bound:,.0f}")
+        else:
+            print("  review queue: nothing pending")
+    except Exception:  # noqa: BLE001
+        pass
+    print(f"  can claim containment: "
+          f"{'YES' if r['can_claim_containment'] else 'NO'}")
+    # Do not let "the model is bounded" read as "the model is enforced".
+    # This line was written before the settlement gate existed and said NO
+    # bound was consulted; that is no longer true and a stale reassurance is
+    # worse than none.
+    # DERIVED, not hardcoded. This line has now gone stale three times as the
+    # model changed -- it claimed no bound was enforced after the settlement
+    # gate landed, then claimed H1 was enforced after H1 was retired. A list
+    # maintained by hand beside a model that moves is a stale reassurance
+    # waiting to happen, and a stale reassurance is worse than none.
+    enforced = sorted(_ENFORCED_HARM_CLASSES & {c.id for c in harm})
+    measured = sorted({c.id for c in harm} - set(enforced))
+    if enforced:
+        print(f"  ENFORCED at runtime: {', '.join(enforced)}")
+    else:
+        print("  ENFORCED at runtime: NONE of the declared classes.")
+    print("    Authority containment IS enforced, separately and "
+          "unconditionally,")
+    print("    by the per-work-item bounds gate in gyza/runner.py.")
+    print(f"  MEASURED but NOT enforced: {', '.join(measured) or 'none'}")
 
 
 def _print_economy_section(cfg: GyzaConfig) -> None:
@@ -2096,7 +2291,7 @@ def cmd_submit(args: argparse.Namespace) -> int:
         print(bar)
         # Bounds-proof. If the artifact carries an __enforcement__
         # record, the agent's runner executed this work inside a
-        # kernel-enforced sandbox AND refused to sign unless that
+        # OS-enforced sandbox AND refused to sign unless that
         # sandbox was no wider than its capability manifest (see
         # runner._execute). Because the record is INSIDE the hashed
         # artifact, the signature above also commits to it — these
@@ -2107,7 +2302,7 @@ def cmd_submit(args: argparse.Namespace) -> int:
             print(f"  BOUNDS-PROOF (committed in the signed artifact)")
             print(bar)
             print(f"  sandbox:       {enforcement.get('backend', '?')}"
-                  f" (kernel-enforced)")
+                  f" (OS-enforced: namespaces + seccomp)")
             print(f"  fs read:       {ro if ro else 'NONE (no host filesystem)'}")
             print(f"  fs write:      {rw if rw else 'NONE (no host filesystem)'}")
             print(f"  network:       "
@@ -2430,6 +2625,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="intent to audit; omit to list intents with logged envelopes",
     )
 
+    p_review = sub.add_parser(
+        "review",
+        help="see escalations waiting for a human, and resolve them",
+    )
+    p_review.add_argument("escalation_id", nargs="?",
+                          help="escalation to resolve; omit to list")
+    p_review.add_argument("--reviewer", help="who is deciding (required to resume)")
+    p_review.add_argument("--note", help="why (required to resume)")
+    p_review.add_argument("--halt", action="store_true",
+                          help="halt instead of resuming")
+
     p_run = sub.add_parser(
         "run",
         help="execute one task bounded + flight-recorded: real sandbox, "
@@ -2450,7 +2656,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_run.add_argument(
         "--allow-read", action="append", default=[], metavar="PATH",
-        help="host path the agent may read (repeatable; kernel-enforced "
+        help="host path the agent may read (repeatable; OS-enforced "
              "read-only bind; becomes part of the signed grant)",
     )
     p_run.add_argument(
@@ -2719,6 +2925,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "review":
+        return cmd_review(args)
     if args.command == "audit":
         return cmd_audit(args)
     if args.command == "run":

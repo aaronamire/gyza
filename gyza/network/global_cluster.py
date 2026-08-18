@@ -285,6 +285,27 @@ class GlobalCluster:
                 self._blackboard, evidence_store,
             )
             LOG.info("[global] settlement audit-before-cosign: ENABLED")
+        # C-1/C-8 — the declared harm model, on the one production path where a
+        # declared quantity actually moves. H1 (credits at risk) changes when
+        # this node cosigns as payer, and that path is already serialized, so
+        # the cumulative bound has the serialization point C7 requires.
+        #
+        # Bounds load UNSIGNED here, and that is honest rather than sloppy: the
+        # levels are in force either way and only the CLAIM depends on the
+        # signature (C-8). `gyza status` reports which state is in effect.
+        # H1_credits was RETIRED as a harm class on 2026-08-15 (user decision):
+        # credits are TOKEN_IS_FAKE, so no level in them is checkable, and R-B1
+        # classifies the quantity TRANSFERS -- enforcing it relocated harm onto
+        # counterparties rather than removing it. So there is nothing at the
+        # settlement boundary for a declared bound to check, and no guard is
+        # installed. `SettlementGuard` is kept and tested: when credits acquire
+        # an external referent and a real exposure class is declared, it is the
+        # place to hang it, and it now REFUSES construction against a class that
+        # does not exist so it cannot be revived silently.
+        #
+        # Autonomy is bounded instead by H6 (actions), checked in the runner.
+        harm_guard = None
+
         self._settlement = LedgerSettlementService(
             ledger=self._ledger,
             netd=self._netd,
@@ -292,6 +313,7 @@ class GlobalCluster:
             acceptance_policy=acceptance_policy,
             evidence_store=evidence_store,
             blackboard=self._blackboard,
+            harm_guard=harm_guard,
         )
         self._settlement.start()
 

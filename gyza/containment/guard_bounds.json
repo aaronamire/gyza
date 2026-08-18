@@ -1,0 +1,37 @@
+{
+  "_comment": [
+    "BUILD_PLAN D1 \u2014 declared harm bound levels. USER DECISION, 2026-07-31.",
+    "Every level in research/HARM_MODEL_DRAFT.md was 'TBD \u2014 user decision';",
+    "these are the first declared values. They are deliberately TIGHT: the",
+    "point of D1 is a declared, falsifiable model, and tightening later is",
+    "cheap while loosening after a loss is not.",
+    "",
+    "H1_credits: max net drawdown per run, in credits. The quantity may be",
+    "  negative by design (net debt is never clamped, wallet.py:276-280), so",
+    "  this is a floor on net position, not a cap on magnitude.",
+    "H2_market_capital: same shape. NOTE the standing hazard: _capital is a",
+    "  mutable dict no gate reads (market.py:231, mutated :287/:325/:332/:345).",
+    "  This bound makes the exposure measurable; it does NOT fix the",
+    "  representation. The fix is to route market P&L through LedgerEntry.",
+    "H4_authority: 0. Authority exceedance is a BREACH, not a budget \u2014 the",
+    "  attenuation theorem says it cannot happen, so any count above zero is a",
+    "  broken invariant rather than consumed allowance.",
+    "",
+    "C-8: this file will move into the signed guard-configuration trust domain.",
+    "Until then it is an ordinary repo file and is NOT tamper-evident.",
+    "",
+    "H5_storage_growth: 1e10 bytes = 10 GB. NOT a level invented here -- it is transcribed from GyzaConfig.max_artifact_store_gb, which the operator had already declared and which nothing read (it was printed by `gyza status` as an enforced cap while ArtifactStore.max_bytes stayed None everywhere).",
+    "",
+    "H6_unsupervised_actions: 10000. THE REVIEW CADENCE, chosen by the operator 2026-08-15: how many signed actions may occur before a human looks. Stated in actions rather than credits because TOKEN_IS_FAKE -- a credit bound cannot be checked against anything, an action count can.",
+    "",
+    "H1_credits RETIRED 2026-08-15 (user decision): credits are TOKEN_IS_FAKE, so no level in them is checkable. It is listed in UNMODELLED so the gap is visible rather than absent. Autonomy is bounded by H6 in actions instead.",
+    "H2_market_capital RETIRED 2026-08-17 (owner decision): BondedMarket has zero production constructors and gates.py passes capital_entries=[], so the class measured 0.0 in every production evaluation. Listed in UNMODELLED. NOTE: removing a bound is a TIGHTENING, not a loosening -- an unset bound FAILS CLOSED, so a class with no bound admits nothing (guardconfig.diff_bounds)."
+  ],
+  "version": 1,
+  "declared": "2026-07-31",
+  "bounds": {
+    "H4_authority": 0.0,
+    "H5_storage_growth": 10000000000.0,
+    "H6_unsupervised_actions": 10000
+  }
+}

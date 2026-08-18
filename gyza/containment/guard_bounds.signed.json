@@ -1,0 +1,12 @@
+{
+  "config": {
+    "bounds": {
+      "H4_authority": 0.0,
+      "H5_storage_growth": 10000000000.0,
+      "H6_unsupervised_actions": 10000
+    },
+    "tier_assignments": {},
+    "version": 1
+  },
+  "signature": "e7e51725125ceff7c1606ac16fce0f54b8abad22ad430f1c52a4067a923e1d9cd983a6d6bcee877cc18c74f1bebf924f1e07c0c502341925d46500f99a467003"
+}

@@ -246,9 +246,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "gyza-canonjson"
+version = "0.1.0-vnext.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "gyza-capability"
 version = "0.1.0-vnext.0"
 dependencies = [
+ "gyza-canonjson",
  "gyza-crypto",
  "hex",
  "hex-literal",
@@ -281,6 +290,7 @@ dependencies = [
 name = "gyza-icp"
 version = "0.1.0-vnext.0"
 dependencies = [
+ "gyza-canonjson",
  "gyza-crypto",
  "hex",
  "hex-literal",

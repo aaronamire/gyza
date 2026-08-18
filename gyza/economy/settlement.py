@@ -353,6 +353,23 @@ class AuditAcceptancePolicy:
         return AcceptanceVerdict.ACCEPT, ""
 
 
+@dataclass(frozen=True)
+class _HarmRecord:
+    """One evaluation of the declared harm bound at the settlement gate.
+
+    Kept whether the bound held or not, because the interesting number is how
+    often it WOULD have fired. `admitted=False` under record-only mode is a
+    near-miss the operator needs to see; discarding those would leave the
+    calibration question unanswerable, which is the question this record exists
+    to answer.
+    """
+    entry_id: str
+    admitted: bool
+    measured: dict
+    reasons: list
+    at_ns: int
+
+
 class LedgerSettlementService:
     """
     Bilateral ledger settlement. One instance per node.
@@ -382,7 +399,22 @@ class LedgerSettlementService:
         acceptance_policy: "AcceptancePolicy | None" = None,
         evidence_store=None,
         blackboard=None,
+        harm_guard: "object | None" = None,
+        harm_enforce: bool = False,
     ):
+        # THE DECLARED HARM BOUND, evaluated on the payer path. Optional and
+        # None by default so an unguarded service behaves exactly as before;
+        # `GlobalCluster` installs one, which is what makes this the first
+        # consequence bound in Gyza that a production path actually enforces.
+        #
+        # It is NOT constructed here. The bound levels and their accounting
+        # origin are declared, not derived, and a service that built its own
+        # guard would be choosing its own bound -- the circularity the harm
+        # model exists to avoid.
+        self._harm_guard = harm_guard
+        # RECORD-ONLY by default; see the enforcement-mode note at the gate.
+        self._harm_enforce = bool(harm_enforce)
+        self._harm_records: list[_HarmRecord] = []
         self._ledger = ledger
         self._netd = netd
         self._resolve_envelope = envelope_resolver
@@ -430,6 +462,37 @@ class LedgerSettlementService:
         # call.
         self._pending_reconciles: dict[str, _PendingReconcile] = {}
         self._pending_lock = threading.Lock()
+
+    # ------------------------------------------------------------------
+    # The declared harm bound: what it measured, and what it would have done
+    # ------------------------------------------------------------------
+    @property
+    def harm_records(self) -> list:
+        """Every gate evaluation, in order. A copy: the caller must not be able
+        to shorten the record a calibration decision rests on."""
+        return list(self._harm_records)
+
+    def harm_summary(self) -> dict:
+        """What an operator needs to decide whether the bound is calibrated.
+
+        `would_have_refused` is the number that matters under record-only mode:
+        it is the throughput the bound WOULD have cost, measured instead of
+        guessed. Reporting evaluations without it would be a containment number
+        with no counterfactual, which is the AG-3 failure.
+        """
+        recs = self._harm_records
+        refused = [r for r in recs if not r.admitted]
+        peak = {}
+        for r in recs:
+            for k, v in r.measured.items():
+                peak[k] = max(peak.get(k, float("-inf")), v)
+        return {
+            "evaluations": len(recs),
+            "would_have_refused": len(refused),
+            "refusal_rate": (len(refused) / len(recs)) if recs else 0.0,
+            "enforcing": self._harm_enforce,
+            "peak_measured": peak,
+        }
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -812,6 +875,56 @@ class LedgerSettlementService:
                     self._bump_dispute(entry.to_compositor)
                     _obs_dispute("acceptance_declined")
                     return
+
+            # THE DECLARED HARM BOUND (H1). Last check before the commit, and
+            # the ordering is deliberate: everything above establishes that the
+            # entry is well-formed, honestly priced and worth paying for. This
+            # asks a different question -- whether paying it stays inside the
+            # drawdown WE declared. `sign_as_payer` settles the entry, so this
+            # is the final instant at which the answer can still be no.
+            #
+            # A REFUSAL HERE IS NOT A DISPUTE. The peer did nothing wrong; we
+            # hit our own bound. Bumping their reputation would punish a
+            # counterparty for our budget, and would corrupt the one signal the
+            # dispute counter is supposed to carry.
+            #
+            # ENFORCEMENT MODE. Default is RECORD, not REFUSE, and that is a
+            # deliberate retreat from what shipped yesterday: the declared bound
+            # of 100 credits is smaller than a SINGLE real-model action (40,000
+            # for Sonnet, 120,000 for Opus), so refusing on it blocked all real
+            # settlement traffic. A guard that refuses everything is the failure
+            # mode this program has a name for.
+            #
+            # Recording keeps the mechanism EXERCISED on every real settlement
+            # -- the measurement accumulates, `h_bar` becomes observable, and
+            # the operator can see how often the bound would have fired --
+            # without a miscalibrated level halting the system. Flip
+            # `harm_enforce=True` when the level is calibrated; the refusal path
+            # below is unchanged and still tested.
+            if self._harm_guard is not None:
+                decision = self._harm_guard.check_payment(
+                    self._ledger.all_entries(), entry)
+                self._harm_records.append(_HarmRecord(
+                    entry_id=entry.entry_id,
+                    admitted=bool(decision.admit),
+                    measured=dict(decision.measured),
+                    reasons=list(decision.reasons),
+                    at_ns=time.time_ns(),
+                ))
+                if not decision.admit:
+                    if self._harm_enforce:
+                        LOG.warning(
+                            "[settlement] REFUSING to cosign entry %s — "
+                            "declared harm bound: %s", entry.entry_id,
+                            "; ".join(decision.reasons),
+                        )
+                        _obs_dispute("harm_bound_refused")
+                        return
+                    LOG.info(
+                        "[settlement] harm bound WOULD HAVE REFUSED entry %s "
+                        "(recording only, not enforcing): %s", entry.entry_id,
+                        "; ".join(decision.reasons),
+                    )
 
             try:
                 cosigned = self._ledger.sign_as_payer(entry)

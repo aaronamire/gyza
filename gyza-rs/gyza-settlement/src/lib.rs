@@ -28,8 +28,18 @@
 //! `[entry_id, amount_canonical, work_item_id, icp_envelope_hash,
 //! role]`. `amount_canonical` is `"{:.6}"` formatted; both Python's
 //! `f"{amount:.6f}"` and Rust's `format!("{:.6}", amount)` round
-//! half-to-even and produce byte-identical bytes for the values the
-//! protocol uses.
+//! half-to-even and produce byte-identical bytes for every FINITE value,
+//! including `-0.0`, the smallest denormal and `f64::MAX` (measured
+//! 2026-08-06, `research/respecification/FINDINGS_SURVEY.md`).
+//!
+//! **NaN was the one exception, and it is now UNREACHABLE rather than
+//! harmonized.** Python formats NaN as `"nan"` and Rust as `"NaN"`, so
+//! the two sides produced DIFFERENT sign digests for a NaN amount. Making
+//! the formatters agree would have meant agreeing on an encoding of a
+//! value neither side should ever sign. Instead both sides now refuse a
+//! non-finite amount at `canonical_sign_bytes`, so the formatter cannot be
+//! reached with one. `+inf` formats `"inf"` on both sides and never
+//! diverged; it is refused for the same reason.
 //!
 //! ## Cross-references
 //!
@@ -76,6 +86,9 @@ pub const ROLE_PAYER: &str = "payer";
 pub enum SettlementError {
     #[error("invalid role: must be 'earner' or 'payer', got {got:?}")]
     InvalidRole { got: String },
+    /// Mirrors Python's `_require_signable_amount` (gyza/economy/ledger.py).
+    #[error("amount must be finite and non-negative, got {got}")]
+    UnsignableAmount { got: f64 },
     #[error("signer compositor pubkey mismatch: signer is {signer}, entry expects {expected}")]
     SignerMismatch { signer: String, expected: String },
     #[error("missing earner signature; can't cosign as payer")]
@@ -206,6 +219,23 @@ pub fn canonical_sign_bytes(entry: &LedgerEntry, role: &str) -> Result<[u8; 32],
     if role != ROLE_EARNER && role != ROLE_PAYER {
         return Err(SettlementError::InvalidRole {
             got: role.to_string(),
+        });
+    }
+    // POSITIVE predicate, mirroring Python's `_require_signable_amount`.
+    // Deliberately not `!(x < 0.0)`: NaN compares false against every
+    // ordering operator, so an ordering test cannot exclude it.
+    //
+    // This also REMOVES A LATENT DIVERGENCE rather than fixing a live one.
+    // Python formats NaN as "nan" and Rust as "NaN", so the two produced
+    // different sign digests for a NaN amount. Harmonizing the FORMATTING
+    // would have made both sides agree on an encoding of a value neither
+    // should ever sign; refusing the input on both sides removes the
+    // disagreement by making it unreachable. Python now refuses at
+    // `canonical_sign_bytes` too, so neither side can reach the formatter
+    // with a non-finite amount.
+    if !(entry.amount_credits.is_finite() && entry.amount_credits >= 0.0) {
+        return Err(SettlementError::UnsignableAmount {
+            got: entry.amount_credits,
         });
     }
     let amount = amount_canonical(entry.amount_credits);
@@ -502,6 +532,82 @@ mod tests {
         assert_eq!(amount_canonical(0.000001), b"0.000001".to_vec());
     }
 
+    /// NUMERIC EDGE FIXTURES -- Python's REAL digests, from
+    /// regenerate_settlement_fixtures.py.
+    ///
+    /// `amount_canonical_six_decimals` above checks four trivial values
+    /// against HAND-WRITTEN strings and its own comment admits it dodged the
+    /// hard case ("let's just check a known-clean case below"). Trivial
+    /// agreement cannot distinguish two float formatters. These can:
+    /// negative zero, the smallest denormal, f64::MAX, both half-even
+    /// boundaries, and a value that only exists as a floating-point artifact.
+    #[test]
+    fn numeric_edge_digests_match_python() {
+        let cases: &[(&str, f64, &str)] = &[
+            (
+                "neg_zero",
+                -0.0_f64,
+                "5a6660aa0ba78307bfe4eb39f95c20afd68c8dd9156756c27f1e36f5f429050e",
+            ),
+            (
+                "denormal_min",
+                5e-324_f64,
+                "17574cfead2b17a849ed4b77d632b90f435dd313513a309f0958e3c79a038162",
+            ),
+            (
+                "f64_max",
+                1.7976931348623157e308_f64,
+                "d98ef824a7dfc66551d564beb937ee99a2a3da1b491baf6909fa21d5b102daed",
+            ),
+            (
+                "half_even_lo",
+                0.1234565_f64,
+                "a3aa6e0616c0053aec8101d789c4eeba583414b877039b08c277366aa2f99029",
+            ),
+            (
+                "half_even_hi",
+                0.1234575_f64,
+                "e7f72e28b17272e99cf3e10bb00ee1b77902df11c5eb9b1185e34113f36aa614",
+            ),
+            (
+                "fp_artifact",
+                0.30000000000000004_f64,
+                "690eb10e204fd86067ca322350090ebb99e62b55dab93587094da429bb5b3f30",
+            ),
+            (
+                "large_1e17",
+                1e17_f64,
+                "586ef9e61c70c070e2c01777578bca6bc069ce9722cc05715dc059c0714e122e",
+            ),
+        ];
+        for (name, amount, expected) in cases {
+            let mut e = fixture_entry();
+            e.entry_id = "entry-0001".into();
+            e.from_compositor = "a".repeat(64);
+            e.to_compositor = "b".repeat(64);
+            e.work_item_id = "work-0001".into();
+            e.icp_envelope_hash = "envhash-0001".into();
+            e.amount_credits = *amount;
+            let got = hex::encode(canonical_sign_bytes(&e, ROLE_EARNER).expect(name));
+            assert_eq!(&got, expected, "digest mismatch for {name}");
+        }
+    }
+
+    /// Non-finite amounts have NO digest on either side: both refuse. This is
+    /// the fixture for a value that used to be SIGNABLE in Python and would
+    /// have produced a different digest here ("nan" vs "NaN").
+    #[test]
+    fn non_finite_amounts_have_no_digest_on_either_side() {
+        for bad in [f64::NAN, f64::INFINITY] {
+            let mut e = fixture_entry();
+            e.amount_credits = bad;
+            assert!(
+                canonical_sign_bytes(&e, ROLE_EARNER).is_err(),
+                "{bad} must have no digest"
+            );
+        }
+    }
+
     #[test]
     fn canonical_sign_bytes_role_distinct() {
         let e = fixture_entry();
@@ -511,6 +617,68 @@ mod tests {
             earner_digest, payer_digest,
             "earner and payer must sign DIFFERENT bytes for the same entry"
         );
+    }
+
+    /// Mirrors Python's tests in tests/test_ledger.py. The predicate is
+    /// POSITIVE (is finite and >= 0), never the negation of an ordering test:
+    /// NaN compares false against every ordering operator, so `!(x < 0.0)`
+    /// would ACCEPT both NaN and +inf.
+    #[test]
+    fn unsignable_amounts_are_refused_on_this_side_too() {
+        for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, -1.0] {
+            let mut e = fixture_entry();
+            e.amount_credits = bad;
+            let err = canonical_sign_bytes(&e, ROLE_EARNER).unwrap_err();
+            assert!(
+                matches!(err, SettlementError::UnsignableAmount { .. }),
+                "amount {bad} must be refused, got {err:?}"
+            );
+        }
+    }
+
+    /// The PRE-FIX predicate, kept executable so the negative control below
+    /// runs the real thing rather than a description of it. `#[inline(never)]`
+    /// and a runtime argument keep it out of const-evaluation.
+    #[inline(never)]
+    fn pre_fix_guard_rejects(amount: f64) -> bool {
+        amount < 0.0
+    }
+
+    /// NEGATIVE CONTROL for the guard's SHAPE. Proves the OLD predicate could
+    /// not have caught NaN or +inf, so `unsignable_amounts_are_refused...` is
+    /// not passing for some unrelated reason.
+    ///
+    /// The root cause stated exactly: NaN is not merely "not less than zero",
+    /// it is INCOMPARABLE -- `partial_cmp` returns `None`. Any guard phrased
+    /// as an ordering test therefore cannot classify it, which is why the fix
+    /// is a positive predicate over the protected quantity.
+    ///
+    /// clippy's own `neg_cmp_op_on_partial_ord` lint names this hazard.
+    #[test]
+    fn nan_is_incomparable_so_an_ordering_guard_cannot_catch_it() {
+        assert_eq!(f64::NAN.partial_cmp(&0.0), None, "NaN is incomparable");
+
+        assert!(!pre_fix_guard_rejects(f64::NAN), "old guard ACCEPTED NaN");
+        assert!(
+            !pre_fix_guard_rejects(f64::INFINITY),
+            "old guard ACCEPTED +inf"
+        );
+        assert!(pre_fix_guard_rejects(f64::NEG_INFINITY));
+        assert!(pre_fix_guard_rejects(-1.0));
+    }
+
+    /// Counter-metric: a guard refusing everything would pass the test above
+    /// and be useless. Legitimate amounts must still sign.
+    #[test]
+    fn zero_and_tiny_amounts_still_sign() {
+        for good in [0.0, 1e-9, 1.234567, f64::MAX] {
+            let mut e = fixture_entry();
+            e.amount_credits = good;
+            assert!(
+                canonical_sign_bytes(&e, ROLE_EARNER).is_ok(),
+                "amount {good} must remain signable"
+            );
+        }
     }
 
     #[test]

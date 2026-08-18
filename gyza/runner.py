@@ -43,12 +43,19 @@ import blake3
 import numpy as np
 
 from gyza.blackboard import Blackboard
+from gyza.containment.projection import AuthorityViolation
 from gyza.demand import LSHIndex
 from gyza.drift import SpecializationTracker
 from gyza.icp import ICPEnvelope, compute_envelope_hash
 from gyza.identity import AgentIdentity
 from gyza.memory import Episode, EpisodicMemory, build_enriched_prompt
 from gyza.schema import Artifact, HLC, WorkItem
+
+# BUILD_PLAN E2 — process-wide default for the bounds-proof refusal policy.
+# Production entry points set this True (or pass require_enforcement=True);
+# unit tests with mock executors leave it False. Moves into the signed guard
+# configuration (C-8) once that trust domain exists.
+REQUIRE_ENFORCEMENT_DEFAULT = False
 
 
 # Observability hooks. The module-private wrappers fail closed so an
@@ -99,8 +106,46 @@ class AgentRunner:
         strict_chain_verification: bool = False,
         hlc: HLC | None = None,
         reputation_store=None,
+        require_enforcement: bool | None = None,
+        review_queue=None,
+        harm_registry=None,
+        cadence_origin_ns: int = 0,
     ):
+        # BUILD_PLAN E2 — the fail-open gate.
+        #
+        # The bounds check historically ran only `if enforcement is not None`,
+        # so an executor that stamped no record skipped it entirely and still
+        # produced a signed envelope. That is non-repudiation of a claim rather
+        # than refusal to proceed without one.
+        #
+        # `require_enforcement` makes the policy EXPLICIT and refusable:
+        #   True  — refuse to sign any work item lacking a valid record.
+        #   False — permit it (the historical behaviour), for unit tests and
+        #           mock/deterministic executors that do not sandbox at all.
+        #   None  — take the process-wide default below.
+        #
+        # The default is deliberately NOT flipped here: 18 test files drive the
+        # runner with non-sandboxing executors, and flipping it silently would
+        # convert a security decision into test churn. Production entry points
+        # set it True explicitly. When C-8 (guard configuration in a separate
+        # trust domain) lands, this policy moves there and stops being a
+        # constructor argument at all.
+        self._require_enforcement = (
+            REQUIRE_ENFORCEMENT_DEFAULT if require_enforcement is None
+            else bool(require_enforcement)
+        )
         self._identity = identity
+        # H4's measurand. APPEND-ONLY and never cleared: authority exceedance
+        # is monotone non-cumulative -- once exceeded it cannot be un-exceeded
+        # -- so a counter that could be reset would be a bound whose origin
+        # moves, which is not a bound (ledger artifact #13).
+        self._authority_violations: list[AuthorityViolation] = []
+        # H6's consumer. None means the cadence is not watched -- which is the
+        # honest default for a runner with no review path attached, not a
+        # silently-disabled guard.
+        self._review_queue = review_queue
+        self._harm_registry = harm_registry
+        self._cadence_origin_ns = int(cadence_origin_ns)
         self._bb = blackboard
         self._mem = memory
         self._spec = specialization
@@ -363,6 +408,15 @@ class AgentRunner:
                 best = it
         return best, best_score
 
+    @property
+    def authority_violations(self) -> list[AuthorityViolation]:
+        """H4's measurand, for a guard to project into `GyzaState`.
+
+        A copy: the list is append-only and the caller must not be able to
+        shorten the thing a bound is measured over.
+        """
+        return list(self._authority_violations)
+
     def _gather_inputs(self, item: WorkItem) -> list[Artifact]:
         out: list[Artifact] = []
         for h in item.input_hashes:
@@ -404,12 +458,35 @@ class AgentRunner:
         # for them — the artifact below is byte-identical to before
         # and the existing test suite is unaffected.
         enforcement = raw.get("__enforcement__")
+        if enforcement is None and self._require_enforcement:
+            # FAIL CLOSED. Under this policy an absent record is a refusal,
+            # not a skip: we cannot prove the work stayed in bounds, so no
+            # envelope is produced for it.
+            raise RuntimeError(
+                "refusing to sign — no sandbox enforcement record was "
+                "stamped and require_enforcement is set; an unenforced "
+                "execution cannot carry a bounds-proof"
+            )
         if enforcement is not None:
             from gyza.sandbox.config import enforcement_satisfies_manifest
             ok, why = enforcement_satisfies_manifest(
                 enforcement, self._identity.manifest,
             )
             if not ok:
+                # RECORD BEFORE REFUSING. H4's quantity is "count of executed
+                # actions whose enforcement exceeded the manifest", and until
+                # now nothing anywhere produced that count -- the harm class
+                # read `getattr(s, "authority_violations", ())`, measured 0
+                # against a bound of 0, and passed by measuring nothing.
+                #
+                # The work ALREADY RAN outside its declared bounds; refusing to
+                # sign withholds the attestation but does not un-run it. So the
+                # breach is recorded here, at the point of detection, and the
+                # refusal below is unchanged.
+                self._authority_violations.append(AuthorityViolation(
+                    action_id=item.id, agent_pubkey=self._identity.agent_id,
+                    reason=why, at_ns=time.time_ns(),
+                ))
                 raise RuntimeError(
                     f"refusing to sign — sandbox enforcement is not "
                     f"consistent with the agent manifest: {why}"
@@ -596,6 +673,23 @@ class AgentRunner:
             except Exception:
                 # Settlement / observability hook — never break completion.
                 pass
+
+        # THE REVIEW CADENCE, checked WHERE THE ACTION HAPPENS. It was first
+        # wired only into `gyza review`, which meant an operator discovered they
+        # were due a review by ASKING WHETHER THEY WERE DUE A REVIEW -- a passive
+        # queue is the same unconsumed-surface defect one layer up.
+        #
+        # One indexed COUNT per signature. `check_cadence` is idempotent, so a
+        # bound already escalated does not re-fire; the cost is the count, not
+        # the escalation.
+        if self._review_queue is not None:
+            try:
+                from gyza.containment.review import check_cadence
+                check_cadence(self._review_queue, self._harm_registry,
+                              self._bb.count_envelopes_since(
+                                  self._cadence_origin_ns))
+            except Exception:  # noqa: BLE001 - never break completion
+                LOG.debug("cadence check failed", exc_info=True)
 
         # Bump the completion counter HERE — before bb.complete_work_item
         # publishes the work item's completion to other nodes via Raft.

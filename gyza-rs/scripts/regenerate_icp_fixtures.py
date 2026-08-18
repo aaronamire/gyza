@@ -17,6 +17,7 @@ canonical-JSON byte string the Rust port must produce byte-identically.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -66,6 +67,31 @@ def fixture_envelope() -> ICPEnvelope:
     )
 
 
+def fixture_envelope_hostile() -> ICPEnvelope:
+    """The fixture the ASCII-only ones could never be.
+
+    Every existing parity fixture uses ASCII-only, finite payloads, so it
+    agreed under BOTH the pre-fix and post-fix Rust encoders and had no power
+    to detect the ensure_ascii divergence (FINDINGS_SURVEY.md). This one
+    carries, in a single envelope:
+
+      * BMP non-ASCII        -- e-acute, escaped \u00e9
+      * a combining mark     -- so NFC and NFD forms differ on the wire
+      * an astral codepoint  -- escaped as a UTF-16 SURROGATE PAIR
+      * DEL (U+007F)         -- ASCII, and escaped by Python; the case a
+                                spec-derived "escape non-ASCII" misses
+      * CJK, NBSP, an RTL mark
+      * a solidus and a quote, which must NOT gain an escape
+    """
+    e = fixture_envelope()
+    e.intent_id = "caf\u00e9/x\U0001F510y"          # BMP + solidus + astral
+    e.action_id = "cafe\u0301"                       # NFD: e + combining acute
+    e.model_identifier = "a\x7fb"                    # DEL
+    e.inference_backend = "\u4e2d\u6587\u00a0\u200f"  # CJK + NBSP + RTL
+    e.input_hashes = ["\u00e9", 'q"q', "plain"]      # non-ASCII + quote in a list
+    return e
+
+
 def main() -> None:
     env = fixture_envelope()
 
@@ -100,3 +126,13 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+    # ---- the hostile fixture (commit 3) -------------------------------
+    h = fixture_envelope_hostile()
+    hb = _payload_bytes(h)
+    print()
+    print("# ---- HOSTILE fixture: non-ASCII, astral, DEL, combining ----")
+    print("# paste into gyza-icp/src/lib.rs::tests::fixture_payload_hostile")
+    print(f"# canonical bytes ({len(hb)} bytes):")
+    print(f'let expected = {json.dumps(hb.decode("ascii"))};')
+    print(f'# envelope hash: {compute_envelope_hash(h)}')

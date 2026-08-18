@@ -108,7 +108,71 @@ def _resolve_daemon_binary(binary_path: str | None) -> str:
 # the boundary clean.
 # ---------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------- #
+#  SendClaim CONSTRUCTOR -- retained; emission REMOVED                         #
+# --------------------------------------------------------------------------- #
+#
+# The five send paths used to call `_emit_send_claim` unconditionally and
+# store the result on `self.last_send_claim`. That attribute was READ AT ZERO
+# SITES anywhere in the repository, including tests, so every send paid a
+# BLAKE3 over the wire payload -- 3.56us at 256B rising to 320us at 1MB, plus
+# a full EXTRA `SerializeToString()` on the three protobuf paths -- for a
+# value nothing could observe.
+#
+# WIRING A CONSUMER WAS NOT AVAILABLE, which is why the producer went instead.
+# `last_send_claim` is a mutable attribute on the client object; it appears
+# nowhere in icp.py, runner.py, blackboard.py, audit.py or evidence.py. A
+# verifier reading it would verify THIS PROCESS'S MEMORY, not the record --
+# S5 B3's self-reporting circularity one layer up. It was also never
+# initialised (reading it before the first send raised AttributeError, so a
+# consumer got an ERROR where it expected a VALUE), and it was a single slot
+# overwritten on every send, so only the last of N sends survived even
+# in-process.
+#
+# The claim TYPE and its VERIFIER are kept: `verify_send_claim` is proven
+# against a real divergence (D3, the stale-buffer sender-intent case) and
+# costs nothing while dormant. What would justify re-adding emission is
+# recorded in research/OPEN_PROBLEM.md 4.6 -- in short, the claim must be
+# persisted into the signed chain, not hung off a live object.
+# --------------------------------------------------------------------------- #
+NO_POLICY_DECLARED = "no-policy-declared"
+"""Recorded in the claim when no caller supplied a policy.
+
+THE POLICY PREDICATE STAYS CALLER-SUPPLIED. A default policy authored in this
+module, checking the sends this module makes, is the oracle-embedding species
+(R14): it would pass by construction and certify nothing. So a send with no
+declared policy RECORDS that fact in the claim rather than passing vacuously,
+and a reader can tell the two apart.
+"""
+
+
+def _emit_send_claim(emitted: bytes, destination: str,
+                     policy_id: str = NO_POLICY_DECLARED):
+    """Build a SendClaim over THE BYTES HANDED TO THE TRANSPORT.
+
+    The hash must not come from what the sender INTENDED to send -- that is
+    self-report at a finer grain, which is exactly what S5 B3 records for binary
+    hashes. `emitted` is therefore the same object passed to the stub.
+
+    SCOPE, stated because it differs per path: for `send_message` and
+    `broadcast`, `emitted` IS the wire payload. For the protobuf paths it is
+    THIS process's serialization of the message the transport will itself
+    serialize -- the closest faithful capture available without a transport
+    interceptor, and not a claim about gRPC's own bytes.
+    """
+    from gyza.verification.respec import SendClaim, wire_digest
+
+    return SendClaim(
+        artifact_hash=wire_digest(emitted),
+        policy_id=policy_id,
+        destination=destination,
+        timestamp_ns=time.time_ns(),
+        n_bytes=len(emitted),
+    )
+
+
 @dataclass
+
 class NodeInfo:
     peer_id: str
     compositor_pubkey: str
@@ -266,9 +330,29 @@ class NetdClient:
     restart loop relies on tear-down/rebuild semantics anyway.
     """
 
-    def __init__(self, socket_path: str = "~/.gyza/netd.sock"):
+    def __init__(self, socket_path: str = "~/.gyza/netd.sock",
+                 egress_recorder: "object | None" = None):
         self._socket_path = _resolve(socket_path)
         self._channel: grpc.Channel | None = None
+        # H3's measurand. INJECTED, not constructed: a gRPC client must not
+        # learn what a blackboard is, the same way the settlement service takes
+        # its harm guard from outside. `None` means unwired -- the send still
+        # happens, because this is a MEASUREMENT surface and not a gate. When a
+        # level is declared the gate goes at this same call site.
+        self._egress = egress_recorder
+
+    def _record_egress(self, channel: str, peer_id: str, n_bytes: int) -> None:
+        """Never let measurement break a send. An exception here would turn a
+        successful transmission into a failure, which is a worse outcome than
+        an unmeasured one -- and it would put an error into the same channel as
+        a measurement, which this program has recorded twice."""
+        if self._egress is None:
+            return
+        try:
+            self._egress.peer_send(channel, peer_id, n_bytes)
+        except Exception:                                    # noqa: BLE001
+            LOG.warning("[netd_client] egress not recorded for %s", channel,
+                        exc_info=True)
 
     # -- channel lifecycle ----------------------------------------------------
 
@@ -325,9 +409,15 @@ class NetdClient:
         advertisement still lands in the daemon's local cache.
         """
         stub = netd_pb2_grpc.DiscoveryServiceStub(self._ensure_channel())
-        result = stub.PublishAgent(ad.to_proto())
+        msg = ad.to_proto()
+        result = stub.PublishAgent(msg)
         if not result.success:
             raise RuntimeError(f"PublishAgent failed: {result.error}")
+        # A DHT put is a send to the network, not to one peer. The destination
+        # is the key, and it is classified UNATTESTED because a DHT has no
+        # single attestable counterparty -- whoever holds the bucket holds it.
+        self._record_egress("publish_agent", result.dht_key,
+                            msg.ByteSize())
         return result.dht_key
 
     def find_agents(
@@ -480,14 +570,20 @@ class NetdClient:
                 f"payload must be bytes, got {type(payload).__name__}"
             )
         stub = netd_pb2_grpc.MessageServiceStub(self._ensure_channel())
+        emitted = bytes(payload)                     # the bytes that LEAVE
         result = stub.Send(netd_pb2.SendRequest(
             peer_id=peer_id,
             message_type=message_type,
-            payload=bytes(payload),
+            payload=emitted,
         ))
         if not result.success:
             LOG.warning("[netd_client] send_message %s -> %s failed: %s",
                         message_type, peer_id, result.error)
+        else:
+            # ONLY ON SUCCESS. A refused write did not leave the machine, and
+            # counting it would measure intent rather than egress.
+            self._record_egress(f"send_message:{message_type}", peer_id,
+                                len(emitted))
         return result.success
 
     def broadcast(
@@ -503,9 +599,10 @@ class NetdClient:
                 f"payload must be bytes, got {type(payload).__name__}"
             )
         stub = netd_pb2_grpc.MessageServiceStub(self._ensure_channel())
+        emitted = bytes(payload)                     # the bytes that LEAVE
         result = stub.Broadcast(netd_pb2.BroadcastRequest(
             message_type=message_type,
-            payload=bytes(payload),
+            payload=emitted,
             exclude_peer_ids=list(exclude_peer_ids or []),
         ))
         return result.delivered_count
@@ -931,7 +1028,8 @@ class GossipClient:
         signature. Returns the assigned sender_seq.
         """
         stub = netd_pb2_grpc.GossipServiceStub(self._ensure())
-        result = stub.PublishDelta(netd_pb2.PublishDeltaRequest(delta=delta.to_proto()))
+        msg = netd_pb2.PublishDeltaRequest(delta=delta.to_proto())
+        result = stub.PublishDelta(msg)
         if not result.success:
             raise RuntimeError(f"PublishDelta failed: {result.error}")
         return result.sender_seq

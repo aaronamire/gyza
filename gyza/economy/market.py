@@ -218,30 +218,91 @@ class Decision:
 # The market
 # ======================================================================
 
+def fold_capital(entries, pubkey: str) -> float:
+    """THE capital fold. One implementation, so the market and any external
+    gate cannot drift apart.
+
+    `capital_of` calls this and so does the H2 harm quantity
+    (`gyza/containment/gyza_model.py`). Frame alignment stops being something
+    a reviewer checks and becomes something the call graph enforces: there is
+    no second expression to disagree with.
+    """
+    return sum(e.delta for e in entries if e.agent_pubkey == pubkey)
+
+
+@dataclass(frozen=True)
+class CapitalEntry:
+    """One append-only movement of market capital.
+
+    H2 FIX (ARCHITECTURAL_PRINCIPLE, FINDINGS_GYZA_INVARIANT_AUDIT). Capital
+    used to be a MUTABLE STORED AGGREGATE -- a plain dict mutated in place at
+    four sites, which no gate read. That is the anti-pattern living in the same
+    codebase as the pattern, and the fix is REPRESENTATIONAL, not a bigger gate:
+    extending a gate to read a second mutable pool would restore the check but
+    forfeit all three guarantees at once -- blind channels become possible
+    again, the frame can drift again, and the guard acquires a second piece of
+    global state that does not partition (C8).
+
+    So capital becomes what credits already are: APPEND-ONLY, PARTITIONED (by
+    agent pubkey), DERIVED-NOT-STORED. There is no balance field for an
+    unmodelled path to write, so every path that moves capital must append an
+    entry and any gate folding those entries necessarily sees it.
+
+    The cost is the standing one and it is paid forever: nothing is ever freed.
+    """
+    seq: int
+    agent_pubkey: str          # the partition key (C8)
+    delta: float
+    reason: str                # seed | stake | refund | settle
+    task_id: str | None = None
+
+
 class BondedMarket:
     """
     A capital ledger plus per-task escrow. Influence follows capital;
     settlement reallocates it toward agents who are repeatedly right.
+
+    Capital is a FOLD over ``_entries``; there is no stored aggregate.
     """
 
     def __init__(
         self, initial_capital: dict[str, float], *,
         diversity_threshold: float = 0.1,
     ) -> None:
-        self._capital: dict[str, float] = dict(initial_capital)
+        self._entries: list[CapitalEntry] = []
+        for pk, amt in initial_capital.items():
+            self._credit(pk, float(amt), "seed")
         self._threshold = diversity_threshold
         self._open: dict[str, list[Assertion]] = {}
         self._escrow: dict[str, dict[str, float]] = {}
         # agent -> {task -> claim}, for the diversity gate
         self._history: dict[str, dict[str, str]] = {}
 
-    # -- capital views -------------------------------------------------------
+    # -- the ONLY mutator ----------------------------------------------------
+
+    def _credit(self, pubkey: str, delta: float, reason: str,
+                task_id: str | None = None) -> CapitalEntry:
+        """Append a capital movement. There is no update and no delete: an
+        adjustment is another entry, exactly as the credit ledger issues a
+        counter-entry rather than editing one (ledger.py:30-32)."""
+        e = CapitalEntry(seq=len(self._entries), agent_pubkey=pubkey,
+                         delta=float(delta), reason=reason, task_id=task_id)
+        self._entries.append(e)
+        return e
+
+    # -- capital views: PURE PROJECTIONS over the entries ---------------------
+
+    def capital_entries(self) -> list[CapitalEntry]:
+        """The fold's input. Exposed so an external gate can fold the SAME
+        entries this class folds, rather than reading a private aggregate --
+        that identity is what makes the guard frame-aligned by construction."""
+        return list(self._entries)
 
     def capital_of(self, pubkey: str) -> float:
-        return self._capital.get(pubkey, 0.0)
+        return fold_capital(self._entries, pubkey)
 
     def total_capital(self) -> float:
-        return sum(self._capital.values())
+        return sum(e.delta for e in self._entries)
 
     # -- open-task introspection (for the resolution layer) ------------------
 
@@ -282,9 +343,9 @@ class BondedMarket:
             return False
         if a.agent_pubkey in self._escrow.get(a.task_id, {}):
             return False  # one bonded assertion per agent per task
-        if self._capital.get(a.agent_pubkey, 0.0) < a.stake:
+        if self.capital_of(a.agent_pubkey) < a.stake:
             return False
-        self._capital[a.agent_pubkey] -= a.stake
+        self._credit(a.agent_pubkey, -a.stake, "stake", a.task_id)
         self._open.setdefault(a.task_id, []).append(a)
         self._escrow.setdefault(a.task_id, {})[a.agent_pubkey] = (
             self._escrow.get(a.task_id, {}).get(a.agent_pubkey, 0.0) + a.stake
@@ -302,9 +363,10 @@ class BondedMarket:
         """
         weight: dict[str, float] = {}
         for a in self._open.get(task_id, []):
-            weight[a.claim] = weight.get(a.claim, 0.0) + self._capital.get(
-                a.agent_pubkey, 0.0
-            ) + self._escrow.get(task_id, {}).get(a.agent_pubkey, 0.0)
+            weight[a.claim] = (weight.get(a.claim, 0.0)
+                               + self.capital_of(a.agent_pubkey)
+                               + self._escrow.get(task_id, {}).get(
+                                   a.agent_pubkey, 0.0))
         claim = max(weight, key=lambda k: weight[k]) if weight else None
         div = pairwise_diversity(self._history)
         return Decision(claim, weight, div, div >= self._threshold)
@@ -322,14 +384,14 @@ class BondedMarket:
         s = settle(assertions, truth)
         if s.refunded:
             for pk, amt in escrow.items():
-                self._capital[pk] = self._capital.get(pk, 0.0) + amt
+                self._credit(pk, amt, "refund", task_id)
             return s
         # Return each agent's own stake, then apply net P&L (which is
         # measured on a stake basis: winners += share of pot, losers -=
         # stake). Returning stake + pnl nets to: winners keep stake+share,
         # losers keep 0 — capital conserved.
         for pk, amt in escrow.items():
-            self._capital[pk] = self._capital.get(pk, 0.0) + amt + s.pnl.get(pk, 0.0)
+            self._credit(pk, amt + s.pnl.get(pk, 0.0), "settle", task_id)
         return s
 
     def cancel(self, task_id: str) -> None:
@@ -342,11 +404,12 @@ class BondedMarket:
         escrow = self._escrow.pop(task_id, {})
         self._open.pop(task_id, None)
         for pk, amt in escrow.items():
-            self._capital[pk] = self._capital.get(pk, 0.0) + amt
+            self._credit(pk, amt, "refund", task_id)
 
 
 __all__ = [
     "Assertion",
+    "CapitalEntry",
     "sign_assertion",
     "verify_assertion",
     "Settlement",
