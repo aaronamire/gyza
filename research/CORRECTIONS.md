@@ -143,6 +143,29 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 24. `churn/FINDINGS.md` §3 — the adversary caveat is REMOVED
+
+R-C refuted CHURN-BREAKS but weakened its own refutation: defectors migrated to
+the fullest pool, collided in one cluster, and a concentrated attack is weaker.
+R-C named deliberate dispersion as the untested case that could overturn it.
+
+**Now known: dispersal is STRICTLY WORSE for the attacker.** It never breaches
+at any k in [1, 511], against 511 for colliding and 103 for stationary. R-C's
+conclusion stands WITHOUT its stated limitation.
+
+**Correction:** `research/disperse/FINDINGS.md`.
+
+## 25. My own cluster-visit argument was in the wrong currency
+
+R-D's preregistration §1 predicted k* ~ 20 by computing cluster-visits x
+damage-per-visit. Measured: no k breaches at all, while destroying 96% of all
+federation value.
+
+**Damage is the wrong currency for a RATIO.** Concentration is scale-invariant,
+so uniform destruction is inert; an attacker must maximise ASYMMETRY. The
+argument would have been correct for a bound on total value -- and a total-value
+bound would have been breached catastrophically by the same attack.
+
 ## 23. `horizon/FINDINGS.md` §6.5 — the churn caveat is NOT needed
 
 R-N listed churn as its largest untested dependency and expected it to restore
