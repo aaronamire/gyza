@@ -1,0 +1,130 @@
+[
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 0.0,
+    "k_star": 103,
+    "pools": 1,
+    "mean_pools": 1.0
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 0.1,
+    "k_star": 64,
+    "pools": 10,
+    "mean_pools": 4.65625
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 0.5,
+    "k_star": 444,
+    "pools": 30,
+    "mean_pools": 20.283783783783786
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 1.0,
+    "k_star": 511,
+    "pools": 41,
+    "mean_pools": 40.37573385518591
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_STAYS",
+    "rate": 0.0,
+    "k_star": 103,
+    "pools": 1,
+    "mean_pools": 1.0
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_STAYS",
+    "rate": 0.1,
+    "k_star": 235,
+    "pools": 4,
+    "mean_pools": 2.367375886524823
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_STAYS",
+    "rate": 0.5,
+    "k_star": 504,
+    "pools": 4,
+    "mean_pools": 2.98015873015873
+  },
+  {
+    "mode": "ADVERSARIAL",
+    "policy": "CLAIM_STAYS",
+    "rate": 1.0,
+    "k_star": 511,
+    "pools": 3,
+    "mean_pools": 2.9706457925636003
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 0.0,
+    "k_star": 103,
+    "pools": 1,
+    "mean_pools": 1.0
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 0.1,
+    "k_star": 61,
+    "pools": 10,
+    "mean_pools": 4.912568306010929
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 0.5,
+    "k_star": 61,
+    "pools": 25,
+    "mean_pools": 17.989071038251367
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_TRAVELS",
+    "rate": 1.0,
+    "k_star": 68,
+    "pools": 35,
+    "mean_pools": 30.504901960784313
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_STAYS",
+    "rate": 0.0,
+    "k_star": 103,
+    "pools": 1,
+    "mean_pools": 1.0
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_STAYS",
+    "rate": 0.1,
+    "k_star": 1,
+    "pools": 10,
+    "mean_pools": 7.666666666666667
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_STAYS",
+    "rate": 0.5,
+    "k_star": 1,
+    "pools": 20,
+    "mean_pools": 18.333333333333332
+  },
+  {
+    "mode": "BENIGN",
+    "policy": "CLAIM_STAYS",
+    "rate": 1.0,
+    "k_star": 1,
+    "pools": 34,
+    "mean_pools": 31.333333333333332
+  }
+]

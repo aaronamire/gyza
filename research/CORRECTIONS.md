@@ -143,6 +143,22 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 23. `horizon/FINDINGS.md` §6.5 — the churn caveat is NOT needed
+
+R-N listed churn as its largest untested dependency and expected it to restore
+the horizon.
+
+**Now known: it does not.** Under maximal adversarial churn the tree's margin
+still saturates -- 68.9% of ceiling against R-N's 68.68%, identical at eps=32
+and 128. Churn breaks compartmentalisation of REACH completely (a defector
+touches 41 of 64 clusters) and that turns out not to be load-bearing: migration
+relocates a principal's entitlement rather than duplicating it.
+
+The corrected mechanism: a stale reader's error is bounded by THE ENTITLEMENT IT
+HOLDS, not by the set of pools it can reach.
+
+**Correction:** `research/churn/FINDINGS.md`. R-N stands unqualified.
+
 ## 22. `hierarchy/FINDINGS.md` — composability is NOT what makes it work
 
 R-H1 made composability look like the sufficient condition for hierarchical
