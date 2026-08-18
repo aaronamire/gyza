@@ -143,6 +143,33 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 20. `defector/FINDINGS.md` — narrowed by topology
+
+A2 concluded the aggregate bound is a compliance assumption because ONE defector
+breaks it at every scale, and that "the profitable defection is also the
+effective one".
+
+**Now known: both statements are properties of a FLAT federation.** Under a
+3-level tree the same shed attack needs **103** defectors rather than 2, the
+invariant is **~1.6 defectors per CLUSTER**, and the hoarding attack -- the
+profitable one -- **stops breaching entirely**, because a hoarder can capture
+only its own cluster's commons (payoff 3086 -> 61.88).
+
+A2 is not overturned: defectors still break the bound. What changes is the
+price, and that cluster size is the security parameter.
+
+**Correction:** `research/blast/FINDINGS.md`.
+
+## 21. R-B repeated E1-HOLDS's defect one route after recording it
+
+R-B's preregistration asserted "k* >= 1 by construction, so a ratio is
+well-defined here -- unlike E1-HOLDS, whose baseline came out exactly 0.000."
+It then divided by zero for the same reason: at delta=0 the flat topology
+already breaches with ZERO defectors, so k*(d=1)=0.
+
+Recorded because the failure mode was NAMED IN THE SAME SENTENCE that walked
+into it. Citing a defect is not checking for it.
+
 ## 18. `margin/FINDINGS.md` "and runs out" — **REFUTED (scan artifact)**
 
 R-M1 reported **INFEASIBLE** in four cells and built a headline on it. The delta

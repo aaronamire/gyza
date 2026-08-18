@@ -99,3 +99,30 @@ deployable regime (see `audit_mechanism/GYZA_DESIGN_RULES.md`).
 live in `audit_mechanism/GYZA_DESIGN_RULES.md`. Choosing whether to open a *new* channel is a
 user decision informed by `FRONTIER_LEDGER.md`; it would be a new program, not a continuation
 of this one.
+
+
+---
+
+## Post-closure routes (appended 2026-08-18)
+
+The program was declared terminal at twelve routes. Five more have run since,
+each preregistered before any code, each with its hash re-verified after the
+runs. **This section exists because a reader of this file would otherwise
+believe the program ended where it did not.**
+
+| route | verdict |
+|---|---|
+| **escrow** | `ESCROW-CONVERTS-LOSS-TO-FORGONE-GAIN` — unpaid work → 0, but the same 80 credits reappear as work never commissioned. Also `RESERVATION-DEAD-ABOVE-M=3` |
+| **R-M1 margin** | `MARGIN-GROWS-WITH-M-AND-APPROACHES-THE-CEILING` — δ\* rises 0.130 → 0.295 (M=8→512); margin is a STEP, not a dial |
+| **A2 defector** | `COMPLIANCE-ASSUMPTION-NOT-SECURITY-PROPERTY` — one defector breaks the bound at every flat scale, via the COMMONS |
+| **R-H1 hierarchy** | `HIERARCHY-HELPS-DECISIVELY` — depth 2–3 defeats at ε≤2 with NO margin; max fan-in 511 → 7 |
+| **R-B blast radius** | `BLAST-RADIUS-IS-ONE-CLUSTER` — ~1.6 defectors per cluster; hoarding stops breaching at depth 3 |
+
+**Corrections to previously published findings are indexed in
+`research/CORRECTIONS.md` (21 entries).** Two closed forms and one scan have
+failed; do not cite a number from any document without recomputing it.
+
+**Open, named by the work itself:** churn (clusters are fixed everywhere above);
+a defector that GAMES a check rather than ignoring it; colluding defectors
+concentrated in one cluster; and the amortization lever `A`, still untouched and
+still the binding term in `N ≤ H·A/[(1−p)(1−c)]`.
