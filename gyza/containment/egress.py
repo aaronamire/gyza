@@ -55,9 +55,25 @@ class EgressClass:
     UNATTESTED_PEER = "UNATTESTED_PEER"
     OUTSIDE_PROTOCOL = "OUTSIDE_PROTOCOL"
 
-    ALL = frozenset({ATTESTED_PEER, UNATTESTED_PEER, OUTSIDE_PROTOCOL})
+    #: A CAPABILITY GRANT, NOT A SEND, and the distinction is the point.
+    #: `bwrap`'s network control is all-or-nothing (`sandbox/config.py:231-238`:
+    #: a per-host allowlist is "DECLARED, not enforced"), so granting network to
+    #: a sandboxed agent permits an UNBOUNDED number of sends to arbitrary
+    #: destinations, in a subprocess with no per-send visibility.
+    UNBOUNDED_GRANT = "UNBOUNDED_GRANT"
 
-    #: What H3 counts. `ATTESTED_PEER` is deliberately absent.
+    ALL = frozenset({ATTESTED_PEER, UNATTESTED_PEER, OUTSIDE_PROTOCOL,
+                     UNBOUNDED_GRANT})
+
+    #: What H3 counts. TWO deliberate exclusions.
+    #:
+    #: `ATTESTED_PEER` is excluded because the effect stays in modelled state.
+    #:
+    #: `UNBOUNDED_GRANT` is excluded because IT IS A DIFFERENT UNIT. Folding
+    #: grants into a send count would report "1" for a capability that permits
+    #: arbitrarily many sends -- a category error of exactly the species this
+    #: program keeps recording, and one that would fail in the reassuring
+    #: direction. Grants are counted separately by `count_grants_since`.
     MESH_EXIT = (UNATTESTED_PEER, OUTSIDE_PROTOCOL)
 
 
@@ -99,6 +115,19 @@ class EgressRecorder:
         self._bb.record_egress(EgressClass.OUTSIDE_PROTOCOL, channel,
                                destination, byte_count)
         return EgressClass.OUTSIDE_PROTOCOL
+
+    def unbounded_grant(self, channel: str, destination: str) -> str:
+        """Record that a capability permitting UNCOUNTABLE egress was granted.
+
+        `byte_count` is None, stored as SQL NULL, and that is load-bearing: 0
+        would read as "zero bytes left the machine", which is false and is the
+        reassuring reading. NULL says UNKNOWN, which is the truth -- nothing in
+        this process can see what a sandboxed subprocess sends once its network
+        namespace is shared.
+        """
+        self._bb.record_egress(EgressClass.UNBOUNDED_GRANT, channel,
+                               destination, None)
+        return EgressClass.UNBOUNDED_GRANT
 
 
 __all__ = ["EgressClass", "EgressRecorder", "classify_peer"]

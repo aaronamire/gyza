@@ -83,9 +83,9 @@ def test_every_registered_quantity_measures_REAL_production_state(tmp_path):
         assert isinstance(v, float) and v == v, hc.id      # not NaN
         measured[hc.id] = v
 
-    assert set(measured) == {"H2_market_capital", "H3_mesh_exit_sends",
-                             "H4_authority", "H5_storage_growth",
-                             "H6_unsupervised_actions"}
+    assert set(measured) == {"H3_mesh_exit_sends", "H4_authority",
+                             "H5_storage_growth", "H6_unsupervised_actions"}
+    assert "H2_market_capital" not in measured, "H2 was retired 2026-08-17"
     # H1 must SEE the 10-credit outflow. If it did not, this whole file would
     # be measuring a shape rather than a quantity.
     assert "H1_credits" not in measured, "H1 was retired 2026-08-15"
@@ -147,6 +147,16 @@ def _measure(s0, s, cid):
     return harm.get(cid).measure(s0, s)
 
 
+def _measure_h2(s0, s):
+    """H2 was RETIRED from the registry 2026-08-17, but `_market_capital_at_risk`
+    and `WindowOrigin.capital_seq` are still live and still correct. These
+    assertions test the FOLD and the ORIGIN, not the registration, so they call
+    the quantity directly. Routing them through `build_registries` would make
+    them fail for a reason that has nothing to do with what they check."""
+    from gyza.containment.gyza_model import _market_capital_at_risk
+    return _market_capital_at_risk(s0, s)
+
+
 def test_H1_IS_RETIRED_and_the_gap_is_REPORTED(tmp_path):
     """H1 was retired 2026-08-15: credits are TOKEN_IS_FAKE, so no level in
     them is checkable, and R-B1 classifies the quantity TRANSFERS.
@@ -169,7 +179,7 @@ def test_H2_moves_with_REAL_market_capital(tmp_path):
     """The class that measured 0.0 forever. It must now track the append-only
     fold, and it must do so through the market's OWN function."""
     s0, s, market = _states(tmp_path)
-    assert _measure(s0, s, "H2_market_capital") == pytest.approx(0.0), \
+    assert _measure_h2(s0, s) == pytest.approx(0.0), \
         "an idle market must show no drawdown"
 
     # stake against A's capital. `_credit` is the market's ONLY mutator, so
@@ -184,7 +194,7 @@ def test_H2_moves_with_REAL_market_capital(tmp_path):
                            origin=origin)
     s = project_now(owner=A, ledger_entries=[], active_holds=0.0,
                     capital_entries=market.capital_entries())
-    assert _measure(s0, s, "H2_market_capital") == pytest.approx(30.0)
+    assert _measure_h2(s0, s) == pytest.approx(30.0)
 
 
 def test_H2_uses_the_MARKETS_OWN_FOLD_so_they_cannot_drift(tmp_path):
@@ -339,7 +349,7 @@ def test_the_window_origin_separates_LEDGER_ns_from_CAPITAL_seq(tmp_path):
     s = project_now(owner=A, ledger_entries=[], active_holds=0.0,
                     capital_entries=entries)
     assert len(s0.capital_entries) == 1 and len(s.capital_entries) == 2
-    assert _measure(s0, s, "H2_market_capital") == pytest.approx(30.0)
+    assert _measure_h2(s0, s) == pytest.approx(30.0)
 
 
 # --------------------------------------------------------------------------- #

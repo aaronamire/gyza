@@ -237,8 +237,8 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     h, i = build_registries(bounds_file=None)
     r = GuardEngine(h, i).readiness()
     assert r["can_claim_containment"] is False
-    assert set(r["unbounded"]) == {"H2_market_capital", "H3_mesh_exit_sends",
-                                   "H4_authority", "H5_storage_growth",
+    assert set(r["unbounded"]) == {"H3_mesh_exit_sends", "H4_authority",
+                                   "H5_storage_growth",
                                    "H6_unsupervised_actions"}
     assert r["uncovered"] == []
 
@@ -405,7 +405,11 @@ def test_every_registered_gyza_harm_quantity_actually_EXECUTES():
         assert isinstance(v0, float) and isinstance(v1, float)
         assert v0 == 0.0, f"{hc.id} must measure zero harm against itself"
 
-    assert h.get("H2_market_capital").measure(s0, s1) == pytest.approx(10.0)
+    # H2 retired 2026-08-17: BondedMarket has zero production constructors.
+    # The fold is retained for re-registration and is exercised directly in
+    # tests/test_h2_capital_fold.py.
+    from gyza.containment.gyza_model import _market_capital_at_risk
+    assert _market_capital_at_risk(s0, s1) == pytest.approx(10.0)
     assert h.get("H4_authority").measure(s0, s1) == pytest.approx(1.0)
 
 

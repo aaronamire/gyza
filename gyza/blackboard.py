@@ -118,7 +118,10 @@ CREATE TABLE IF NOT EXISTS egress_log (
     egress_class   TEXT NOT NULL,
     channel        TEXT NOT NULL,
     destination    TEXT NOT NULL,
-    byte_count     INTEGER NOT NULL,
+    -- NULLABLE ON PURPOSE. A capability grant has no byte count: one
+    -- network-shared sandbox permits arbitrarily many sends this process
+    -- cannot see. NULL means UNKNOWN; 0 would claim nothing was sent.
+    byte_count     INTEGER,
     timestamp_ns   INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_egress_ts ON egress_log(timestamp_ns);
@@ -646,8 +649,25 @@ class Blackboard:
         ).fetchone()
         return int(row["n"] if row is not None else 0)
 
+    def count_grants_since(self, origin_ns: int = 0) -> int:
+        """Capability grants permitting UNCOUNTABLE egress, since `origin_ns`.
+
+        DELIBERATELY SEPARATE from `count_egress_since`. A grant is not a send:
+        one network-shared sandbox permits arbitrarily many sends that nothing
+        in this process can observe. A single accessor returning grants+sends
+        would let a caller add two different units and report the sum as harm.
+        """
+        from gyza.containment.egress import EgressClass
+        row = self._conn().execute(
+            "SELECT COUNT(*) AS n FROM egress_log "
+            "WHERE timestamp_ns >= ? AND egress_class = ?",
+            (int(origin_ns), EgressClass.UNBOUNDED_GRANT),
+        ).fetchone()
+        return int(row["n"] if row is not None else 0)
+
     def record_egress(self, egress_class: str, channel: str, destination: str,
-                      byte_count: int, timestamp_ns: int | None = None) -> None:
+                      byte_count: int | None,
+                      timestamp_ns: int | None = None) -> None:
         """Append one egress event. Called at the moment of sending.
 
         `egress_class` is one of `gyza.containment.egress.EgressClass`; it is
@@ -661,11 +681,14 @@ class Blackboard:
                 f"unknown egress class {egress_class!r}; an unclassified send "
                 f"is not a measurement (must be one of {sorted(EgressClass.ALL)})")
         ts = int(time.time_ns() if timestamp_ns is None else timestamp_ns)
+        # NULL, not 0, when the volume is unknowable. Writing 0 would claim
+        # nothing left the machine.
+        n = None if byte_count is None else int(byte_count)
         self._conn().execute(
             "INSERT INTO egress_log "
             "(egress_class, channel, destination, byte_count, timestamp_ns) "
             "VALUES (?,?,?,?,?)",
-            (egress_class, channel, destination, int(byte_count), ts),
+            (egress_class, channel, destination, n, ts),
         )
         self._conn().commit()
 

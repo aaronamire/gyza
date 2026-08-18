@@ -39,6 +39,18 @@ UNMODELLED: dict[str, str] = {
         "directly by H6 in actions. Re-register it when credits have an "
         "external referent and a real exposure limit can be declared."
     ),
+    "H2_market_capital": (
+        "RETIRED as a harm class 2026-08-17 (owner decision). The quantity is "
+        "real and computable -- `fold_capital` over an append-only CapitalEntry "
+        "log -- but it has NO PRODUCTION EXISTENCE: `BondedMarket` is "
+        "constructed in tests only (zero production constructors), and the one "
+        "production projection that feeds the harm model hardcodes "
+        "`capital_entries=[]` (gates.py:114,122). So H2 measured exactly 0.0 in "
+        "every production evaluation while being reported as a bounded class. "
+        "Unlike H1 this is a WIRING gap rather than an unmeasurable quantity: "
+        "re-register it the moment a production path constructs a market, and "
+        "wire `capital_entries` through the projection at the same time."
+    ),
     "H3_irreversible_change": (
         "no function in gyza/ computes an irreversibility measure "
         "(HARM_MODEL_DRAFT §H3). Sub-classes: signed envelopes emitted, "
@@ -242,18 +254,6 @@ def build_registries(
 ) -> tuple[HarmModelRegistry, InvariantRegistry]:
     harm = HarmModelRegistry()
     harm.register(HarmClass(
-        id="H2_market_capital",
-        description="market capital exposure",
-        quantity=_market_capital_at_risk,
-        frame="agent pubkey, over the append-only CapitalEntry log",
-        frame_mutable=False,
-        # Was "market.py:231 _capital (mutated :287/:325/:332/:345)" — a
-        # citation to a field the H2 fix deleted. A stale citation is worse
-        # than none, and this one described the anti-pattern as though it were
-        # still live.
-        code_path="gyza/economy/market.py fold_capital; entries via capital_entries()",
-    ))
-    harm.register(HarmClass(
         id="H4_authority",
         description="count of actions exceeding the delegation root's manifest",
         quantity=_authority_exceedance,
@@ -307,12 +307,6 @@ def build_registries(
             "class with no invariant makes the engine refuse every action "
             "through the same channel as a bound breach, so the invariant must "
             "exist even while the level does not."),
-    ))
-    inv.register(Invariant(
-        id="INV-H2-capital",
-        harm_class="H2_market_capital",
-        cls=InvariantClass.CUMULATIVE,
-        description="market capital exposure within bound; same class as H1.",
     ))
     inv.register(Invariant(
         id="INV-H4-attenuation",

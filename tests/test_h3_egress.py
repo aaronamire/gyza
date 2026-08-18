@@ -184,3 +184,65 @@ def test_no_declared_H5_level_means_UNLIMITED_not_a_silent_default(tmp_path):
     empty = tmp_path / "none.json"
     empty.write_text('{"bounds": {}}')
     assert storage_cap_bytes(empty) is None
+
+
+# --------------------------------------------------------------------------- #
+#  H3's HARD LIMIT — a capability grant is not a send                          #
+# --------------------------------------------------------------------------- #
+def test_a_GRANT_is_never_counted_as_a_SEND(tmp_path):
+    """The unit-safety property, and the whole reason UNBOUNDED_GRANT exists.
+
+    `bwrap`'s network control is all-or-nothing, so one granted sandbox permits
+    arbitrarily many invisible sends. Counting the grant as one send would
+    report 1 for an unbounded quantity — in the reassuring direction."""
+    bb = _bb(tmp_path)
+    r = EgressRecorder(bb, attested_peers=frozenset())
+    r.unbounded_grant("sandbox:share-net", "pkg.mod:factory")
+    r.unbounded_grant("sandbox:share-net", "pkg.mod:factory")
+
+    assert bb.count_grants_since(0) == 2
+    # H3 must not see them at all
+    assert bb.count_egress_since(0, EgressClass.MESH_EXIT) == 0
+    assert EgressClass.UNBOUNDED_GRANT not in EgressClass.MESH_EXIT
+
+
+def test_an_unknown_volume_is_NULL_not_zero(tmp_path):
+    """0 would claim nothing left the machine. NULL says unknown, which is
+    what is actually true of a shared network namespace."""
+    import sqlite3
+    bb = _bb(tmp_path)
+    EgressRecorder(bb, None).unbounded_grant("sandbox:share-net", "f")
+    con = sqlite3.connect(str(tmp_path / "bb.db"))
+    got = con.execute(
+        "SELECT byte_count FROM egress_log WHERE egress_class=?",
+        (EgressClass.UNBOUNDED_GRANT,)).fetchone()
+    assert got is not None and got[0] is None, got
+
+
+def test_the_sandbox_records_a_grant_ONLY_when_network_is_shared(tmp_path):
+    """Drives the REAL `run_sandboxed` argument path. A sandbox with no network
+    must record nothing — otherwise the measure counts denied capability."""
+    from gyza.sandbox.config import SandboxConfig
+    from gyza.sandbox.runner import SandboxUnavailableError, run_sandboxed
+
+    bb = _bb(tmp_path)
+    rec = EgressRecorder(bb, None)
+
+    def _drive(requires_network: bool):
+        try:
+            run_sandboxed(
+                factory_qualname="gyza.nonexistent:factory", init_kwargs={},
+                prompt="p", context={},
+                config=SandboxConfig(requires_network=requires_network,
+                                     backend="bubblewrap"),
+                egress_recorder=rec)
+        except Exception:
+            # the call is expected to fail; the grant is recorded BEFORE the
+            # subprocess launches, because the capability is granted at
+            # argv-construction time whether or not the agent then works
+            pass
+
+    _drive(False)
+    assert bb.count_grants_since(0) == 0, "recorded a grant with no network"
+    _drive(True)
+    assert bb.count_grants_since(0) >= 1, "network grant was not recorded"

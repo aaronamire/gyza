@@ -24,12 +24,12 @@
     "",
     "H6_unsupervised_actions: 10000. THE REVIEW CADENCE, chosen by the operator 2026-08-15: how many signed actions may occur before a human looks. Stated in actions rather than credits because TOKEN_IS_FAKE -- a credit bound cannot be checked against anything, an action count can.",
     "",
-    "H1_credits RETIRED 2026-08-15 (user decision): credits are TOKEN_IS_FAKE, so no level in them is checkable. It is listed in UNMODELLED so the gap is visible rather than absent. Autonomy is bounded by H6 in actions instead."
+    "H1_credits RETIRED 2026-08-15 (user decision): credits are TOKEN_IS_FAKE, so no level in them is checkable. It is listed in UNMODELLED so the gap is visible rather than absent. Autonomy is bounded by H6 in actions instead.",
+    "H2_market_capital RETIRED 2026-08-17 (owner decision): BondedMarket has zero production constructors and gates.py passes capital_entries=[], so the class measured 0.0 in every production evaluation. Listed in UNMODELLED. NOTE: removing a bound is a TIGHTENING, not a loosening -- an unset bound FAILS CLOSED, so a class with no bound admits nothing (guardconfig.diff_bounds)."
   ],
   "version": 1,
   "declared": "2026-07-31",
   "bounds": {
-    "H2_market_capital": 100.0,
     "H4_authority": 0.0,
     "H5_storage_growth": 10000000000.0,
     "H6_unsupervised_actions": 10000

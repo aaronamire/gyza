@@ -333,6 +333,7 @@ def run_sandboxed(
     config: SandboxConfig,
     python_bin: str | None = None,
     gyza_source_root: str | None = None,
+    egress_recorder: Any | None = None,
 ) -> SandboxResult:
     """
     Execute one sandboxed call. Returns a SandboxResult on success.
@@ -420,6 +421,23 @@ def run_sandboxed(
         timeout_s=config.timeout_s,
         backend=config.backend,
     )
+
+    # H3's hard limit, recorded at the only place it is visible.
+    #
+    # `--share-net` is ALL-OR-NOTHING (see SandboxConfig's enforcement-honesty
+    # note): the manifest's `allowed_hosts` is declared and NOT enforced, and
+    # once the namespace is shared the sandboxee may send anywhere, any number
+    # of times, in a subprocess this process cannot observe. So H3's send count
+    # is BLIND to everything that happens after this line.
+    #
+    # What is recordable is the GRANT -- a different unit, kept in a different
+    # accessor (`count_grants_since`) so nothing can add it to a send count.
+    if effective.requires_network and egress_recorder is not None:
+        try:
+            egress_recorder.unbounded_grant(
+                "sandbox:share-net", factory_qualname)
+        except Exception:                                    # noqa: BLE001
+            LOG.warning("[sandbox] egress grant not recorded", exc_info=True)
 
     argv = _build_bwrap_argv(effective, entry_argv)
 
