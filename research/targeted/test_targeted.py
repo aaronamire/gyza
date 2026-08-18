@@ -81,3 +81,22 @@ def test_eligible_domains_differ_and_do_not_confound():
     assert T.eligible(T.RANDOM, 512, 8) == 511
     assert T.eligible(T.SPARE_EVEN, 512, 8) == 504
     assert 105 < 504, "if k* approached the domain limit it WOULD confound"
+
+
+def test_coverage_is_not_invariant_across_depth():
+    """CORRECTIONS 29: the falsification of this route's first headline.
+
+    At d=2 full coverage is reached at k=24 and does NOT breach; k=25 has the
+    same coverage and does. Coverage cannot be the governing quantity.
+    """
+    lo = T.run_trial(2, 23, F(0), 1, 24, T.EVEN_ALL, 0)
+    hi = T.run_trial(2, 23, F(0), 1, 25, T.EVEN_ALL, 0)
+    assert lo["clusters_covered"] == hi["clusters_covered"] == 23
+    assert lo["violations"] == 0 and hi["violations"] > 0
+
+
+def test_max_is_inert_so_breach_is_governed_by_the_denominator():
+    """The invariant that survives both depths (FINDINGS 3.1)."""
+    from tree import Tree
+    for d, f in ((2, 23), (3, 8)):
+        assert Tree(d, f).leaf_total(T.TARGET) == 20 * 10 ** 9

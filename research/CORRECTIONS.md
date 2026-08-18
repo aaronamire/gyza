@@ -477,3 +477,39 @@ This is the SECOND correction of this species -- a quantity that CORRELATES with
 the protected one being reported in place of it (see the GuardConfigStore note
 in CLAUDE.md, where a version integer stood in for permissiveness). Pinned by
 `test_cluster_coverage_is_55_in_every_arm`.
+
+## 29. R-T's OWN headline was the species R-T's own CORRECTIONS 28 names
+
+`targeted/FINDINGS.md` was first published with the verdict
+`COVERAGE-IS-THE-INVARIANT`, on evidence of `clusters_covered = 55` in all five
+placement arms at d=3, confirmed per seed.
+
+**Its own Sec 6.1 said the check that would falsify it had not been run:**
+
+> *55/64 = 0.859 was measured at d = 3 only. Whether the FRACTION is stable
+> across depth, fan-out and margin is untested -- R-B's 1.61 looked stable
+> across d = 2 and d = 3 too, and it was an artifact.*
+
+Running d=2 (f=23) falsified it immediately:
+
+| d | arm | k | covered | total | breach |
+|---|---|---|---|---|---|
+| 2 | EVEN_ALL | 24 | **23 (full)** | 23.598 | **no** |
+| 2 | EVEN_ALL | 25 | **23 (full)** | 23.252 | **yes** |
+
+**Identical coverage, opposite verdicts** -- and the 1.000 is a saturated metric,
+the third occurrence of that species here (R-B's `clusters_damaged` 64/64, R-D's
+`clusters_below_half` 64/64).
+
+The invariant that survives both depths is **total remaining value**: `max` is
+inert at 14.000-14.003 across every arm, k and depth, so breach is governed by
+the denominator alone. Coverage, defectors-per-cluster and defector count are
+all topology-specific proxies for it.
+
+**Two lessons, and the second is the one that cost something.** First, this is
+the same species as 28 -- a correlate reported in place of the protected
+quantity -- committed in the same commit that named it. Second: **the limitation
+was correctly written down and the claim was published anyway. Writing the caveat
+is not a substitute for running the check**, and a Sec 'what this cannot
+establish' entry that is one cheap run away from being resolved is a TODO, not a
+disclosure. Pinned by `test_coverage_is_not_invariant_across_depth`.
