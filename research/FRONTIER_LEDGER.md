@@ -152,6 +152,7 @@ believe the program ended where it did not.**
 | **A2 defector** | `COMPLIANCE-ASSUMPTION-NOT-SECURITY-PROPERTY` — one defector breaks the bound at every flat scale, via the COMMONS |
 | **R-H1 hierarchy** | `HIERARCHY-HELPS-DECISIVELY` — depth 2–3 defeats at ε≤2 with NO margin; max fan-in 511 → 7 |
 | **R-B blast radius** | `BLAST-RADIUS-IS-ONE-CLUSTER` — ~1.6 defectors per cluster; hoarding stops breaching at depth 3 |
+| **R-N horizon** | `COMPOSABILITY-IS-NOT-SUFFICIENT` — flat has a finite staleness horizon (eps\* = 8); the tree's margin SATURATES at 68.68% of ceiling, identical at eps = 32, 64, 128 |
 
 **Corrections to previously published findings are indexed in
 `research/CORRECTIONS.md` (21 entries).** Two closed forms and one scan have

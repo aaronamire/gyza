@@ -143,6 +143,19 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 22. `hierarchy/FINDINGS.md` — composability is NOT what makes it work
+
+R-H1 made composability look like the sufficient condition for hierarchical
+enforceability. It is not.
+
+**Now known:** concentration composes at EVERY staleness -- the inequality does
+not depend on eps -- yet flat enforcement fails at eps=16 with no feasible
+margin anywhere below the ceiling. A second condition is required: the shared
+resource a stale reader is stale ABOUT must be bounded. Composition is a
+property of the aggregate; that is a property of the PARTITION.
+
+**Correction:** `research/horizon/FINDINGS.md`.
+
 ## 20. `defector/FINDINGS.md` — narrowed by topology
 
 A2 concluded the aggregate bound is a compliance assumption because ONE defector
