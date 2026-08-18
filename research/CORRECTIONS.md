@@ -442,3 +442,38 @@ This also mis-specified R-E's own preregistered flat control, which disabled
 internal checks while keeping the d=3 floor and therefore tied 6/6 cells
 exactly. Diagnosed under standing rule #2 rather than reported. Pinned by
 `test_internal_admission_checks_never_fire`.
+
+## 28. `blast/FINDINGS.md` -- the governing quantity is CLUSTER COVERAGE, not defectors per cluster
+
+R-B's headline: *"k* rises 2 -> 37 -> 103 while k*/clusters is flat at ~1.6.
+The governing quantity is defectors per cluster, not defectors total."*
+
+R-T ran five placement rules over the identical environment. `k*/clusters`
+ranges over **0.86 to 1.70, a factor of two**. `clusters_covered` at k* is
+**55 in all five arms**:
+
+| arm | k* | k*/clusters | clusters covered |
+|---|---|---|---|
+| CONCENTRATE | 109 | 1.70 | 55 |
+| RANDOM (R-B) | 103 | 1.61 | 55 |
+| SPARE | 105 | 1.67 | 55 |
+| EVEN_ALL | 55 | 0.86 | 55 |
+| SPARE_EVEN | 55 | 0.87 | 55 |
+
+Coverage predicts breach **per seed**, not merely in aggregate: at k = 102 the
+three RANDOM seeds cover [53, 48, 54] and none breaches; at k = 103 they cover
+[53, 49, 55] and only the 55 breaches, with 11 violations.
+
+**1.61 is what a Poisson process costs to reach 55-cluster coverage**, because
+random placement wastes defectors by doubling them into already-covered
+clusters. R-B's DIRECTION stands -- topology bounds damage, k* rises with depth
+-- but the quantity it named is placement-dependent and the invariant is not.
+
+**Safety consequence: R-B's k* = 103 is LOOSE BY 1.87x.** The honest tolerance
+for that environment is 55. Every k* this program published against a
+randomly-placing adversary is an over-estimate of what the federation survives.
+
+This is the SECOND correction of this species -- a quantity that CORRELATES with
+the protected one being reported in place of it (see the GuardConfigStore note
+in CLAUDE.md, where a version integer stood in for permissiveness). Pinned by
+`test_cluster_coverage_is_55_in_every_arm`.
