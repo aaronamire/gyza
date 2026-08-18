@@ -143,6 +143,34 @@ earners paid nothing at all.
 
 **Correction:** `research/escrow/FINDINGS.md` §3.4.
 
+## 18. `margin/FINDINGS.md` "and runs out" — **REFUTED (scan artifact)**
+
+R-M1 reported **INFEASIBLE** in four cells and built a headline on it. The delta
+scan stepped by 1/40 from 0 and, against a ceiling of 0.5980, tested 0.575 and
+then exited — **never testing (0.575, 0.598)**. All four cells are safe there
+(0.590-0.595).
+
+**Now known:** the margin does **not** run out; it approaches the ceiling
+asymptotically, needing **99.2%** of it at eps=4, M=512. Severe, and a weaker
+claim than infeasibility. M-GROWTH and every control survive untouched.
+
+A **search-coverage** defect, not a feasibility-ceiling one: correct bound,
+correct rule, scan that did not cover the interval the rule ranged over. R-M1
+listed monotonicity-in-delta as a control, and monotonicity makes it *worse* --
+under a monotone response the untested interval was where a positive result was
+most likely.
+
+**Correction:** `research/margin/CORRECTION_INFEASIBLE.md`.
+
+## 19. R-H1's positive control agreed with R-M1 *including on the bug*
+
+R-H1's d=1 arm reproduces R-M1's delta* exactly at every eps -- and reproduced
+its false INFEASIBLE too, because both implementations shared the scan
+structure. **A positive control confirms what two instruments share, which
+includes their shared mistakes.** Recorded because the agreement was cited as
+the strongest validation either route had, and it was, for everything except the
+one thing they had in common.
+
 ## 16. `margin/FINDINGS.md` — its constructive result needs ENFORCEMENT, not compliance
 
 Not a refutation. R-M1's finding that bounded activity makes a cross-principal

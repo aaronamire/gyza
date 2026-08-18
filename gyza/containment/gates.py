@@ -12,6 +12,26 @@ WRONG: `runner.py` touches neither the ledger nor the market, so a guard there
 would measure quantities the gated path cannot move. That is AG-3's finding
 exactly -- a guard watching the wrong end of a ratio, expensive and inert.
 
+  >> THAT RATIONALE INVERTED ON 2026-08-18 AND IS KEPT ONLY AS THE RECORD OF
+  >> WHY THE DECISION WAS RIGHT WHEN IT WAS MADE.
+  >>
+  >> It reasons about H1 (ledger) and H2 (market). BOTH ARE NOW RETIRED. The
+  >> registered classes are H3/H4/H5/H6, and `runner.py` moves THREE of them:
+  >> it records `AuthorityViolation` (H4), writes through the artifact store
+  >> (H5), and signs envelopes (H6). The premise "the gated path cannot move
+  >> these quantities" is now false.
+  >>
+  >> A correct design decision became wrong because the harm model changed
+  >> underneath it and nothing re-checked the rationale. That is frame drift
+  >> applied to a DESIGN ARGUMENT rather than to a measurement -- the same
+  >> species as R9's pinned frame and SR-5's floating origin, in a new place.
+  >>
+  >> What did NOT follow is "therefore wire the promotion gate here". The
+  >> runner already covers those three classes by other means (H4 enforced at
+  >> its own bounds gate, H5 at `ArtifactStore.max_bytes`, H6 at the review
+  >> cadence), and `containment/staging.py` is a DIFFERENT EXECUTION MODEL
+  >> rather than an unwired copy of this one. See that module's header.
+
 H1 moves in exactly one place in production: the PAYER path of
 `LedgerSettlementService`, where `sign_as_payer` settles an entry and credits
 leave. That path is already inside `self._lock`. The serialization point C7

@@ -918,6 +918,26 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
                   f"({n/cad:.2%}) — a human is due in {max(cad-n,0):,.0f}")
     except Exception:  # noqa: BLE001 - status must survive a broken store
         pass
+    # PENDING ESCALATIONS BELONG WHERE THE OPERATOR ALREADY LOOKS.
+    #
+    # `pending()` was surfaced ONLY by `gyza review`, so an operator learned
+    # they had an unreviewed escalation by asking whether they had one -- the
+    # same defect already recorded when `check_cadence` was callable only from
+    # `gyza review` and therefore never fired where actions happen. A record-only
+    # cadence whose record is invisible from the status command is a queue
+    # nobody can act on.
+    try:
+        from gyza.containment.review import ReviewQueue
+        pend = ReviewQueue(cfg.review_db_path).pending()
+        if pend:
+            print(f"  ** {len(pend)} UNREVIEWED escalation(s) — "
+                  f"`gyza review` to act; oldest: {pend[0].harm_class} "
+                  f"measured {pend[0].measured:,.0f} against "
+                  f"{pend[0].bound:,.0f}")
+        else:
+            print("  review queue: nothing pending")
+    except Exception:  # noqa: BLE001
+        pass
     print(f"  can claim containment: "
           f"{'YES' if r['can_claim_containment'] else 'NO'}")
     # Do not let "the model is bounded" read as "the model is enforced".

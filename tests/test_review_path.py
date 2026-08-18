@@ -179,3 +179,52 @@ def test_gyza_review_LISTS_and_RESOLVES(tmp_path, monkeypatch, capsys):
     assert cli.cmd_review(argparse.Namespace(
         escalation_id=eid, reviewer="alice", note="sampled 20", halt=False)) == 0
     assert ReviewQueue(cfg.review_db_path).resume_count() == 1
+
+
+# --------------------------------------------------------------------------- #
+#  B4 — THE OPERATOR MUST NOT HAVE TO ASK WHETHER THEY HAVE BEEN ASKED         #
+# --------------------------------------------------------------------------- #
+def test_status_SURFACES_pending_escalations(tmp_path, capsys, monkeypatch):
+    """`pending()` used to be reachable only from `gyza review`, so the only
+    way to discover an unreviewed escalation was to run the review command --
+    the same defect as a cadence that only fired when asked."""
+    from gyza.cli import _print_containment_section
+    from gyza.config import GyzaConfig
+    from gyza.containment.review import ReviewQueue
+
+    db = str(tmp_path / "review.db")
+    cfg = GyzaConfig()
+    monkeypatch.setattr(cfg, "review_db_path", db)  # raising=True: the
+    # attribute must EXIST. raising=False would create it, and the test would
+    # then pass even if production had no such config field.
+
+    # nothing pending -> says so explicitly rather than staying silent
+    _print_containment_section(cfg)
+    assert "review queue: nothing pending" in capsys.readouterr().out
+
+    ReviewQueue(db).escalate("H6_unsupervised_actions", 10_500.0, 10_000.0)
+    _print_containment_section(cfg)
+    out = capsys.readouterr().out
+    assert "UNREVIEWED escalation" in out
+    assert "H6_unsupervised_actions" in out
+    assert "10,500" in out and "10,000" in out
+
+
+def test_a_RESOLVED_escalation_stops_being_reported(tmp_path, capsys, monkeypatch):
+    """Counter-control. If resolution did not clear the banner, the operator
+    would be trained to ignore it — which is worse than no banner."""
+    from gyza.cli import _print_containment_section
+    from gyza.config import GyzaConfig
+    from gyza.containment.review import RESUME, ReviewQueue
+
+    db = str(tmp_path / "review.db")
+    cfg = GyzaConfig()
+    monkeypatch.setattr(cfg, "review_db_path", db)  # raising=True: the
+    # attribute must EXIST. raising=False would create it, and the test would
+    # then pass even if production had no such config field.
+    q = ReviewQueue(db)
+    e = q.escalate("H6_unsupervised_actions", 10_500.0, 10_000.0)
+    q.resolve(e.record_id, "alice", RESUME, "sampled 20 of 10500")
+
+    _print_containment_section(cfg)
+    assert "review queue: nothing pending" in capsys.readouterr().out

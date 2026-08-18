@@ -1,6 +1,40 @@
 """
 C-5 staging area, C-6 promotion gate, C-7 checkpoint/rollback.
 
+STATUS: REFERENCE IMPLEMENTATION OF A NON-ADOPTED EXECUTION MODEL.
+=================================================================
+`StagingArea`, `PromotionGate` and `coordination.Scheduler` have **zero
+production constructors** -- every one is in `tests/`. That is deliberate and
+recorded here so it stops reading as an oversight, because an unconsumed
+component that LOOKS like it should be running is the artifact-#16 species
+("registering a checker is not evidence that it runs").
+
+These implement a **staged-interior / promotion-boundary** execution model.
+`AgentRunner` implements a different one: execute, then sign. They are not an
+unwired copy of production; they are an alternative production did not adopt.
+
+The classes this module would gate are covered by other means today:
+
+    H4 authority   `runner.py`'s bounds gate -- refuses to SIGN when the
+                   enforcement record is wider than the manifest (ENFORCED)
+    H5 storage     `ArtifactStore.max_bytes`, sourced from the DECLARED bound
+                   (`gyza_model.storage_cap_bytes`) (ENFORCED)
+    H6 cadence     `check_cadence` at the runner's signing boundary, escalating
+                   to the durable `ReviewQueue` (RECORD-ONLY by owner decision)
+    H3 egress      `containment/egress.py`, recorded at the send sites
+                   (MEASURED, deliberately unbounded)
+
+**What is kept and why.** The research this encodes is real and is not
+reproducible from the tests alone: C-7's "no stateless local check bounds a
+cumulative quantity", C-9's ungated interior, R10's mutable-vs-append-only
+content-loss result, and SR-5's per-action promotion decision. Deleting the
+module would delete the only executable statement of those findings.
+
+`tests/test_staging_is_unadopted.py` asserts the absence, so the day someone
+wires it, that test fails and this header must be corrected rather than
+silently becoming false.
+
+
 These are one mechanism described three ways, and the architecture says so:
 the promotion gate is SIMULTANEOUSLY the irreversibility gate and the
 serialization point that cumulative bounding requires. Those are the same place
