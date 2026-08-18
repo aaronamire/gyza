@@ -396,3 +396,59 @@ opposite of what it means.
 
 Two numbers with the same units and a plausible ordering will happily form a
 trend line. The trend is only real if both are the same measurement.
+
+---
+
+## #18 — INFEASIBLE in four cells, from a stride that never reached the ceiling
+
+**The clean number.** R-M1 reported `INFEASIBLE` — *"no margin below the
+feasibility ceiling is safe"* — in four cells, and built a headline on it:
+`MARGIN-GROWS-WITH-M-AND-RUNS-OUT`.
+
+**What it would have falsely shown.** That a cross-principal aggregate bound
+becomes *unachievable at any price* at ε = 4 or with four agents per principal.
+It was published, and R-H1's d=1 arm reproduced it exactly — two independent
+instruments agreeing on a number that was wrong in both, because they shared a
+scan structure.
+
+**The truth.** All four cells are safe at δ = 0.590–0.595. The scan stepped by
+1/40 from 0, tested 0.575 against a 0.5980 ceiling, and exited without ever
+testing the gap. The margin does not run out; it **approaches the ceiling**,
+needing 99.2% of it at ε = 4. Severe, and a strictly weaker claim.
+
+**What caught it.** A test written to assert the *opposite* pole existed — that
+some δ near the ceiling was unsafe. It wasn't.
+
+**The generalized lesson.**
+
+> **A NEGATIVE VERDICT MUST BE ESTABLISHED OVER THE WHOLE ADMISSIBLE RANGE, NOT
+> OVER THE PART A STRIDE HAPPENED TO LAND ON.**
+
+R-M1 listed *monotonicity of violations in δ* as a control. Monotonicity makes
+this **worse**, not better: under a monotone response the untested interval
+adjacent to the ceiling is exactly where a safe point was most likely. A
+coverage property was assumed from a shape property.
+
+## #19 — 64/64 clusters "damaged" at zero defectors
+
+**The clean number.** R-B's blast-radius measure — clusters below half their
+genesis value — read **64 of 64 at k = 0**, before any defector existed.
+
+**What it would have falsely shown.** That damage was total regardless of
+defection, which would have made the compartmentalisation result unmeasurable:
+if every cluster is already destroyed, a defector adding damage to its own
+cluster is invisible.
+
+**The truth.** The honest adversarial population already halves every cluster.
+The metric was saturated by the *baseline*, not driven by the defector.
+Rebuilt as a differential — value remaining in clusters *with* a defector versus
+*without* — it shows 4.4e-05 against 0.0074, a 170× separation.
+
+**What caught it.** Running the k = 0 control and reading the number, which was
+identical to the k = 32 number.
+
+**The generalized lesson.**
+
+> **A MEASURE SATURATED BY ITS OWN BASELINE REPORTS THE BASELINE, NOT THE
+> TREATMENT.** Check what the metric reads when the treatment is absent before
+> reading anything into what it reads when present.

@@ -35,10 +35,17 @@ class ArtifactClient:
         local_store: ArtifactStore,
         identity: AgentIdentity,
         timeout_s: float = 30.0,
+        egress_recorder: "object | None" = None,
     ):
         self._store = local_store
         self._identity = identity
         self._timeout_s = timeout_s
+        # H3's remaining countable caller. A fetch is INGRESS of content but
+        # EGRESS of a request: it discloses which hash this node wants, to
+        # whoever holds the peer URL. Classified as a PEER send rather than
+        # OUTSIDE_PROTOCOL -- the destinations are Gyza peers -- so it is
+        # attested-or-not by the same rule as everything else.
+        self._egress = egress_recorder
 
     async def fetch(
         self,
@@ -56,6 +63,13 @@ class ArtifactClient:
         headers = self._make_auth_headers(hash_hex)
         async with httpx.AsyncClient(timeout=self._timeout_s) as client:
             for base in peer_urls:
+                if self._egress is not None:
+                    try:
+                        # never let measurement break a fetch
+                        self._egress.peer_send("artifact_fetch", base,
+                                               len(hash_hex))
+                    except Exception:                        # noqa: BLE001
+                        pass
                 base = base.rstrip("/")
                 # 2. Cheap existence check first; skip peers that don't have it.
                 try:

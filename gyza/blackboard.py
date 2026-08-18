@@ -649,6 +649,23 @@ class Blackboard:
         ).fetchone()
         return int(row["n"] if row is not None else 0)
 
+    def count_agent_envelopes_since(self, agent_pubkey: str,
+                                    origin_ns: int = 0) -> int:
+        """Signed envelopes by ONE agent since `origin_ns`.
+
+        `count_envelopes_since` folds the whole node; a per-principal rate cap
+        needs the per-principal fold, and using the node-wide count would make
+        one busy agent exhaust every other agent's budget. Derived from the
+        append-only log for the same reason H6 is: an in-process counter resets
+        on restart, and a cumulative bound whose origin can move is not a bound.
+        """
+        row = self._conn().execute(
+            "SELECT COUNT(*) AS n FROM icp_envelopes "
+            "WHERE agent_pubkey = ? AND timestamp_ns >= ?",
+            (agent_pubkey, int(origin_ns)),
+        ).fetchone()
+        return int(row["n"] if row is not None else 0)
+
     def count_grants_since(self, origin_ns: int = 0) -> int:
         """Capability grants permitting UNCOUNTABLE egress, since `origin_ns`.
 

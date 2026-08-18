@@ -100,6 +100,19 @@ class CapabilitySpec:
     rw: frozenset[str] = field(default_factory=frozenset)
     network: bool = False
     mem_cap: int | None = None
+    #: Max actions this agent may sign within its accounting window.
+    #:
+    #: THE FIFTH DIMENSION, AND THE FIRST DERIVED FROM MEASUREMENT RATHER THAN
+    #: FROM A THREAT MODEL. R-M1 measured that a cross-principal aggregate is
+    #: boundable by local checks exactly when concurrent activity per principal
+    #: is bounded; A2 measured that the bound is a COMPLIANCE ASSUMPTION unless
+    #: that limit is enforced rather than assumed; R-B measured that the
+    #: tolerable number of non-compliant principals is ~1.6 PER CLUSTER, so the
+    #: quantity to bound is per-principal rate, not a global total.
+    #:
+    #: `None` means "no rate declared", and -- exactly like `mem_cap` -- that
+    #: asymmetry is load-bearing: an omitted cap must not launder a granted one.
+    rate_cap: int | None = None
 
     def to_canonical(self) -> dict:
         """Deterministic dict for signing. Paths are SORTED LISTS —
@@ -110,6 +123,11 @@ class CapabilitySpec:
             "rw": sorted(self.rw),
             "network": bool(self.network),
             "mem_cap": self.mem_cap,
+            # OLD GRANTS KEEP HASHING IDENTICALLY. `DelegationGrant` stores
+            # `delegated_authority` as a dict and signs it as stored, so a
+            # grant issued before this field existed has no key here and its
+            # payload bytes are unchanged. Only new grants carry it.
+            "rate_cap": self.rate_cap,
         }
 
     @classmethod
@@ -117,11 +135,13 @@ class CapabilitySpec:
         if not isinstance(d, dict):
             return cls()
         mem = d.get("mem_cap")
+        rate = d.get("rate_cap")
         return cls(
             ro=_strset(d.get("ro", [])),
             rw=_strset(d.get("rw", [])),
             network=bool(d.get("network")),
             mem_cap=mem if isinstance(mem, int) and mem > 0 else None,
+            rate_cap=rate if isinstance(rate, int) and rate > 0 else None,
         )
 
 
@@ -144,11 +164,15 @@ def spec_from_manifest(manifest: dict) -> CapabilitySpec:
         else {}
     )
     mem = budget.get("memory_limit_mb")
+    # Read from the SAME resource_budget block as the memory cap, so a rate
+    # cap travels with a manifest by the route every other bound already uses.
+    rate = budget.get("action_rate_cap")
     return CapabilitySpec(
         ro=_strset(fs.get("read", [])),
         rw=_strset(fs.get("write", [])),
         network=bool(net.get("allowed_hosts")),
         mem_cap=mem if isinstance(mem, int) and mem > 0 else None,
+        rate_cap=rate if isinstance(rate, int) and rate > 0 else None,
     )
 
 
@@ -206,6 +230,17 @@ def capability_subset(
             return False, (
                 f"memory {inner.mem_cap} MB exceeds the granted cap "
                 f"{outer.mem_cap} MB"
+            )
+    if outer.rate_cap is not None:
+        if inner.rate_cap is None:
+            return False, (
+                f"grant caps the action rate at {outer.rate_cap} but the "
+                f"inner spec declares no cap"
+            )
+        if inner.rate_cap > outer.rate_cap:
+            return False, (
+                f"action rate {inner.rate_cap} exceeds the granted cap "
+                f"{outer.rate_cap}"
             )
     return True, ""
 

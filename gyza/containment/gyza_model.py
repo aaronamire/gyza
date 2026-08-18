@@ -259,7 +259,7 @@ def build_registries(
         quantity=_authority_exceedance,
         frame="delegation chain root manifest",
         frame_mutable=False,
-        code_path="gyza/economy/delegation.py:229 verify_delegation",
+        code_path="gyza/economy/delegation.py:264 verify_delegation",
     ))
 
     harm.register(HarmClass(

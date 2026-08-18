@@ -492,6 +492,38 @@ class AgentRunner:
                     f"consistent with the agent manifest: {why}"
                 )
 
+        # THE RATE CAP, ENFORCED AT THE SERIALIZATION POINT C7 REQUIRES.
+        #
+        # R-M1 measured that a cross-principal aggregate is boundable by local
+        # checks exactly when concurrent activity per principal is bounded. A2
+        # then measured that the bound is a COMPLIANCE ASSUMPTION unless that
+        # limit is ENFORCED: one principal ignoring it breaks the aggregate at
+        # every scale. R-B measured the tolerable non-compliance at ~1.6 per
+        # cluster, so the quantity to bound is PER-PRINCIPAL rate.
+        #
+        # A cumulative bound needs a serialization point (C7), and signing is
+        # this agent's: it is inside its own loop and every action passes it.
+        # The count is folded from the append-only envelope log, per agent --
+        # a node-wide count would let one busy agent exhaust everyone's budget.
+        #
+        # REFUSING TO SIGN DOES NOT UN-RUN THE WORK, exactly as with the
+        # authority gate above. What it withholds is the attestation.
+        from gyza.economy.delegation import spec_from_manifest
+        rate_cap = spec_from_manifest(self._identity.manifest).rate_cap
+        if rate_cap is not None:
+            used = self._bb.count_agent_envelopes_since(
+                self._identity.agent_id, self._cadence_origin_ns)
+            if used >= rate_cap:
+                self._authority_violations.append(AuthorityViolation(
+                    action_id=item.id, agent_pubkey=self._identity.agent_id,
+                    reason=(f"action rate cap {rate_cap} reached "
+                            f"({used} signed since origin)"),
+                    at_ns=time.time_ns(),
+                ))
+                raise RuntimeError(
+                    f"refusing to sign — this agent has signed {used} actions "
+                    f"against a declared rate cap of {rate_cap}")
+
         # Canonical JSON for the output so the BLAKE3 hash is stable
         # across runs / processes. When an enforcement record is
         # present we fold it into the artifact so the envelope's
