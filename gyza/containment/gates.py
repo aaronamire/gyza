@@ -154,10 +154,24 @@ class SettlementGuard:
     Everything is REQUIRED. There is no constructor default that yields a guard
     measuring nothing -- the defect this whole line of work removed was two
     `getattr` defaults that turned an absent measurement into a passing one.
+
+    THE DOCSTRING ABOVE WAS FALSE UNTIL 2026-08-19. `harm_class` defaulted to
+    `"H1_credits"`, which was RETIRED on 2026-08-15, so the one default the
+    class had pointed at a class that does not exist -- `SettlementGuard(...)`
+    with no `harm_class` raised `KeyError` deep in `__init__`. The default is
+    removed so the requirement is expressed in the signature rather than
+    asserted in prose. AN UNENFORCED INVARIANT IS AN ASSUMPTION.
+
+    STATUS: ZERO PRODUCTION CONSTRUCTORS. `LedgerSettlementService` accepts
+    `harm_guard=`, and nothing supplies it. The tests that exercise this class
+    build their own registries and guard a synthetic `"X_exposure"` class, so
+    no registered production class has ever been guarded here. Recorded rather
+    than left to be rediscovered -- an unconsumed component that LOOKS live is
+    the artifact-#16 species.
     """
 
     def __init__(self, engine: GuardEngine, owner: str, origin: WindowOrigin,
-                 harm_class: str = "H1_credits"):
+                 harm_class: str):
         # REFUSE TO WATCH A CLASS THAT DOES NOT EXIST. H1 was retired
         # 2026-08-15 (credits are TOKEN_IS_FAKE, so no level in them is
         # checkable), and a guard constructed against a retired class would

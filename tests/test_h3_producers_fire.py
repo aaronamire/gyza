@@ -138,3 +138,49 @@ def test_global_cluster_builds_a_recorder():
     src = inspect.getsource(global_cluster)
     assert "default_egress_recorder(" in src
     assert src.count("egress_recorder=self._egress_recorder") >= 3
+
+
+def test_OUTSIDE_PROTOCOL_has_no_production_producer():
+    """Defect 3, WRITTEN AS A CHECK rather than left as prose.
+
+    H3's declared measurand is `UNATTESTED_PEER + OUTSIDE_PROTOCOL`, and
+    `outside_send` -- the only thing that emits the second -- has no caller in
+    `gyza/`. So H3's stated definition is broader than what it can observe.
+
+    This test FAILS THE DAY SOMEONE ADDS ONE, which is the point: at that
+    moment H3's definition stops overstating and the level (if declared by
+    then) must be revisited against a wider measurand. A documented invariant
+    with no mechanism is a promise the code has not made.
+    """
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[1] / "gyza"
+    hits = [
+        f"{p.relative_to(root)}:{i}"
+        for p in root.rglob("*.py")
+        if p.name != "egress.py"
+        for i, line in enumerate(p.read_text().splitlines(), 1)
+        if ".outside_send(" in line
+    ]
+    assert hits == [], (
+        "OUTSIDE_PROTOCOL now has a producer at "
+        f"{hits} -- H3's definition no longer overstates its measurand. "
+        "Revisit research/H3_WIRING_GAP.md and any declared H3 level.")
+
+
+def test_UNBOUNDED_GRANT_producer_exists_and_is_the_sandbox():
+    """The counterpart: a grant IS produced, and from exactly one place.
+
+    If a second appears, the 'different unit' argument that keeps grants out
+    of the send count has to be re-checked at the new site too.
+    """
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[1] / "gyza"
+    hits = [
+        str(p.relative_to(root))
+        for p in root.rglob("*.py")
+        if p.name != "egress.py"
+        and ".unbounded_grant(" in p.read_text()
+    ]
+    assert hits == ["sandbox/runner.py"], hits
