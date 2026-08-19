@@ -351,11 +351,18 @@ def run_local_task(
         agent_id=ident.agent_id, initial_embedding=spec_v,
         db_path=str(Path(rp["memory_db_path"]).parent / "run-spec.db"),
     )
+    # H6's consumer, on the one path that actually signs envelopes. Without
+    # this the runner's cadence check is dead code: `review_queue` defaulted to
+    # None at every production construction, so `check_cadence` never ran and
+    # the autonomy bound that REPLACED the retired H1 was never in force.
+    from gyza.containment.review import default_cadence_wiring
+    _rq, _hr, _origin = default_cadence_wiring()
     runner = AgentRunner(
         identity=ident, blackboard=bb, memory=mem, specialization=spec,
         lsh=LSHIndex(seed=42), executor=executor,
         min_reward_threshold=0.0, min_similarity_threshold=-1.0,
         verify_chain_before_claim=False,
+        review_queue=_rq, harm_registry=_hr, cadence_origin_ns=_origin,
     )
 
     # One synchronous execute+sign cycle — the exact producer path the

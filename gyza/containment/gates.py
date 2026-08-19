@@ -169,6 +169,12 @@ class SettlementGuard:
     than left to be rediscovered -- an unconsumed component that LOOKS live is
     the artifact-#16 species.
     """
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = ("H1_credits was retired 2026-08-15 and nothing else "
+                   "moves at the settlement boundary, so no guard is "
+                   "installed (network/global_cluster.py records the "
+                   "decision). Kept and tested as the place to hang a real "
+                   "exposure class when credits gain an external referent.")
 
     def __init__(self, engine: GuardEngine, owner: str, origin: WindowOrigin,
                  harm_class: str):

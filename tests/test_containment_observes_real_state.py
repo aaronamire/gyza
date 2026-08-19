@@ -125,3 +125,48 @@ def test_a_declared_bound_is_now_checkable_against_a_real_number(db):
     harm, _ = build_registries()
     growth = {c.id: c.quantity(s0, s) for c in harm}["H5_storage_growth"]
     assert growth > cap, "the bound must be exceedable by a real measurement"
+
+
+# --------------------------------------------------------------------------- #
+#  H6's CONSUMER MUST BE WIRED. AgentRunner accepts review_queue /             #
+#  harm_registry / cadence_origin_ns and NO production construction supplied   #
+#  any of them, so check_cadence never ran -- while global_cluster.py recorded #
+#  "Autonomy is bounded instead by H6 (actions), checked in the runner".       #
+#  H1 was retired and its stated replacement was never in force.               #
+# --------------------------------------------------------------------------- #
+def test_cadence_wiring_builds_a_real_queue_and_registry():
+    from gyza.containment.review import ReviewQueue, default_cadence_wiring
+
+    q, harm, origin = default_cadence_wiring()
+    assert isinstance(q, ReviewQueue)
+    assert harm is not None and len(list(harm)) == 4
+    # GENESIS, and it must not move: an origin at process start refills the
+    # budget on restart (ledger artifact #13).
+    assert origin == 0
+
+
+def test_run_local_task_supplies_H6s_consumer():
+    """The production path that signs envelopes must count toward the cadence."""
+    import inspect
+
+    from gyza import cli
+
+    src = inspect.getsource(cli.run_local_task)
+    assert "default_cadence_wiring()" in src
+    assert "review_queue=" in src and "harm_registry=" in src
+
+
+def test_cadence_escalates_at_the_bound_and_is_idempotent(tmp_path):
+    from gyza.containment.gyza_model import build_registries
+    from gyza.containment.review import ReviewQueue, check_cadence
+
+    harm, _ = build_registries()
+    q = ReviewQueue(str(tmp_path / "review.db"))
+    bound = harm.bound("H6_unsupervised_actions")
+
+    assert check_cadence(q, harm, int(bound) - 1) is None, "below the bound"
+    first = check_cadence(q, harm, int(bound))
+    assert first is not None, "the bound must escalate"
+    # idempotent: a second call with an escalation already pending opens none
+    assert check_cadence(q, harm, int(bound) + 500) is None
+    assert len(q.pending()) == 1

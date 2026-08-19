@@ -61,6 +61,12 @@ GENESIS = "0" * 64
 
 @dataclass(frozen=True)
 class Event:
+    #: See StagingArea.NON_ADOPTED. Appended only by AppendOnlyLog, which
+    #: is itself NON_ADOPTED, so this record type is transitively
+    #: unreachable -- a value type of an execution model production did
+    #: not adopt, not a defect.
+    NON_ADOPTED = ("record type of AppendOnlyLog, which is NON_ADOPTED; "
+                   "transitively unreachable from any adopted path.")
     seq: int
     partition: str
     kind: str
@@ -92,6 +98,11 @@ class AppendOnlyLog:
     """There is deliberately no ``update`` and no ``delete``. Adjustments are
     made by appending a compensating event, exactly as the credit ledger issues
     a counter-entry rather than editing one."""
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = ("in-memory and therefore NOT durable; ReviewQueue "
+                   "supersedes it for anything that must survive a restart "
+                   "(review.py header). Its only construction is inside "
+                   "staging.py, which is itself NON_ADOPTED.")
 
     def __init__(self) -> None:
         self._events: list[Event] = []

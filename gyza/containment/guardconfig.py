@@ -89,6 +89,12 @@ class LooseningRecord:
     declare is worse than one you did, because the signature would then attest
     to a change nobody read.
     """
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = ("no production entry point exists BY DESIGN. Tightening "
+                   "goes through scripts/sign_guard_config.py, which states "
+                   "at line 19 that loosening is deliberately not that "
+                   "script: raising a bound must be a separate, separately-"
+                   "signed, human act and no tool automates it yet.")
     changes: tuple                          # ((bound_id, old, new), ...)
     reason: str
 

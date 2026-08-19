@@ -251,5 +251,50 @@ def check_cadence(queue: "ReviewQueue", harm_registry, actions_since_origin: int
                f"since the accounting origin, declared cadence {bound:,.0f}")
 
 
+def default_cadence_wiring(review_db_path: "str | None" = None,
+                           bounds_file: "str | None" = None):
+    """Build H6's consumer for `AgentRunner`, or `(None, None, 0)` if it cannot.
+
+    THIS EXISTS BECAUSE THE CADENCE NEVER RAN. `AgentRunner` accepts
+    `review_queue` / `harm_registry` / `cadence_origin_ns`, and **no production
+    construction supplied any of them**, so `self._review_queue` was always
+    None and `check_cadence` was never called. Meanwhile
+    `network/global_cluster.py` records the design decision that followed H1's
+    retirement -- *"Autonomy is bounded instead by H6 (actions), checked in the
+    runner"* -- which was FALSE IN PRODUCTION for exactly that reason. H1 was
+    retired and its stated replacement was never wired, so nothing bounded
+    autonomy at all.
+
+    The comment directly above the runner's own cadence check says "the queue
+    is the same unconsumed-surface defect one layer up". It anticipated this
+    defect and was an instance of it.
+
+    THE ORIGIN IS GENESIS (0) AND MUST STAY THERE. H6 is cumulative, and a
+    cumulative bound whose origin can move is not a bound -- an origin at
+    process start refills the budget on restart (ledger artifact #13). This
+    matches what `gyza status` reports, so the operator's displayed position
+    and the runner's enforced position are the SAME number.
+
+    Returns `(None, None, 0)` on any failure: a review path that cannot open
+    must not be the reason an agent refuses to run, and the honest state is
+    then "cadence not watched", which `readiness()` already reports.
+    """
+    try:
+        from gyza.config import load_config
+        from gyza.containment.gyza_model import build_registries
+
+        if review_db_path is None:
+            review_db_path = load_config().review_db_path
+        harm, _inv = (build_registries(bounds_file=bounds_file)
+                      if bounds_file else build_registries())
+        return ReviewQueue(review_db_path), harm, 0
+    except Exception:  # noqa: BLE001
+        import logging
+        logging.getLogger("gyza.containment.review").warning(
+            "[review] cadence not wired; H6 will not escalate", exc_info=True)
+        return None, None, 0
+
+
 __all__ = ["ReviewQueue", "Escalation", "Review", "RESUME", "HALT",
+           "default_cadence_wiring",
            "check_cadence"]

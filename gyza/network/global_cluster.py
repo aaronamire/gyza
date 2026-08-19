@@ -317,6 +317,18 @@ class GlobalCluster:
         # does not exist so it cannot be revived silently.
         #
         # Autonomy is bounded instead by H6 (actions), checked in the runner.
+        #
+        # THAT SENTENCE WAS FALSE IN PRODUCTION UNTIL 2026-08-19, and it is the
+        # reason to distrust a design note that names a bound without naming
+        # its wiring. `AgentRunner` accepts `review_queue` / `harm_registry` /
+        # `cadence_origin_ns` and NO production construction supplied any of
+        # them, so `self._review_queue` was always None, `check_cadence` never
+        # ran, and H6 -- the stated REPLACEMENT for the retired H1 -- bounded
+        # nothing. Nothing bounded autonomy at all.
+        #
+        # `run_local_task` now supplies them via `default_cadence_wiring()`.
+        # This cluster path does not construct an `AgentRunner`; when it does,
+        # it must supply them too.
         harm_guard = None
 
         self._settlement = LedgerSettlementService(
