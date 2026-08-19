@@ -130,4 +130,45 @@ class EgressRecorder:
         return EgressClass.UNBOUNDED_GRANT
 
 
-__all__ = ["EgressClass", "EgressRecorder", "classify_peer"]
+def default_egress_recorder(blackboard_path: "str | None" = None,
+                            attested_peers: "frozenset[str] | None" = None
+                            ) -> "EgressRecorder | None":
+    """Build the recorder production send paths inject.
+
+    THIS FUNCTION EXISTS BECAUSE NOTHING BUILT ONE. `EgressRecorder` had zero
+    production constructors: the parameter was threaded through `NetdClient`,
+    `GossipClient`, `CapabilityClient`, `ArtifactClient` and the sandbox runner,
+    and was supplied at none of the 12+ construction sites -- so every call site
+    short-circuited on `if recorder is None: return` and H3 measured 0 in every
+    production evaluation while being registered as a measured class. That is
+    the exact condition H2_market_capital was RETIRED for, found by reading
+    rather than by a failing test (research/H3_WIRING_GAP.md).
+
+    Returns None -- meaning "unwired", the pre-existing behaviour -- when the
+    blackboard cannot be opened. A measurement surface must never be the reason
+    a node fails to start.
+
+    `attested_peers` STAYS A PARAMETER AND HAS NO PRODUCTION SOURCE YET. Passing
+    None makes `classify_peer` fail toward UNATTESTED_PEER, so every peer send
+    counts toward H3 and the "H3 shrinks as the mesh grows" property in this
+    module's header is UNREALISED until an attestation source is wired. That is
+    a deliberate, documented over-count: it errs toward reporting more exit than
+    there is, which is the safe direction for a bound.
+    """
+    try:
+        from gyza.blackboard import Blackboard
+        from gyza.config import load_config
+
+        if blackboard_path is None:
+            rp = load_config().resolved_paths()
+            blackboard_path = rp["blackboard_db_path"]
+        return EgressRecorder(Blackboard(blackboard_path), attested_peers)
+    except Exception:                                        # noqa: BLE001
+        import logging
+        logging.getLogger("gyza.containment.egress").warning(
+            "[egress] recorder not wired; H3 will measure 0", exc_info=True)
+        return None
+
+
+__all__ = ["EgressClass", "EgressRecorder", "classify_peer",
+           "default_egress_recorder"]

@@ -219,6 +219,25 @@ def storage_cap_bytes(bounds_file: "str | Path | None" = None) -> int | None:
         return None
 
 
+def mesh_exit_sends_since(blackboard: object, origin_ns: int = 0) -> int:
+    """THE single source for H3's count, filtered the one correct way.
+
+    `count_egress_since` defaults to `classes=None`, which means EVERY class --
+    including `UNBOUNDED_GRANT`. Folding a grant into a send count reports "1"
+    for a capability permitting arbitrarily many unobservable sends, which is
+    the category error `containment/egress.py` was written to prevent and which
+    would fail in the REASSURING direction.
+
+    That accessor had zero production callers, so no code had yet got the
+    filter either right or wrong. This function exists so the next caller
+    cannot get it wrong: `EgressClass.MESH_EXIT` is passed here and nowhere
+    else, mirroring `storage_cap_bytes` as H5's single source.
+    """
+    from gyza.containment.egress import EgressClass
+    return int(blackboard.count_egress_since(
+        int(origin_ns), classes=EgressClass.MESH_EXIT))
+
+
 def _mesh_exit_sends(s0: object, s: object) -> float:
     """H3 -- sends since the origin that did NOT land on an attested peer.
 
