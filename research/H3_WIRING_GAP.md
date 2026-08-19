@@ -100,6 +100,46 @@ semantics and it is now demonstrated rather than assumed.
 3. **No adopted evaluation path** (defect 5). The quantity can now be *counted*;
    nothing *checks* it.
 
+## The defect is NOT confined to H3 -- it is three of four classes
+
+Auditing the other registered classes the same way, by asking **what production
+code supplies the quantity**:
+
+| class | quantity | supplied by | bound declared |
+|---|---|---|---|
+| H3 mesh-exit | `mesh_exit_sends` | **nothing** | no |
+| H4 authority | `authority_violations` | `runner.py:487` ✓ | 0 |
+| H5 storage | `stored_bytes` | **nothing** | **10 GB, SIGNED** |
+| H6 actions | `signed_envelope_count` | **nothing** | **10,000, SIGNED** |
+
+**H5 and H6 carry declared, signed bounds and measured a constant 0.** That is
+H2's retirement condition alive in two more classes. `projection.py` correctly
+refuses to know what a blackboard is -- "the caller folds, this projects" -- and
+**no caller folded**, at any site in the repository.
+
+And no harm class is evaluated in an adopted production path at all:
+`SettlementGuard` (the only `engine.evaluate` caller outside the non-adopted
+staging model) has **zero production constructors**, and it defaults to
+`harm_class="H1_credits"`, which is retired.
+
+**So `can_claim_containment` was going to be false-in-fact regardless of H3.**
+Declaring an H3 level would have flipped the flag to True with three of four
+classes pinned at zero.
+
+### Fixed: `observe_now()` / `observe_at_origin()` (`containment/gates.py`)
+
+The missing caller. It folds the three sources that already existed --
+`ArtifactStore.total_size_bytes()`, `Blackboard.count_envelopes_since()`, and
+`mesh_exit_sends_since()` -- into the state the harm model reads. Measured
+against real sources, H3 now reads 5 from a real egress log with grants
+correctly excluded, H5 reads 8192 from a real store, and **H5's signed 10 GB
+bound is exceedable by a real measurement** instead of compared against 0.
+
+Two layers exist and only one was ever real: enforcement lives in `runner.py`
+(H4's bounds gate), `ArtifactStore.max_bytes` (H5) and the review cadence (H6),
+and it works. The harm model DESCRIBES those quantities and measured none of
+them. This connects the description to the enforcement.
+
 ## The warning that matters most
 
 **`can_claim_containment` is one JSON line and one signature away, and taking
