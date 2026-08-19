@@ -45,6 +45,33 @@
 //! this crate was created to fix: two implementations of one logical
 //! operation, free to drift. There is one implementation. It lives here.
 
+//! # Non-finite floats: a LIMITATION, not a guard
+//!
+//! Python's canonical encoders pass `allow_nan=False` and RAISE on NaN or
+//! Infinity. **This crate cannot do the same at the formatter layer, and the
+//! asymmetry is recorded here rather than papered over with a check that
+//! cannot fire.**
+//!
+//! `serde_json`'s `serialize_f64` classifies the value ITSELF and routes
+//! non-finite to `Formatter::write_null`, so an overridden `write_f64` is
+//! never reached. `write_null` cannot be overridden to reject, because a
+//! legitimate `Option::None` uses the same path -- `EnvelopePayload
+//! ::parent_envelope_hash` is exactly that.
+//!
+//! **The consequence is NOT a signature mismatch.** Rust emits `null`; Python
+//! parsing that JSON gets `None` and re-canonicalizes to `null`, so the two
+//! sides agree byte-for-byte and verification still succeeds. What is lost is
+//! the DISTINCTION between "absent" and "was NaN" -- silent degradation on the
+//! Rust side against a hard refusal on the Python side.
+//!
+//! This is reachable: `ChallengeResponsePayload` carries `eval_results` whose
+//! `EvalResult` has `duration_s: f64`, on a signed path. Closing it properly
+//! needs a wrapping `Serializer` that intercepts `serialize_f64` before
+//! `serde_json` classifies -- roughly the whole `Serializer` trait in
+//! boilerplate -- and is deliberately NOT done here. The behaviour is pinned
+//! by `non_finite_floats_currently_become_null` so it is visible and any
+//! change is caught.
+
 use serde::Serialize;
 use serde_json::ser::Formatter;
 use std::io;
@@ -131,6 +158,12 @@ mod tests {
     /// Fixtures are the MEASURED output of Python's `json.dumps`, pasted
     /// from a real run — never hand-written from the spec. Regenerate with
     /// `gyza-rs/scripts/regenerate_canonjson_fixtures.py`.
+    /// Serialize anything and return the canonical string. `py` above is
+    /// kept &str-only so the existing fixtures read unchanged.
+    fn canon<T: Serialize + ?Sized>(v: &T) -> String {
+        String::from_utf8(to_vec(v).expect("serialize")).expect("utf8")
+    }
+
     fn py(s: &str) -> String {
         String::from_utf8(to_vec(s).expect("serialize")).expect("utf8")
     }
@@ -221,5 +254,55 @@ mod tests {
         let out = String::from_utf8(to_vec(&m).unwrap()).unwrap();
         assert_eq!(out, r#"{"a":[3],"b":[1,2]}"#);
         assert!(!out.contains(' '));
+    }
+
+    /// PINS A KNOWN LIMITATION (see the module header). Python RAISES on
+    /// these; this crate emits `null` because serde_json classifies
+    /// non-finite before the formatter is consulted.
+    ///
+    /// Not a signature divergence -- Python re-canonicalizing that `null`
+    /// produces the same bytes -- but the "absent vs was-NaN" distinction is
+    /// lost. If this test starts failing, the asymmetry has been closed and
+    /// the module header must be updated.
+    #[test]
+    fn non_finite_floats_currently_become_null() {
+        for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            assert_eq!(canon(&bad), "null", "serde_json nulls non-finite f64");
+        }
+        for bad in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+            assert_eq!(canon(&bad), "null", "serde_json nulls non-finite f32");
+        }
+    }
+
+    /// Finite floats must still round-trip byte-identically to Python.
+    #[test]
+    fn finite_floats_still_match_python() {
+        // MEASURED from python: json.dumps(v, separators=(",", ":"))
+        assert_eq!(canon(&1.5f64), "1.5");
+        assert_eq!(canon(&0.0f64), "0.0");
+        assert_eq!(canon(&-2.25f64), "-2.25");
+    }
+
+    /// The reachable case: a struct with a float, as on the signed
+    /// ChallengeResponsePayload path.
+    #[test]
+    fn a_struct_carrying_a_non_finite_float_becomes_null() {
+        #[derive(serde::Serialize)]
+        struct Evalish {
+            duration_s: f64,
+            task_id: &'static str,
+        }
+        let ok = Evalish {
+            duration_s: 0.25,
+            task_id: "t",
+        };
+        assert_eq!(canon(&ok), r#"{"duration_s":0.25,"task_id":"t"}"#);
+        // The reachable case, pinned: NaN inside a signed struct becomes null
+        // rather than raising as Python does.
+        let bad = Evalish {
+            duration_s: f64::NAN,
+            task_id: "t",
+        };
+        assert_eq!(canon(&bad), r#"{"duration_s":null,"task_id":"t"}"#);
     }
 }

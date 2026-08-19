@@ -110,7 +110,7 @@ class GuardConfigError(RuntimeError):
 
 
 def canonical_bytes(config: dict) -> bytes:
-    return json.dumps(config, sort_keys=True, separators=(",", ":")).encode()
+    return json.dumps(config, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
 
 
 def config_hash(config: dict) -> str:

@@ -419,7 +419,8 @@ def _canonical_output_bytes(output: dict) -> bytes:
     so two valid JSON serializations of the same dict produce the
     same hash.
     """
-    return json.dumps(output, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return json.dumps(output, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 def run_eval_locally(
@@ -782,7 +783,7 @@ def _verify_one(
     # our own canonicalization here would diverge from what gets
     # signed and produce false-negatives on every envelope.
     runner_canonical = json.dumps(
-        {"text": result.output_text}, sort_keys=True, separators=(",", ":"),
+        {"text": result.output_text}, sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")
     claimed_hash = blake3.blake3(runner_canonical).hexdigest()
     if claimed_hash != env.output_hash:

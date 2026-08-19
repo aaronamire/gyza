@@ -92,7 +92,8 @@ def _fold_artifact_bytes(text: str, enforcement: Optional[dict]) -> bytes:
     obj: dict = {"text": text}
     if enforcement is not None:
         obj["__enforcement__"] = enforcement
-    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 class AgentAdaptor:

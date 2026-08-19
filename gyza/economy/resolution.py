@@ -68,7 +68,7 @@ def _verdict_digest(task_id: str, truth: str, resolver_pubkey: str, method: str)
             "task_id": task_id,
             "truth": truth,
         },
-        sort_keys=True, separators=(",", ":"),
+        sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")
     return blake3.blake3(payload).digest()
 

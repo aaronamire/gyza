@@ -617,7 +617,7 @@ class Blackboard:
         from dataclasses import asdict
         env_hash = compute_envelope_hash(envelope)
         payload = json.dumps(
-            asdict(envelope), sort_keys=True, separators=(",", ":"),
+            asdict(envelope), sort_keys=True, separators=(",", ":"), allow_nan=False,
         )
         self._conn().execute(
             """

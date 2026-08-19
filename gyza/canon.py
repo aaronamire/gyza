@@ -74,7 +74,7 @@ def canonical_form(value: Any) -> str:
     `values_equal` instead.
     """
     return json.dumps(_normalize(value), sort_keys=True, separators=(",", ":"),
-                      default=_fallback)
+                      default=_fallback, allow_nan=False)
 
 
 def _normalize(v: Any) -> Any:

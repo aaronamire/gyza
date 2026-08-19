@@ -216,7 +216,7 @@ class CoordinationState:
         """
         parts = [
             json.dumps(asdict(self._envelopes[h]), sort_keys=True,
-                       separators=(",", ":"))
+                       separators=(",", ":"), allow_nan=False)
             for h in sorted(self._envelopes)
         ]
         return "\n".join(parts).encode("utf-8")

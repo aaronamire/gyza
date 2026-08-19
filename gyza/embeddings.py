@@ -361,7 +361,7 @@ def _canonical_text(d: dict) -> str:
     # JSON canonicalization for the fallback path. We avoid full
     # CBOR/etc.; goal_spec is already small and human-readable.
     import json
-    return json.dumps(d, sort_keys=True, separators=(",", ":"))
+    return json.dumps(d, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
 __all__ = [

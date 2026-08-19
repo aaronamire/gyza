@@ -124,7 +124,8 @@ class BuildAttestation:
 
     def signing_bytes(self) -> bytes:
         return json.dumps(self.payload(), sort_keys=True,
-                          separators=(",", ":")).encode("utf-8")
+                          separators=(",", ":"),
+                          allow_nan=False).encode("utf-8")
 
     def digest(self) -> str:
         return blake3.blake3(self.signing_bytes()).hexdigest()

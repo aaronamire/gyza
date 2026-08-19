@@ -152,7 +152,7 @@ def _fold_bytes(text: str, enforcement: dict | None) -> bytes:
     obj: dict = {"text": text}
     if enforcement is not None:
         obj["__enforcement__"] = enforcement
-    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
 
 
 def _fold_artifact(text: str, enforcement: dict | None) -> str:

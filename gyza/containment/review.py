@@ -60,7 +60,7 @@ HALT = "HALT"
 def _hash(seq: int, kind: str, payload: dict, at_ns: int, prev: str) -> str:
     body = json.dumps({"seq": seq, "kind": kind, "payload": payload,
                        "at_ns": at_ns, "prev": prev},
-                      sort_keys=True, separators=(",", ":")).encode()
+                      sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return blake3.blake3(body).hexdigest()
 
 
@@ -126,7 +126,7 @@ class ReviewQueue:
                 "INSERT INTO review_log (seq, record_id, kind, payload, at_ns,"
                 " prev_hash, hash) VALUES (?,?,?,?,?,?,?)",
                 (seq, record_id, kind,
-                 json.dumps(payload, sort_keys=True, separators=(",", ":")),
+                 json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False),
                  at, prev, h))
             conn.commit()
             return h

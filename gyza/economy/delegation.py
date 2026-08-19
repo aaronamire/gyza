@@ -385,7 +385,8 @@ def _grant_payload_bytes(g: DelegationGrant) -> bytes:
     across the codebase)."""
     d = asdict(g)
     d.pop("signature", None)
-    return json.dumps(d, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return json.dumps(d, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 def grant_hash(g: DelegationGrant) -> str:

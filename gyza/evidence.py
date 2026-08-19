@@ -92,7 +92,8 @@ def create_bundle(
 
 def bundle_to_bytes(bundle: dict) -> bytes:
     """Canonical serialization — sorted keys, no whitespace, UTF-8."""
-    return json.dumps(bundle, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return json.dumps(bundle, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 def bundle_hash(bundle: dict) -> str:

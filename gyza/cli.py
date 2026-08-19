@@ -1648,7 +1648,7 @@ def cmd_global_attest(args: argparse.Namespace) -> int:
         "per_task": report.per_task,
     }
     payload_bytes = _json.dumps(
-        payload, sort_keys=True, separators=(",", ":"),
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")
     signature = compositor.sign(payload_bytes)
 

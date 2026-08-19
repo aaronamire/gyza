@@ -534,7 +534,7 @@ class AgentRunner:
         if enforcement is not None:
             artifact_obj["__enforcement__"] = enforcement
         canonical = json.dumps(
-            artifact_obj, sort_keys=True, separators=(",", ":"),
+            artifact_obj, sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")
         output_hash = blake3.blake3(canonical).hexdigest()
 
@@ -651,7 +651,7 @@ class AgentRunner:
         # zero-hash placeholder if the item carried none.
         if result is None:
             err_payload = json.dumps(
-                {"error": error}, sort_keys=True, separators=(",", ":"),
+                {"error": error}, sort_keys=True, separators=(",", ":"), allow_nan=False,
             ).encode("utf-8")
             output_hash = blake3.blake3(err_payload).hexdigest()
             duration_ms = 0

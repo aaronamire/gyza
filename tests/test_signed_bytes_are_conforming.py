@@ -71,3 +71,35 @@ def test_the_lenient_self_check_would_have_MISSED_this():
     assert json.loads(payload)              # Python accepts its own NaN
     with pytest.raises(ValueError):
         _strict_loads(payload)              # a conforming parser does not
+
+
+# --------------------------------------------------------------------------- #
+#  THE SWEEP. `allow_nan=False` was applied to icp.py and identity.py and NOT  #
+#  to the other eight canonical encoders -- the same shape as the             #
+#  "kernel-enforced swept from README only" defect. This asserts every        #
+#  canonical-bytes function in gyza/ carries the guard, so the next one added  #
+#  cannot quietly omit it.                                                     #
+# --------------------------------------------------------------------------- #
+def test_every_canonical_encoder_refuses_non_finite():
+    """A signed-bytes function without allow_nan=False emits bare NaN --
+    not RFC 8259, unparseable by Rust's serde_json, and hashed + signed."""
+    import pathlib
+    import re
+
+    root = pathlib.Path(__file__).resolve().parents[1] / "gyza"
+    offenders = []
+    for p in sorted(root.rglob("*.py")):
+        src = p.read_text()
+        # canonical encoders are the sort_keys=True + compact-separators form
+        for m in re.finditer(r"json\.dumps\((?:[^()]|\([^()]*\))*?\)", src,
+                             re.DOTALL):
+            call = m.group(0)
+            if "sort_keys=True" not in call:
+                continue
+            if 'separators=(",", ":")' not in call:
+                continue          # pretty-printed config writes, not signed
+            if "allow_nan=False" not in call:
+                line = src[:m.start()].count("\n") + 1
+                offenders.append(f"{p.relative_to(root)}:{line}")
+    assert offenders == [], (
+        "canonical encoders missing allow_nan=False: " + ", ".join(offenders))

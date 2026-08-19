@@ -75,7 +75,7 @@ class Event:
             {"seq": self.seq, "partition": self.partition, "kind": self.kind,
              "payload": self.payload, "ts_ns": self.ts_ns,
              "prev_hash": self.prev_hash},
-            sort_keys=True, separators=(",", ":"),
+            sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")
 
 
@@ -84,7 +84,7 @@ def _hash(seq: int, partition: str, kind: str, payload: dict, ts_ns: int,
     return blake3.blake3(json.dumps(
         {"seq": seq, "partition": partition, "kind": kind, "payload": payload,
          "ts_ns": ts_ns, "prev_hash": prev_hash},
-        sort_keys=True, separators=(",", ":"),
+        sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")).hexdigest()
 
 
