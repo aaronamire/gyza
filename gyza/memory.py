@@ -36,52 +36,44 @@ _FEW_SHOT_CHAR_LIMIT = 2000
 
 # Process-wide model cache — avoids reloading 80MB of weights per agent.
 _model_lock = threading.Lock()
-_model_singleton: object | None = None
 
 
 class _EmbeddingsUnavailable(Exception):
     """sentence-transformers is not installed in this environment."""
 
 
-def _get_model():
-    global _model_singleton
-    with _model_lock:
-        if _model_singleton is None:
-            try:
-                from sentence_transformers import SentenceTransformer
-            except ImportError as e:
-                # On hosts that intentionally skip the [embeddings]
-                # extra (e.g. the demo agent on a 1 GB VPS), retrieving
-                # similar episodes is structurally impossible — there's
-                # no encoder. We raise a typed exception so
-                # retrieve_similar can degrade gracefully rather than
-                # crash mid-execution.
-                raise _EmbeddingsUnavailable(
-                    "sentence-transformers is not installed; "
-                    "EpisodicMemory.retrieve_similar will return []"
-                ) from e
-            _model_singleton = SentenceTransformer(_EMBED_MODEL_NAME)
-        return _model_singleton
-
-
 def _embed(texts: list[str]) -> np.ndarray:
-    # Architectural debt: this module loads SentenceTransformer
-    # independently of ``gyza.embeddings`` — it predates the unified
-    # embedder protocol. When ``GYZA_EMBEDDER=stub`` is set the rest
-    # of the system uses ``StubEmbedder`` but ``_get_model()`` would
-    # still cold-load ST, silently undoing the opt-out and causing a
-    # ~10-15s pause on the first ``retrieve_similar`` with non-empty
-    # memory (e.g. the 2nd round of demo/single_machine_global.py
-    # --fast). Honour the env var explicitly here. The longer-term
-    # fix is to delete ``_get_model`` and route through
-    # ``gyza.embeddings.default_embedder()``; this hop preserves the
-    # existing ``_EmbeddingsUnavailable`` semantics callers depend on.
-    if os.environ.get("GYZA_EMBEDDER", "").strip().lower() == "stub":
-        from gyza.embeddings import default_embedder
-        return default_embedder().embed_batch(texts).astype(np.float32)
-    model = _get_model()
-    arr = model.encode(texts, show_progress_bar=False)
-    return np.asarray(arr, dtype=np.float32)
+    """Embed via the unified embedder, WITHOUT losing honest degradation.
+
+    This module used to load SentenceTransformer independently of
+    ``gyza.embeddings``, so ``GYZA_EMBEDDER`` was honoured everywhere except
+    here. A later patch special-cased the single value ``"stub"``; every other
+    setting still leaked, because ``_get_model()`` cold-loaded ST regardless.
+    Routing through ``default_embedder()`` closes that for all settings and
+    keeps one model load per process.
+
+    THE NAIVE ROUTE-THROUGH WOULD HAVE BEEN WRONG, in the reassuring direction.
+    ``default_embedder()`` FALLS BACK to ``StubEmbedder`` when
+    sentence-transformers is absent, so a bare hop would make
+    ``retrieve_similar`` return neighbours ranked by stub vectors — plausible
+    output computed from nothing — where callers currently get
+    ``_EmbeddingsUnavailable`` and honestly degrade to ``[]``. "It broke" and
+    "it found nothing" are opposite claims and must not share a channel.
+
+    So a stub is accepted only when it was ASKED FOR, and a stub arrived at by
+    FALLBACK still raises.
+    """
+    from gyza.embeddings import StubEmbedder, default_embedder
+
+    explicit_stub = os.environ.get("GYZA_EMBEDDER", "").strip().lower() == "stub"
+    embedder = default_embedder()
+    if isinstance(embedder, StubEmbedder) and not explicit_stub:
+        raise _EmbeddingsUnavailable(
+            "sentence-transformers is not installed; default_embedder() fell "
+            "back to StubEmbedder. EpisodicMemory.retrieve_similar will return "
+            "[] rather than rank episodes by meaningless vectors."
+        )
+    return embedder.embed_batch(texts).astype(np.float32)
 
 
 @dataclass
