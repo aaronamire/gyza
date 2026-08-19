@@ -63,6 +63,27 @@ registry entry is executed against a real input") is what
   permitting arbitrarily many unobservable sends. That accessor had **zero**
   production callers, so no code had yet got it right or wrong.
 
+## Verified against a live daemon, not only under unit test
+
+A real `gyza-netd` on a temp socket, three real `publish_agent` RPCs:
+
+```
+  ALL egress rows : 3
+  H3 mesh-exit    : 3
+  grants          : 0
+    ('UNATTESTED_PEER', 'publish_agent', '/gyza/agents/00...', 1754)
+    ('UNATTESTED_PEER', 'publish_agent', '/gyza/agents/00...', 1754)
+    ('UNATTESTED_PEER', 'publish_agent', '/gyza/agents/00...', 1754)
+```
+
+**Before this change the same run produced 0 rows.** Byte counts are real wire
+sizes, and the classification is `UNATTESTED_PEER` because defect 4 stands.
+
+A `publish_delta` in the same run was refused by the daemon ("not joined to
+project") and **recorded nothing** -- the recording call sits after the success
+check, so a refused send is correctly not counted as egress. That is the right
+semantics and it is now demonstrated rather than assumed.
+
 ## NOT fixed, and each blocks a truthful bound
 
 1. **`OUTSIDE_PROTOCOL` is unreachable in-process** (defect 3). All external
