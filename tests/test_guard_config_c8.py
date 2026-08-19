@@ -229,8 +229,17 @@ def test_gyza_status_REPORTS_that_the_bounds_are_unsigned(capsys):
     assert "NOT SIGNED" in out
     assert "can claim containment: NO" in out
     assert "sign_guard_config.py" in out, "the report must say what to do"
-    # the declared levels are still shown: unsigned is not the same as unknown
-    assert "H6_unsupervised_actions" in out and "10000.00" in out
+    # the declared levels are still shown: unsigned is not the same as unknown.
+    # The format moved from `10000.00` to `10,000` on 2026-08-19 when the
+    # section began reporting MEASURED-of-BOUND instead of the bound alone --
+    # a count of actions has no meaningful hundredths.
+    assert "H6_unsupervised_actions" in out and "10,000" in out
+    # AND the operator's POSITION against it, which is the point of the
+    # section. Before that change H3/H5 printed a bound with no measurement and
+    # every quantity was structurally 0 (research/H3_WIRING_GAP.md), so a bound
+    # nobody could see their position against was one nobody could act on.
+    assert " of 10,000" in out, "the measured position must be shown, not just the bound"
+    assert "H5_storage_growth" in out and " of 10,000,000,000" in out
     # and a RETIRED class must still be REPORTED, not silently dropped. H2 was
     # retired 2026-08-17; if retirement removed it from the report, the operator
     # would see a smaller model rather than a named gap.

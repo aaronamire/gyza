@@ -886,11 +886,58 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     prov = r["bounds_provenance"]
     print()
     print("containment (declared harm model):")
+
+    # MEASURED, NOT JUST DECLARED. Until 2026-08-19 this loop printed the
+    # BOUND alone for every class, and only H6 had a hand-rolled block showing
+    # the operator their position against it. H3 and H5 were invisible -- and
+    # all three measured a constant 0 anyway, because nothing folded the real
+    # sources into `GyzaState` (research/H3_WIRING_GAP.md). A bound nobody can
+    # see their position against is a bound nobody can act on, and a bound
+    # measured against a hardcoded zero is not a bound at all.
+    _measured: dict[str, float] = {}
+    try:
+        from pathlib import Path as _P
+
+        from gyza.containment.gates import observe_at_origin, observe_now
+
+        _bb = None
+        _bbp = _P(_resolve(cfg.blackboard_db_path))
+        if _bbp.exists():
+            from gyza.blackboard import Blackboard
+            _bb = Blackboard(str(_bbp))
+
+        # `ArtifactStore.__init__` mkdirs, and a status command must not
+        # create state it is only reporting on.
+        _store = None
+        _sp = _P(_resolve("~/.gyza/artifacts"))
+        if _sp.exists():
+            from gyza.network.artifact_store import ArtifactStore
+            _store = ArtifactStore(base_path=str(_sp))
+
+        _owner = (prov.get("authority_pubkey") or "local-node")[:16] or "local-node"
+        _s0 = observe_at_origin(owner=_owner)
+        _s = observe_now(owner=_owner, blackboard=_bb, artifact_store=_store)
+        _measured = {c.id: float(c.quantity(_s0, _s)) for c in harm}
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        _measured = {}
+
     for c in harm:
         try:
-            print(f"  {c.id:22s} bound {harm.bound(c.id):>10.2f}")
+            b = harm.bound(c.id)
+            bound_s = f"{b:>12,.0f}"
         except Exception:  # noqa: BLE001
-            print(f"  {c.id:22s} bound   UNDECLARED")
+            b, bound_s = None, "   UNDECLARED"
+        if c.id in _measured:
+            m = _measured[c.id]
+            pos = f"{m:>12,.0f} of {bound_s.strip()}"
+            if b:
+                pos += f"  ({m / b:.2%})"
+            elif b == 0:
+                # A bound of 0 is a BREACH THRESHOLD, not a budget (H4).
+                pos += "  (any nonzero value is a breach)"
+            print(f"  {c.id:22s} {pos}")
+        else:
+            print(f"  {c.id:22s} bound {bound_s}  — NOT MEASURED HERE")
     for cid, why in UNMODELLED.items():
         print(f"  {cid:22s} NOT MODELLED — {why.split('(')[0].strip()}")
 
@@ -905,17 +952,15 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
               "the claim")
         print("    has no base case. Sign it: scripts/sign_guard_config.py "
               "--generate-key")
-    # THE CADENCE, in the unit the operator actually chose. A bound nobody can
-    # see their position against is a bound nobody can act on.
+    # THE CADENCE, in the unit the operator actually chose. The position
+    # itself now comes from the uniform fold above -- this adds only the
+    # actionable remainder, which is what an operator schedules against.
     try:
-        from pathlib import Path as _P
-        bb_path = _P(_resolve(cfg.blackboard_db_path))
-        if bb_path.exists():
-            from gyza.blackboard import Blackboard
-            n = Blackboard(str(bb_path)).count_envelopes_since(0)
-            cad = harm.bound("H6_unsupervised_actions")
-            print(f"  review cadence: {n:,} of {cad:,.0f} actions used "
-                  f"({n/cad:.2%}) — a human is due in {max(cad-n,0):,.0f}")
+        n = _measured.get("H6_unsupervised_actions")
+        cad = harm.bound("H6_unsupervised_actions")
+        if n is not None and cad:
+            print(f"  review cadence: a human is due in "
+                  f"{max(cad - n, 0):,.0f} actions")
     except Exception:  # noqa: BLE001 - status must survive a broken store
         pass
     # PENDING ESCALATIONS BELONG WHERE THE OPERATOR ALREADY LOOKS.
