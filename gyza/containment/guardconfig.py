@@ -123,6 +123,27 @@ def config_hash(config: dict) -> str:
     return blake3.blake3(canonical_bytes(config)).hexdigest()
 
 
+def _sign_payload(payload: dict, sk: bytes) -> str:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+    )
+    return Ed25519PrivateKey.from_private_bytes(sk).sign(
+        canonical_bytes(payload)).hex()
+
+
+def _verify_payload(payload: dict, signature_hex: str, pubkey: bytes) -> bool:
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PublicKey,
+    )
+    try:
+        Ed25519PublicKey.from_public_bytes(pubkey).verify(
+            bytes.fromhex(signature_hex), canonical_bytes(payload))
+        return True
+    except (InvalidSignature, ValueError):
+        return False
+
+
 def sign_config(config: dict, authority_sk: bytes) -> str:
     """Sign-the-hash, matching the ICP discipline (gyza/icp.py:67)."""
     sk = Ed25519PrivateKey.from_private_bytes(authority_sk)
@@ -157,13 +178,69 @@ class VerifiedGuardConfig:
                 "tier_assignments": dict(self.tier_assignments)}
 
 
+@dataclass(frozen=True)
+class KeySuccession:
+    """An authority key naming its successor, SIGNED BY THE OUTGOING KEY.
+
+    WHY THE OLD KEY SIGNS. Succession must be an act of the CURRENT authority,
+    never of the constrained system. A record signed by the incoming key would
+    let anyone who can generate a keypair appoint themselves -- the guard
+    configuration is the trust root the whole induction rests on, so
+    self-appointment would void every downstream containment claim.
+
+    WHY THIS TYPE EXISTS AT ALL. `settlement.py` deferred "rotation of the
+    compositor key (a settled entry references the key valid at the moment of
+    signing)", and CLAUDE.md records that the deferral is a FRAME HAZARD:
+    implemented naively it reproduces R9's `G4'` exactly -- history pinned to
+    the old key, the live gate reading the new one, and the invariant checking
+    against a frame the history is not in.
+
+    THE SAFETY PROPERTY, which is the whole point:
+
+        ROTATION CHANGES WHO SIGNS. IT CHANGES NOTHING ELSE.
+
+    Version monotonicity and permissiveness monotonicity continue across a
+    rotation UNBROKEN, because `_install` compares against `self._cfg` and
+    succession deliberately leaves `_cfg` in place. Clearing it would make
+    rotation a LOOSENING BYPASS: rotate, then install any bounds at any version
+    with nothing to compare against. That bypass is the reason this class keeps
+    the previous configuration rather than starting fresh.
+    """
+
+    old_pubkey_hex: str
+    new_pubkey_hex: str
+    at_ns: int
+    reason: str
+
+    def as_dict(self) -> dict:
+        return {"old_pubkey": self.old_pubkey_hex,
+                "new_pubkey": self.new_pubkey_hex,
+                "at_ns": self.at_ns, "reason": self.reason}
+
+
+def sign_succession(rec: KeySuccession, outgoing_sk: bytes) -> str:
+    """Sign a succession with the OUTGOING key. See `KeySuccession`."""
+    return _sign_payload(rec.as_dict(), outgoing_sk)
+
+
+def verify_succession(rec: KeySuccession, signature_hex: str,
+                      outgoing_pubkey: bytes) -> bool:
+    return _verify_payload(rec.as_dict(), signature_hex, outgoing_pubkey)
+
+
 class GuardConfigStore:
     """Holds the verified configuration and refuses to replace it except under
     the authority signature."""
 
     def __init__(self, authority_pubkey: bytes):
         self._authority = bytes(authority_pubkey)
+        self._genesis_authority = bytes(authority_pubkey)
         self._cfg: VerifiedGuardConfig | None = None
+        #: Every accepted succession, oldest first, so an offline verifier
+        #: holding only the GENESIS pubkey can walk to the current one. A
+        #: rotation nobody can reconstruct is indistinguishable from a key
+        #: substitution.
+        self._successions: list[tuple[KeySuccession, str]] = []
         # O-3 surface: every loosening lands here, always.
         self.alarms: list[str] = []
 
@@ -185,6 +262,70 @@ class GuardConfigStore:
     def load_file(self, path: str | Path) -> VerifiedGuardConfig:
         doc = json.loads(Path(path).read_text())
         return self._install(doc["config"], doc["signature"])
+
+    @property
+    def genesis_authority_pubkey_hex(self) -> str:
+        """The key this store was PINNED to. An auditor validates the chain
+        from here, never from the current key -- validating from the current
+        key would accept any substitution that arrived with its own history."""
+        return self._genesis_authority.hex()
+
+    @property
+    def succession_chain(self) -> list[dict]:
+        return [r.as_dict() for r, _ in self._successions]
+
+    def rotate_authority(self, record: "KeySuccession", signature_hex: str
+                         ) -> None:
+        """Install a new authority key, named by the outgoing one.
+
+        THREE REFUSALS, each closing a distinct attack:
+
+        1. The signature must verify against the CURRENT authority. A record
+           signed by the incoming key is SELF-APPOINTMENT and is refused.
+        2. `old_pubkey_hex` must equal the current authority. A record naming
+           some other predecessor is a chain that does not attach here, and
+           accepting it would let a valid succession from an unrelated store be
+           replayed into this one.
+        3. The new key must differ from the old. A no-op rotation would append
+           a chain entry that asserts a change that did not happen.
+
+        WHAT IS DELIBERATELY NOT DONE: `self._cfg` IS NOT CLEARED. Version
+        monotonicity and permissiveness monotonicity both compare against it,
+        so clearing it would make rotation a LOOSENING BYPASS -- rotate, then
+        install any bounds at any version against nothing. Rotation changes WHO
+        SIGNS and nothing else; the invariant's frame follows the history's
+        frame rather than the reverse (R9's `G4'`, which CLAUDE.md flags this
+        deferral as reproducing if done naively).
+        """
+        if not verify_succession(record, signature_hex, self._authority):
+            # NAME THE FAILURE, NOT A GUESS AT ITS CAUSE. An earlier version
+            # asserted "self-appointment", which sent the first person to hit
+            # it (a mismatched `at_ns` between the signed record and the passed
+            # one) looking for the wrong bug entirely. The C-8 suite already
+            # records why: 'these bounds are unsigned' and 'this signature is
+            # wrong' have different remedies, and an operator handed the wrong
+            # one debugs the wrong thing. Causes are listed as possibilities.
+            raise GuardConfigError(
+                "succession signature does not verify against the CURRENT "
+                "authority key. Possible causes: it was signed by the INCOMING "
+                "key (self-appointment, which is refused); it was signed by a "
+                "third key; or the signed record differs from the one passed "
+                "here -- every field is covered, including at_ns and reason.")
+        if record.old_pubkey_hex != self._authority.hex():
+            raise GuardConfigError(
+                f"succession names predecessor {record.old_pubkey_hex[:16]}... "
+                f"but this store's authority is "
+                f"{self._authority.hex()[:16]}...; the chain does not attach "
+                f"here and replaying another store's succession is refused")
+        if record.new_pubkey_hex == self._authority.hex():
+            raise GuardConfigError(
+                "succession names the incumbent as its own successor; a no-op "
+                "rotation would record a change that did not happen")
+        self._successions.append((record, signature_hex))
+        self._authority = bytes.fromhex(record.new_pubkey_hex)
+        self.alarms.append(
+            f"AUTHORITY ROTATED to {record.new_pubkey_hex[:16]}... "
+            f"({record.reason})")
 
     def attempt_update(self, config: dict, signature_hex: str,
                        *, requested_by: str = "unknown") -> VerifiedGuardConfig:

@@ -40,7 +40,19 @@ import pytest
 from gyza.containment.gates import observe_at_origin, observe_now
 from gyza.containment.gyza_model import build_registries
 
-GYZA = pathlib.Path(__file__).resolve().parents[1] / "gyza"
+_ROOT = pathlib.Path(__file__).resolve().parents[1]
+GYZA = _ROOT / "gyza"
+
+#: OPERATOR ENTRY POINTS COUNT AS PRODUCTION. `scripts/` holds real tools --
+#: `sign_guard_config.py` signs the guard configuration and rotates the
+#: authority key, `cut_release.py` cuts releases. Scanning `gyza/` alone gave
+#: the census a blind spot: a mechanism whose only legitimate consumer is an
+#: operator tool would read as unwired forever. Found by using this test on
+#: `KeySuccession` the day both were written.
+#:
+#: `tests/` stays excluded, and that exclusion is the point of the file: a
+#: suite that builds its own fixtures never touches the registered ones.
+_PRODUCTION_TREES = (GYZA, _ROOT / "scripts")
 
 
 def _constructions(name: str) -> list[str]:
@@ -58,7 +70,8 @@ def _constructions(name: str) -> list[str]:
     is transitive; a census that ignores that measures syntax, not reachability.
     """
     hits: list[str] = []
-    for p in GYZA.rglob("*.py"):
+    for p in [q for tree in _PRODUCTION_TREES if tree.exists()
+              for q in tree.rglob("*.py")]:
         try:
             tree = ast.parse(p.read_text())
         except SyntaxError:
@@ -80,7 +93,7 @@ def _constructions(name: str) -> list[str]:
                 continue
             if any(lo <= node.lineno <= hi for lo, hi in exempt_spans):
                 continue
-            hits.append(f"{p.relative_to(GYZA)}:{node.lineno}")
+            hits.append(f"{p.relative_to(_ROOT)}:{node.lineno}")
     return hits
 
 
@@ -208,7 +221,8 @@ def test_guard_consumer_kwargs_are_supplied_at_a_production_call_site(kwarg):
     note claimed H6 bounded autonomy. `egress_recorder` was the same for H3.
     """
     supplied = []
-    for p in GYZA.rglob("*.py"):
+    for p in [q for tree in _PRODUCTION_TREES if tree.exists()
+              for q in tree.rglob("*.py")]:
         try:
             tree = ast.parse(p.read_text())
         except SyntaxError:
@@ -222,7 +236,7 @@ def test_guard_consumer_kwargs_are_supplied_at_a_production_call_site(kwarg):
                 if kw.arg == kwarg and not (
                         isinstance(kw.value, ast.Constant)
                         and kw.value.value is None):
-                    supplied.append(f"{p.relative_to(GYZA)}:{node.lineno}")
+                    supplied.append(f"{p.relative_to(_ROOT)}:{node.lineno}")
     assert supplied, (
         f"nothing in gyza/ passes a non-None {kwarg}=; the consumer it feeds "
         "is dead code and whatever it was meant to bound is unbounded.")
