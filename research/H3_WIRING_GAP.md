@@ -84,20 +84,59 @@ project") and **recorded nothing** -- the recording call sits after the success
 check, so a refused send is correctly not counted as egress. That is the right
 semantics and it is now demonstrated rather than assumed.
 
+## Defect 6, found 2026-08-19 (later the same day): THE GRANT WAS NEVER RECORDED EITHER
+
+The paragraph below used to argue that external network was "covered by the
+grant". **That argument was hollow.** `run_sandboxed` accepted an
+`egress_recorder` and **`make_sandboxed_executor` had no such parameter**, so
+nothing ever passed one and the `UNBOUNDED_GRANT` branch at
+`sandbox/runner.py:435` never fired.
+
+So every network-granted agent had **unbounded, unobservable egress that
+nothing anywhere counted** — not as a send, and not as a grant. The class that
+was supposed to make the blind channel visible was itself blind.
+
+Fixed: `make_sandboxed_executor` threads the recorder, `cli.py` builds one and
+supplies it at all three sandboxed sites. Verified end-to-end — a
+network-granted sandbox now records exactly one grant with `byte_count = NULL`,
+and `mesh_exit_sends_since` stays 0, so the two units remain separate. A
+sandbox WITHOUT network records none, so the count measures network exposure
+rather than sandbox usage. `gyza status` prints it on its own line, in its own
+unit.
+
+## Defect 3 RESOLVED, and the way it was nearly closed WRONG
+
+**`OUTSIDE_PROTOCOL` does have a real producer, and it is the most consequential
+egress in the system.** `runner.py`'s Anthropic executor inlines up to 4000
+bytes of *every input artifact* into the prompt and posts it to a third-party
+provider — agent data leaving modelled state entirely. `outside_send` existed
+for exactly this and had no caller.
+
+**THE NEAR-MISS IS THE LESSON.** The first proposal was to NARROW H3's declared
+definition to `UNATTESTED_PEER` so the label matched the measurand — tidy,
+defensible-sounding, and it would have **permanently hidden the channel where
+data actually leaves**. The declaration was right; the measurement was missing.
+
+> **When a declared measurand exceeds what you measure, do not assume the
+> declaration is wrong. Check whether the measurement is missing first.**
+> Shrinking a definition to fit an instrument silently redefines the hazard as
+> whatever the instrument happens to see.
+
+In production this executor runs SANDBOXED, where per-send bytes are
+unobservable and the honest record is the grant (defect 6). The `outside_send`
+wiring covers the IN-PROCESS path — an injected executor, or any caller
+importing the factory directly — which bypassed the sandbox and was invisible
+to *both* classes at once. The byte count is a stated LOWER BOUND: the prompt
+handed to the SDK, not its framing or headers.
+
 ## NOT fixed, and each blocks a truthful bound
 
-1. **`OUTSIDE_PROTOCOL` is unreachable in-process** (defect 3). All external
-   network from agents leaves through a bubblewrap sandbox whose grant is
-   all-or-nothing, and that is recorded as `UNBOUNDED_GRANT` — a *different
-   unit*, deliberately excluded from H3. So H3 currently measures
-   `UNATTESTED_PEER` alone, and its stated definition
-   (`UNATTESTED + OUTSIDE_PROTOCOL`) overstates what it counts.
-2. **No attestation source** (defect 4), so H3's headline property — *the only
+1. **No attestation source** (defect 4), so H3's headline property — *the only
    declared quantity that shrinks as the mesh grows* — is **unrealised**. Every
    send counts. This errs toward reporting more exit than exists, which is the
    safe direction for a bound, but it means the number is a **total peer-send
    count**, not a mesh-exit count.
-3. **No adopted evaluation path** (defect 5). The quantity can now be *counted*;
+2. **No adopted evaluation path** (defect 5). The quantity can now be *counted*;
    nothing *checks* it.
 
 ## The defect is NOT confined to H3 -- it is three of four classes

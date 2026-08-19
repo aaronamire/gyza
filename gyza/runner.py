@@ -874,6 +874,7 @@ def make_command_executor(
 def make_anthropic_executor(
     api_key: str | None = None,
     model: str = "claude-sonnet-4-5",
+    egress_recorder: "Any | None" = None,
 ) -> Callable[[str, dict], dict]:
     """
     Pluggable Anthropic executor. The runner stays unaware of the
@@ -881,6 +882,23 @@ def make_anthropic_executor(
 
     Imports `anthropic` lazily so the module loads cleanly on machines
     that don't have the SDK installed (everyone using the mock executor).
+
+    THE ONE GENUINELY EXTERNAL SEND IN THIS PROCESS, and until 2026-08-19
+    nothing measured it. `_executor` inlines up to 4000 bytes of EVERY input
+    artifact into the prompt and posts it to a third-party provider. That is an
+    `OUTSIDE_PROTOCOL` egress in H3's vocabulary -- it leaves modelled state
+    entirely -- and `outside_send` had no caller anywhere.
+
+    IN PRODUCTION THIS RUNS SANDBOXED (`cli.py` wraps it via
+    `make_sandboxed_executor`), where the parent cannot observe per-send bytes
+    and the honest record is the `UNBOUNDED_GRANT` instead. This recorder is
+    for the IN-PROCESS path -- an injected executor, or any caller importing
+    this factory directly -- which bypasses the sandbox and was therefore
+    invisible to both classes at once.
+
+    The byte count is a LOWER BOUND: it measures the prompt handed to the SDK,
+    not the SDK's framing, headers or system prompt. Stated rather than implied,
+    because a measurand that silently understates is the reassuring direction.
     """
     key = api_key or os.environ.get("ANTHROPIC_API_KEY")
     if not key:
@@ -908,11 +926,26 @@ def make_anthropic_executor(
         if input_blocks:
             full_prompt = "\n\n".join(input_blocks) + "\n\n" + prompt
 
-        msg = client.messages.create(
-            model=model,
-            max_tokens=2048,
-            messages=[{"role": "user", "content": full_prompt}],
-        )
+        # RECORD AROUND THE CALL, NOT AFTER SUCCESS. Once the request is
+        # handed to the transport the bytes have left, whether or not a
+        # response comes back -- so a `finally` is the honest placement. The
+        # peer-send paths record only on success because a refused RPC never
+        # left the host; an HTTPS request that errors mid-flight did.
+        _n_bytes = len(full_prompt.encode("utf-8"))
+        try:
+            msg = client.messages.create(
+                model=model,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": full_prompt}],
+            )
+        finally:
+            if egress_recorder is not None:
+                try:
+                    egress_recorder.outside_send(
+                        f"inference:{model}", "api.anthropic.com", _n_bytes)
+                except Exception:                            # noqa: BLE001
+                    LOG.warning("[runner] inference egress not recorded",
+                                exc_info=True)
         text = "".join(
             block.text for block in msg.content if getattr(block, "type", "") == "text"
         )

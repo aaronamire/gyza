@@ -140,32 +140,89 @@ def test_global_cluster_builds_a_recorder():
     assert src.count("egress_recorder=self._egress_recorder") >= 3
 
 
-def test_OUTSIDE_PROTOCOL_has_no_production_producer():
-    """Defect 3, WRITTEN AS A CHECK rather than left as prose.
+def test_OUTSIDE_PROTOCOL_producer_is_the_inference_boundary():
+    """Defect 3, RESOLVED -- and resolved BY the check that recorded it.
 
-    H3's declared measurand is `UNATTESTED_PEER + OUTSIDE_PROTOCOL`, and
-    `outside_send` -- the only thing that emits the second -- has no caller in
-    `gyza/`. So H3's stated definition is broader than what it can observe.
-
-    This test FAILS THE DAY SOMEONE ADDS ONE, which is the point: at that
-    moment H3's definition stops overstating and the level (if declared by
-    then) must be revisited against a wider measurand. A documented invariant
-    with no mechanism is a promise the code has not made.
+    This test previously asserted `outside_send` had NO caller, with the note
+    that it "FAILS THE DAY SOMEONE ADDS ONE, which is the point". On
+    2026-08-19 it did exactly that, naming `runner.py`, when the Anthropic
+    executor's egress was wired. The check worked as designed and is inverted
+    here rather than deleted: the producer must EXIST and must be the
+    inference boundary, so H3's declared measurand
+    (`UNATTESTED_PEER + OUTSIDE_PROTOCOL`) is no longer broader than what it
+    can observe.
     """
     import pathlib
 
     root = pathlib.Path(__file__).resolve().parents[1] / "gyza"
     hits = [
-        f"{p.relative_to(root)}:{i}"
+        str(p.relative_to(root))
         for p in root.rglob("*.py")
-        if p.name != "egress.py"
-        for i, line in enumerate(p.read_text().splitlines(), 1)
-        if ".outside_send(" in line
+        if p.name != "egress.py" and ".outside_send(" in p.read_text()
     ]
-    assert hits == [], (
-        "OUTSIDE_PROTOCOL now has a producer at "
-        f"{hits} -- H3's definition no longer overstates its measurand. "
-        "Revisit research/H3_WIRING_GAP.md and any declared H3 level.")
+    assert hits == ["runner.py"], (
+        f"expected the inference boundary to be OUTSIDE_PROTOCOL's only "
+        f"producer; got {hits}. A new external-send site must be classified "
+        "deliberately, not inherit this one's justification.")
+
+
+def test_sandbox_grants_are_actually_RECORDED_end_to_end(db):
+    """The hollow argument, closed.
+
+    `run_sandboxed` accepted `egress_recorder` and NOTHING EVER PASSED IT --
+    `make_sandboxed_executor` had no such parameter -- so the UNBOUNDED_GRANT
+    branch never fired. The standing claim that external network "is covered
+    by the grant" was therefore hollow: the grant was not recorded either, and
+    a network-granted agent had unbounded unobservable egress that nothing
+    counted.
+    """
+    from gyza.containment.gyza_model import mesh_exit_sends_since
+    from gyza.sandbox.config import SandboxConfig
+    from gyza.sandbox.executor import make_sandboxed_executor
+
+    rec = default_egress_recorder(db)
+    ex = make_sandboxed_executor(
+        "gyza.runner:make_mock_executor", init_kwargs={"response": "hi"},
+        config=SandboxConfig(requires_network=True), egress_recorder=rec)
+    try:
+        ex("probe", {})
+    except Exception:                                        # noqa: BLE001
+        pass          # bwrap may be unavailable; the GRANT is recorded first
+    bb = Blackboard(db)
+    assert bb.count_grants_since(0) == 1
+    # A GRANT IS A DIFFERENT UNIT and must never enter the send count.
+    assert mesh_exit_sends_since(bb, 0) == 0
+    row = sqlite3.connect(db).execute(
+        "SELECT byte_count FROM egress_log").fetchone()
+    assert row[0] is None, "unknown bytes must be NULL, never 0"
+
+
+def test_a_sandbox_WITHOUT_network_records_no_grant(db):
+    """The counter-metric: the recorder must not fire on every sandbox run,
+    or the count measures sandbox usage rather than network exposure."""
+    from gyza.sandbox.config import SandboxConfig
+    from gyza.sandbox.executor import make_sandboxed_executor
+
+    rec = default_egress_recorder(db)
+    ex = make_sandboxed_executor(
+        "gyza.runner:make_mock_executor", init_kwargs={"response": "hi"},
+        config=SandboxConfig(requires_network=False), egress_recorder=rec)
+    try:
+        ex("probe", {})
+    except Exception:                                        # noqa: BLE001
+        pass
+    assert Blackboard(db).count_grants_since(0) == 0
+
+
+def test_production_sandbox_paths_supply_a_recorder():
+    """cli.py builds one recorder and passes it at every sandboxed site."""
+    import inspect
+
+    from gyza import cli
+
+    src = inspect.getsource(cli)
+    assert "default_egress_recorder()" in src
+    assert src.count("egress_recorder=_egress") >= 3
 
 
 def test_UNBOUNDED_GRANT_producer_exists_and_is_the_sandbox():

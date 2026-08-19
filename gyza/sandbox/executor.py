@@ -68,6 +68,7 @@ def make_sandboxed_executor(
     *,
     init_kwargs: dict[str, Any] | None = None,
     config: SandboxConfig | None = None,
+    egress_recorder: Any | None = None,
 ) -> Callable[[str, dict], dict]:
     """
     Wrap an inner executor factory into a sandboxed callable that
@@ -114,6 +115,14 @@ def make_sandboxed_executor(
             prompt=prompt,
             context=_json_safe_context(context),
             config=cfg,
+            # H3'S ONLY OBSERVABLE FACT ABOUT SANDBOXED EGRESS. `run_sandboxed`
+            # accepted this parameter and NOTHING EVER PASSED IT, so the
+            # UNBOUNDED_GRANT branch at sandbox/runner.py:435 never fired. The
+            # standing argument that external network "is covered by the grant"
+            # was therefore hollow: the grant was not recorded either, and a
+            # network-granted agent had unbounded unobservable egress that
+            # nothing anywhere counted.
+            egress_recorder=egress_recorder,
         )
         payload = result.payload
         # Host-side enforcement stamp. This runs in the trusted parent

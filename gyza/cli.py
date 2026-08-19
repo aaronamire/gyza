@@ -252,6 +252,13 @@ def run_local_task(
         # The manifest is the single source of truth for the sandbox:
         # what it declares is, by construction, what bwrap enforces.
         scfg = sandbox_config_from_manifest(ident.manifest)
+        # H3's grant measurand. `run_sandboxed` records an UNBOUNDED_GRANT when
+        # a sandbox is given network, and NOTHING EVER SUPPLIED A RECORDER, so
+        # that branch never fired -- every network-granted agent had unbounded,
+        # unobservable egress that nothing counted. A grant is a DIFFERENT UNIT
+        # from a send and stays in its own accessor (`count_grants_since`).
+        from gyza.containment.egress import default_egress_recorder
+        _egress = default_egress_recorder()
         if command_argv is not None:
             # Run the command in the user's current directory when that
             # directory is among the granted paths (so it's bound and
@@ -267,6 +274,7 @@ def run_local_task(
                 "gyza.runner:make_command_executor",
                 init_kwargs={"argv": command_argv, "cwd": cmd_cwd},
                 config=scfg,
+                egress_recorder=_egress,
             )
             executor_label = (
                 f"command: {' '.join(command_argv)} (sandboxed"
@@ -279,6 +287,7 @@ def run_local_task(
                 init_kwargs={"api_key": api_key,
                              "model": model or cfg.default_model},
                 config=scfg,
+                egress_recorder=_egress,
             )
             executor_label = f"anthropic {model or cfg.default_model} (sandboxed)"
         else:
@@ -287,6 +296,7 @@ def run_local_task(
                 init_kwargs={"response": "[mock executor — no AI] "
                                          f"task acknowledged: {task[:120]}"},
                 config=scfg,
+                egress_recorder=_egress,
             )
             executor_label = "mock — no AI, deterministic placeholder (sandboxed)"
     else:
@@ -959,6 +969,30 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
               "the claim")
         print("    has no base case. Sign it: scripts/sign_guard_config.py "
               "--generate-key")
+    # CAPABILITY GRANTS, IN THEIR OWN UNIT AND THEIR OWN LINE.
+    #
+    # A grant is not a send: `bwrap`'s network control is all-or-nothing, so
+    # one network-granted sandbox permits arbitrarily many sends this process
+    # cannot observe. Reporting grants inside the H3 row would add two
+    # different units and present the sum as harm. They are shown separately,
+    # unbounded, and labelled as what they are -- the honest answer to "what
+    # can leave this machine".
+    try:
+        from pathlib import Path as _P2
+        _gp = _P2(_resolve(cfg.blackboard_db_path))
+        if _gp.exists():
+            from gyza.blackboard import Blackboard as _BB
+            _grants = _BB(str(_gp)).count_grants_since(0)
+            print(f"  {'network grants':22s} {_grants:>12,d} "
+                  f"(UNBOUNDED — each permits uncountable egress)")
+            if _grants:
+                print("    Each grant shares a network namespace with a "
+                      "sandboxed agent; after that")
+                print("    point nothing here can see what was sent. "
+                      "`research/H3_BLIND_CHANNEL.md`.")
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        pass
+
     # THE CADENCE, in the unit the operator actually chose. The position
     # itself now comes from the uniform fold above -- this adds only the
     # actionable remainder, which is what an operator schedules against.
