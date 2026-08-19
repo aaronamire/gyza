@@ -666,6 +666,32 @@ class Blackboard:
         ).fetchone()
         return int(row["n"] if row is not None else 0)
 
+    def egress_by_channel_since(self, origin_ns: int = 0) -> "dict[str, int]":
+        """H3's count split by channel, for the ONE question that decides
+        whether an attestation source is worth building.
+
+        Only `send_message` carries a single peer destination. `publish_agent`
+        and `publish_attestation` are DHT puts landing on the k closest nodes;
+        `publish_delta` fans out to a gossip topic. For those three, "is the
+        destination attested?" IS NOT A WELL-FORMED QUESTION at send time, so
+        they can never be reclassified out of the exit count no matter how
+        complete attestation coverage becomes.
+
+        That makes the peer-addressed share the CEILING on H3's headline
+        property -- "the only declared quantity that shrinks as the mesh
+        grows". Reporting the ceiling beside the count is the same discipline
+        as reporting FPR beside TPR: a property that can only ever apply to a
+        fraction of traffic must say which fraction.
+        """
+        from gyza.containment.egress import EgressClass
+        rows = self._conn().execute(
+            "SELECT channel, COUNT(*) AS n FROM egress_log "
+            "WHERE timestamp_ns >= ? AND egress_class IN (?, ?) "
+            "GROUP BY channel",
+            (int(origin_ns), *EgressClass.MESH_EXIT),
+        ).fetchall()
+        return {r["channel"]: int(r["n"]) for r in rows}
+
     def count_grants_since(self, origin_ns: int = 0) -> int:
         """Capability grants permitting UNCOUNTABLE egress, since `origin_ns`.
 

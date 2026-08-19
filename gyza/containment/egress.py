@@ -20,6 +20,15 @@ effects that leave modelled state SHRINKS as the mesh grows, because more
 destinations come to have a model. That makes H3 the only declared quantity in
 this harm model that gets *better* with scale -- every other one worsens.
 
+**THAT CLAIM IS BOUNDED, AND THE BOUND WAS MEASURED 2026-08-19.** It holds only
+for sends with a SINGLE PEER DESTINATION, which is `send_message` alone. The
+other three cited sites are DHT puts and gossip fan-out whose destination set is
+unknown at send time, so no attestation coverage can ever reclassify them --
+see `PEER_ADDRESSED_CHANNEL_PREFIX` below. Under a delta-dominated workload the
+attestable share came out near a sixth of all egress. **H3 improves with scale
+on a MINORITY of its own traffic**, and any claim made from this module must say
+so.
+
 THE CLASSIFICATION IS THREE-WAY, NOT TWO, and the middle class is the point:
 
   ATTESTED_PEER      the destination presented a verifiable attestation. Its own
@@ -75,6 +84,30 @@ class EgressClass:
     #: program keeps recording, and one that would fail in the reassuring
     #: direction. Grants are counted separately by `count_grants_since`.
     MESH_EXIT = (UNATTESTED_PEER, OUTSIDE_PROTOCOL)
+
+
+#: Channels whose destination is a SINGLE PEER, and therefore the only ones an
+#: attestation source could ever reclassify out of the exit count.
+#:
+#: MEASURED CEILING ON H3'S HEADLINE PROPERTY. `publish_agent` and
+#: `publish_attestation` are DHT puts landing on the k closest nodes;
+#: `publish_delta` fans out to a gossip topic; the inference boundary leaves the
+#: protocol entirely. For all four, "is the destination attested?" is not a
+#: well-formed question AT SEND TIME, so no attestation coverage can ever move
+#: them. Only `send_message` qualifies.
+#:
+#: So "the only declared quantity that SHRINKS as the mesh grows" is true of ONE
+#: channel out of five, not of H3 as a whole. Under a delta-dominated workload
+#: the attestable share measured ~16%; that ratio depends on the traffic mix and
+#: is illustrative, but the STRUCTURAL limit -- one channel -- does not.
+#: `Blackboard.egress_by_channel_since` reports the live split so the ceiling is
+#: visible rather than recomputed by hand.
+PEER_ADDRESSED_CHANNEL_PREFIX = "send_message"
+
+
+def is_attestable_channel(channel: str) -> bool:
+    """True iff an attestation source could ever reclassify this channel."""
+    return channel.startswith(PEER_ADDRESSED_CHANNEL_PREFIX)
 
 
 def classify_peer(peer_id: str, attested_peers: "frozenset[str] | None") -> str:
@@ -171,4 +204,5 @@ def default_egress_recorder(blackboard_path: "str | None" = None,
 
 
 __all__ = ["EgressClass", "EgressRecorder", "classify_peer",
-           "default_egress_recorder"]
+           "default_egress_recorder", "is_attestable_channel",
+           "PEER_ADDRESSED_CHANNEL_PREFIX"]

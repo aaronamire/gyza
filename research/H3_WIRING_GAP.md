@@ -136,6 +136,34 @@ handed to the SDK, not its framing or headers.
    send counts. This errs toward reporting more exit than exists, which is the
    safe direction for a bound, but it means the number is a **total peer-send
    count**, not a mesh-exit count.
+
+   **AND THE PROPERTY HAS A CEILING, MEASURED BEFORE DECIDING TO BUILD.** Rule
+   #4 applied to an engineering decision rather than an experiment: measure the
+   attainable range before committing. Only `send_message` carries a single peer
+   destination. `publish_agent` and `publish_attestation` are DHT puts landing
+   on the k closest nodes; `publish_delta` fans out to a gossip topic; the
+   inference boundary leaves the protocol entirely. For those four, *"is the
+   destination attested?"* is **not a well-formed question at send time**, so no
+   attestation coverage can ever reclassify them.
+
+   Under a delta-dominated workload the attestable share came out near **a
+   sixth** of all egress. **That ratio is illustrative — the traffic mix was
+   chosen, not measured in production — but the structural limit is not: one
+   channel of five.** `Blackboard.egress_by_channel_since` now reports the live
+   split and `gyza status` prints it, so the ceiling is visible rather than
+   recomputed by hand.
+
+   **The decision that follows:** do not build the attestation subsystem yet.
+   Two additional facts make it worse than the ceiling alone suggests —
+   `PeerInfo.attestation_tier` from `list_peers()` is **hardcoded zero**
+   (`netd/internal/grpc/server.go:381`, never populated for attestation), so the
+   cheap source would yield a permanently empty set; and the real verifier
+   (`netd/internal/dht/verifier.go`) is keyed by compositor pubkey at
+   `FindAgents` time, not at send time. Building against either would produce a
+   component that measures nothing — the defect this document exists to record.
+   **Restating the claim honestly is the correct first move; the subsystem is
+   worth building only once peer-addressed traffic is a materially larger share
+   than a sixth.**
 2. **No adopted evaluation path** (defect 5). The quantity can now be *counted*;
    nothing *checks* it.
 

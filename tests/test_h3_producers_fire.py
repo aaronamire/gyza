@@ -241,3 +241,42 @@ def test_UNBOUNDED_GRANT_producer_exists_and_is_the_sandbox():
         and ".unbounded_grant(" in p.read_text()
     ]
     assert hits == ["sandbox/runner.py"], hits
+
+
+def test_only_peer_addressed_channels_are_ever_attestable():
+    """The CEILING on H3's headline property, as a check rather than prose.
+
+    "The only declared quantity that shrinks as the mesh grows" is true of
+    `send_message` alone. DHT puts and gossip fan-out have no single
+    destination to attest AT SEND TIME, so attestation coverage can never move
+    them out of the exit count.
+    """
+    from gyza.containment.egress import is_attestable_channel
+
+    assert is_attestable_channel("send_message:settle")
+    assert is_attestable_channel("send_message")
+    for fanout in ("publish_delta", "publish_agent", "publish_attestation",
+                   "inference:claude-sonnet-4-5", "artifact_fetch"):
+        assert not is_attestable_channel(fanout), fanout
+
+
+def test_channel_split_reports_the_attestable_share(db):
+    """A property that applies to part of the traffic must say which part."""
+    from gyza.containment.egress import is_attestable_channel
+
+    r = default_egress_recorder(db)
+    for _ in range(20):
+        r.peer_send("publish_delta", "topic:p", 8)
+    for _ in range(5):
+        r.peer_send("send_message:settle", "peerA", 8)
+    r.outside_send("inference:m", "api.anthropic.com", 8)
+    r.unbounded_grant("sandbox:share-net", "x")      # different unit
+
+    split = Blackboard(db).egress_by_channel_since(0)
+    assert split == {"publish_delta": 20, "send_message:settle": 5,
+                     "inference:m": 1}, split
+    total = sum(split.values())
+    attestable = sum(n for c, n in split.items() if is_attestable_channel(c))
+    assert total == 26 and attestable == 5
+    # the grant must NOT appear -- it is a different unit
+    assert "sandbox:share-net" not in split

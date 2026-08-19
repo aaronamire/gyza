@@ -29,7 +29,9 @@ from gyza.containment.engine import GuardEngine
 from gyza.containment.guardconfig import (
     GuardConfigError, GuardConfigStore, sign_config,
 )
-from gyza.containment.gyza_model import DEFAULT_BOUNDS_FILE, build_registries
+from gyza.containment.gyza_model import (
+    DEFAULT_BOUNDS_FILE, PLAIN_BOUNDS_FILE, build_registries,
+)
 from gyza.containment.harm import UnsignedBoundsError
 
 # H1_credits was RETIRED 2026-08-15 — credits are TOKEN_IS_FAKE, so no level
@@ -67,8 +69,13 @@ def _readiness(**kw):
 # --------------------------------------------------------------------------- #
 def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     """The state the repo shipped in. Bounds are in force and reportable; the
-    containment claim is not available over them."""
-    h, r = _readiness(bounds_file=DEFAULT_BOUNDS_FILE)
+    containment claim is not available over them.
+
+    Uses PLAIN_BOUNDS_FILE explicitly: on 2026-08-19 DEFAULT_BOUNDS_FILE became
+    the SIGNED configuration, because the signature had been covering a document
+    nothing loaded. This test is about the PLAIN path and must name it.
+    """
+    h, r = _readiness(bounds_file=PLAIN_BOUNDS_FILE)
     assert r["bounds_provenance"]["source"] == "UNSIGNED_FILE"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
@@ -147,7 +154,7 @@ def test_a_PLAIN_file_under_an_authority_is_refused_AS_UNSIGNED(tmp_path):
     the wrong one debugs the wrong thing."""
     _, pub = _authority()
     with pytest.raises(UnsignedBoundsError) as ei:
-        build_registries(bounds_file=DEFAULT_BOUNDS_FILE, authority_pubkey=pub)
+        build_registries(bounds_file=PLAIN_BOUNDS_FILE, authority_pubkey=pub)
     msg = str(ei.value)
     assert "not a SIGNED configuration" in msg
     assert "sign_guard_config.py" in msg, "the refusal must say what to do"
@@ -226,9 +233,13 @@ def test_gyza_status_REPORTS_that_the_bounds_are_unsigned(capsys):
 
     _print_containment_section(GyzaConfig())
     out = capsys.readouterr().out
-    assert "NOT SIGNED" in out
+    # The default now loads the SIGNED bytes with no key configured, which is
+    # a DIFFERENT state from unsigned and carries a DIFFERENT remedy: configure
+    # a pubkey, do not re-sign a document that is already signed.
+    assert "SIGNED BUT UNVERIFIED" in out
+    assert "GYZA_GUARD_AUTHORITY" in out, "the report must say what to do"
     assert "can claim containment: NO" in out
-    assert "sign_guard_config.py" in out, "the report must say what to do"
+    assert "sign_guard_config.py" in out
     # the declared levels are still shown: unsigned is not the same as unknown.
     # The format moved from `10000.00` to `10,000` on 2026-08-19 when the
     # section began reporting MEASURED-of-BOUND instead of the bound alone --

@@ -961,6 +961,21 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     if prov["trusted"]:
         print(f"  bounds: SIGNED (v{prov['version']}, authority "
               f"{prov['authority_pubkey'][:16]}…)")
+    elif prov["source"] == "SIGNED_UNVERIFIED":
+        # A DIFFERENT STATE WITH A DIFFERENT REMEDY. The bytes in force carry a
+        # signature; what is missing is a key to check it against. Reporting
+        # this as "NOT SIGNED" would send the operator to re-sign a document
+        # that is already signed.
+        print(f"  bounds: SIGNED BUT UNVERIFIED (v{prov['version']})")
+        print("    The loaded bytes carry a signature and NO AUTHORITY PUBKEY "
+              "is configured,")
+        print("    so nothing here can check it. Tampering would break the "
+              "signature — but")
+        print("    only a verifier that holds the key would notice. Containment "
+              "cannot be")
+        print("    claimed until it is checked.")
+        print("    Fix: export GYZA_GUARD_AUTHORITY=<pubkey hex>  "
+              "(scripts/sign_guard_config.py prints it)")
     else:
         print(f"  bounds: NOT SIGNED — {prov['source']}")
         print("    The guard configuration is the trust root of every "
@@ -985,6 +1000,21 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
             _grants = _BB(str(_gp)).count_grants_since(0)
             print(f"  {'network grants':22s} {_grants:>12,d} "
                   f"(UNBOUNDED — each permits uncountable egress)")
+            # THE CEILING ON H3's HEADLINE PROPERTY, beside the count.
+            # Only peer-addressed sends could ever be reclassified by an
+            # attestation source; DHT puts, gossip fan-out and the inference
+            # boundary have no single destination to attest. A property that
+            # can apply to only part of the traffic must say which part.
+            from gyza.containment.egress import is_attestable_channel
+            _split = _BB(str(_gp)).egress_by_channel_since(0)
+            _tot = sum(_split.values())
+            if _tot:
+                _att = sum(n for c, n in _split.items()
+                           if is_attestable_channel(c))
+                print(f"  {'attestable share':22s} {_att:>12,d} of {_tot:,d} "
+                      f"({_att / _tot:.1%}) — the CEILING on how much H3 could")
+                print("    ever shrink with attestation; the rest is fan-out "
+                      "with no single destination.")
             if _grants:
                 print("    Each grant shares a network namespace with a "
                       "sandboxed agent; after that")

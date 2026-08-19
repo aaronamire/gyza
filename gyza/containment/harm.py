@@ -51,8 +51,16 @@ class BoundsProvenance:
     `UNSET` and `UNSIGNED_FILE` are both untrusted, and they are kept DISTINCT:
     "no bounds at all" and "bounds nobody signed" are different states and
     collapsing them would hide one behind the other.
+
+    `SIGNED_UNVERIFIED` is the fourth state and it exists for a real condition:
+    the bytes in force CARRY a signature, but no authority pubkey is configured
+    to check it against. It is UNTRUSTED -- `trusted` is True only for verified
+    SIGNED -- but it is materially better than UNSIGNED_FILE, because tampering
+    with the loaded bytes now breaks a signature that a verifier CAN check
+    later. Collapsing it into either neighbour would hide which remedy applies:
+    UNSIGNED_FILE needs a signing run, SIGNED_UNVERIFIED needs only a pubkey.
     """
-    source: str                       # SIGNED | UNSIGNED_FILE | UNSET
+    source: str        # SIGNED | SIGNED_UNVERIFIED | UNSIGNED_FILE | UNSET
     detail: str = ""
     authority_pubkey_hex: str = ""
     version: int | None = None
@@ -166,6 +174,23 @@ class HarmModelRegistry:
         `GuardConfigStore.apply_to(registry)` for the trusted path.
         """
         data = json.loads(Path(path).read_text())
+
+        # A SIGNED CONFIGURATION READ WITHOUT A KEY IS NOT A PLAIN FILE.
+        #
+        # `data.get("bounds", data)` silently returned the whole envelope for a
+        # signed file -- no key named "bounds" at the top level -- so NO BOUNDS
+        # LOADED AT ALL while reporting success. Every class would read
+        # UNDECLARED. That fails closed, but for the wrong reason, and it is why
+        # the signed artifact could not simply be made the default.
+        if isinstance(data, dict) and "config" in data and "signature" in data:
+            cfg = data.get("config") or {}
+            self.load_bounds(cfg.get("bounds", {}), BoundsProvenance(
+                source="SIGNED_UNVERIFIED",
+                detail=(f"signed file {Path(path).name}, no authority pubkey "
+                        f"configured to verify against"),
+                version=cfg.get("version")))
+            return
+
         self.load_bounds(data.get("bounds", data), BoundsProvenance(
             source="UNSIGNED_FILE", detail=f"plain file {Path(path).name}"))
 

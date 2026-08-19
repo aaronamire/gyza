@@ -264,7 +264,19 @@ def _mesh_exit_sends(s0: object, s: object) -> float:
     return float(s.mesh_exit_sends - s0.mesh_exit_sends)
 
 
-DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
+#: THE BYTES IN FORCE MUST BE THE BYTES THAT WERE SIGNED.
+#:
+#: This pointed at the UNSIGNED file while a signed one sat beside it, so the
+#: levels actually loaded came from a file the signature did not cover. Editing
+#: `guard_bounds.json` was therefore UNDETECTABLE BY CONSTRUCTION -- the
+#: signature protected a document nothing read. Pointing here at the signed
+#: configuration makes tampering breakable-and-detectable the moment an
+#: authority pubkey is configured, and `SIGNED_UNVERIFIED` names the interim
+#: state honestly rather than reporting it as either signed or plain.
+DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.signed.json")
+
+#: Kept for the development path and for tests that need a plain document.
+PLAIN_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
 
 
 def build_registries(
