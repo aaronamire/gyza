@@ -961,6 +961,27 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     if prov["trusted"]:
         print(f"  bounds: SIGNED (v{prov['version']}, authority "
               f"{prov['authority_pubkey'][:16]}…)")
+        # SIGNED IS NOT THE SAME AS SEPARATED, and only one of those is what
+        # the induction needs. C-8's base case is that the constrained system
+        # does not hold the signing key; if it does, a local compromise can
+        # re-sign any bounds and the signature stops being evidence against the
+        # adversary that matters. Checked rather than assumed.
+        try:
+            from gyza.containment.guardconfig import authority_key_is_colocated
+            _where = authority_key_is_colocated(prov["authority_pubkey"])
+            if _where:
+                print(f"    ** the AUTHORITY PRIVATE KEY is on this host "
+                      f"({_where}).")
+                print("    Signed bounds are still better than unsigned — "
+                      "tampering without the key")
+                print("    is detectable. But C-8's separation does not hold: "
+                      "anything that can")
+                print("    read that file can re-sign the policy it is "
+                      "constrained by. Move it to")
+                print("    a machine that does not run agents and keep only "
+                      "the pubkey here.")
+        except Exception:  # noqa: BLE001 - status must survive anything
+            pass
     elif prov["source"] == "SIGNED_UNVERIFIED":
         # A DIFFERENT STATE WITH A DIFFERENT REMEDY. The bytes in force carry a
         # signature; what is missing is a key to check it against. Reporting

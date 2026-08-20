@@ -102,3 +102,72 @@ def test_TAMPERING_WITH_THE_SIGNED_FILE_IS_DETECTABLE(tmp_path):
     bad.write_text(json.dumps(doc))
     with pytest.raises((GuardConfigError, Exception)):
         GuardConfigStore(pub).load_file(bad)
+
+
+# --------------------------------------------------------------------------- #
+#  SIGNED IS NOT SEPARATED. C-8's base case is that the constrained system      #
+#  does not hold the signing key. The header of sign_guard_config.py states it  #
+#  -- "keep it off the machine that runs agents" -- and NOTHING VERIFIED IT.    #
+# --------------------------------------------------------------------------- #
+def test_colocated_authority_key_is_DETECTED(tmp_path):
+    from cryptography.hazmat.primitives import serialization as ser
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+    )
+
+    from gyza.containment.guardconfig import authority_key_is_colocated
+
+    import secrets
+    seed = secrets.token_bytes(32)
+    pub = Ed25519PrivateKey.from_private_bytes(seed).public_key().public_bytes(
+        ser.Encoding.Raw, ser.PublicFormat.Raw).hex()
+    kf = tmp_path / "authority.key"
+    kf.write_bytes(seed)
+
+    assert authority_key_is_colocated(pub, [str(kf)]) == str(kf)
+
+
+def test_an_UNRELATED_key_on_disk_is_NOT_reported_as_colocated(tmp_path):
+    """The counter-control. Reporting every key file as 'the authority key'
+    would make the warning noise, and a warning that always fires is ignored."""
+    import secrets
+
+    from cryptography.hazmat.primitives import serialization as ser
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+    )
+
+    from gyza.containment.guardconfig import authority_key_is_colocated
+
+    pub = Ed25519PrivateKey.from_private_bytes(
+        secrets.token_bytes(32)).public_key().public_bytes(
+            ser.Encoding.Raw, ser.PublicFormat.Raw).hex()
+    other = tmp_path / "somebody_elses.key"
+    other.write_bytes(secrets.token_bytes(32))
+
+    assert authority_key_is_colocated(pub, [str(other)]) is None
+
+
+def test_a_missing_or_short_key_file_is_handled(tmp_path):
+    from gyza.containment.guardconfig import authority_key_is_colocated
+
+    short = tmp_path / "truncated.key"
+    short.write_bytes(b"\x01" * 8)
+    assert authority_key_is_colocated("00" * 32,
+                                      [str(short), str(tmp_path / "nope")]) is None
+
+
+def test_status_WARNS_when_the_key_is_colocated(capsys, monkeypatch):
+    """A green SIGNED line next to a co-located key would read as 'trust root
+    secure' when it means 'trust root is on the same disk'."""
+    from gyza.cli import _print_containment_section
+    from gyza.config import load_config
+
+    cfg = load_config()
+    if not cfg.guard_authority_pubkey:
+        pytest.skip("no authority pubkey pinned in this environment")
+    _print_containment_section(cfg)
+    out = capsys.readouterr().out
+    if "bounds: SIGNED" in out and "AUTHORITY PRIVATE KEY is on this host" in out:
+        assert "does not hold" in out or "re-sign the policy" in out
+        assert "Move it to" in out, "the warning must say what to do"

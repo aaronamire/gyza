@@ -123,6 +123,47 @@ def config_hash(config: dict) -> str:
     return blake3.blake3(canonical_bytes(config)).hexdigest()
 
 
+def authority_key_is_colocated(pubkey_hex: str,
+                               search: "list[str] | None" = None) -> str | None:
+    """Return the path of a PRIVATE authority key on this host, or None.
+
+    C-8'S BASE CASE, CHECKED RATHER THAN ASSUMED. The whole containment
+    induction rests on one premise: *the constrained system does not hold the
+    key that signs its bounds.* `scripts/sign_guard_config.py` states it in its
+    header -- "keep it off the machine that runs agents" -- and **nothing
+    verified it.** A host whose agent directory also contains the authority
+    private key can re-sign any bounds it likes after a local compromise, so a
+    bare `SIGNED` verdict there reads far stronger than it is.
+
+    This does not weaken the signature: signed bounds are still strictly better
+    than unsigned, because tampering without the key is detectable. What it
+    weakens is the SEPARATION, and separation is what the induction needs.
+
+    Returns the path so the report can name it. NEVER returns or logs key
+    material -- only a public key is derived, and only to compare.
+    """
+    from cryptography.hazmat.primitives import serialization as _ser
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+    )
+
+    candidates = search or ["~/.gyza/authority.key", "./authority.key"]
+    for c in candidates:
+        path = Path(c).expanduser()
+        try:
+            raw = path.read_bytes()
+            if len(raw) < 32:
+                continue
+            derived = Ed25519PrivateKey.from_private_bytes(
+                raw[:32]).public_key().public_bytes(
+                    _ser.Encoding.Raw, _ser.PublicFormat.Raw).hex()
+        except Exception:                                    # noqa: BLE001
+            continue
+        if derived == pubkey_hex:
+            return str(path)
+    return None
+
+
 def _sign_payload(payload: dict, sk: bytes) -> str:
     from cryptography.hazmat.primitives.asymmetric.ed25519 import (
         Ed25519PrivateKey,
