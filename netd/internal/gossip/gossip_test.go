@@ -187,8 +187,12 @@ func TestGossipFanout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("PublishDelta: %v", err)
 	}
-	if seq != 1 {
-		t.Errorf("first published seq = %d, want 1", seq)
+	// sender_seq is now seeded from the wall clock so it stays monotonic
+	// across daemon restarts (see Manager.seqBase). The property that matters
+	// is that it is positive and increasing, never that it starts at 1 --
+	// starting at 1 is precisely what muted a restarted node.
+	if seq <= 0 {
+		t.Errorf("first published seq = %d, want positive", seq)
 	}
 
 	dB := drainOne(t, chB, 4*time.Second)
@@ -282,8 +286,10 @@ func TestSenderSeqDedupRejects(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("expected 2 deltas, got %d (%v)", len(got), got)
 	}
-	if got[0] != 1 || got[1] != 2 {
-		t.Errorf("expected seqs [1,2], got %v", got)
+	// Consecutive and increasing, not literally [1,2]: sender_seq is seeded
+	// from the wall clock so it stays monotonic across restarts.
+	if got[1] != got[0]+1 {
+		t.Errorf("expected consecutive seqs, got %v", got)
 	}
 
 	// Re-deliver the first delta by directly injecting bytes —

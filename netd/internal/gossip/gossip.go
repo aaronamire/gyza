@@ -126,8 +126,27 @@ type Manager struct {
 	subs     map[uint64]*subscriberHandle  // subscriber_id → handle
 	subSeq   atomic.Uint64                  // next subscriber id
 
-	publishSeq map[string]int64 // project_id → next sender_seq
+	publishSeq map[string]int64 // project_id → count published this run
 	pubSeqMu   sync.Mutex
+
+	// seqBase makes sender_seq MONOTONIC ACROSS RESTARTS.
+	//
+	// publishSeq lives only in memory. Receivers drop any delta whose seq is
+	// <= the highest already seen from that sender (see checkAndUpdateSeq), so
+	// a daemon that restarted and resumed at 1 was SILENTLY MUTED to every
+	// peer that remembered its old high-water mark -- for a deploy, a crash,
+	// or an autoscale event. The longer the node had run, the longer it stayed
+	// muted. Demonstrated by TestRestartedSenderIsSilencedByStaleDedupState.
+	//
+	// Seeding from the wall clock fixes it without persistence: the base rises
+	// on every restart because time does, and no node can publish more
+	// messages in a run than there are nanoseconds in its uptime.
+	//
+	// LIMIT, stated rather than hidden: a backwards clock jump larger than the
+	// node's message count within a run could still regress. Persisting a
+	// high-water mark would close that too and is the durable fix; this one
+	// requires no new I/O on the publish path and no signature change.
+	seqBase int64
 }
 
 // topicState bundles the per-topic primitives plus dedup state. The
@@ -190,6 +209,7 @@ func NewManager(
 		topics:     make(map[string]*topicState),
 		subs:       make(map[uint64]*subscriberHandle),
 		publishSeq: make(map[string]int64),
+		seqBase:    time.Now().UnixNano(),
 	}, nil
 }
 
@@ -344,7 +364,7 @@ func (m *Manager) nextSeq(projectID string) int64 {
 	m.pubSeqMu.Lock()
 	defer m.pubSeqMu.Unlock()
 	m.publishSeq[projectID]++
-	return m.publishSeq[projectID]
+	return m.seqBase + m.publishSeq[projectID]
 }
 
 // Subscribe registers a fan-out slot. Returns a buffered channel that
