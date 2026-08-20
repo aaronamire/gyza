@@ -425,6 +425,23 @@ class AgentRunner:
                 out.append(a)
         return out
 
+    def _attest_context(self, prompt: str) -> "str | None":
+        """Store the assembled context content-addressed; return its hash.
+
+        Returns None when no content-addressed store is attached, which is the
+        honest state for a runner with no CAS rather than a silent skip: the
+        caller then adds nothing to `input_hashes` and the envelope makes no
+        claim about context it cannot produce.
+        """
+        cas = getattr(self._bb, "_artifact_store", None)
+        if cas is None:
+            return None
+        try:
+            return cas.store(prompt.encode("utf-8"))
+        except Exception:                                    # noqa: BLE001
+            LOG.warning("context not attested", exc_info=True)
+            return None
+
     def _execute(self, item: WorkItem) -> dict[str, Any]:
         t0 = time.monotonic_ns()
         inputs = self._gather_inputs(item)
@@ -435,6 +452,27 @@ class AgentRunner:
             current_task=item.description,
             max_episodes=5,
         )
+        # ATTESTED CONTEXT. `build_enriched_prompt` injects up to five
+        # RETRIEVED EPISODES into this prompt, and until now nothing signed
+        # covered them: the envelope's `input_hashes` commits to the work
+        # item's DECLARED inputs only, so the system could not prove what
+        # context produced an output. An inference-time control action that
+        # cannot be shown to the verifier is applied, not auditable.
+        #
+        # The assembled prompt is stored content-addressed and its hash joins
+        # `input_hashes`, which is DELIBERATELY ADDITIVE (icp.py's DAG note):
+        # no schema change, no re-signing, and the Rust byte-parity fixtures
+        # are untouched. It creates no spurious DAG edge either -- a data
+        # dependency edge forms only when an input hash matches another
+        # envelope's `output_hash`, and an artifact hash never does.
+        #
+        # SCOPE, stated rather than implied: this attests what the RUNNER
+        # assembled and handed to the executor. An executor that further
+        # transforms the prompt -- `make_anthropic_executor` inlines artifact
+        # contents -- is not covered by this hash. Closing that requires the
+        # executor to report its final payload and is the next step, not this
+        # one.
+        context_hash = self._attest_context(prompt)
         context = {"item": item, "inputs": inputs}
         raw = self._executor(prompt, context)
 
@@ -573,6 +611,7 @@ class AgentRunner:
 
         duration_ms = max(1, (time.monotonic_ns() - t0) // 1_000_000)
         return {
+            "context_hash": context_hash,
             "output": raw.get("text", ""),
             "output_hash": output_hash,
             "duration_ms": int(duration_ms),
@@ -670,9 +709,15 @@ class AgentRunner:
         # ICP envelope. parent_envelope is this agent's previous envelope
         # — the per-agent local chain. (Cross-agent chains are stitched
         # by a future indexer that walks parent_envelope_hash links.)
-        input_hashes = item.input_hashes if item.input_hashes else [
+        input_hashes = list(item.input_hashes) if item.input_hashes else [
             "00" * 32  # placeholder for "read nothing", keeps verify_chain happy
         ]
+        # The attested context joins the declared inputs. It is appended, never
+        # substituted: a verifier must still see everything the work item
+        # declared, and the context is an ADDITIONAL input to the inference.
+        _ctx = result.get("context_hash")
+        if _ctx and _ctx not in input_hashes:
+            input_hashes.append(_ctx)
         envelope = self._signer.sign_action(
             intent_id=item.lineage_root,
             action_id=item.id,
