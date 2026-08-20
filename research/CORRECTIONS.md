@@ -369,8 +369,10 @@ running the discipline it claims.
 
 ## Decision rules that failed their own feasibility check
 
-Standing rule #4 now has **four** instances, and the fourth is a new species of
-the same error.
+Standing rule #4 now has **five** instances. The fourth and fifth are each a new
+species: the fourth checked the measured quantity but not the baseline the rule
+divides by, and the fifth checked the ceiling of the system under test but not
+of the route's own liveness bar.
 
 | rule | defect |
 |---|---|
@@ -378,6 +380,7 @@ the same error.
 | R10 TUNABLE clause | trivially satisfiable |
 | R11 economy bar 0.40 | exceeded what *any* router could achieve on 2 of 6 MBPP cells |
 | **E1-HOLDS** ("within 2× of the M=2 value") | **the BASELINE was exactly 0.000, so the ratio is undefined and the rule is unscorable.** I checked the feasibility ceiling of the measured quantity and not of the baseline the rule divides by. |
+| **R-H3L liveness bar** (`N = 1000` benign actions) | **satisfiable but not meaningful.** 1000 actions is under an hour at this program's own 26k/day figure, so the bar made Q-BYTES look adequate over a horizon nobody would deploy. |
 
 ## Apparatus defects found in my own instruments
 
@@ -513,3 +516,40 @@ was correctly written down and the claim was published anyway. Writing the cavea
 is not a substitute for running the check**, and a Sec 'what this cannot
 establish' entry that is one cheap run away from being resolved is a TODO, not a
 disclosure. Pinned by `test_coverage_is_not_invariant_across_depth`.
+
+
+## 30. R-H3L's liveness bar was checked for the system and not for itself
+
+`research/h3_level/PREREGISTRATION.md` §3 does standing rule #4 properly for the
+system under test. C1 derives, from the code and before any data, that Q-COUNT
+rises by exactly 1 per action — and the run reproduced 1.000 exactly. That check
+worked and it decided the route.
+
+**The decision rule's own threshold got no such treatment.** §6 fixes liveness
+at "a benign node completes ≥ 1000 actions" with an argument only about why 1000
+is not *too small* for Q-COUNT. Nobody asked whether it was large enough to
+mean anything. At 26,000 actions/day — this program's own planetary figure —
+**1000 actions is under an hour.**
+
+The consequence is not a wrong verdict; `Q-BYTES-CARRIES` is correct as scored.
+The consequence is a verdict that reads as adequacy and is not:
+
+| benign lifetime | catches only adversaries above |
+|---|---|
+| 1,000 actions (~1 hour) | 10× benign |
+| 26,000 actions (1 day) | 260× benign |
+| 9,490,000 actions (1 year) | **94,900× benign** |
+
+A separating level exists iff `b_adv/b_benign > N/K`, so the threshold ratio of
+10 that the sweep located is not a fact about Gyza — **it is `1000/100`, the two
+numbers in my own rule.** A rule can be feasible, non-trivial, and still measure
+a horizon nobody operates over.
+
+**The generalisation is the useful part:** a feasibility ceiling must be computed
+for the *decision rule's parameters*, not only for the quantity the rule scores.
+Both R-H3L and E1-HOLDS put the check on one side of the comparison and left the
+other side unexamined.
+
+Reported as preregistered rather than rescored — `FINDINGS.md` §3a carries the
+correction beside the verdict, and `test_h3_level.py` pins the linear
+degradation so the ratio cannot be quoted without its horizon.
