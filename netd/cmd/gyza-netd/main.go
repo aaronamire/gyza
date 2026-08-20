@@ -296,6 +296,14 @@ func main() {
 			*relayAdvertiseInterval)
 	}
 
+	// The mirror of the DHT promotion watch, for the same free-rider shape:
+	// --autorelay defaults on (we USE relays) and --enable-relay-service
+	// defaults off (we PROVIDE none). Reports only a node that is CONFIRMED
+	// reachable and still declining, since that is the only case where the
+	// default is leaving a cost on someone else.
+	natMgr.WatchRelayContribution(ctx, dhtPromotionGrace, dhtPromotionPoll,
+		logger.Info)
+
 	// Periodic re-publication of every local agent so DHT records don't
 	// expire under their TTL. interval ≤ 0 disables.
 	gdht.StartRepublishLoop(ctx, *republishInterval)
