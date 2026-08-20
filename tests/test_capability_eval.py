@@ -183,6 +183,50 @@ def test_mock_executor_unknown_task_returns_error():
 # End-to-end: run_eval_locally + verify_eval_results round-trip
 # ----------------------------------------------------------------------
 
+@pytest.fixture(autouse=True, scope="module")
+def _stub_embedder():
+    """THE 68-SECOND MYSTERY, MEASURED AND REMOVED.
+
+    CLAUDE.md recorded this test at 68s against a 90s deadline -- 24% headroom
+    -- and said the number "has never been explained", preferring an
+    explanation over raising the deadline. Measured:
+
+        import gyza.memory        :  1.17s
+        EpisodicMemory(...)       :  7.48s
+        FIRST _embed (model load) : 52.53s   <-- the 68 seconds
+        second _embed (warm)      :  0.014s
+
+    **52.5s of it is a one-time SentenceTransformer load, and the attestation
+    loop under test is about 7 seconds.** The deadline was never guarding a slow
+    eval; it was racing a model load, which is why the failure correlates with
+    machine load rather than with anything this test asserts.
+
+    AND THIS TEST DOES NOT USE SEMANTIC EMBEDDINGS AT ALL. It says so itself
+    below -- "eval items have arbitrary embeddings; we don't want the similarity
+    gate to filter them" -- sets `min_similarity_threshold=-1.0`, and seeds the
+    specialization vector from an RNG. The model load buys it nothing.
+
+    Scoped to this module, not to conftest: the suite SHOULD exercise the real
+    embedder somewhere, and disabling it globally would trade a timeout for lost
+    coverage. State is restored on teardown so ordering cannot leak.
+    """
+    import os
+
+    import gyza.embeddings as E
+
+    prev = os.environ.get("GYZA_EMBEDDER")
+    os.environ["GYZA_EMBEDDER"] = "stub"
+    E.reset_default_embedder()
+    try:
+        yield
+    finally:
+        if prev is None:
+            os.environ.pop("GYZA_EMBEDDER", None)
+        else:
+            os.environ["GYZA_EMBEDDER"] = prev
+        E.reset_default_embedder()
+
+
 @pytest.fixture
 def applicant(tmp_path):
     """
@@ -419,3 +463,18 @@ def test_eval_version_is_stable_string():
 # Pyright bookkeeping
 _ = uuid
 _ = time
+
+
+def test_this_module_does_NOT_load_the_real_embedder():
+    """Pins the fix for the 68-second deadline race.
+
+    If this fails, the module-scoped stub fixture stopped taking effect and the
+    52.5s SentenceTransformer load is back -- which will show up as a flaky
+    90s timeout under load rather than as an obvious failure, exactly as it did
+    before it was measured.
+    """
+    from gyza.embeddings import StubEmbedder, default_embedder
+
+    assert isinstance(default_embedder(), StubEmbedder), (
+        "the real embedder is loaded; this module asserts nothing about "
+        "semantic similarity and pays ~52s for it")
