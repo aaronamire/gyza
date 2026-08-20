@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	pb "gyza/netd/internal/grpc/proto"
 	"gyza/netd/internal/gossip"
+	pb "gyza/netd/internal/grpc/proto"
 	"gyza/netd/internal/identity"
 
 	libp2p "github.com/libp2p/go-libp2p"
@@ -374,10 +374,10 @@ func TestValidateProjectID(t *testing.T) {
 		{"valid_with_underscore", false},
 		{"valid.with.dot", false},
 		{"Valid123", false},
-		{"", true},               // empty
-		{"has/slash", true},      // would corrupt topic path
+		{"", true},          // empty
+		{"has/slash", true}, // would corrupt topic path
 		{"has space", true},
-		{"has\x00null", true},    // NUL byte
+		{"has\x00null", true}, // NUL byte
 		{"has\nnewline", true},
 		{string(make([]byte, 129)), true}, // 129 NULs — too long AND bad char; both reasons
 	}

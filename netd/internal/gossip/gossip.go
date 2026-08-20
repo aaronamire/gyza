@@ -1,7 +1,7 @@
 // Package gossip implements cross-cluster blackboard delta sync over
 // libp2p gossipsub.
 //
-// Topology
+// # Topology
 //
 // Each project has its own gossipsub topic:
 //
@@ -12,7 +12,7 @@
 // subscriber within seconds (single-hop fan-out for small meshes; bounded
 // hops for larger ones).
 //
-// Two layers of message authentication
+// # Two layers of message authentication
 //
 // libp2p pubsub envelope: signed by the sender's libp2p host key (which
 // in this system equals the compositor key — same Ed25519). Verified
@@ -27,7 +27,7 @@
 // proof "this delta was issued by compositor X" the application layer
 // trusts for CRDT merging.
 //
-// Dedup
+// # Dedup
 //
 // Each delta carries a per-(sender, project) monotonically increasing
 // sender_seq. Receivers drop any delta whose seq is ≤ the highest seq
@@ -39,7 +39,7 @@
 // back to us. The receive loop drops messages where msg.GetFrom() ==
 // our own PeerID, so the application doesn't have to filter.
 //
-// Subscriber fan-out
+// # Subscriber fan-out
 //
 // One internal subscriber goroutine per joined topic feeds a slice of
 // per-client channels held under the manager's mutex. PublishDelta
@@ -61,9 +61,9 @@ import (
 	pb "gyza/netd/internal/grpc/proto"
 	"gyza/netd/internal/identity"
 
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
-	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/zeebo/blake3"
 	"google.golang.org/protobuf/proto"
 )
@@ -121,17 +121,31 @@ type Manager struct {
 	ps       *pubsub.PubSub
 	logf     func(string, ...any)
 
-	mu       sync.RWMutex
-	topics   map[string]*topicState        // project_id → topic state
-	subs     map[uint64]*subscriberHandle  // subscriber_id → handle
-	subSeq   atomic.Uint64                  // next subscriber id
+	mu     sync.RWMutex
+	topics map[string]*topicState       // project_id → topic state
+	subs   map[uint64]*subscriberHandle // subscriber_id → handle
+	subSeq atomic.Uint64                // next subscriber id
 
-	publishSeq map[string]int64 // project_id → count published this run
-	pubSeqMu   sync.Mutex
+	// publishSeq is ONE counter for all projects, not one per project.
+	//
+	// It used to be map[project_id]int64, which leaked: LeaveProject deleted
+	// m.topics but never the counter, so a long-lived node in a large mesh
+	// accumulated an entry per project it had ever published to, freed never.
+	// Deleting on leave is NOT the fix -- seqBase is fixed for the process, so
+	// a leave/rejoin would restart at seqBase+1, below the seqBase+N peers
+	// already hold, and reproduce exactly the muting that seqBase exists to
+	// prevent.
+	//
+	// A single counter removes the map instead of managing it. The only
+	// consumer of sender_seq is checkAndUpdateSeq's `seq <= last` test, which
+	// needs the sequence to be STRICTLY INCREASING per (sender, topic) and
+	// nothing more. A global counter is strictly increasing on every topic; it
+	// merely skips values on any one of them, which the test does not read.
+	publishSeq atomic.Int64
 
 	// seqBase makes sender_seq MONOTONIC ACROSS RESTARTS.
 	//
-	// publishSeq lives only in memory. Receivers drop any delta whose seq is
+	// The send counter lives only in memory. Receivers drop any delta whose seq is
 	// <= the highest already seen from that sender (see checkAndUpdateSeq), so
 	// a daemon that restarted and resumed at 1 was SILENTLY MUTED to every
 	// peer that remembered its old high-water mark -- for a deploy, a crash,
@@ -158,17 +172,44 @@ type topicState struct {
 	sub       *pubsub.Subscription
 	cancel    context.CancelFunc
 
-	dedupMu  sync.Mutex
-	lastSeen map[string]int64 // sender_pubkey → highest seq applied
+	dedupMu   sync.Mutex
+	lastSeen  map[string]seqEntry // sender_pubkey → highest seq applied
+	lastPrune time.Time
 }
+
+// seqEntry is a sender's dedup high-water mark plus when it was last
+// touched, so idle senders can be evicted and the map stays bounded.
+type seqEntry struct {
+	seq int64
+	at  time.Time
+}
+
+// How long a sender's dedup state is retained after its last delta, and how
+// often the sweep runs. Unbounded lastSeen meant one entry per distinct sender
+// ever seen on a topic, never freed -- at planetary scale, per-topic growth
+// with no ceiling.
+//
+// THE COST OF EVICTION, stated because it is real: once a sender's entry is
+// dropped, a replay of one of its old deltas would be accepted again. That
+// window is bounded by dedupRetention, gossipsub applies its own message-ID
+// dedup underneath, and the application layer merges deltas idempotently
+// (CRDT), so the exposure is a re-merge rather than a corruption. Retaining
+// every sender forever to close it would trade a bounded, idempotent replay
+// for unbounded memory.
+// Vars, not consts, so tests can shrink them and exercise the sweep itself
+// rather than only the function it calls.
+var (
+	dedupRetention  = 30 * time.Minute
+	dedupSweepEvery = 5 * time.Minute
+)
 
 // subscriberHandle is one open SubscribeDeltas stream's slot in the
 // fan-out. The channel buffer size and the projectFilter set are
 // captured at subscription time.
 type subscriberHandle struct {
-	id              uint64
-	ch              chan *pb.BlackboardDelta
-	projectFilter   map[string]struct{} // empty == all joined projects
+	id            uint64
+	ch            chan *pb.BlackboardDelta
+	projectFilter map[string]struct{} // empty == all joined projects
 }
 
 // NewManager constructs a gossipsub instance and a Manager wrapping it.
@@ -202,14 +243,13 @@ func NewManager(
 		return nil, fmt.Errorf("gossipsub init: %w", err)
 	}
 	return &Manager{
-		host:       h,
-		identity:   id,
-		ps:         ps,
-		logf:       logf,
-		topics:     make(map[string]*topicState),
-		subs:       make(map[uint64]*subscriberHandle),
-		publishSeq: make(map[string]int64),
-		seqBase:    time.Now().UnixNano(),
+		host:     h,
+		identity: id,
+		ps:       ps,
+		logf:     logf,
+		topics:   make(map[string]*topicState),
+		subs:     make(map[uint64]*subscriberHandle),
+		seqBase:  time.Now().UnixNano(),
 	}, nil
 }
 
@@ -246,7 +286,7 @@ func (m *Manager) JoinProject(ctx context.Context, projectID string) (int, error
 		topic:     topic,
 		sub:       sub,
 		cancel:    cancel,
-		lastSeen:  make(map[string]int64),
+		lastSeen:  make(map[string]seqEntry),
 	}
 	m.topics[projectID] = st
 	m.mu.Unlock()
@@ -323,7 +363,7 @@ func (m *Manager) PublishDelta(ctx context.Context, d *pb.BlackboardDelta) (int6
 	}
 
 	d.SenderCompositorPubkey = m.identity.PubKeyHex
-	d.SenderSeq = m.nextSeq(d.ProjectId)
+	d.SenderSeq = m.nextSeq()
 	d.TimestampNs = time.Now().UnixNano()
 	d.AppSignature = nil
 
@@ -356,15 +396,12 @@ func (m *Manager) PublishDelta(ctx context.Context, d *pb.BlackboardDelta) (int6
 	return d.SenderSeq, nil
 }
 
-// nextSeq increments and returns the per-project send sequence number.
+// nextSeq increments and returns this daemon's send sequence number.
 // Compatible with the spec's "vector clock" semantic when there's only
 // one entry per (sender, project) — which there always is in this
 // design (one daemon == one compositor).
-func (m *Manager) nextSeq(projectID string) int64 {
-	m.pubSeqMu.Lock()
-	defer m.pubSeqMu.Unlock()
-	m.publishSeq[projectID]++
-	return m.seqBase + m.publishSeq[projectID]
+func (m *Manager) nextSeq() int64 {
+	return m.seqBase + m.publishSeq.Add(1)
 }
 
 // Subscribe registers a fan-out slot. Returns a buffered channel that
@@ -481,11 +518,20 @@ func (m *Manager) verifyAppSignature(d *pb.BlackboardDelta) bool {
 func (m *Manager) checkAndUpdateSeq(st *topicState, d *pb.BlackboardDelta) bool {
 	st.dedupMu.Lock()
 	defer st.dedupMu.Unlock()
-	last := st.lastSeen[d.SenderCompositorPubkey]
-	if d.SenderSeq <= last {
+	now := time.Now()
+	if now.Sub(st.lastPrune) > dedupSweepEvery {
+		for k, v := range st.lastSeen {
+			if now.Sub(v.at) > dedupRetention {
+				delete(st.lastSeen, k)
+			}
+		}
+		st.lastPrune = now
+	}
+	e := st.lastSeen[d.SenderCompositorPubkey]
+	if d.SenderSeq <= e.seq {
 		return false
 	}
-	st.lastSeen[d.SenderCompositorPubkey] = d.SenderSeq
+	st.lastSeen[d.SenderCompositorPubkey] = seqEntry{seq: d.SenderSeq, at: now}
 	return true
 }
 

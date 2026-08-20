@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
-	pb "gyza/netd/internal/grpc/proto"
 	"gyza/netd/internal/gossip"
+	pb "gyza/netd/internal/grpc/proto"
 )
 
 func TestRestartedSenderIsSilencedByStaleDedupState(t *testing.T) {
@@ -128,8 +128,74 @@ func TestRestartedSenderIsSilencedByStaleDedupState(t *testing.T) {
 		t.Logf("B accepted the post-restart delta (seq=%d > pre-restart %d)",
 			d.SenderSeq, highWater)
 	case <-time.After(8 * time.Second):
-		t.Fatalf("REGRESSION: B dropped the restarted sender's delta. sender_seq "+
-			"is no longer monotonic across restarts, so a node that restarts is "+
+		t.Fatalf("REGRESSION: B dropped the restarted sender's delta. sender_seq " +
+			"is no longer monotonic across restarts, so a node that restarts is " +
 			"silently muted to every peer that remembers its old seq.")
 	}
+}
+
+// A LEAVE/REJOIN OF THE SAME PROJECT MUST NOT RESET THE SENDER'S SEQUENCE.
+//
+// This guards the fix that was ALMOST made for the publishSeq leak. That
+// counter was map[project_id]int64 and LeaveProject never deleted it, so it
+// grew per project ever published to. The obvious cleanup -- delete the entry
+// on leave -- reintroduces this test's failure exactly: seqBase is fixed for
+// the process, so the rejoin restarts at seqBase+1, below the seqBase+N that
+// peers still hold, and every delta after the rejoin is dropped. Same muting
+// as a restart, from a leave. The counter is now global and per-project state
+// is gone rather than managed.
+func TestSendSeqIsMonotoneAcrossProjectRejoin(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	const project = "rejoin-seq-test"
+
+	id := makeIdentity(t)
+	h, closeH := hostFor(t, id)
+	defer closeH()
+
+	mgr, err := gossip.NewManager(ctx, h, id, t.Logf)
+	if err != nil {
+		t.Fatalf("NewManager: %v", err)
+	}
+	defer mgr.Close()
+
+	mk := func() *pb.BlackboardDelta {
+		return &pb.BlackboardDelta{
+			ProjectId: project,
+			NewIntents: []*pb.IntentRecord{{
+				IntentId:     "rejoin",
+				GoalSpecJson: `{}`,
+				CreatedAtNs:  time.Now().UnixNano(),
+			}},
+		}
+	}
+
+	if _, err := mgr.JoinProject(ctx, project); err != nil {
+		t.Fatalf("JoinProject: %v", err)
+	}
+	var before int64
+	for i := 0; i < 3; i++ {
+		if before, err = mgr.PublishDelta(ctx, mk()); err != nil {
+			t.Fatalf("publish before leave: %v", err)
+		}
+	}
+
+	if err := mgr.LeaveProject(project); err != nil {
+		t.Fatalf("LeaveProject: %v", err)
+	}
+	if _, err := mgr.JoinProject(ctx, project); err != nil {
+		t.Fatalf("rejoin: %v", err)
+	}
+
+	after, err := mgr.PublishDelta(ctx, mk())
+	if err != nil {
+		t.Fatalf("publish after rejoin: %v", err)
+	}
+	if after <= before {
+		t.Fatalf("SEQ REGRESSED ACROSS REJOIN: %d before leave, %d after rejoin. "+
+			"Every peer holding %d will drop this delta and the node is muted "+
+			"on this project.", before, after, before)
+	}
+	t.Logf("rejoin monotone: %d before leave, %d after", before, after)
 }
