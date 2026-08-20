@@ -235,6 +235,9 @@ class _LanceBackend:
         # already [0-9a-f]; just prefix to make the namespacing explicit.
         return f"episodes_{agent_id}"
 
+    #: Row count at the last successful index build; 0 means never built.
+    _indexed_at = 0
+
     def _connect(self) -> None:
         import lancedb
         self._db = lancedb.connect(str(self._lance_path))
@@ -296,6 +299,68 @@ class _LanceBackend:
             self._ensure_table(episodes[0])
         rows = [self._episode_to_row(e) for e in episodes]
         self._table.add(rows)
+        self._maybe_build_index()
+
+    #: Below this, LanceDB's exhaustive scan is faster than an ANN index and
+    #: IVF has too few rows to partition sensibly.
+    _ANN_MIN_ROWS = 1024
+    #: Rebuild once the table has grown this many times past the last build,
+    #: so index maintenance stays amortized rather than per-write.
+    _ANN_REBUILD_FACTOR = 4
+
+    def _maybe_build_index(self) -> None:
+        """Build the ANN index once the corpus justifies it.
+
+        WHY THIS EXISTS. `search()` reads as an approximate-nearest-neighbour
+        query and this class documents itself as one, but **LanceDB performs an
+        EXHAUSTIVE SCAN until an index is explicitly created** and
+        `create_index` was called nowhere. So the indexed backend was selected,
+        in use, and had no index: retrieval was O(corpus) on the execution hot
+        path, measured at 17 ms / 200 episodes rising linearly to 163 ms /
+        8,000 -- roughly 1 s at 50,000 and 3.6 s at 180,000.
+
+        That is a SLOPE, not a constant: an agent got permanently slower the
+        longer it ran, which is precisely the regime "sustained, long-horizon
+        missions" require.
+
+        Failure is non-fatal. An index that cannot be built leaves the previous
+        behaviour intact -- a slow answer, never a wrong one -- so this cannot
+        be the reason a write fails.
+        """
+        try:
+            n = self._table.count_rows()
+        except Exception:                                    # noqa: BLE001
+            return
+        if n < self._ANN_MIN_ROWS:
+            return
+        if n < self._indexed_at * self._ANN_REBUILD_FACTOR:
+            return
+        try:
+            # cosine, because RetrievalClaim declares metric "cosine_unit" and
+            # the metric definition is the arbiter (see search()'s D2 note).
+            # Building under a different metric would rank by one measure and
+            # report another.
+            self._table.create_index(metric="cosine", replace=True)
+            # AND A SCALAR INDEX ON THE PREFILTER COLUMN. `search()` applies
+            # `where("success = true", prefilter=True)`, and a prefilter is
+            # evaluated across the WHOLE TABLE before the vector search -- so it
+            # is O(corpus) regardless of how good the vector index is. Measured
+            # at 8,000 episodes: the ANN query took 45.8 ms and the full
+            # backend.search 102.7 ms, so the prefilter alone was ~57 ms and
+            # rising linearly.
+            #
+            # Dropping the prefilter is NOT the fix: postfiltering is what
+            # caused D1's systematic under-retrieval, where a qualifying result
+            # could never be returned. Indexing the filtered column keeps the
+            # correctness and removes the scan.
+            try:
+                self._table.create_scalar_index("success", replace=True)
+            except Exception:                                # noqa: BLE001
+                pass          # vector index still stands on its own
+            self._indexed_at = n
+        except Exception:                                    # noqa: BLE001
+            # Leave _indexed_at alone so a later add retries.
+            pass
 
     def search(self, query_vec: np.ndarray, k: int,
                *, success_only: bool = False) -> list[tuple[Episode, float]]:
