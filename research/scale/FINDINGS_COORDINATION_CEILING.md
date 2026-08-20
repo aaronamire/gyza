@@ -1,5 +1,23 @@
 # Coordination-plane scaling ceiling — measured 2026-08-20
 
+> ## ⚠ CORRECTED SAME DAY — THIS FILE FIRST MEASURED THE WRONG THING
+>
+> §1–§3 measure the **read** path and concluded "500k is ~2.5× over". Two
+> further measurements moved the ceiling by three orders of magnitude:
+>
+> | path | throughput | scales with processes? |
+> |---|---|---|
+> | blackboard **reads** | 209,000 /s | yes (2.2×) |
+> | blackboard **writes** | **~11,000 /s** | **no — degrades** |
+> | **bubblewrap sandbox** | **3.3 actions/s/core** | per-core only |
+>
+> **The sandbox is the binding constraint — 305 ms per action, 3,362× the
+> write path.** An agent doing real sandboxed work costs four orders of
+> magnitude more than one polling. Reporting the read ceiling as *the*
+> ceiling was measuring the cheapest path and calling it the system.
+>
+> See §6, which is the finding that actually answers the question.
+
 **Not a projection.** Single-machine measurement of the blackboard poll path,
 which is what every `AgentRunner` executes once per `poll_interval_s` (default
 1.0s). Answers SOW Task 1.2 — *"establish the current scaling ceiling and
@@ -97,3 +115,77 @@ all three are architectural work that has not been done.
 The value of this file is that "designed, not demonstrated" becomes "measured
 at 23k threaded / 200k multi-process, binding constraint identified" — which is
 a statement a reviewer can check, and a starting point rather than a promise.
+
+
+## 6. THE REAL CEILING — writes and the sandbox
+
+### Write path (`post_work_item`), the path reads do not contend on
+
+| processes | writes/s total | per process |
+|---|---|---|
+| 1 | 14,072 | 14,072 |
+| 4 | 12,311 | 3,077 |
+| 16 | 10,656 | 666 |
+
+**Writes do not scale with processes — they degrade.** SQLite serializes
+writers; adding concurrency subtracts throughput. Every agent action performs
+several writes (claim, envelope, artifact, completion, episode), so node-wide
+action throughput from storage alone is roughly **2,000–3,000 actions/sec**.
+
+### Sandbox (bubblewrap), per action
+
+**Median 305.6 ms** (n=12, min 290, max 323). **One core sustains 3.3 sandboxed
+actions per second.**
+
+> **This dominates everything else by 3,362×.** Coordination throughput is
+> irrelevant next to it for any agent doing real work.
+
+### What that means, decomposed by agent kind
+
+The distinction matters and collapsing it produces nonsense:
+
+| population | per-action cost | ceiling |
+|---|---|---|
+| **Mock runners (poll only)** | ~1 read | ~209k/s multi-process; 23k threaded |
+| **Real agents (sandboxed)** | **305 ms + ~5 writes** | **3.3 actions/s/core** |
+
+- **500 real agents, one action per 10 s** → 50 actions/s → **~15 cores of
+  sandbox alone.** Feasible on one large machine.
+- **500 real agents, one action per second** → 500 actions/s → **~150 cores.**
+- **500,000 runners doing sandboxed work** → one action each is **42 core-hours**.
+  Not feasible in any configuration measured here.
+- **500,000 MOCK runners** → polling only, bounded by reads; feasible with
+  sharding and multi-process, *provided they do no sandboxed work.*
+
+## 7. What is STILL NOT MEASURED — and must not be assumed
+
+Everything above is one machine, empty board, coordination and sandbox only.
+**Not measured:**
+
+- **libp2p / DHT / gossip at scale.** The mesh plane is entirely absent from
+  these numbers. `CLAUDE.md` records gossipsub mesh re-formation at 10–15 s on
+  two loopback nodes; behaviour at hundreds is unknown.
+- **Settlement throughput.**
+- **Multi-machine anything.**
+- **Populated board.** Every measurement used an empty blackboard;
+  `get_unclaimed` does more work with real items, so the read ceiling falls.
+- **Episodic memory at corpus scale.** `memory.py:15` — the SQLite backend does
+  brute-force cosine search, "slow above ~50k episodes", and retrieval sits on
+  the execution hot path.
+- **Inference API rate limits.** For *real* agents this is likely the true
+  binding constraint and it is external to the substrate entirely.
+
+## 8. So: is the substrate ready?
+
+**For 500 real agents: nothing measured breaks, but it is sandbox-bound and
+needs roughly 15 cores at a 10-second action cadence.** That is a deployment
+question, not a research one.
+
+**For 500,000 runners doing real work: no**, by four orders of magnitude on the
+sandbox path.
+
+**"Fully ready" is the wrong frame, and the honest answer is no** for reasons
+independent of throughput: `can_claim_containment` reports **FALSE**; DDIL is
+demonstrated on a clean cut only; **no external party has verified a bundle**;
+and H3 has no attestation source so it counts every send. Those gate a
+*deployment claim* regardless of how many agents the machine can hold.
