@@ -727,6 +727,25 @@ class Blackboard:
         # NULL, not 0, when the volume is unknowable. Writing 0 would claim
         # nothing left the machine.
         n = None if byte_count is None else int(byte_count)
+        # A MESH_EXIT row with no byte count makes any byte-denominated harm
+        # measure UNDEFINED over this log, and the natural repair -- treat the
+        # NULL as 0 -- understates disclosure, which is the reassuring
+        # direction and therefore the one that does not get questioned.
+        #
+        # `peer_send` and `outside_send` both annotate `byte_count: int`, and
+        # every current caller passes one. That annotation is a type hint, not
+        # a check, and this method has always accepted None from anywhere; an
+        # unenforced invariant is an assumption. R-H3L needed the sum to be
+        # well-defined to measure anything at all, so the assumption becomes a
+        # check here. UNBOUNDED_GRANT is exempt by design: its volume is
+        # genuinely unknowable and it is excluded from MESH_EXIT for that
+        # reason.
+        if n is None and egress_class in EgressClass.MESH_EXIT:
+            raise ValueError(
+                f"MESH_EXIT class {egress_class!r} requires a byte_count: a "
+                f"NULL makes byte-denominated harm undefined over this log, "
+                f"and reading it as 0 would understate disclosure. Only "
+                f"UNBOUNDED_GRANT may omit it.")
         self._conn().execute(
             "INSERT INTO egress_log "
             "(egress_class, channel, destination, byte_count, timestamp_ns) "

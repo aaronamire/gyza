@@ -280,3 +280,34 @@ def test_channel_split_reports_the_attestable_share(db):
     assert total == 26 and attestable == 5
     # the grant must NOT appear -- it is a different unit
     assert "sandbox:share-net" not in split
+
+
+# A MESH_EXIT ROW WITHOUT A BYTE COUNT IS AN UNDEFINED MEASUREMENT.
+#
+# `peer_send` and `outside_send` annotate `byte_count: int` and every caller
+# passes one, but `record_egress` accepted None from anywhere -- a type hint is
+# not a check. R-H3L (research/h3_level/) needed the byte sum to be well
+# defined, and a single NULL would have made it undefined while the natural
+# repair (read NULL as 0) understates disclosure. That is the reassuring
+# direction, which is the one that does not get questioned.
+def test_mesh_exit_requires_a_byte_count(tmp_path):
+    from gyza.blackboard import Blackboard
+    from gyza.containment.egress import EgressClass
+
+    bb = Blackboard(str(tmp_path / "egress.db"))
+    for cls in EgressClass.MESH_EXIT:
+        with pytest.raises(ValueError, match="requires a byte_count"):
+            bb.record_egress(cls, "some_channel", "dest", None)
+
+
+# ... and the exemption is exactly one class, for a stated reason. A grant's
+# volume is genuinely unknowable, which is why it is excluded from MESH_EXIT.
+def test_unbounded_grant_may_omit_the_byte_count(tmp_path):
+    from gyza.blackboard import Blackboard
+    from gyza.containment.egress import EgressClass
+    from gyza.containment.gyza_model import mesh_exit_sends_since
+
+    bb = Blackboard(str(tmp_path / "egress.db"))
+    bb.record_egress(EgressClass.UNBOUNDED_GRANT, "sandbox", "any", None)
+    assert mesh_exit_sends_since(bb, 0) == 0, (
+        "a grant must not be folded into a send count")
