@@ -175,6 +175,27 @@ is H3's attainable range on representative traffic — the number that must exis
 before a level is declared, because standing rule #4 has now failed five times
 and H1 was retired for exactly that.
 
+> **ANSWERED 2026-08-20 by R-H3L (`research/h3_level/`), and the answer changes
+> the question.** Verdict `Q-COUNT-DEAD` + `Q-BYTES-CARRIES`, preregistered at
+> `c5a3ab6`. The registered quantity — cumulative MESH_EXIT *count* since an
+> immutable origin — rises by **exactly 1.000 per action** (C1, derived from
+> the code before the run and reproduced by it), so a benign node and an
+> exfiltrating one consume it identically and **no level can separate them**.
+> A count of sends measures uptime.
+>
+> Bytes separate, but only above `b_adv/b_benign > N/K` — so the required
+> adversary strength **scales linearly with the operating lifetime demanded**.
+> A level permitting one year at 26k actions/day catches only an agent
+> disclosing 102 MB per inference call.
+>
+> **The general result:** for a monotone flow with a positive benign rate, no
+> bound on cumulative consumption since an immutable origin can both permit an
+> unbounded lifetime and refuse an adversary of bounded per-send strength. H3
+> is therefore in a trilemma — bounded total harm, unbounded lifetime, a bound
+> that binds — of which at most two are available. `can_claim_containment`
+> stays FALSE, and the open question is now **what shape**, not what number,
+> which is a user decision (`FINDINGS.md` §6).
+
 **Open, named by the work itself:** a defector that GAMES a check rather than
 ignoring it; colluding defectors concentrated in one cluster; an adversary that
 can raise the NUMERATOR (R-T §6.3's one standing assumption); the pricing

@@ -164,3 +164,30 @@ failed; do not cite a number from any document without recomputing it.
 a defector that GAMES a check rather than ignoring it; colluding defectors
 concentrated in one cluster; and the amortization lever `A`, still untouched and
 still the binding term in `N ≤ H·A/[(1−p)(1−c)]`.
+
+## H3's level — CLOSED AS A MEASUREMENT, OPEN AS A DESIGN CHOICE (2026-08-20)
+
+`research/h3_level/` (R-H3L, preregistered `c5a3ab6`) answers the question
+`PROGRAM_STATUS` named as the real-system arm's first, and the answer relocates
+it rather than settling it.
+
+**What is closed.** The attainable range was measured. Cumulative MESH_EXIT
+*count* cannot carry a level at all: it rises by exactly 1.000 per action, so
+the benign and exfiltrating nodes exhaust it at the same rate. Cumulative
+*bytes* can, but the separating condition is `b_adv/b_benign > N/K`, so the
+bound weakens linearly as the demanded operating lifetime grows.
+
+**What is open, and it is not a measurement.** A cumulative quantity over an
+immutable origin buys bounded total harm and unbounded lifetime but never a
+bound that binds; an agent-advanced origin buys the other two and is artifact
+#13; a time-windowed origin bounds the rate and so permits unbounded total over
+unbounded time. **Choosing among the three is a product decision** — it fixes
+what Gyza's containment claim *means*, not how strong it is.
+
+**The one piece of that which is codeable now** and is currently a comment
+rather than a mechanism: if a windowed origin is ever adopted, the window origin
+must be a function of **wall-clock time only, never of agent-controlled state**.
+That is precisely what distinguishes it from artifact #13's moving checkpoint,
+and an unenforced invariant is an assumption. No such check exists today because
+no windowed origin exists today; it must land in the same commit as the first
+one that does.
