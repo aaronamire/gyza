@@ -120,12 +120,63 @@ believe the program ended where it did not.**
 | **R-D disperse** | `DISPERSAL-IS-SELF-DEFEATING` — the smarter routing never breaches at any k; a ratio is scale-invariant so an attacker must maximise ASYMMETRY, not damage |
 | **R-C churn** | `REACH-BREAKS-DAMAGE-DOES-NOT` — churn destroys compartmentalisation of reach (1 -> 41 pools) and the horizon still does not return; the claim policy is a threat-dependent safety parameter |
 | **R-N horizon** | `COMPOSABILITY-IS-NOT-SUFFICIENT` — flat has a finite staleness horizon (eps\* = 8); the tree's margin SATURATES at 68.68% of ceiling, identical at eps = 32, 64, 128 |
+| **R-E extensive** | `THE-RATIO-IS-THE-FLOOR-AND-PRESERVATION-IS-PRICED` — a ratio bound permits **97% destruction by fully compliant principals**; at ρ = 0.02 both bounds cost the same margin, and across ρ they separate into a smooth pricing curve (68.9% → 96.7% of ceiling) |
+| **R-T targeted** | `THE-DENOMINATOR-IS-THE-ONLY-LEVER` — the targeted adversary R-D called sharpest **does not work**; sparing the target makes the attack *worse* (103 → 105). Even placement halves k\* (103 → 55). `max` is inert, so breach is governed entirely by total remaining value |
 
-**Corrections to previously published findings are indexed in
-`research/CORRECTIONS.md` (21 entries).** Two closed forms and one scan have
-failed; do not cite a number from any document without recomputing it.
+**Corrections are indexed in `research/CORRECTIONS.md` (29 entries).** Two closed
+forms, one scan, and **two published headlines** of this program have failed; do
+not cite a number from any document without recomputing it.
 
-**Open, named by the work itself:** churn (clusters are fixed everywhere above);
-a defector that GAMES a check rather than ignoring it; colluding defectors
-concentrated in one cluster; and the amortization lever `A`, still untouched and
+---
+
+## THE AGGREGATE-ALIGNMENT ARM IS TERMINAL (2026-08-20)
+
+**No further route will run on the synthetic arena.** Nine consecutive routes —
+margin, defector, hierarchy, blast, horizon, churn, disperse, extensive,
+targeted — all sit on one environment (`research/margin/env_margin.py` and
+`research/hierarchy/tree.py`) whose dynamics, population and harm function were
+chosen by the author.
+
+**The binding constraint stopped being the questions and became the
+environment.** R-T is the proof: its headline invariant was exact across five
+structurally different adversaries at one depth, and **died the moment a single
+topology parameter changed** (CORRECTIONS 29). An arena that cannot support a
+claim across its own parameters cannot support the next nine claims either.
+
+What the arm established, and it is real: the composition inequality; the box
+bounds and the margin identity with an exact feasibility ceiling; hierarchy's
+benefit is the **leaf floor**, not the internal checks (which fire zero times);
+preservation is **priced**, not free; and breach is governed by the extensive
+quantity a ratio bound does not measure.
+
+**This is not the competence-bound closure repeated.** That arm ended because
+six independent mechanism families converged on one negative result. This one
+ends because its instrument is exhausted — a different and less satisfying
+reason, stated plainly rather than dressed as a conclusion.
+
+## THE REAL-SYSTEM ARM IS OPEN (2026-08-20)
+
+The successor is the same discipline against **live agent traffic** rather than
+a simulation, and it became feasible only on 2026-08-19-20, when the
+instrumentation started measuring anything at all:
+
+- egress is classified and counted across all five producers, live-daemon proven
+- sandbox network grants are recorded in their own unit
+- storage, envelopes and authority violations fold from real sources
+- the guard configuration loads the bytes that were actually signed
+- `research/H3_WIRING_GAP.md` records why none of that was true before
+
+Twelve route directories already read production state (`harm_redteam`,
+`reversibility`, `planetary`, `escrow`, `federation`, and others). The arm is a
+**return to that mode**, not a new capability.
+
+**Its first question is already named and already blocked on measurement:** what
+is H3's attainable range on representative traffic — the number that must exist
+before a level is declared, because standing rule #4 has now failed five times
+and H1 was retired for exactly that.
+
+**Open, named by the work itself:** a defector that GAMES a check rather than
+ignoring it; colluding defectors concentrated in one cluster; an adversary that
+can raise the NUMERATOR (R-T §6.3's one standing assumption); the pricing
+curve's shape across depth; and the amortization lever `A`, still untouched and
 still the binding term in `N ≤ H·A/[(1−p)(1−c)]`.
