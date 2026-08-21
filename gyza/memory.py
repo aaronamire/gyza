@@ -253,10 +253,31 @@ class _LanceBackend:
         # construction, which adds a heavy dep we don't otherwise need.
         placeholder = self._episode_to_row(sample)
         placeholder["episode_id"] = "__placeholder__"
-        self._table = self._db.create_table(
-            self._table_name, data=[placeholder]
-        )
-        self._table.delete('episode_id = "__placeholder__"')
+        try:
+            self._table = self._db.create_table(
+                self._table_name, data=[placeholder]
+            )
+            self._table.delete('episode_id = "__placeholder__"')
+        except Exception:                                    # noqa: BLE001
+            # CREATE-OR-OPEN, because "does it exist?" and "create it" are two
+            # calls with a gap between them. `_connect` decides from a
+            # `list_tables()` SNAPSHOT taken at construction; anything that
+            # creates the table after that snapshot -- a sibling process, or
+            # this agent's own earlier run -- leaves `self._table` None while
+            # the table is on disk, and `create_table` then raises
+            # "Table ... already exists".
+            #
+            # MEASURED, NOT HYPOTHETICAL. `gyza serve` failed EVERY work item
+            # after the first few with exactly that error, and because
+            # `_run_loop` releases the claim and continues, the agent looked
+            # alive while completing nothing. A long-running agent is the case
+            # that hits this, which is why it surfaced with the fleet and not
+            # in a unit test that starts from an empty directory.
+            #
+            # Opening is the right recovery: the table already holds this
+            # agent's episodes, and re-raising would make a runner that has
+            # memory from a previous run permanently unable to use it.
+            self._table = self._db.open_table(self._table_name)
 
     @staticmethod
     def _episode_to_row(e: Episode) -> dict:

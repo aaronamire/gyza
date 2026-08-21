@@ -154,7 +154,46 @@ class SentenceTransformerEmbedder:
                     "SentenceTransformerEmbedder. "
                     "Install with: pip install sentence-transformers"
                 ) from e
-            model = SentenceTransformer(self._model_name)
+            # OFFLINE BY DEFAULT. `SentenceTransformer(name)` contacts
+            # huggingface.co on every load even when the model is already
+            # cached, and that is wrong here for three independent reasons:
+            #
+            #   1. IT IS UNMEASURED EGRESS. This runs in the RUNNER process,
+            #      outside the sandbox and outside every H3 producer, so a
+            #      fleet of agents phones a third party at startup and
+            #      `egress_log` stays EMPTY. Measured: three `gyza serve`
+            #      agents made HTTP requests to huggingface.co and H3 reported
+            #      zero. The harm model cannot see a channel nothing reports.
+            #   2. IT BREAKS DDIL. An agent that needs huggingface.co to start
+            #      cannot start on a disconnected, degraded or intermittent
+            #      link -- which is the deployment environment this system is
+            #      built for.
+            #   3. IT IS SLOW AND BUYS NOTHING. Measured 18.9 s online against
+            #      7.7 s offline for the same cached model, and 39 s under
+            #      three-way contention. The round trip re-validates a file
+            #      that is already on disk.
+            #
+            # DOWNLOADING IS AN EXPLICIT ACT. `GYZA_EMBEDDER_ALLOW_DOWNLOAD=1`
+            # permits the fetch, for the first install or a model change. The
+            # default refuses, with a message that says which of the two
+            # situations you are in -- an agent silently reaching the internet
+            # is the failure this closes, so the opt-in must be a decision.
+            allow_download = os.environ.get(
+                "GYZA_EMBEDDER_ALLOW_DOWNLOAD", "").strip().lower() in (
+                    "1", "true", "yes")
+            try:
+                model = SentenceTransformer(
+                    self._model_name, local_files_only=not allow_download)
+            except Exception as exc:                         # noqa: BLE001
+                if allow_download:
+                    raise
+                raise RuntimeError(
+                    f"embedding model {self._model_name!r} is not in the local "
+                    f"cache and downloading is disabled. Agents load their "
+                    f"embedder OFFLINE so they neither reach the network "
+                    f"unmeasured nor fail on a degraded link. To fetch it "
+                    f"once: GYZA_EMBEDDER_ALLOW_DOWNLOAD=1 gyza status"
+                ) from exc
             # API rename in sentence-transformers 5.x: prefer the new name
             # but tolerate older versions that only have the old method.
             get_dim = getattr(
