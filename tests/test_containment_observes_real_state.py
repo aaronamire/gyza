@@ -139,7 +139,10 @@ def test_cadence_wiring_builds_a_real_queue_and_registry():
 
     q, harm, origin = default_cadence_wiring()
     assert isinstance(q, ReviewQueue)
-    assert harm is not None and len(list(harm)) == 4
+    # FIVE since 2026-08-21: H3 gained a RATE class alongside the count. The
+    # count stays registered because it is the reading `gyza status` shows and
+    # can never carry a level; the rate carries the chosen shape.
+    assert harm is not None and len(list(harm)) == 5
     # GENESIS, and it must not move: an origin at process start refills the
     # budget on restart (ledger artifact #13).
     assert origin == 0

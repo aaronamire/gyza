@@ -58,13 +58,24 @@ def test_the_readiness_report_names_which_bounds_are_only_timers():
     assert r["unclassified_drift"] == []
 
 
-def test_H4_is_the_only_class_whose_level_is_a_real_bound():
-    """Measured, not assumed: R-EVID Part B put H4's benign rate at exactly
-    0.000. If another class ever becomes sound this test should change, and
-    changing it should require saying which one and why."""
+def test_H4_is_the_only_class_whose_LEVEL_is_a_real_bound():
+    """A sound SHAPE and a real BOUND are different claims, and only the second
+    is what the containment argument spends.
+
+    `H3_mesh_exit_rate` has a sound shape (sound-by-detection: a trailing
+    window gives non-positive benign drift) and NO LEVEL, so it bounds nothing
+    today. Asserting over shapes alone would have read that as progress. The
+    claim this test makes is about declared levels.
+    """
     harm, _ = build_registries()
-    sound = {c.id for c in harm if c.drift_class in DriftClass.SOUND}
-    assert sound == {"H4_authority"}
+    sound_shape = {c.id for c in harm if c.drift_class in DriftClass.SOUND}
+    assert sound_shape == {"H4_authority", "H3_mesh_exit_rate"}
+
+    real_bounds = {c.id for c in harm
+                   if c.bound is not None and c.drift_class in DriftClass.SOUND}
+    assert real_bounds == {"H4_authority"}, (
+        "a class other than H4 now carries a level whose shape makes it a real "
+        "bound; that is a genuine change and this test should say which and why")
 
 
 # --------------------------------------------------------------------------- #

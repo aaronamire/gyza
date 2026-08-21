@@ -183,6 +183,15 @@ def _unsupervised_actions(s0: object, s: object) -> float:
 #: False while any class is unbounded, signed configuration or not. That price is
 #: correct and is the point -- see research/H3_MESH_EXIT.md §6.
 MEASURED_NOT_BOUNDED: dict[str, str] = {
+    "H3_mesh_exit_rate": (
+        "THE SHAPE IS CHOSEN AND THE LEVEL IS NOT. A rate over a trailing "
+        "wall-clock window is the only sound shape available -- mesh exit is "
+        "irreversible so capacity is unavailable, and a cumulative budget is a "
+        "timer. `research/evidence/recommend_h3_rate.py` measures the "
+        "attainable range (a SATURATED benign node emits 12.7 MB/hour on one "
+        "core). Choosing from that range is a product decision informed by the "
+        "measurement, not determined by it (CLAUDE.md §10)."
+    ),
     "H3_mesh_exit_sends": (
         "no level until the attainable range is measured. H1_credits was "
         "retired because 100 was declared without measuring and refused every "
@@ -236,6 +245,51 @@ def mesh_exit_sends_since(blackboard: object, origin_ns: int = 0) -> int:
     from gyza.containment.egress import EgressClass
     return int(blackboard.count_egress_since(
         int(origin_ns), classes=EgressClass.MESH_EXIT))
+
+
+def mesh_exit_bytes_in_window(blackboard: object, window_ns: int,
+                             now_ns: "int | None" = None) -> int:
+    """THE single source for H3-as-a-rate, windowed the one correct way.
+
+    THE WINDOW ORIGIN ADVANCES WITH THE WALL CLOCK AND NOTHING ELSE. That is
+    the whole distinction from ledger artifact #13, where a gate measured from
+    a checkpoint the AGENT could advance by acting and so bought unlimited
+    drain. An agent cannot buy egress budget by working, only by waiting.
+
+    `EgressClass.MESH_EXIT` is passed here and nowhere else, mirroring
+    `mesh_exit_sends_since`. The class filter is load-bearing twice over: it
+    excludes ATTESTED_PEER, which is what makes the quantity shrink as the mesh
+    grows, and it excludes UNBOUNDED_GRANT, whose byte count is NULL because a
+    grant's volume is genuinely unknowable.
+    """
+    import time as _t
+
+    from gyza.containment.egress import EgressClass
+    if int(window_ns) <= 0:
+        raise ValueError(
+            f"window_ns must be positive, got {window_ns}; a non-positive "
+            f"window makes the lookback empty and the rate unenforceable")
+    now = int(_t.time_ns() if now_ns is None else now_ns)
+    start = max(0, now - int(window_ns))
+    return int(blackboard.mesh_exit_bytes_since(start, EgressClass.MESH_EXIT))
+
+
+def _mesh_exit_rate(s0: object, s: object) -> float:
+    """H3 as a RATE: bytes that left modelled state inside the trailing window.
+
+    `s0` is unused and that is correct, not an oversight. A rate is not a
+    difference from an origin -- the window IS the frame, and subtracting an
+    origin reading would reintroduce the cumulative shape this replaced.
+
+    DIRECT ATTRIBUTE ACCESS, NEVER `getattr(..., 0)`. The first version of this
+    function used a defaulting getattr and
+    `test_the_quantities_REFUSE_a_state_missing_their_field` caught it
+    immediately: a state carrying no egress field would have measured 0.0 --
+    inside any bound, silently passing -- which is the precise defect that test
+    was written to end. A quantity handed a state it cannot measure must raise,
+    because "I could not measure" and "there was no harm" are opposite claims.
+    """
+    return float(s.mesh_exit_bytes_in_window)
 
 
 def _mesh_exit_sends(s0: object, s: object) -> float:
@@ -341,6 +395,55 @@ def build_registries(
             "not repair of the bound."),
     ))
 
+    # H3 AS A RATE -- the shape decision, taken 2026-08-21.
+    #
+    # The count below stays REGISTERED AND UNBOUNDED because it is what
+    # `gyza status` has always reported, and because retiring a class that
+    # still measures something real would lose the reading. But it can never
+    # carry a level: R-EVID Part B measured a benign node and an exfiltrating
+    # one at exactly 1.000 sends per action, so the evidence is 0 and no
+    # threshold separates them.
+    #
+    # WHY A RATE AND NOT A CUMULATIVE BYTE BUDGET. Mesh exit is irreversible,
+    # so `sound-by-capacity` is unavailable in principle -- nothing un-sends.
+    # That leaves `sound-by-detection`, which bounds the rate and never the
+    # total (THEOREMS.md 5). Three consequences decided it:
+    #
+    #   1. A cumulative budget is a TIMER: a node that federates well for years
+    #      is refused anyway, at ceil(L/b).
+    #   2. A rate makes federation PAY. As the mesh grows more traffic is
+    #      attested and stops counting, so the same level permits more useful
+    #      work -- the bound loosens as the federation grows.
+    #   3. It is the only one of Part A 5's four exits that does not spend
+    #      HUMAN ATTENTION. Renewable authorisation needs a person per refill,
+    #      which is the H term in N <= H*A and precisely what caps scale.
+    #
+    # NO LEVEL IS DECLARED HERE. `research/evidence/recommend_h3_rate.py`
+    # measures the attainable range -- a fully SATURATED benign node emits
+    # 12.7 MB/hour -- and choosing from it is a product decision, not a
+    # measurement (CLAUDE.md 10). Declaring one before it is chosen is how
+    # H1_credits was retired.
+    harm.register(HarmClass(
+        id="H3_mesh_exit_rate",
+        description="bytes leaving modelled state inside a trailing wall-clock "
+                    "window — the rate, not the lifetime total",
+        quantity=_mesh_exit_rate,
+        frame="the local egress log over a trailing window",
+        frame_mutable=False,
+        code_path="gyza/containment/gyza_model.py mesh_exit_bytes_in_window",
+        drift_class=DriftClass.DETECTION,
+        drift_reason=(
+            "a trailing wall-clock window subtracts a compensation term from "
+            "the fold, giving non-positive benign drift with reflection at "
+            "zero (THEOREMS_C.md Theorem 5(iv)), so a level on it is a bound "
+            "rather than a timer. THE WINDOW ORIGIN ADVANCES WITH TIME AND "
+            "NOTHING ELSE -- an agent cannot buy egress budget by acting, only "
+            "by waiting, which is what distinguishes it from ledger artifact "
+            "#13's agent-advanced checkpoint. Bounds the RATE and never the "
+            "total: unbounded time still permits unbounded total exit, and no "
+            "level here changes that (THEOREMS.md 5)."),
+    ))
+
     harm.register(HarmClass(
         id="H3_mesh_exit_sends",
         description="sends since the accounting origin that did NOT land on an "
@@ -364,6 +467,26 @@ def build_registries(
     ))
 
     inv = InvariantRegistry()
+    inv.register(Invariant(
+        id="INV-H3-mesh-exit-rate",
+        harm_class="H3_mesh_exit_rate",
+        # TAGGED CUMULATIVE FOR ITS COMPOSITION, NOT ITS MONOTONICITY. The
+        # windowed byte total is NOT monotone -- it falls as old events leave
+        # the window, which is exactly why a level on it is a bound rather than
+        # a timer. But `composes_statelessly` is what the tag decides (C6), and
+        # a running fold over one shared log does not compose concurrently
+        # whether or not it is monotone. Tagging it MONOTONE_NON_CUMULATIVE to
+        # match the quantity's shape would claim stateless composition it does
+        # not have, which is the more dangerous error of the two.
+        cls=InvariantClass.CUMULATIVE,
+        description=(
+            "bytes leaving modelled state within the trailing window stay "
+            "within the declared rate. Registered WITHOUT a level: the shape "
+            "is chosen and the number is a product decision. E2 established "
+            "that a harm class with no invariant makes the engine refuse every "
+            "action through the same channel as a breach, so the invariant "
+            "must exist even while the level does not."),
+    ))
     inv.register(Invariant(
         id="INV-H3-mesh-exit",
         harm_class="H3_mesh_exit_sends",

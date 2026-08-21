@@ -82,9 +82,20 @@ def test_TAMPERING_WITH_THE_SIGNED_FILE_IS_DETECTABLE(tmp_path):
 
     from gyza.containment.guardconfig import GuardConfigError, GuardConfigStore
 
-    raw = Path.home().joinpath(".gyza/authority.key")
-    if not raw.exists():
+    # FIND the key rather than assuming ~/.gyza/authority.key. This test
+    # hardcoded that path and began SILENTLY SKIPPING the moment the key was
+    # relocated on 2026-08-21 -- a coverage regression that a green suite would
+    # have reported as success. It now locates the key through the same
+    # production locator the colocation check uses, so a legitimate move keeps
+    # the test running and only a genuinely absent key skips it.
+    from gyza.config import load_config
+    from gyza.containment.guardconfig import authority_key_is_colocated
+
+    configured = (load_config().guard_authority_pubkey or "").strip()
+    found = authority_key_is_colocated(configured) if configured else None
+    if not found:
         pytest.skip("no local authority key to verify against")
+    raw = Path(found)
     sk = Ed25519PrivateKey.from_private_bytes(raw.read_bytes()[:32])
     pub = sk.public_key().public_bytes(ser.Encoding.Raw, ser.PublicFormat.Raw)
 
@@ -279,3 +290,44 @@ def test_an_ERROR_determining_separation_is_NOT_read_as_separated(tmp_path,
 
     assert r["authority_key_colocated"] == "UNDETERMINED"
     assert r["can_claim_containment"] is False
+
+
+def test_relocating_the_key_does_NOT_silence_the_colocation_check(tmp_path,
+                                                                  monkeypatch):
+    """A check a `mv` defeats reports where the key ISN'T.
+
+    The default search listed two paths, so moving the authority key one
+    directory sideways cleared the warning while changing nothing about the
+    risk: anything running as the agent's user could still read it and re-sign
+    the policy it is constrained by. Widening does not make the check sound --
+    it cannot prove absence anywhere it does not look -- but the common
+    relocations must not silently pass.
+    """
+    import secrets
+
+    from cryptography.hazmat.primitives import serialization as ser
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+    )
+
+    from gyza.containment.guardconfig import authority_key_is_colocated
+
+    seed = secrets.token_bytes(32)
+    pub = Ed25519PrivateKey.from_private_bytes(seed).public_key().public_bytes(
+        ser.Encoding.Raw, ser.PublicFormat.Raw).hex()
+
+    home = tmp_path / "home"
+    monkeypatch.setenv("HOME", str(home))
+    for rel in (".gyza/authority.key", ".gyza-authority/authority.key",
+                ".config/gyza/authority.key", "authority.key"):
+        kf = home / rel
+        kf.parent.mkdir(parents=True, exist_ok=True)
+        kf.write_bytes(seed)
+        assert authority_key_is_colocated(pub) == str(kf), (
+            f"a key at ~/{rel} was not detected; relocating there would clear "
+            f"the warning without achieving any separation")
+        kf.unlink()
+
+    # ...and with the key genuinely gone from every searched location, the
+    # check must clear. Otherwise it is a permanent veto rather than a check.
+    assert authority_key_is_colocated(pub) is None

@@ -147,7 +147,28 @@ def authority_key_is_colocated(pubkey_hex: str,
         Ed25519PrivateKey,
     )
 
-    candidates = search or ["~/.gyza/authority.key", "./authority.key"]
+    # THE SEARCH IS BEST-EFFORT AND CANNOT PROVE ABSENCE, and that limit is the
+    # reason this list is wide rather than tidy. The check answers "is the
+    # signing key reachable by the constrained system?", and the honest answer
+    # for any location it does not look in is "unknown", not "no".
+    #
+    # It listed exactly two paths until 2026-08-21, so RELOCATING THE KEY ONE
+    # DIRECTORY SIDEWAYS SILENCED IT while changing nothing about the risk:
+    # anything running as the agent's user could still read the file and re-sign
+    # the policy it is constrained by. A check that a file move defeats is a
+    # check that reports where the key ISN'T.
+    #
+    # Widening does not make it sound. Only removable media, another host, or
+    # ownership the agent's user cannot read achieves separation; this makes the
+    # common relocations visible instead of silently clearing them.
+    candidates = search or [
+        "~/.gyza/authority.key",
+        "~/.gyza-authority/authority.key",
+        "~/.config/gyza/authority.key",
+        "~/authority.key",
+        "./authority.key",
+        "./authority/authority.key",
+    ]
     for c in candidates:
         path = Path(c).expanduser()
         try:

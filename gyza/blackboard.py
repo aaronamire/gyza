@@ -708,6 +708,43 @@ class Blackboard:
         ).fetchone()
         return int(row["n"] if row is not None else 0)
 
+    def mesh_exit_bytes_since(self, origin_ns: int = 0,
+                              classes: "tuple[str, ...] | list[str] | None" = None
+                              ) -> int:
+        """Bytes that left via the given egress classes at or after `origin_ns`.
+
+        H3's measurand once the quantity became a RATE. The COUNT of sends is
+        mute -- R-EVID measured a benign node and an exfiltrating one emitting
+        exactly 1.000 sends per action, so the count carries zero evidence and
+        no level over it can separate them. Bytes carry evidence.
+
+        SUMS ONLY NON-NULL byte counts, and that is safe here rather than
+        merely convenient: `record_egress` REFUSES a MESH_EXIT row without a
+        byte count, so a NULL can only belong to `UNBOUNDED_GRANT`, which is a
+        different unit and is excluded by the caller's class filter. If that
+        refusal is ever relaxed this sum silently understates disclosure, which
+        is the reassuring direction -- hence the assertion below rather than a
+        comment.
+        """
+        cs = list(classes) if classes is not None else None
+        sql = ("SELECT COALESCE(SUM(byte_count), 0) AS b, "
+               "SUM(byte_count IS NULL) AS nulls "
+               "FROM egress_log WHERE timestamp_ns >= ?")
+        args: list[object] = [int(origin_ns)]
+        if cs is not None:
+            if not cs:
+                return 0
+            sql += f" AND egress_class IN ({','.join('?' * len(cs))})"
+            args += cs
+        row = self._conn().execute(sql, tuple(args)).fetchone()
+        if row["nulls"]:
+            raise ValueError(
+                f"{row['nulls']} row(s) in this egress class set carry a NULL "
+                f"byte_count, so the byte total is UNDEFINED rather than "
+                f"{row['b']}. Reading a NULL as zero would understate "
+                f"disclosure.")
+        return int(row["b"])
+
     def record_egress(self, egress_class: str, channel: str, destination: str,
                       byte_count: int | None,
                       timestamp_ns: int | None = None) -> None:

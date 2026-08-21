@@ -93,7 +93,8 @@ def genesis_origin() -> WindowOrigin:
 def observe_now(*, owner: str, blackboard: object | None = None,
                 artifact_store: object | None = None,
                 authority_violations=(), ledger_entries=(),
-                active_holds: float = 0.0):
+                active_holds: float = 0.0,
+                mesh_exit_window_ns: int = 3600 * 1_000_000_000):
     """Fold the REAL sources into the state the harm model reads.
 
     THIS FUNCTION IS THE MISSING LINK, and its absence is why the containment
@@ -120,7 +121,9 @@ def observe_now(*, owner: str, blackboard: object | None = None,
     None for a source that EXISTS reintroduces the silent zero, which is what
     `tests/test_containment_observes_real_state.py` exists to prevent.
     """
-    from gyza.containment.gyza_model import mesh_exit_sends_since
+    from gyza.containment.gyza_model import (
+        mesh_exit_bytes_in_window, mesh_exit_sends_since,
+    )
 
     origin = genesis_origin()
     stored = int(artifact_store.total_size_bytes()) if artifact_store else 0
@@ -128,6 +131,11 @@ def observe_now(*, owner: str, blackboard: object | None = None,
                  if blackboard else 0)
     exits = mesh_exit_sends_since(blackboard, origin.envelope_ns) \
         if blackboard else 0
+    # H3 AS A RATE. Windowed, so it does NOT take an origin from `genesis` --
+    # the window IS the frame. Folding it from the same append-only log the
+    # count comes from, so the two readings cannot disagree about what left.
+    exit_bytes = (mesh_exit_bytes_in_window(blackboard, mesh_exit_window_ns)
+                  if blackboard else 0)
 
     return project_now(
         owner=owner, ledger_entries=list(ledger_entries),
@@ -135,6 +143,8 @@ def observe_now(*, owner: str, blackboard: object | None = None,
         authority_violations=tuple(authority_violations),
         stored_bytes=stored, signed_envelope_count=envelopes,
         mesh_exit_sends=exits,
+        mesh_exit_bytes_in_window=exit_bytes,
+        mesh_exit_window_ns=int(mesh_exit_window_ns),
     )
 
 

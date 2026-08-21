@@ -237,7 +237,8 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     h, i = build_registries(bounds_file=None)
     r = GuardEngine(h, i).readiness()
     assert r["can_claim_containment"] is False
-    assert set(r["unbounded"]) == {"H3_mesh_exit_sends", "H4_authority",
+    assert set(r["unbounded"]) == {"H3_mesh_exit_rate", "H3_mesh_exit_sends",
+                                   "H4_authority",
                                    "H5_storage_growth",
                                    "H6_unsupervised_actions"}
     assert r["uncovered"] == []
@@ -259,7 +260,13 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     # H5's transcribed from the operator's own GyzaConfig.max_artifact_store_gb.
     # So ONLY C-8 provenance blocks the claim, which is this test's whole point.
     # H3 is registered and deliberately unbounded: measured, not bounded.
-    assert r["unbounded"] == ["H3_mesh_exit_sends"], r["unbounded"]
+    # BOTH H3 classes are unbounded, and deliberately. The RATE carries the
+    # chosen shape and awaits a level; the COUNT can never carry one (evidence
+    # 0), and is kept registered because it is the reading `gyza status` has
+    # always shown. Two unbounded classes is the honest state, not a
+    # regression.
+    assert r["unbounded"] == ["H3_mesh_exit_rate",
+                              "H3_mesh_exit_sends"], r["unbounded"]
     assert r["uncovered"] == []
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False, (

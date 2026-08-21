@@ -85,7 +85,9 @@ def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     # retirement bought). Before H3 was declared, this list was empty and the
     # claim was blocked by provenance alone — not because the gap was smaller,
     # but because it was UNNAMED.
-    assert r["unbounded"] == ["H3_mesh_exit_sends"]
+    # BOTH H3 classes: the RATE carries the chosen shape and awaits a level,
+    # the COUNT can never carry one (evidence 0) and is kept for the reading.
+    assert r["unbounded"] == ["H3_mesh_exit_rate", "H3_mesh_exit_sends"]
     assert r["uncovered"] == []
     assert h.bound("H4_authority") == 0.0
 
@@ -101,7 +103,7 @@ def test_SIGNED_bounds_lift_the_claim(tmp_path):
     # independent gates — the property KEY_PROVENANCE.md recorded when H5 was
     # the unbounded one, now re-exercised by H3.
     assert r["can_claim_containment"] is False
-    assert r["unbounded"] == ["H3_mesh_exit_sends"]
+    assert r["unbounded"] == ["H3_mesh_exit_rate", "H3_mesh_exit_sends"]
     assert r["bounds_provenance"]["authority_pubkey"] == pub.hex()
     assert len(r["bounds_provenance"]["config_hash"]) == 64
 
@@ -180,7 +182,8 @@ def test_NO_bounds_is_a_DISTINCT_state_from_UNSIGNED_bounds():
     # unbounded in BOTH states, so it is added rather than compared away --
     # writing `set(BOUNDS) | {"H3..."}` keeps the assertion about the FILE's
     # effect rather than quietly widening it to whatever is registered.
-    assert set(r["unbounded"]) == set(BOUNDS) | {"H3_mesh_exit_sends"}
+    assert set(r["unbounded"]) == set(BOUNDS) | {"H3_mesh_exit_rate",
+                                                 "H3_mesh_exit_sends"}
 
 
 # --------------------------------------------------------------------------- #

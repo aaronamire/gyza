@@ -83,6 +83,15 @@ class GyzaState:
     # ATTESTED_PEER by construction, which is what makes the quantity shrink as
     # the mesh grows (see `containment/egress.py`).
     mesh_exit_sends: int = 0
+    # H3 AS A RATE: bytes that left via MESH_EXIT inside a TRAILING WALL-CLOCK
+    # WINDOW, not since genesis. The count above is retained because it is what
+    # `gyza status` reports and what the retired-shape record refers to, but it
+    # carries no evidence -- a benign node and an exfiltrating one both emit
+    # 1.000 sends per action (R-EVID Part B), so no level over it separates
+    # them. Bytes do carry evidence, and a window is what keeps the fold from
+    # being a timer.
+    mesh_exit_bytes_in_window: int = 0
+    mesh_exit_window_ns: int = 0
 
     def __post_init__(self) -> None:
         if not self.owner:
@@ -133,6 +142,8 @@ def project_now(
     stored_bytes: int = 0,
     signed_envelope_count: int = 0,
     mesh_exit_sends: int = 0,
+    mesh_exit_bytes_in_window: int = 0,
+    mesh_exit_window_ns: int = 0,
 ) -> GyzaState:
     """State as of now — the `s_next` of a guard evaluation."""
     return GyzaState(
@@ -144,6 +155,8 @@ def project_now(
         stored_bytes=int(stored_bytes),
         signed_envelope_count=int(signed_envelope_count),
         mesh_exit_sends=int(mesh_exit_sends),
+        mesh_exit_bytes_in_window=int(mesh_exit_bytes_in_window),
+        mesh_exit_window_ns=int(mesh_exit_window_ns),
     )
 
 
