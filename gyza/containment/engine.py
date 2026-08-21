@@ -28,7 +28,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from gyza.containment.harm import HarmModelRegistry, UnsetBoundError
+from gyza.containment.harm import DriftClass, HarmModelRegistry, UnsetBoundError
 from gyza.containment.invariants import InvariantRegistry
 from gyza.containment.reversibility import Reversibility, ReversibilityTable
 
@@ -141,8 +141,20 @@ class GuardEngine:
         remedies and a single boolean would hide which one is in force.
         """
         prov = self._harm.bounds_provenance
+        # R-EVID Part C: a level is a BOUND only if its quantity has
+        # non-positive benign drift with reflection; otherwise it is a TIMER
+        # that refuses every benign agent at ceil(L/b). Reported beside the
+        # levels because a level without its drift class does not say whether
+        # the number means anything -- H6 carried a SIGNED 10,000 while its
+        # benign and adversarial rates were identical.
+        timers = [c.id for c in self._harm
+                  if c.bound is not None and c.drift_class == DriftClass.TIMER]
+        unclassified = [c.id for c in self._harm if c.drift_class is None]
         return {
             "harm_classes": [c.id for c in self._harm],
+            "drift_classes": {c.id: c.drift_class for c in self._harm},
+            "bounded_but_only_a_timer": timers,
+            "unclassified_drift": unclassified,
             "unbounded": self._harm.unbounded(),
             "mutable_frames": self._harm.mutable_frames(),
             "uncovered": self._inv.uncovered([c.id for c in self._harm]),

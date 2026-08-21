@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from gyza.containment.harm import HarmClass, HarmModelRegistry
+from gyza.containment.harm import DriftClass, HarmClass, HarmModelRegistry
 from gyza.containment.invariants import (
     Invariant, InvariantClass, InvariantRegistry,
 )
@@ -291,6 +291,14 @@ def build_registries(
         frame="delegation chain root manifest",
         frame_mutable=False,
         code_path="gyza/economy/delegation.py:264 verify_delegation",
+        drift_class=DriftClass.SILENCE,
+        drift_reason=(
+            "benign rate measured at EXACTLY 0.000 (R-EVID Part B): "
+            "runner.py appends to _authority_violations only inside the "
+            "`if not ok` branch of enforcement_satisfies_manifest, so a "
+            "compliant execution cannot increment it. The walk never takes a "
+            "step, which is why a bound of 0 never false-alarms. This is the "
+            "only registered class whose level is a bound rather than a timer."),
     ))
 
     harm.register(HarmClass(
@@ -301,6 +309,16 @@ def build_registries(
         frame="the local artifact store",
         frame_mutable=False,
         code_path="gyza/network/artifact_store.py:115 total_size_bytes",
+        drift_class=DriftClass.TIMER,
+        drift_reason=(
+            "STOCK-SHAPED, FLOW-BEHAVED. total_size_bytes DOES decrement when "
+            "an artifact is removed (measured: 10,000 -> 9,000 bytes), but "
+            "ArtifactStore exposes no reversal at all and the sole unlink() in "
+            "the tree (artifact_store.py:92) is corruption repair on a hash "
+            "mismatch. So r = 0 < b and Theorem 5(i) applies. Reclassify to "
+            "CAPACITY only when a reversal exists AND its rate is measured to "
+            "exceed the creation rate -- Theorem 6: a tombstone with r < b is "
+            "still a timer, merely a slower one."),
     ))
 
     harm.register(HarmClass(
@@ -311,6 +329,16 @@ def build_registries(
         frame="the local envelope log",
         frame_mutable=False,
         code_path="gyza/blackboard.py count_envelopes_since",
+        drift_class=DriftClass.TIMER,
+        drift_reason=(
+            "rho = 1.000 BY DEFINITION, not by accident (R-EVID Part B). The "
+            "quantity is the count of signed envelopes, and an adversary doing "
+            "harmful work signs exactly as many as a benign agent doing useful "
+            "work -- the difference is not in the count, so evidence D = 0 and "
+            "NO level separates them. A timer is nevertheless exactly what a "
+            "review CADENCE should be: this class is correctly built and "
+            "mis-registered, and the remedy is reclassification to a cadence, "
+            "not repair of the bound."),
     ))
 
     harm.register(HarmClass(
@@ -323,6 +351,16 @@ def build_registries(
         frame_mutable=False,
         code_path="gyza/blackboard.py count_egress_since; "
                   "classification in gyza/containment/egress.py",
+        drift_class=DriftClass.TIMER,
+        drift_reason=(
+            "benign rate 1.000 sends/action with rho = 1.000 and evidence "
+            "D = 0 (R-H3L, reproduced by R-EVID Part B on an independent "
+            "harness). A COUNT of sends measures uptime, not harm. Bytes carry "
+            "evidence (rho = 374) but are still an unreflected positive-drift "
+            "fold, so a byte level is a slower timer. Mesh exit is "
+            "irreversible, so CAPACITY is unavailable in principle: the only "
+            "sound shape here is DETECTION over a rate, which bounds the rate "
+            "and never the total (Part A 5)."),
     ))
 
     inv = InvariantRegistry()
