@@ -594,3 +594,42 @@ though the material for it was two sections away.
 Not scored as a failure of standing rule #4: the preregistered bar (10×) was
 feasibility-checked on both sides and did its job by *catching* this. The defect
 is in Part A's prose, and Part B's data is what found it.
+
+
+## 32. "Six theorems, first ever" — the mathematics is classical and the application was published five months earlier
+
+R-EVID Parts A and C separated classical from contributed in their own §6 and
+cited Wald, Page, Lorden, Moustakides, Lindley, Cramér–Lundberg and Kingman. The
+documents were not dishonest. **The framing around them drifted anyway**, and by
+the end of the session the claim in play was that the route had produced six new
+theorems.
+
+A prior-art pass (`research/evidence/PRIOR_ART.md`) refutes it:
+
+- **Theorem 5, presented as the deepest contribution, is Neely's virtual-queue
+  technique** — `Q(t+1) = max(0, Q(t) + a − b)` with Lyapunov drift, foundational
+  in stochastic network optimization and textbook since ~2010. "Safety virtual
+  queues" already exist in network control.
+- **Theorem 6 is queue stability**, `λ < μ`.
+- **Theorem 2 is why token buckets exist** — the quota-vs-rate-limit distinction
+  is standard systems engineering.
+- **The agent application is prior art**: Sahoo's Irreversibility Budget (ICLR
+  2026 workshop, arXiv 2603.03515, March 2026) defines `IC(t) = Σ ι(aⱼ)` with
+  human re-authorization at `IC ≥ I_B`, and `ι = 0` for reversible actions — our
+  SILENCE case as a design feature.
+
+**The species is not a false measurement.** Every number R-EVID reports still
+stands; `b = 0.000`, `ρ = 1.000`, the two live defects, all reproduce. What
+failed was the NOVELTY claim wrapped around them, and it failed because the
+citation work was done inside the documents and then not carried into how the
+result was described.
+
+**Generalisable lesson:** citing prior art in a §6 does not protect a claim if
+the headline is written as though §6 were not there. `FINDINGS_PRIOR_ART.md` §3
+had already reached exactly this conclusion about the competence bound — *"it has
+a name, and it is not ours"* — and that precedent should have been applied to
+R-EVID before the framing hardened, not after.
+
+**What survives is in `PRIOR_ART.md` §4** and it is narrower: the
+classification-as-audit-method, the measured finding that a real system's signed
+bounds are mostly timers, and the defects the method found.
