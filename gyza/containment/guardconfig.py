@@ -27,6 +27,8 @@ in the interior and must pass the promotion gate: the maximally-gated action.
 from __future__ import annotations
 
 import json
+import logging
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -307,10 +309,36 @@ class GuardConfigStore:
     """Holds the verified configuration and refuses to replace it except under
     the authority signature."""
 
-    def __init__(self, authority_pubkey: bytes):
+    def __init__(self, authority_pubkey: bytes,
+                 history_path: "str | Path | None" = None):
         self._authority = bytes(authority_pubkey)
         self._genesis_authority = bytes(authority_pubkey)
         self._cfg: VerifiedGuardConfig | None = None
+        #: WHERE VERSION MONOTONICITY SURVIVES A RESTART.
+        #:
+        #: `_cfg` is None on every fresh store, and BOTH monotonicity checks
+        #: compare against it -- so before 2026-08-21 a cold load accepted any
+        #: validly-signed configuration, including an OLD one. Demonstrated
+        #: against the real file shipped at v0.1.3: it installed cleanly over
+        #: v3, no key required, because a rollback payload is just a file from
+        #: git history.
+        #:
+        #: That is the one attack a signature cannot show you. Replacing code
+        #: needs the same host write access and breaks integrity checks; a
+        #: rollback leaves EVERY SIGNATURE VERIFYING, and `gyza status` would
+        #: report "bounds: SIGNED (v1, authority ...)" and be telling the
+        #: truth. The version integer was the only tell and nothing compared it
+        #: against anything.
+        #:
+        #: WHAT THIS DOES AND DOES NOT CLOSE. It remembers the highest version
+        #: ever installed and refuses anything below it, so a silent downgrade
+        #: becomes a refusal. An attacker with write access to BOTH the config
+        #: and this file can reset both and roll back anyway -- local storage
+        #: cannot prevent that, only trusted storage or a remote witness can.
+        #: This raises the bar and is not a closure, which is why the ceiling
+        #: is written here rather than left for a reader to discover.
+        self._history_path = (Path(history_path).expanduser()
+                              if history_path else None)
         #: Every accepted succession, oldest first, so an offline verifier
         #: holding only the GENESIS pubkey can walk to the current one. A
         #: rotation nobody can reconstruct is indistinguishable from a key
@@ -417,12 +445,84 @@ class GuardConfigStore:
                 f"the authority key."
             ) from None
 
+    def _version_floor(self) -> int:
+        """Highest version ever installed, from the append-only history.
+
+        FAILS CLOSED ON A BROKEN CHAIN. A history whose links do not verify has
+        been edited, and an edited history is exactly what a rollback needs --
+        so it raises rather than returning 0. "I cannot tell" must not read as
+        "no floor", which is the reassuring direction.
+        """
+        if self._history_path is None or not self._history_path.exists():
+            return 0
+        floor, prev = 0, ""
+        for i, line in enumerate(
+                self._history_path.read_text().splitlines(), start=1):
+            if not line.strip():
+                continue
+            try:
+                rec = json.loads(line)
+                link = blake3.blake3(
+                    canonical_bytes({"version": rec["version"],
+                                     "config_hash": rec["config_hash"],
+                                     "at_ns": rec["at_ns"],
+                                     "prev": rec["prev"]})).hexdigest()
+            except Exception as exc:                         # noqa: BLE001
+                raise GuardConfigError(
+                    f"guard-config history is unreadable at line {i} ({exc}). "
+                    f"An unreadable history cannot establish a version floor, "
+                    f"and proceeding without one is what a rollback needs."
+                ) from exc
+            if rec["prev"] != prev:
+                raise GuardConfigError(
+                    f"guard-config history chain breaks at line {i}: entry "
+                    f"names predecessor {rec['prev'][:16]!r} but the previous "
+                    f"link hashes to {prev[:16]!r}. The history has been "
+                    f"edited, which is what a rollback requires.")
+            prev = link
+            floor = max(floor, int(rec["version"]))
+        return floor
+
+    def _record_install(self, version: int, config_hash_hex: str) -> None:
+        """Append one install to the chained history. Best-effort on I/O, but
+        a failure is LOGGED -- an install nobody recorded lowers the floor for
+        the next start."""
+        if self._history_path is None:
+            return
+        prev = ""
+        try:
+            if self._history_path.exists():
+                for line in self._history_path.read_text().splitlines():
+                    if not line.strip():
+                        continue
+                    r = json.loads(line)
+                    prev = blake3.blake3(canonical_bytes(
+                        {"version": r["version"], "config_hash": r["config_hash"],
+                         "at_ns": r["at_ns"], "prev": r["prev"]})).hexdigest()
+            rec = {"version": int(version), "config_hash": config_hash_hex,
+                   "at_ns": time.time_ns(), "prev": prev}
+            self._history_path.parent.mkdir(parents=True, exist_ok=True)
+            with self._history_path.open("a") as fh:
+                fh.write(json.dumps(rec, sort_keys=True) + "\n")
+        except OSError:
+            logging.getLogger(__name__).warning(
+                "[guardconfig] install of v%s was not recorded; the version "
+                "floor will not rise", version, exc_info=True)
+
     def _install(self, config: dict, signature_hex: str,
                  _allow_loosening: bool = False) -> VerifiedGuardConfig:
         if not verify_config(config, signature_hex, self._authority):
             raise GuardConfigError(
                 "signature does not verify against the declared authority key")
         version = int(config.get("version", 0))
+        floor = self._version_floor()
+        if self._cfg is None and version < floor:
+            raise GuardConfigError(
+                f"refusing to install version {version}: this host has "
+                f"previously installed version {floor}. A validly-signed OLD "
+                f"configuration is a ROLLBACK -- every signature verifies and "
+                f"the bounds silently revert. Monotonicity is checked across "
+                f"restarts, not only within one process.")
         if self._cfg is not None and version <= self._cfg.version:
             # Monotone versioning: a valid OLD config must not be replayable to
             # reinstate loosened bounds that were since tightened.
@@ -458,6 +558,7 @@ class GuardConfigStore:
             authority_pubkey_hex=self._authority.hex(),
             config_hash=config_hash(config),
         )
+        self._record_install(version, self._cfg.config_hash)
         return self._cfg
 
     def install_loosening(self, config: dict, signature_hex: str,

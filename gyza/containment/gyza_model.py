@@ -538,7 +538,16 @@ def build_registries(
                 f"an authority key was supplied but no configuration exists at "
                 f"{bounds_file!r}. Refusing to run unconfigured: an absent "
                 f"policy is not a permissive policy")
-        store = GuardConfigStore(authority_pubkey)
+        # The version floor lives on the host, not in the repo. Without it a
+        # cold start accepts any previously-signed configuration -- a rollback
+        # needs no key, only a file from git history, and leaves every
+        # signature verifying.
+        try:
+            from gyza.config import load_config as _lc
+            _hist = _lc().guard_config_history_path
+        except Exception:                                    # noqa: BLE001
+            _hist = None
+        store = GuardConfigStore(authority_pubkey, history_path=_hist)
         try:
             store.load_file(bounds_file)
         except (KeyError, TypeError) as e:
