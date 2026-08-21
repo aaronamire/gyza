@@ -553,3 +553,44 @@ other side unexamined.
 Reported as preregistered rather than rescored — `FINDINGS.md` §3a carries the
 correction beside the verdict, and `test_h3_level.py` pins the linear
 degradation so the ratio cannot be quoted without its horizon.
+
+
+## 31. R-EVID Part A said the cumulative level "is dominated". It is dominated ONLY where the measurand already carries evidence
+
+`research/evidence/THEOREMS.md` §3 states that CUSUM over the same log buys
+benign lifetime exponentially while paying linearly in delay, and concludes the
+cumulative level "is not merely suboptimal — it is dominated by a statistic
+computable from exactly the same log."
+
+**Part B measured it and the flat claim is wrong at the low end.** At matched
+detection delay (K = 100 actions):
+
+| `ρ` | CUSUM lifetime | LEVEL ceiling | advantage |
+|---|---|---|---|
+| **1.05** | 45.8 | 105.0 | **0.4× — WORSE** |
+| **1.20** | 223.7 | 120.0 | 1.9× |
+| 1.50 | 21,204.8 | 150.0 | 141× |
+
+The preregistered bar was ≥10×; it fails at ρ ≤ 1.2 and holds from ρ ≈ 1.5.
+
+**The failure was derivable from Part A's own §4 and I did not derive it.** As
+ρ → 1 the evidence D → 0, so by Wald's identity the observations required
+diverge and no threshold meets the delay budget without collapsing the
+false-alarm rate. §3 was written about the *asymptotic* regime and stated
+without its domain of validity; §4, two sections later, contains exactly the
+condition that bounds it.
+
+**The corrected statement is stronger than the one it replaces:** the optimal
+test is bounded by the same evidence that bounds the naive one, so *the
+measurand, not the test, is the binding constraint.* That is the route's thesis,
+and stating domination flatly obscured it.
+
+**Species:** a claim asserted in its asymptotic regime and reported without the
+condition, where the condition was already written down elsewhere in the same
+document. Related to 29 — writing the caveat is not a substitute for running the
+check — but distinct: here the caveat was not even written where the claim was,
+though the material for it was two sections away.
+
+Not scored as a failure of standing rule #4: the preregistered bar (10×) was
+feasibility-checked on both sides and did its job by *catching* this. The defect
+is in Part A's prose, and Part B's data is what found it.

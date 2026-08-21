@@ -1,0 +1,145 @@
+{
+  "actions_per_workload": 200,
+  "classes": [
+    {
+      "adversary_rate": 1.0,
+      "adversary_rejection_reason": "sandbox granted read paths beyond manifest: ['/etc']",
+      "benign_rate": 0.0,
+      "benign_refused_at_action": Infinity,
+      "class": "H4_authority",
+      "declared_level": 0.0,
+      "evidence_nats": null,
+      "rho": null,
+      "shape": "flow",
+      "sound_reason": "benign rate is zero"
+    },
+    {
+      "accessor": "gyza/network/artifact_store.py:115 total_size_bytes rglob+stat",
+      "bytes_after_out_of_band_removal": 9000,
+      "bytes_after_writes": 10000,
+      "class": "H5_storage_growth",
+      "decrements_on_reversal": true,
+      "derived_from_append_only_log": false,
+      "public_api": [
+        "base_path",
+        "exists",
+        "get",
+        "list_hashes",
+        "max_bytes",
+        "size_bytes",
+        "store",
+        "total_size_bytes"
+      ],
+      "shape": "stock",
+      "store_exposes_a_reversal": false
+    },
+    {
+      "adversary_rate": 1.0,
+      "benign_rate": 1.0,
+      "benign_refused_at_action": 10000,
+      "class": "H6_unsupervised_actions",
+      "declared_level": 10000.0,
+      "evidence_nats": 0.0,
+      "measured_how": "STRUCTURAL, not sampled: runner._complete signs exactly one envelope per completed work item, so both behaviours emit 1.0/action by construction. Labelled rather than dressed as a sample.",
+      "rho": 1.0,
+      "shape": "flow"
+    },
+    {
+      "adversary_rate": 1.0,
+      "benign_rate": 1.0,
+      "benign_refused_at_action": 10000,
+      "class": "H3_mesh_exit_count",
+      "declared_level": null,
+      "evidence_nats": 0.0,
+      "note": "no level is declared; the refusal action is shown for a hypothetical 10,000 to make the timer visible",
+      "rho": 1.0,
+      "shape": "flow"
+    },
+    {
+      "adversary_rate": 403419.0,
+      "benign_rate": 1077.0,
+      "benign_refused_at_action": 1003,
+      "class": "H3_mesh_exit_bytes",
+      "declared_level": null,
+      "evidence_nats": 367.65080534541954,
+      "rho": 374.5766016713092,
+      "shape": "flow"
+    }
+  ],
+  "cusum": {
+    "benign_rate": 1077.0,
+    "by_rho": {
+      "1.05": {
+        "advantage_over_level": 0.4359523809523809,
+        "cusum_benign_lifetime": 45.775,
+        "cusum_detection_delay": 40.95,
+        "cusum_lifetime_censored_runs": 0,
+        "level_max_benign_lifetime_at_same_delay": 105.0,
+        "reference_k": 1103.7060628244037,
+        "threshold": 5385.0
+      },
+      "1.2": {
+        "advantage_over_level": 1.8641666666666665,
+        "cusum_benign_lifetime": 223.7,
+        "cusum_detection_delay": 59.5,
+        "cusum_lifetime_censored_runs": 0,
+        "level_max_benign_lifetime_at_same_delay": 120.0,
+        "reference_k": 1181.4291397447198,
+        "threshold": 10770.0
+      },
+      "1.5": {
+        "advantage_over_level": 141.36516666666668,
+        "cusum_benign_lifetime": 21204.775,
+        "cusum_detection_delay": 72.575,
+        "cusum_lifetime_censored_runs": 4,
+        "level_max_benign_lifetime_at_same_delay": 150.0,
+        "reference_k": 1328.1044144897085,
+        "threshold": 21540.0
+      },
+      "2.0": {
+        "advantage_over_level": 300.0,
+        "cusum_benign_lifetime": 60000.0,
+        "cusum_detection_delay": 86.4,
+        "cusum_lifetime_censored_runs": 40,
+        "level_max_benign_lifetime_at_same_delay": 200.0,
+        "reference_k": 1553.7825590374136,
+        "threshold": 53850.0
+      },
+      "4.0": {
+        "advantage_over_level": 150.0,
+        "cusum_benign_lifetime": 60000.0,
+        "cusum_detection_delay": 56.5,
+        "cusum_lifetime_censored_runs": 40,
+        "level_max_benign_lifetime_at_same_delay": 400.0,
+        "reference_k": 2330.6738385561202,
+        "threshold": 107700.0
+      },
+      "10.0": {
+        "advantage_over_level": 60.0,
+        "cusum_benign_lifetime": 60000.0,
+        "cusum_detection_delay": 82.6,
+        "cusum_lifetime_censored_runs": 40,
+        "level_max_benign_lifetime_at_same_delay": 1000.0,
+        "reference_k": 4209.61641308822,
+        "threshold": 538500.0
+      }
+    },
+    "detection_budget_K": 100
+  },
+  "horizons": {
+    "1000": {
+      "required_rho": 10.0
+    },
+    "26000": {
+      "required_rho": 260.0
+    },
+    "780000": {
+      "required_rho": 7800.0
+    },
+    "9490000": {
+      "required_rho": 94900.0
+    }
+  },
+  "part_a_commit": "c968d0c",
+  "preregistration_commit": "113e1c3"
+}
