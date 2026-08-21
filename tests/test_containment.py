@@ -257,12 +257,11 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     # D1 is fully lifted: every registered class now has a declared level,
     # H5's transcribed from the operator's own GyzaConfig.max_artifact_store_gb.
     # So ONLY C-8 provenance blocks the claim, which is this test's whole point.
-    # H3 is registered and deliberately unbounded: measured, not bounded.
-    # Only the RATE. The COUNT was RETIRED 2026-08-21: it can never carry a
-    # level (benign and exfiltrating nodes emit the same number of sends), and
-    # leaving it registered kept `unbounded` permanently non-empty, making the
-    # containment claim unreachable by construction.
-    assert r["unbounded"] == ["H3_mesh_exit_rate"], r["unbounded"]
+    # EMPTY since v3 (2026-08-21) declared H3's rate level at 300 MB/h. Every
+    # registered class carries a bound, so D1 is fully lifted and the claim is
+    # refused by C-8 alone -- which is exactly what this test is named for, and
+    # is now demonstrated more cleanly than when H3 was also blocking.
+    assert r["unbounded"] == [], r["unbounded"]
     assert r["uncovered"] == []
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False, (

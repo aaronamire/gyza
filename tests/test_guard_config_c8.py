@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import secrets
+from pathlib import Path
 
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -81,13 +82,12 @@ def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     assert r["bounds_provenance"]["source"] == "UNSIGNED_FILE"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
-    # TWO blockers now, and separating them matters. Provenance is one; the
-    # other is that H3_mesh_exit_sends is REGISTERED AND UNBOUNDED on purpose
-    # (measured, not bounded — the level waits on the measurement that H1's
-    # retirement bought). Before H3 was declared, this list was empty and the
-    # claim was blocked by provenance alone — not because the gap was smaller,
-    # but because it was UNNAMED.
-    assert r["unbounded"] == ["H3_mesh_exit_rate"]
+    # ONE blocker again since v3 declared H3's level (2026-08-21): provenance.
+    # This list held H3 while its level waited on measurement, and the point
+    # that mattered then still holds now -- the two gates are INDEPENDENT, and
+    # this test is about the provenance one. A `[]` here does not mean the
+    # claim is available; the assertion above is what refuses it.
+    assert r["unbounded"] == []
     assert r["uncovered"] == []
     assert h.bound("H4_authority") == 0.0
 
@@ -98,10 +98,10 @@ def test_SIGNED_bounds_lift_the_claim(tmp_path):
                       authority_pubkey=pub)
     assert r["bounds_provenance"]["source"] == "SIGNED"
     assert r["bounds_signed"] is True
-    # SIGNING DOES NOT MANUFACTURE THE CLAIM. C-8 (provenance) is open; D1
-    # (every class bounded) is not, because H3 has no declared level. Two
-    # independent gates — the property KEY_PROVENANCE.md recorded when H5 was
-    # the unbounded one, now re-exercised by H3.
+    # SIGNING DOES NOT MANUFACTURE THE CLAIM. This file is built from THIS
+    # MODULE'S `BOUNDS` fixture, which declares H4 and H5 only -- so H3 is
+    # genuinely unbounded here regardless of what the shipped configuration
+    # says, and D1 is open for that reason. Two independent gates.
     assert r["can_claim_containment"] is False
     assert r["unbounded"] == ["H3_mesh_exit_rate"]
     assert r["bounds_provenance"]["authority_pubkey"] == pub.hex()
@@ -112,9 +112,18 @@ def test_the_BOUNDS_THEMSELVES_are_identical_either_way(tmp_path):
     """Counter-control. If signing changed the levels, the test above would be
     measuring a different policy rather than the same one under authority."""
     seed, pub = _authority()
+    # SIGN THE SHIPPED BOUNDS, not this module's fixture. Comparing the shipped
+    # configuration against a synthetic one measures two different POLICIES and
+    # calls the difference an effect of signing -- which is the exact confusion
+    # this test's docstring warns about. It began failing the moment the two
+    # diverged (H3's level was declared in the shipped file at v3, 2026-08-21),
+    # which is the test noticing correctly.
+    shipped = json.loads(Path(DEFAULT_BOUNDS_FILE).read_text())
+    shipped_bounds = shipped.get("config", shipped)["bounds"]
     unsigned, _ = _readiness(bounds_file=DEFAULT_BOUNDS_FILE)
-    signed, _ = _readiness(bounds_file=_signed_file(tmp_path, seed),
-                           authority_pubkey=pub)
+    signed, _ = _readiness(
+        bounds_file=_signed_file(tmp_path, seed, bounds=shipped_bounds),
+        authority_pubkey=pub)
     def _levels(reg):
         out = {}
         for c in reg:

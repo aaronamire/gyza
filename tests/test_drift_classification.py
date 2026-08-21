@@ -73,11 +73,19 @@ def test_H4_is_the_only_class_whose_LEVEL_is_a_real_bound():
     assert sound_shape == {"H4_authority", "H5_storage_growth",
                            "H3_mesh_exit_rate"}
 
+    # WHICH, AND WHY -- the change this assertion demanded be named:
+    #   H5_storage_growth  gained eviction 2026-08-21, so its fold reflects at
+    #                      zero with r >= b by construction (sound-by-capacity).
+    #   H3_mesh_exit_rate  had its level declared at v3, 300 MB/h, over a
+    #                      trailing wall-clock window (sound-by-detection).
+    # All three registered classes now carry a level whose SHAPE makes it a
+    # bound rather than a timer -- one in each of Theorem 5's three sound cases.
     real_bounds = {c.id for c in harm
                    if c.bound is not None and c.drift_class in DriftClass.SOUND}
-    assert real_bounds == {"H4_authority", "H5_storage_growth"}, (
-        "a class other than H4 now carries a level whose shape makes it a real "
-        "bound; that is a genuine change and this test should say which and why")
+    assert real_bounds == {"H4_authority", "H5_storage_growth",
+                           "H3_mesh_exit_rate"}, (
+        "a class changed shape or level; that is a genuine change and this "
+        "test should say which and why")
 
 
 # --------------------------------------------------------------------------- #

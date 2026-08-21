@@ -163,11 +163,13 @@ def test_H3_is_reported_UNBOUNDED_rather_than_silently_passing():
     from gyza.containment.engine import GuardEngine
     harm, inv = build_registries()
     r = GuardEngine(harm, inv).readiness()
-    # The RATE is the registered class; the COUNT was retired 2026-08-21 for
-    # carrying zero evidence, and a retired class is not "unbounded" -- it is
-    # not a harm class at all.
-    assert "H3_mesh_exit_rate" in r["unbounded"]
+    # H3's LEVEL was declared 2026-08-21 (v3, 300 MB/h), so it is no longer
+    # unbounded. What this test guards is that the class is REGISTERED and
+    # COVERED -- a class with no invariant makes the engine refuse everything
+    # through the same channel as a breach.
+    assert "H3_mesh_exit_rate" in {c.id for c in harm}
     assert "H3_mesh_exit_rate" not in r["uncovered"]
+    assert harm.bound("H3_mesh_exit_rate") == 300_000_000
 
 
 # --------------------------------------------------------------------------- #

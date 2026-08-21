@@ -142,9 +142,8 @@ def test_the_harm_model_measures_what_the_loop_actually_did(tmp_path):
     assert runner.authority_violations == []
     # and the readiness verdict is computable over the same registry
     r = GuardEngine(harm, inv).readiness()
-    # The RATE is registered and deliberately unbounded (measured, not
-    # bounded). The COUNT was retired 2026-08-21 for carrying zero evidence.
-    assert r["unbounded"] == ["H3_mesh_exit_rate"]
+    # Nothing is unbounded since v3 declared H3's rate level (2026-08-21).
+    assert r["unbounded"] == []
     assert r["uncovered"] == []
 
 
