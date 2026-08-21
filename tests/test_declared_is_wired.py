@@ -211,8 +211,100 @@ def test_every_registered_harm_class_is_movable_by_a_real_source():
 #  3. Injected consumers must be SUPPLIED somewhere in production              #
 #     (review_queue was accepted by AgentRunner and passed by nobody)          #
 # --------------------------------------------------------------------------- #
-@pytest.mark.parametrize("kwarg", ["review_queue", "harm_registry",
-                                   "egress_recorder"])
+#: Guard-consumer parameters, DERIVED from AgentRunner's signature rather than
+#: listed by hand.
+#:
+#: THE HAND-MAINTAINED LIST WAS ITSELF THE DEFECT. This test exists to catch
+#: "declared but nothing supplies it", and it shipped as three literal strings
+#: that someone had to remember to extend. `require_enforcement` was added to
+#: `AgentRunner` afterwards, was never added here, and was supplied by NO
+#: production call site while runner.py's own comment claimed "Production entry
+#: points set it True explicitly" -- instance #9 of the species this file was
+#: written to end, walking straight past the check.
+#:
+#: An inclusion list that needs manual upkeep has exactly the fragility
+#: CLAUDE.md forbids in an exemption list. Deriving it means a new guard
+#: parameter is covered the moment it is added.
+def _guard_consumer_kwargs() -> list[str]:
+    #: An INJECTED guard consumer is a constructor parameter whose name marks it
+    #: as a guard, whose default is None or False, and for which the constructor
+    #: builds NO working substitute. All three conditions matter, and the middle
+    #: two were learned by running the broad version:
+    #:
+    #:   `queue or EscalationQueue()`          -> falls back to a real object
+    #:   `trust_registry or TrustRegistry()`   -> falls back to a real object
+    #:
+    #: Those are optional-with-fallback, not injected-or-disabled, and absence
+    #: disables nothing. Whereas `require_enforcement` falls back to a NAME
+    #: (`REQUIRE_ENFORCEMENT_DEFAULT`, which is False) -- a disabled guard
+    #: wearing a default's clothes, and exactly the case this must catch.
+    #:
+    #: Restricted to `__init__` because injection happens at construction. A
+    #: free function taking a queue positionally is a call, not an injection --
+    #: which is also what excludes `alarms(guard_loosenings=...)`, whose name
+    #: matched a marker while being a list of strings.
+    MARKERS = ("queue", "registry", "recorder", "require_", "guard")
+    found: set[str] = set()
+    for path in [q for tree in _PRODUCTION_TREES if tree.exists()
+                 for q in tree.rglob("*.py")]:
+        try:
+            mod = ast.parse(path.read_text())
+        except SyntaxError:
+            continue
+        for node in ast.walk(mod):
+            if not isinstance(node, ast.FunctionDef) or node.name != "__init__":
+                continue
+            a = node.args
+            params = a.args + a.kwonlyargs
+            defaults = ([None] * (len(a.args) - len(a.defaults))
+                        + list(a.defaults) + list(a.kw_defaults))
+            for prm, dflt in zip(params, defaults):
+                if not any(m in prm.arg for m in MARKERS):
+                    continue
+                if not (isinstance(dflt, ast.Constant)
+                        and dflt.value in (None, False)):
+                    continue
+                if _constructs_a_substitute(node, prm.arg):
+                    continue
+                found.add(prm.arg)
+    assert found, "derived no guard-consumer kwargs; the marker heuristic broke"
+    # `harm_guard` feeds SettlementGuard, which carries a NON_ADOPTED marker
+    # ON THE CLASS giving its reason (H1_credits was retired 2026-08-15 and
+    # nothing else moves at the settlement boundary). The exemption is READ
+    # FROM THE CODE IT EXCUSES rather than listed here -- deleting the marker
+    # re-arms this check, which is the property CLAUDE.md's "do not add an
+    # exemption list" rule is protecting.
+    from gyza.containment.gates import SettlementGuard
+    if getattr(SettlementGuard, "NON_ADOPTED", None):
+        found.discard("harm_guard")
+    return sorted(found)
+
+
+def _constructs_a_substitute(fn: ast.FunctionDef, name: str) -> bool:
+    """True iff the constructor builds a REAL object when `name` is absent.
+
+    Recognises `name or Thing()` and `if name is None: ... Thing()`. A fallback
+    to a bare name or constant is NOT a substitute -- that is a disabled guard,
+    which is the thing being hunted.
+    """
+    for node in ast.walk(fn):
+        if (isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or)
+                and node.values and isinstance(node.values[0], ast.Name)
+                and node.values[0].id == name
+                and any(isinstance(v, ast.Call) for v in node.values[1:])):
+            return True
+        if isinstance(node, ast.If):
+            t = node.test
+            if (isinstance(t, ast.Compare) and isinstance(t.left, ast.Name)
+                    and t.left.id == name
+                    and any(isinstance(c, ast.Is) for c in t.ops)
+                    and any(isinstance(sub, ast.Call)
+                            for stmt in node.body for sub in ast.walk(stmt))):
+                return True
+    return False
+
+
+@pytest.mark.parametrize("kwarg", _guard_consumer_kwargs())
 def test_guard_consumer_kwargs_are_supplied_at_a_production_call_site(kwarg):
     """A consumer parameter that nothing ever passes is a dead guard.
 

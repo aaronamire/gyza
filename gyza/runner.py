@@ -55,6 +55,15 @@ from gyza.schema import Artifact, HLC, WorkItem
 # Production entry points set this True (or pass require_enforcement=True);
 # unit tests with mock executors leave it False. Moves into the signed guard
 # configuration (C-8) once that trust domain exists.
+#: The window `action_rate_cap` is measured over. A RATE needs two numbers and
+#: the manifest declares one, so the second lives here as a constant.
+#:
+#: DELIBERATELY NOT READ FROM THE MANIFEST. A principal that could widen its own
+#: window could restore the lifetime-quota semantics this replaced, or erase the
+#: cap entirely by declaring a window longer than the deployment. The window is
+#: a property of the enforcement, not of the grant.
+RATE_WINDOW_NS = 3600 * 1_000_000_000   # one hour
+
 REQUIRE_ENFORCEMENT_DEFAULT = False
 
 
@@ -110,6 +119,7 @@ class AgentRunner:
         review_queue=None,
         harm_registry=None,
         cadence_origin_ns: int = 0,
+        rate_window_ns: int = RATE_WINDOW_NS,
     ):
         # BUILD_PLAN E2 — the fail-open gate.
         #
@@ -126,10 +136,27 @@ class AgentRunner:
         #
         # The default is deliberately NOT flipped here: 18 test files drive the
         # runner with non-sandboxing executors, and flipping it silently would
-        # convert a security decision into test churn. Production entry points
-        # set it True explicitly. When C-8 (guard configuration in a separate
-        # trust domain) lands, this policy moves there and stops being a
-        # constructor argument at all.
+        # convert a security decision into test churn.
+        #
+        # "Production entry points set it True explicitly" WAS FALSE FROM THE
+        # DAY THIS COMMENT WAS WRITTEN UNTIL 2026-08-21. `require_enforcement`
+        # appeared nowhere in gyza/ outside this file, so the bounds-proof
+        # requirement rested entirely on every executor branch in `cli.py`
+        # happening to sandbox -- true, and enforced by nothing. A fourth branch
+        # added without a sandbox would have signed envelopes carrying no
+        # bounds-proof, silently.
+        #
+        # It is now supplied by `run_local_task` as `_built_sandboxed`, tied to
+        # the branch that already refuses to run without bubblewrap, so the
+        # guarantee is structural there. It is NOT unconditional: an injected
+        # executor stamps no record, and refusing those is what would have made
+        # this test churn.
+        #
+        # `tests/test_declared_is_wired.py` now DERIVES the guard-consumer list
+        # from constructor signatures instead of holding three literals, which
+        # is how this parameter walked past the check that exists to catch
+        # exactly it. When C-8 (guard configuration in a separate trust domain)
+        # lands, this policy moves there and stops being a constructor argument.
         self._require_enforcement = (
             REQUIRE_ENFORCEMENT_DEFAULT if require_enforcement is None
             else bool(require_enforcement)
@@ -146,6 +173,14 @@ class AgentRunner:
         self._review_queue = review_queue
         self._harm_registry = harm_registry
         self._cadence_origin_ns = int(cadence_origin_ns)
+        # Injectable so tests can exercise the window without sleeping an hour.
+        # A non-positive window would make the rate cap unenforceable by making
+        # the lookback empty, so it is rejected rather than silently ignored.
+        if int(rate_window_ns) <= 0:
+            raise ValueError(
+                f"rate_window_ns must be positive, got {rate_window_ns}; a "
+                f"non-positive window disables the rate cap silently")
+        self._rate_window_ns = int(rate_window_ns)
         self._bb = blackboard
         self._mem = memory
         self._spec = specialization
@@ -539,6 +574,34 @@ class AgentRunner:
         # every scale. R-B measured the tolerable non-compliance at ~1.6 per
         # cluster, so the quantity to bound is PER-PRINCIPAL rate.
         #
+        # IT IS A RATE, AND UNTIL 2026-08-21 IT WAS A LIFETIME QUOTA.
+        #
+        # This block counted envelopes since `_cadence_origin_ns`, which
+        # `default_cadence_wiring` pins at GENESIS and documents as immovable.
+        # So `used` was every envelope the agent had ever signed, compared
+        # against a number called a rate: an agent granted `action_rate_cap:
+        # 1000` was PERMANENTLY REFUSED at its 1000th action, for the rest of
+        # its life, with no way back.
+        #
+        # The justification three paragraphs up is what makes that wrong rather
+        # than merely misnamed. R-M1/A2/R-B establish that a cross-principal
+        # aggregate is boundable when PER-PRINCIPAL RATE is bounded. A lifetime
+        # quota does not bound rate at all -- an agent may spend the whole
+        # budget in one second and then stop -- so the aggregate argument the
+        # dimension exists to serve did not go through.
+        #
+        # Found by R-EVID's drift criterion (research/evidence/THEOREMS_C.md):
+        # benign rate is 1 envelope per action, so the fold had positive drift
+        # with no compensation and was a TIMER with false-alarm probability 1.
+        #
+        # THE WINDOW ORIGIN ADVANCES WITH THE WALL CLOCK AND NOTHING ELSE.
+        # That is what separates it from ledger artifact #13, where a gate
+        # measured from a checkpoint the AGENT could advance by acting and so
+        # bought unlimited drain. Here no action moves the origin: an agent
+        # cannot buy budget by working, only by waiting. `_rate_window_ns` is
+        # not read from the manifest for the same reason -- a principal that
+        # could widen its own window could restore the quota semantics.
+        #
         # A cumulative bound needs a serialization point (C7), and signing is
         # this agent's: it is inside its own loop and every action passes it.
         # The count is folded from the append-only envelope log, per agent --
@@ -549,17 +612,20 @@ class AgentRunner:
         from gyza.economy.delegation import spec_from_manifest
         rate_cap = spec_from_manifest(self._identity.manifest).rate_cap
         if rate_cap is not None:
+            window_start = max(0, time.time_ns() - self._rate_window_ns)
             used = self._bb.count_agent_envelopes_since(
-                self._identity.agent_id, self._cadence_origin_ns)
+                self._identity.agent_id, window_start)
             if used >= rate_cap:
                 self._authority_violations.append(AuthorityViolation(
                     action_id=item.id, agent_pubkey=self._identity.agent_id,
                     reason=(f"action rate cap {rate_cap} reached "
-                            f"({used} signed since origin)"),
+                            f"({used} signed in the last "
+                            f"{self._rate_window_ns // 1_000_000_000}s)"),
                     at_ns=time.time_ns(),
                 ))
                 raise RuntimeError(
                     f"refusing to sign — this agent has signed {used} actions "
+                    f"in the last {self._rate_window_ns // 1_000_000_000}s "
                     f"against a declared rate cap of {rate_cap}")
 
         # Canonical JSON for the output so the BLAKE3 hash is stable

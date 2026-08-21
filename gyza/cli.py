@@ -240,6 +240,21 @@ def run_local_task(
         read_paths=read_paths, write_paths=write_paths,
     )
 
+    # Did WE build the sandbox, or did a caller hand us an executor?
+    #
+    # This decides whether the bounds-proof requirement can be turned on.
+    # `REQUIRE_ENFORCEMENT_DEFAULT` is False and runner.py claimed "Production
+    # entry points set it True explicitly" -- NOTHING DID, anywhere in gyza/.
+    # The guarantee rested on every branch below happening to sandbox, which is
+    # true today and enforced by nothing; a fourth branch added without a
+    # sandbox would have signed envelopes carrying no bounds-proof.
+    #
+    # It cannot be unconditional: an INJECTED executor (tests, demos, the
+    # capability-eval harness) stamps no record, and refusing those would turn
+    # a security decision into test churn -- which is exactly why the default
+    # was left False in the first place. So it is tied to the branch that
+    # already refuses to run without bubblewrap, and is structural there.
+    _built_sandboxed = executor is None
     if executor is None:
         if shutil.which("bwrap") is None:
             print(
@@ -373,6 +388,7 @@ def run_local_task(
         min_reward_threshold=0.0, min_similarity_threshold=-1.0,
         verify_chain_before_claim=False,
         review_queue=_rq, harm_registry=_hr, cadence_origin_ns=_origin,
+        require_enforcement=_built_sandboxed,
     )
 
     # One synchronous execute+sign cycle — the exact producer path the
