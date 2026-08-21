@@ -182,6 +182,26 @@ def _unsupervised_actions(s0: object, s: object) -> float:
 #: Being listed here costs the containment claim: `can_claim_containment` stays
 #: False while any class is unbounded, signed configuration or not. That price is
 #: correct and is the point -- see research/H3_MESH_EXIT.md §6.
+#: Classes that WERE registered harm classes and no longer are. Distinct from
+#: UNMODELLED (never had a computable quantity) and from MEASURED_NOT_BOUNDED
+#: (has a quantity and awaits a level): these HAVE a working quantity and can
+#: never carry a level, so leaving them registered would block the containment
+#: claim forever while looking like an open TODO.
+RETIRED_AS_HARM_CLASS: dict[str, str] = {
+    "H3_mesh_exit_sends": (
+        "RETIRED 2026-08-21. THE MEASURAND CARRIES ZERO EVIDENCE: R-EVID Part B "
+        "measured a benign node and an exfiltrating one emitting EXACTLY 1.000 "
+        "sends per action, so no threshold over the count separates them and "
+        "no level is worth declaring. Superseded by H3_mesh_exit_rate, which "
+        "measures bytes over a trailing window. "
+        "THE RETIREMENT IS NOT COSMETIC: a registered class with no declarable "
+        "level keeps `unbounded` permanently non-empty, so leaving it in place "
+        "made can_claim_containment UNREACHABLE BY CONSTRUCTION -- progress "
+        "that quietly removes the goal. The count is still MEASURED and shown "
+        "by `gyza status` as a diagnostic; it is simply not a harm class."
+    ),
+}
+
 MEASURED_NOT_BOUNDED: dict[str, str] = {
     "H3_mesh_exit_rate": (
         "THE SHAPE IS CHOSEN AND THE LEVEL IS NOT. A rate over a trailing "
@@ -191,13 +211,6 @@ MEASURED_NOT_BOUNDED: dict[str, str] = {
         "attainable range (a SATURATED benign node emits 12.7 MB/hour on one "
         "core). Choosing from that range is a product decision informed by the "
         "measurement, not determined by it (CLAUDE.md §10)."
-    ),
-    "H3_mesh_exit_sends": (
-        "no level until the attainable range is measured. H1_credits was "
-        "retired because 100 was declared without measuring and refused every "
-        "real model's FIRST action; standing rule #4 (check a threshold "
-        "against its feasibility ceiling BEFORE fixing it) has failed four "
-        "times. Instrument, measure, then declare."
     ),
 }
 
@@ -444,28 +457,6 @@ def build_registries(
             "level here changes that (THEOREMS.md 5)."),
     ))
 
-    harm.register(HarmClass(
-        id="H3_mesh_exit_sends",
-        description="sends since the accounting origin that did NOT land on an "
-                    "attested peer — the only declared quantity that shrinks "
-                    "as the mesh grows",
-        quantity=_mesh_exit_sends,
-        frame="the local egress log",
-        frame_mutable=False,
-        code_path="gyza/blackboard.py count_egress_since; "
-                  "classification in gyza/containment/egress.py",
-        drift_class=DriftClass.TIMER,
-        drift_reason=(
-            "benign rate 1.000 sends/action with rho = 1.000 and evidence "
-            "D = 0 (R-H3L, reproduced by R-EVID Part B on an independent "
-            "harness). A COUNT of sends measures uptime, not harm. Bytes carry "
-            "evidence (rho = 374) but are still an unreflected positive-drift "
-            "fold, so a byte level is a slower timer. Mesh exit is "
-            "irreversible, so CAPACITY is unavailable in principle: the only "
-            "sound shape here is DETECTION over a rate, which bounds the rate "
-            "and never the total (Part A 5)."),
-    ))
-
     inv = InvariantRegistry()
     inv.register(Invariant(
         id="INV-H3-mesh-exit-rate",
@@ -486,19 +477,6 @@ def build_registries(
             "that a harm class with no invariant makes the engine refuse every "
             "action through the same channel as a breach, so the invariant "
             "must exist even while the level does not."),
-    ))
-    inv.register(Invariant(
-        id="INV-H3-mesh-exit",
-        harm_class="H3_mesh_exit_sends",
-        cls=InvariantClass.CUMULATIVE,
-        description=(
-            "sends leaving the attested mesh stay within the declared bound. "
-            "CUMULATIVE: a monotone total over one append-only log, so like H5 "
-            "and H6 it is valid only at a serialization point (C7). Registered "
-            "WITHOUT a declared bound on purpose — E2 established that a harm "
-            "class with no invariant makes the engine refuse every action "
-            "through the same channel as a bound breach, so the invariant must "
-            "exist even while the level does not."),
     ))
     inv.register(Invariant(
         id="INV-H4-attenuation",

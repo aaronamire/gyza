@@ -131,18 +131,16 @@ def test_the_harm_model_measures_what_the_loop_actually_did(tmp_path):
                     stored_bytes=store.total_size_bytes(), **kw)
 
     measured = {c.id: c.measure(s0, s) for c in harm}
-    assert set(measured) == {"H3_mesh_exit_rate", "H3_mesh_exit_sends",
-                             "H4_authority",
+    assert set(measured) == {"H3_mesh_exit_rate", "H4_authority",
                              "H5_storage_growth", "H6_unsupervised_actions"}
     # H4 must be zero: the executor is WITHIN bounds, so no authority breach
     assert measured["H4_authority"] == 0.0
     assert runner.authority_violations == []
     # and the readiness verdict is computable over the same registry
     r = GuardEngine(harm, inv).readiness()
-    # Both H3 classes are registered and deliberately unbounded (measured, not
-    # bounded). The RATE carries the chosen shape and awaits a level; the COUNT
-    # can never carry one, its evidence being 0.
-    assert r["unbounded"] == ["H3_mesh_exit_rate", "H3_mesh_exit_sends"]
+    # The RATE is registered and deliberately unbounded (measured, not
+    # bounded). The COUNT was retired 2026-08-21 for carrying zero evidence.
+    assert r["unbounded"] == ["H3_mesh_exit_rate"]
     assert r["uncovered"] == []
 
 

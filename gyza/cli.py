@@ -903,7 +903,9 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     """
     try:
         from gyza.containment.engine import GuardEngine
-        from gyza.containment.gyza_model import UNMODELLED, build_registries
+        from gyza.containment.gyza_model import (
+            RETIRED_AS_HARM_CLASS, UNMODELLED, build_registries,
+        )
         # C-8: when an authority key is configured, bounds must come through a
         # VERIFIED configuration and an unsigned file is refused outright.
         pub = (cfg.guard_authority_pubkey or "").strip()
@@ -973,6 +975,25 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
             print(f"  {c.id:22s} bound {bound_s}  — NOT MEASURED HERE")
     for cid, why in UNMODELLED.items():
         print(f"  {cid:22s} NOT MODELLED — {why.split('(')[0].strip()}")
+    for cid, why in RETIRED_AS_HARM_CLASS.items():
+        print(f"  {cid:22s} RETIRED — {why.split('.')[0].strip()}")
+
+    # THE RETIRED COUNT IS STILL MEASURED, and is shown as a diagnostic rather
+    # than dropped. It cannot carry a level -- benign and exfiltrating nodes
+    # emit the same number of sends -- but "how many times did something leave
+    # the attested mesh" is a real operational reading, and retiring the class
+    # should not cost the operator the number.
+    try:
+        from pathlib import Path as _P3
+        _ep = _P3(_resolve(cfg.blackboard_db_path))
+        if _ep.exists():
+            from gyza.blackboard import Blackboard as _BB3
+            from gyza.containment.gyza_model import mesh_exit_sends_since
+            _exits = mesh_exit_sends_since(_BB3(str(_ep)), 0)
+            print(f"  {'mesh exits (count)':22s} {_exits:>12,d} "
+                  f"(diagnostic — carries no evidence, cannot be bounded)")
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        pass
 
     if prov["trusted"]:
         print(f"  bounds: SIGNED (v{prov['version']}, authority "

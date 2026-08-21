@@ -126,14 +126,20 @@ def test_H3_is_registered_AND_measures_the_real_log(tmp_path):
     r.outside_send("http_fetch", "https://example.invalid", 1)   # H3
 
     harm, _inv = build_registries()
-    hc = harm.get("H3_mesh_exit_sends")
+    # The RATE is the registered class; the count was retired 2026-08-21 for
+    # carrying zero evidence. Same log, same exclusion of attested peers -- the
+    # quantity that reads it changed, the property under test did not.
+    hc = harm.get("H3_mesh_exit_rate")
 
     kw = dict(owner="pk", ledger_entries=[], active_holds=0.0,
               capital_entries=[])
-    s0 = project_now(mesh_exit_sends=0, **kw)
+    s0 = project_now(mesh_exit_bytes_in_window=0, **kw)
     s = project_now(
-        mesh_exit_sends=bb.count_egress_since(0, EgressClass.MESH_EXIT), **kw)
+        mesh_exit_bytes_in_window=bb.mesh_exit_bytes_since(
+            0, EgressClass.MESH_EXIT), **kw)
 
+    # 3 unattested peer sends + 1 outside send, 1 byte each. The 4 ATTESTED
+    # sends are excluded, which is the whole point of the class filter.
     assert hc.measure(s0, s) == 4.0, "H3 did not measure the real log"
     # and the attested sends are genuinely excluded
     assert bb.count_egress_since(0) == 8
@@ -157,8 +163,11 @@ def test_H3_is_reported_UNBOUNDED_rather_than_silently_passing():
     from gyza.containment.engine import GuardEngine
     harm, inv = build_registries()
     r = GuardEngine(harm, inv).readiness()
-    assert "H3_mesh_exit_sends" in r["unbounded"]
-    assert "H3_mesh_exit_sends" not in r["uncovered"]
+    # The RATE is the registered class; the COUNT was retired 2026-08-21 for
+    # carrying zero evidence, and a retired class is not "unbounded" -- it is
+    # not a harm class at all.
+    assert "H3_mesh_exit_rate" in r["unbounded"]
+    assert "H3_mesh_exit_rate" not in r["uncovered"]
 
 
 # --------------------------------------------------------------------------- #

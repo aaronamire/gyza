@@ -104,7 +104,9 @@ def test_every_registered_class_moves_when_its_source_moves(db):
                     artifact_store=_Store(8192))
 
     measured = {c.id: c.quantity(s0, s) for c in harm}
-    assert measured["H3_mesh_exit_sends"] == 5.0
+    # H3's registered class is the RATE (bytes in the trailing window) since
+    # the count was retired 2026-08-21. Five 10-byte sends inside the window.
+    assert measured["H3_mesh_exit_rate"] == 50.0
     assert measured["H5_storage_growth"] == 8192.0
     # H4 stays 0 with no violations, which is CORRECT rather than unmeasured --
     # it is the one class that was already wired (runner.py records it).
@@ -139,10 +141,9 @@ def test_cadence_wiring_builds_a_real_queue_and_registry():
 
     q, harm, origin = default_cadence_wiring()
     assert isinstance(q, ReviewQueue)
-    # FIVE since 2026-08-21: H3 gained a RATE class alongside the count. The
-    # count stays registered because it is the reading `gyza status` shows and
-    # can never carry a level; the rate carries the chosen shape.
-    assert harm is not None and len(list(harm)) == 5
+    # FOUR: H3's count was retired 2026-08-21 and replaced by the rate, so the
+    # total is unchanged even though the H3 class is a different one.
+    assert harm is not None and len(list(harm)) == 4
     # GENESIS, and it must not move: an origin at process start refills the
     # budget on restart (ledger artifact #13).
     assert origin == 0

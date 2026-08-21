@@ -136,7 +136,7 @@ class GuardEngine:
         ordinary repo file are exactly that case, so a guard holding them may
         report its levels and must not claim containment over them.
 
-        The FOUR obstacles are reported separately -- unbounded classes,
+        The obstacles are reported separately -- unbounded classes,
         uncovered classes, unsigned bounds, and a colocated authority key --
         because they have different remedies and a single boolean would hide
         which one is in force. The fourth was checked only by a print statement
@@ -192,9 +192,23 @@ class GuardEngine:
             "bounds_provenance": prov.as_dict(),
             "bounds_signed": prov.trusted,
             "authority_key_colocated": colocated,
+            # A TIMER IS NOT A BOUND, so a level on one cannot buy the claim.
+            #
+            # Without this the claim was available while H5 and H6 carried
+            # SIGNED levels over quantities R-EVID proved to be timers -- a
+            # containment assertion whose content is "this agent has not run
+            # for ceil(L/b) actions yet". That is H2_market_capital's
+            # retirement condition in a new costume: reported as bounded while
+            # bounding nothing.
+            #
+            # UNCLASSIFIED also blocks. A class that has not said which of the
+            # four cases it is in has not shown its level means anything, and
+            # an unanswered question must not read as a passing one.
             "can_claim_containment": (not self._harm.unbounded()
                                       and not self._inv.uncovered(
                                           [c.id for c in self._harm])
                                       and prov.trusted
-                                      and colocated is None),
+                                      and colocated is None
+                                      and not timers
+                                      and not unclassified),
         }

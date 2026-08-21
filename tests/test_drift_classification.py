@@ -118,3 +118,72 @@ def test_a_drift_class_outside_the_four_cases_is_rejected_by_the_test_not_by_luc
     }
     assert DriftClass.TIMER not in DriftClass.SOUND
     assert DriftClass.SOUND < DriftClass.ALL
+
+
+# =========================================================================== #
+#  A TIMER IS NOT A BOUND, so a level on one must not buy the claim.
+# =========================================================================== #
+def test_a_level_on_a_TIMER_cannot_buy_the_containment_claim():
+    """Without this, the claim was available while H5 and H6 carried SIGNED
+    levels over quantities R-EVID proved to be timers -- a containment
+    assertion whose entire content is "this agent has not run for ceil(L/b)
+    actions yet". That is H2_market_capital's retirement condition in a new
+    costume: reported as bounded while bounding nothing.
+    """
+    from gyza.containment.engine import GuardEngine
+
+    harm, inv = build_registries()
+    harm.load_bounds({"H3_mesh_exit_rate": 5e7})
+    r = GuardEngine(harm, inv).readiness(authority_key_search=["/nonexistent"])
+
+    # Every OTHER obstacle is cleared in this construction...
+    assert r["unbounded"] == []
+    assert r["uncovered"] == []
+    assert r["unclassified_drift"] == []
+    assert r["authority_key_colocated"] is None
+    # ...and the claim is still refused, because two levels are timers.
+    assert set(r["bounded_but_only_a_timer"]) == {
+        "H5_storage_growth", "H6_unsupervised_actions"}
+    assert r["can_claim_containment"] is False
+
+
+def test_an_UNCLASSIFIED_drift_class_also_blocks_the_claim(tmp_path):
+    """An unanswered question must not read as a passing one. A class that has
+    not said which of the four cases it is in has not shown that its level
+    means anything."""
+    from gyza.containment.engine import GuardEngine
+    from gyza.containment.harm import BoundsProvenance, HarmModelRegistry
+    from gyza.containment.invariants import (
+        Invariant, InvariantClass, InvariantRegistry,
+    )
+
+    harm = HarmModelRegistry()
+    harm.register(HarmClass(
+        id="Y", description="d", quantity=_q, frame="f", frame_mutable=False,
+        code_path="p"))                       # <- no drift_class
+    harm.load_bounds({"Y": 1.0}, provenance=BoundsProvenance(
+        source="SIGNED", detail="t", authority_pubkey_hex="ab" * 32,
+        version=1, config_hash="h"))
+    inv = InvariantRegistry()
+    inv.register(Invariant(id="INV-Y", harm_class="Y",
+                           cls=InvariantClass.CUMULATIVE, description="covers Y"))
+
+    r = GuardEngine(harm, inv).readiness(authority_key_search=["/nonexistent"])
+    assert r["unclassified_drift"] == ["Y"]
+    assert r["can_claim_containment"] is False
+
+
+def test_the_retired_count_no_longer_blocks_the_claim_forever():
+    """H3_mesh_exit_sends can NEVER carry a level -- benign and exfiltrating
+    nodes emit the same number of sends. Leaving it registered kept `unbounded`
+    permanently non-empty, making the containment claim UNREACHABLE BY
+    CONSTRUCTION: progress that quietly removes the goal.
+    """
+    from gyza.containment.gyza_model import RETIRED_AS_HARM_CLASS
+
+    harm, _ = build_registries()
+    assert "H3_mesh_exit_sends" not in {c.id for c in harm}
+    assert "H3_mesh_exit_sends" in RETIRED_AS_HARM_CLASS
+    # Declaring the RATE level must now actually clear the unbounded gate.
+    harm.load_bounds({"H3_mesh_exit_rate": 5e7})
+    assert harm.unbounded() == []
