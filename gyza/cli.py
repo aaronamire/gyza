@@ -982,9 +982,15 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
         # does not hold the signing key; if it does, a local compromise can
         # re-sign any bounds and the signature stops being evidence against the
         # adversary that matters. Checked rather than assumed.
+        # READ FROM THE PREDICATE, not recomputed here. This block used to be
+        # the ONLY caller of `authority_key_is_colocated` anywhere in
+        # production, so the base case of the containment induction was checked
+        # by a print statement while `can_claim_containment` said nothing about
+        # separation. `readiness()` now asks, and this reports what it found --
+        # one source, so the operator's warning and the machine's verdict can
+        # never disagree.
         try:
-            from gyza.containment.guardconfig import authority_key_is_colocated
-            _where = authority_key_is_colocated(prov["authority_pubkey"])
+            _where = r.get("authority_key_colocated")
             if _where:
                 print(f"    ** the AUTHORITY PRIVATE KEY is on this host "
                       f"({_where}).")

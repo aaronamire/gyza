@@ -171,3 +171,111 @@ def test_status_WARNS_when_the_key_is_colocated(capsys, monkeypatch):
     if "bounds: SIGNED" in out and "AUTHORITY PRIVATE KEY is on this host" in out:
         assert "does not hold" in out or "re-sign the policy" in out
         assert "Move it to" in out, "the warning must say what to do"
+
+
+# =========================================================================== #
+#  C-8'S BASE CASE BELONGS IN THE PREDICATE, NOT IN A PRINT STATEMENT.
+#
+#  `authority_key_is_colocated` existed, was correct, and its ONLY production
+#  caller was a print block in `gyza status`. `readiness()` never asked, so
+#  `can_claim_containment` required SIGNED bounds and said nothing about
+#  SEPARATION -- and separation is the premise the whole induction rests on.
+#
+#  The consequence was latent rather than theoretical: H3 is the last unbounded
+#  class. Bound it, and the claim would have flipped TRUE with the authority
+#  private key sitting in ~/.gyza next to the agents it constrains. That is the
+#  sixth time in this program a claim was one declaration away from being
+#  available without the substance behind it.
+# =========================================================================== #
+def _signed_bounded_engine(tmp_path, key_on_disk: bool):
+    """A fully bounded, correctly SIGNED model. The only variable is whether
+    the authority private key is reachable from the host."""
+    import secrets
+
+    from cryptography.hazmat.primitives import serialization as ser
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+    )
+
+    from gyza.containment.engine import GuardEngine
+    from gyza.containment.harm import (
+        BoundsProvenance, DriftClass, HarmClass, HarmModelRegistry,
+    )
+    from gyza.containment.invariants import (
+        Invariant, InvariantClass, InvariantRegistry,
+    )
+
+    seed = secrets.token_bytes(32)
+    pub = Ed25519PrivateKey.from_private_bytes(seed).public_key().public_bytes(
+        ser.Encoding.Raw, ser.PublicFormat.Raw).hex()
+
+    harm = HarmModelRegistry()
+    harm.register(HarmClass(
+        id="X_exposure", description="d", quantity=lambda s0, s: 0.0,
+        frame="f", frame_mutable=False, code_path="p",
+        drift_class=DriftClass.SILENCE,
+        drift_reason="benign behaviour never increments this quantity"))
+    harm.load_bounds({"X_exposure": 1.0}, provenance=BoundsProvenance(
+        # `trusted` is DERIVED from source == "SIGNED", not a field. There is
+        # deliberately no way to construct a provenance that claims trust
+        # without claiming the source that earns it.
+        source="SIGNED", detail="test", authority_pubkey_hex=pub,
+        version=1, config_hash="h"))
+
+    inv = InvariantRegistry()
+    inv.register(Invariant(
+        id="INV-X", harm_class="X_exposure", cls=InvariantClass.CUMULATIVE,
+        description="covers X"))
+
+    search = []
+    if key_on_disk:
+        kf = tmp_path / "authority.key"
+        kf.write_bytes(seed)
+        search = [str(kf)]
+    else:
+        search = [str(tmp_path / "not-here.key")]
+    return GuardEngine(harm, inv), search
+
+
+def test_a_COLOCATED_key_blocks_the_containment_claim_even_when_fully_bounded(tmp_path):
+    """The scenario that would otherwise flip the flag without the substance."""
+    engine, search = _signed_bounded_engine(tmp_path, key_on_disk=True)
+    r = engine.readiness(authority_key_search=search)
+
+    assert r["bounds_signed"] is True
+    assert r["unbounded"] == []
+    assert r["uncovered"] == []
+    assert r["authority_key_colocated"] == search[0]
+    assert r["can_claim_containment"] is False, (
+        "every other obstacle was cleared and the authority private key is on "
+        "this host; a local compromise re-signs any bounds it likes, so the "
+        "induction has no base case and the claim must not be available")
+
+
+def test_separation_RESTORES_the_claim_so_the_check_is_not_merely_a_veto(tmp_path):
+    """The counter-control. A check that blocks unconditionally is not a check
+    -- it must be satisfiable, or it is just a disabled feature."""
+    engine, search = _signed_bounded_engine(tmp_path, key_on_disk=False)
+    r = engine.readiness(authority_key_search=search)
+
+    assert r["authority_key_colocated"] is None
+    assert r["can_claim_containment"] is True
+
+
+def test_an_ERROR_determining_separation_is_NOT_read_as_separated(tmp_path,
+                                                                  monkeypatch):
+    """AN ERROR IS NOT A VALUE. Failing to determine colocation must not read
+    as 'separated' -- that is the reassuring direction, and the reassuring
+    direction is the one that does not get questioned."""
+    import gyza.containment.guardconfig as gc
+
+    engine, search = _signed_bounded_engine(tmp_path, key_on_disk=False)
+
+    def _boom(*_a, **_k):
+        raise OSError("permission denied scanning for the authority key")
+
+    monkeypatch.setattr(gc, "authority_key_is_colocated", _boom)
+    r = engine.readiness(authority_key_search=search)
+
+    assert r["authority_key_colocated"] == "UNDETERMINED"
+    assert r["can_claim_containment"] is False
