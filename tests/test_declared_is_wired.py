@@ -69,7 +69,27 @@ def _constructions(name: str) -> list[str]:
     its only caller is an execution model production did not adopt. Adoption
     is transitive; a census that ignores that measures syntax, not reachability.
     """
+    return _constructions_split(name)[0]
+
+
+def _constructions_split(name: str) -> "tuple[list[str], list[str]]":
+    """`(reachable, inside_exempt)` -- the second is what makes exemption
+    TRANSITIVE rather than cascading.
+
+    Excluding constructions inside a NON_ADOPTED class is right, and on its own
+    it makes every VALUE TYPE of an exempt component look never-constructed. So
+    marking one class surfaced its dataclasses, marking those surfaced theirs,
+    and the check degenerated into demanding a near-identical paragraph on
+    every helper of an unadopted component.
+
+    Distinguishing the two cases fixes it without weakening anything.
+    Constructed NOWHERE is an offender: it looks live and is not. Constructed
+    ONLY inside an exempt class is transitively exempt -- reached exactly when
+    its parent is, so it needs no separate argument, and it becomes an offender
+    the moment the parent's marker comes off.
+    """
     hits: list[str] = []
+    inside_exempt: list[str] = []
     for p in [q for tree in _PRODUCTION_TREES if tree.exists()
               for q in tree.rglob("*.py")]:
         try:
@@ -91,19 +111,28 @@ def _constructions(name: str) -> list[str]:
                     and isinstance(node.func, ast.Name)
                     and node.func.id == name):
                 continue
+            where = f"{p.relative_to(_ROOT)}:{node.lineno}"
             if any(lo <= node.lineno <= hi for lo, hi in exempt_spans):
+                inside_exempt.append(where)
                 continue
-            hits.append(f"{p.relative_to(_ROOT)}:{node.lineno}")
-    return hits
+            hits.append(where)
+    return hits, inside_exempt
 
 
 def _containment_classes() -> list[tuple[str, type]]:
-    import gyza.containment as C
-
     out = []
-    for mod_name in ("egress", "engine", "gates", "guardconfig", "harm",
-                     "invariants", "log", "review", "reversibility", "staging"):
-        mod = __import__(f"gyza.containment.{mod_name}", fromlist=["x"])
+    #: The census covers containment AND the deployment path. It was
+    #: containment-only, which is why `AgentSupervisor` -- the component a
+    #: multi-agent deployment would run on -- sat with zero production
+    #: constructors and no marker, outside the remit of the very test written
+    #: to catch that. A census scoped to where you already looked finds what
+    #: you already knew.
+    mods = [f"gyza.containment.{m}" for m in
+            ("egress", "engine", "gates", "guardconfig", "harm",
+             "invariants", "log", "review", "reversibility", "staging")]
+    mods += ["gyza.supervisor", "gyza.demand", "gyza.coordination.orchestrator"]
+    for mod_name in mods:
+        mod = __import__(mod_name, fromlist=["x"])
         for nm, obj in vars(mod).items():
             if (inspect.isclass(obj) and obj.__module__ == mod.__name__
                     and "__init__" in obj.__dict__):
@@ -117,9 +146,16 @@ def _containment_classes() -> list[tuple[str, type]]:
 def test_every_containment_component_is_constructed_or_marked_NON_ADOPTED():
     offenders = []
     for name, cls in _containment_classes():
-        if _constructions(name):
+        reachable, inside_exempt = _constructions_split(name)
+        if reachable:
             continue
         if getattr(cls, "NON_ADOPTED", None):
+            continue
+        if inside_exempt:
+            # Transitively exempt: reached exactly when its parent is. It
+            # becomes an offender the moment the parent's marker comes off,
+            # which is the property `test_a_marked_component_that_BECOMES_
+            # wired_fails_this_test` protects at the other end.
             continue
         offenders.append(name)
     assert offenders == [], (

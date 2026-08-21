@@ -570,6 +570,105 @@ def _human_bytes(n: int) -> str:
     return f"{n}TB"
 
 
+def cmd_serve(args: argparse.Namespace) -> int:
+    """Run a FIXED ROSTER of agents, one OS process each, restarted on crash.
+
+    THE ENTRY POINT THAT DID NOT EXIST. Before this, nothing in the CLI hosted
+    runners: `gyza run` executes ONE work item synchronously and returns, and
+    the only `runner.start()` was inside the capability-eval harness. So
+    "N agents" had no code path at all -- not merely no supervisor. Wiring
+    `AgentSupervisor` would not have helped, because there was no program for
+    it to be wired into.
+
+    EACH AGENT GETS ITS OWN IDENTITY, not N runners sharing one. Sharing would
+    make every envelope attribute to the same key, and the per-principal action
+    rate cap is enforced per agent -- N runners behind one identity would share
+    one budget and exhaust it N times faster, which is the aggregate-bounding
+    argument (R-M1/A2/R-B) failing quietly.
+    """
+    import shutil
+    import signal as _signal
+    import time
+
+    from gyza.supervisor import RunnerProcessSupervisor, RunnerSpec
+
+    cfg = load_config()
+    key_path = Path(_resolve(cfg.compositor_key_path))
+    if not key_path.exists():
+        print("no compositor key; run `gyza init` first", file=sys.stderr)
+        return 1
+
+    n = int(args.agents)
+    if n < 1:
+        print(f"--agents must be >= 1, got {n}", file=sys.stderr)
+        return 1
+
+    sandboxed = not args.no_sandbox
+    if sandboxed and shutil.which("bwrap") is None:
+        # Same refusal as `gyza run`: this will NOT fall back to unenforced
+        # execution, because a roster of agents believing they are contained
+        # is worse than a roster that refuses to start.
+        print("gyza serve needs bubblewrap for real enforcement and will not "
+              "fall back to an unenforced sandbox.\n"
+              "install it:  pacman -S bubblewrap  |  apt install bubblewrap\n"
+              "or pass --no-sandbox to run MOCK executors (no containment).",
+              file=sys.stderr)
+        return 1
+
+    compositor = LocalCompositor(key_path=str(key_path))
+    base = key_path.parent
+    agents_dir = base / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+
+    roster = []
+    for i in range(n):
+        state = agents_dir / f"agent-{i:03d}.json"
+        ident = _load_or_issue_local_agent(
+            compositor, state, memory_mb=args.memory_mb, allowed_hosts=[],
+            read_paths=[], write_paths=[])
+        roster.append(RunnerSpec(
+            agent_id=ident.agent_id,
+            agent_state_path=str(state),
+            blackboard_path=_resolve(cfg.blackboard_db_path),
+            memory_path=str(base / "run-memory" / f"agent-{i:03d}"),
+            spec_db_path=str(base / f"serve-spec-{i:03d}.db"),
+            artifact_store_path=_resolve("~/.gyza/artifacts"),
+            poll_interval_s=float(args.poll_interval),
+            min_reward=0.0, min_similarity=-1.0,
+            executor_kind="sandboxed" if sandboxed else "mock",
+        ))
+
+    sup = RunnerProcessSupervisor(roster, max_restarts=args.max_restarts)
+    stopping = {"now": False}
+
+    def _sigterm(_sig, _frm):
+        stopping["now"] = True
+
+    _signal.signal(_signal.SIGINT, _sigterm)
+    _signal.signal(_signal.SIGTERM, _sigterm)
+
+    print(f"serving {n} agent(s), "
+          f"{'sandboxed' if sandboxed else 'MOCK (no containment)'}, "
+          f"max {args.max_restarts} restarts each")
+    sup.start()
+    try:
+        while not stopping["now"]:
+            time.sleep(1.0)
+            st = sup.status()
+            dead = [x for x in st if x["gave_up"]]
+            if dead and len(dead) == len(st):
+                print("every agent has given up; nothing left to supervise",
+                      file=sys.stderr)
+                break
+    finally:
+        print("stopping...")
+        sup.stop()
+        for x in sup.status():
+            print(f"  {x['agent_id'][:16]}  restarts={x['restarts']}  "
+                  f"gave_up={x['gave_up']}  last_exit={x['last_exit']}")
+    return 0
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     cfg = load_config()
     bb_path = _resolve(cfg.blackboard_db_path)
@@ -2816,6 +2915,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")
 
+    p_serve = sub.add_parser(
+        "serve", help="run a fixed roster of agents, one process each")
+    p_serve.add_argument("--agents", type=int, default=1)
+    p_serve.add_argument("--poll-interval", type=float, default=1.0)
+    p_serve.add_argument("--max-restarts", type=int, default=5)
+    p_serve.add_argument("--memory-mb", type=int, default=512)
+    p_serve.add_argument(
+        "--no-sandbox", action="store_true",
+        help="run MOCK executors with no containment (testing only)")
+
     p_audit = sub.add_parser(
         "audit",
         help="forensically audit a stored workflow's provenance DAG + bounds",
@@ -3125,6 +3234,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "serve":
+        return cmd_serve(args)
     if args.command == "review":
         return cmd_review(args)
     if args.command == "audit":

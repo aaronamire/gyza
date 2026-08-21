@@ -90,6 +90,18 @@ class DemandSignal:
 
 
 class DemandOracle:
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = (
+        "ITS ONLY CONSUMER IS `AgentSupervisor`, WHICH IS ITSELF NOT ADOPTED. "
+        "Demand-driven spawning is an optimisation over a fixed roster, and "
+        "`RunnerProcessSupervisor` (the adopted mechanism) takes its roster "
+        "from the operator rather than from a demand signal. Constructing this "
+        "now would wire a component whose only caller nothing calls -- the "
+        "exact shape this project has recorded ten times. It comes back when a "
+        "deployment needs autoscaling, and `gyza serve --agents N` is what "
+        "that would autoscale."
+    )
+
     def __init__(
         self,
         blackboard: Blackboard,

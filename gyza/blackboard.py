@@ -18,6 +18,7 @@ so two threads racing for the same item see one winner deterministically.
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 import threading
 import time
@@ -26,6 +27,8 @@ from pathlib import Path
 import numpy as np
 
 from gyza.schema import EMBEDDING_DIM, Artifact, HLC, WorkItem
+
+LOG = logging.getLogger(__name__)
 
 
 _SCHEMA_SQL = """
@@ -145,6 +148,14 @@ def _embedding_from_blob(blob: bytes) -> np.ndarray:
     # frombuffer returns a read-only view over the bytes; copy so callers
     # can mutate without surprising errors.
     return arr.copy()
+
+
+class ClaimLostError(RuntimeError):
+    """Raised when a completion names an owner that no longer holds the claim.
+
+    Distinct from a generic failure because the remedy differs: the work ran,
+    its envelope is valid, and only the board row belongs to someone else now.
+    """
 
 
 def _row_to_work_item(row: sqlite3.Row) -> WorkItem:
@@ -511,7 +522,23 @@ class Blackboard:
         icp_envelope_hash: str,
         success: bool,
         hlc: HLC,
+        expected_owner: str | None = None,
     ) -> None:
+        """Mark an item complete. `expected_owner` REFUSES a completion by
+        anyone else.
+
+        IT USED TO BE `WHERE id=?` AND NOTHING ELSE, so any party could
+        complete any item, including one it had never claimed. That is
+        harmless while a claim is never taken away -- and it stops being
+        harmless the moment claims become LEASES, because a slow-but-alive
+        runner whose lease expired could then overwrite the result of whoever
+        legitimately reclaimed the item, silently and last-write-wins.
+        So this had to land BEFORE the reaper, not alongside it.
+
+        `expected_owner=None` preserves the old behaviour and is what the Raft
+        apply path uses: a replica applying a committed completion must not
+        re-litigate ownership that consensus already decided.
+        """
         # Tick the HLC on the calling node for ordering observers.
         hlc.now()
         completed_at_ns = time.time_ns()
@@ -525,7 +552,7 @@ class Blackboard:
             return
         self.complete_work_item_direct(
             work_item_id, output_hash, icp_envelope_hash,
-            bool(success), completed_at_ns,
+            bool(success), completed_at_ns, expected_owner=expected_owner,
         )
 
     def complete_work_item_direct(
@@ -535,16 +562,107 @@ class Blackboard:
         icp_envelope_hash: str,
         success: bool,
         completed_at_ns: int,
+        expected_owner: str | None = None,
     ) -> None:
-        self._conn().execute(
+        if expected_owner is None:
+            self._conn().execute(
+                """
+                UPDATE work_items
+                SET completed_at_ns=?, output_hash=?, icp_envelope_hash=?,
+                    success=?
+                WHERE id=?
+                """,
+                (completed_at_ns, output_hash, icp_envelope_hash,
+                 int(success), work_item_id),
+            )
+            return
+        cur = self._conn().execute(
             """
             UPDATE work_items
             SET completed_at_ns=?, output_hash=?, icp_envelope_hash=?, success=?
-            WHERE id=?
+            WHERE id=? AND claimed_by=?
             """,
             (completed_at_ns, output_hash, icp_envelope_hash,
-             int(success), work_item_id),
+             int(success), work_item_id, expected_owner),
         )
+        if cur.rowcount != 1:
+            # RAISE RATHER THAN RETURN FALSE. A completion that silently did
+            # not apply leaves a signed envelope describing work the board does
+            # not record, and the caller carries on believing it landed.
+            raise ClaimLostError(
+                f"refusing to complete {work_item_id}: it is no longer claimed "
+                f"by {expected_owner[:16]}. Its lease expired and another "
+                f"runner reclaimed it, or the claim was released. The work was "
+                f"done and its envelope is valid -- what is refused is "
+                f"overwriting whoever holds the item now.")
+
+    #: How long a claim is held before another runner may reclaim it.
+    #:
+    #: A CLAIM IS A LEASE, NOT A DEED. Before 2026-08-21 it was a deed: a
+    #: runner that died holding one leaked its item permanently, because
+    #: `release_claim` has exactly one caller (the in-process failure path) and
+    #: the TTL filter in `get_unclaimed` only applies to rows that are ALREADY
+    #: unclaimed. A claimed row was never served again and never expired.
+    #:
+    #: That is survivable while a crash is rare and fatal to the node anyway.
+    #: It stops being survivable the moment runners are supervised and
+    #: restarted, because then a crash is ROUTINE -- so this had to land before
+    #: process supervision, not after it.
+    #:
+    #: SIZED FROM THE LONGEST LEGITIMATE ACTION, not from taste: the sandbox
+    #: caps an action at `max_cpu_seconds=300`, so 900 s is three times the
+    #: worst case a live runner can present. Too short steals work from slow
+    #: runners; too long leaves crashed work unavailable. Three times is the
+    #: margin, and it is stated so a future change is a decision rather than a
+    #: nudge.
+    CLAIM_LEASE_NS = 900 * 1_000_000_000
+
+    def reclaim_expired_claims(self, lease_ns: int | None = None,
+                               now_ns: int | None = None) -> list[str]:
+        """Release claims whose lease has expired. Returns the ids reclaimed.
+
+        NOT SILENT. Each reclaim is logged at WARNING, because it means work
+        somebody claimed is being taken from them -- if that happens routinely
+        the lease is mis-sized and an operator needs to see it, and if it never
+        happens the log stays empty and costs nothing.
+
+        Completed items are excluded: a finished row keeps its `claimed_by` as
+        the record of who did the work, and reclaiming it would erase
+        attribution for no benefit.
+        """
+        lease = int(self.CLAIM_LEASE_NS if lease_ns is None else lease_ns)
+        now = int(time.time_ns() if now_ns is None else now_ns)
+        cutoff = now - lease
+        rows = self._conn().execute(
+            """
+            SELECT id, claimed_by FROM work_items
+            WHERE claimed_by IS NOT NULL
+              AND completed_at_ns IS NULL
+              AND claimed_at_ns IS NOT NULL
+              AND claimed_at_ns < ?
+            """,
+            (cutoff,),
+        ).fetchall()
+        reclaimed = []
+        for r in rows:
+            cur = self._conn().execute(
+                """
+                UPDATE work_items
+                SET claimed_by=NULL, claimed_at_ns=NULL
+                WHERE id=? AND claimed_by=? AND completed_at_ns IS NULL
+                """,
+                (r["id"], r["claimed_by"]),
+            )
+            if cur.rowcount == 1:
+                reclaimed.append(r["id"])
+                LOG.warning(
+                    "[blackboard] reclaimed %s from %s: claim lease expired "
+                    "(%.0fs). The holder crashed, or is slower than the lease.",
+                    r["id"][:16], (r["claimed_by"] or "?")[:16],
+                    lease / 1e9)
+        if reclaimed:
+            self._conn().commit()
+        return reclaimed
 
     def get_unclaimed(self, min_reward: float, tier: int) -> list[WorkItem]:
         # TTL filter: an item whose (created_at_ns + ttl_ns) is in the

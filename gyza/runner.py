@@ -42,7 +42,7 @@ from typing import Any, Callable
 import blake3
 import numpy as np
 
-from gyza.blackboard import Blackboard
+from gyza.blackboard import Blackboard, ClaimLostError
 from gyza.containment.projection import AuthorityViolation
 from gyza.demand import LSHIndex
 from gyza.drift import SpecializationTracker
@@ -292,6 +292,20 @@ class AgentRunner:
         tier = int(self._identity.manifest.get("attestation_tier", 0))
         while not self._stop.is_set():
             try:
+                # REAP BEFORE POLLING. A claim is a lease, and a runner that
+                # died holding one leaked its item permanently -- there is
+                # exactly one caller of `release_claim` (the in-process failure
+                # path below), and `get_unclaimed`'s TTL filter only applies to
+                # rows that are already unclaimed.
+                #
+                # WIRED HERE RATHER THAN IN A SWEEPER because a sweeper is one
+                # more thing that must be constructed, and this file's own
+                # history is a list of mechanisms that existed and were never
+                # called. Every live runner reaps for every dead one, so the
+                # recovery path cannot be left unwired without also leaving the
+                # work loop unwired. The write is cheap and happens once per
+                # poll, against a 305 ms action.
+                self._bb.reclaim_expired_claims()
                 items = self._bb.get_unclaimed(
                     min_reward=self._min_reward, tier=tier,
                 )
@@ -863,11 +877,29 @@ class AgentRunner:
             except Exception:
                 pass
 
-        # Mark the work item complete on the blackboard.
+        # Mark the work item complete on the blackboard, AS ITS OWNER.
+        #
+        # `expected_owner` refuses a completion by anyone who does not hold the
+        # claim. It matters now that claims are LEASES: a runner slower than
+        # the lease could otherwise overwrite the result of whoever
+        # legitimately reclaimed its item, silently and last-write-wins.
         try:
             self._bb.complete_work_item(
                 item.id, output_hash, envelope_hash, success, self._hlc,
+                expected_owner=self._identity.agent_id,
             )
+        except ClaimLostError:
+            # NOT SWALLOWED WITH THE REST. Every other failure here is a
+            # storage problem and the signed envelope remains the source of
+            # truth. THIS one says another runner now owns the item, which
+            # means the work was done twice -- an operational fact, and the
+            # only signal that the lease is mis-sized for this workload.
+            # Logging it costs nothing when it never happens.
+            LOG.warning(
+                "[runner] completed %s but its lease had expired and another "
+                "runner holds it; the envelope stands and the board row does "
+                "not. If this recurs, CLAIM_LEASE_NS is too short for this "
+                "workload.", item.id[:16])
         except Exception:
             pass  # DB write is best-effort; the signed envelope is the
                   # source of truth.
