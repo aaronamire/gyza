@@ -25,13 +25,30 @@
     "H6_unsupervised_actions: 10000. THE REVIEW CADENCE, chosen by the operator 2026-08-15: how many signed actions may occur before a human looks. Stated in actions rather than credits because TOKEN_IS_FAKE -- a credit bound cannot be checked against anything, an action count can.",
     "",
     "H1_credits RETIRED 2026-08-15 (user decision): credits are TOKEN_IS_FAKE, so no level in them is checkable. It is listed in UNMODELLED so the gap is visible rather than absent. Autonomy is bounded by H6 in actions instead.",
-    "H2_market_capital RETIRED 2026-08-17 (owner decision): BondedMarket has zero production constructors and gates.py passes capital_entries=[], so the class measured 0.0 in every production evaluation. Listed in UNMODELLED. NOTE: removing a bound is a TIGHTENING, not a loosening -- an unset bound FAILS CLOSED, so a class with no bound admits nothing (guardconfig.diff_bounds)."
+    "H2_market_capital RETIRED 2026-08-17 (owner decision): BondedMarket has zero production constructors and gates.py passes capital_entries=[], so the class measured 0.0 in every production evaluation. Listed in UNMODELLED. NOTE: removing a bound is a TIGHTENING, not a loosening -- an unset bound FAILS CLOSED, so a class with no bound admits nothing (guardconfig.diff_bounds).",
+    "",
+    "v2, 2026-08-21 \u2014 H6_unsupervised_actions MOVED from `bounds` to `policy`.",
+    "It is a review CADENCE, not a harm bound. Its quantity is the count of",
+    "signed envelopes, and an adversary doing harmful work signs exactly as",
+    "many as a benign agent doing useful work (R-EVID Part B: evidence 0), so",
+    "the level asserted only that the agent had not yet run 10,000 actions.",
+    "A timer is exactly what a cadence should be; the mechanism was always",
+    "correct and only the classification was wrong. The INTERVAL IS UNCHANGED",
+    "at 10,000 and is still signed by the same authority \u2014 what changed is",
+    "that it no longer claims to bound harm, and no longer blocks the",
+    "containment claim by being a bounded-but-timer class.",
+    "",
+    "Removing a key from `bounds` is classified TIGHTENED by diff_bounds (an",
+    "unbounded class fails closed and admits nothing), so this installs",
+    "without a LooseningRecord \u2014 correctly, since nothing loosened."
   ],
-  "version": 1,
-  "declared": "2026-07-31",
+  "version": 2,
+  "declared": "2026-07-31; v2 2026-08-21",
   "bounds": {
     "H4_authority": 0.0,
-    "H5_storage_growth": 10000000000.0,
-    "H6_unsupervised_actions": 10000
+    "H5_storage_growth": 10000000000.0
+  },
+  "policy": {
+    "review_cadence_actions": 10000
   }
 }

@@ -50,11 +50,12 @@ def test_the_readiness_report_names_which_bounds_are_only_timers():
     harm, inv = build_registries()
     r = GuardEngine(harm, inv).readiness()
     assert "bounded_but_only_a_timer" in r
-    # H5 and H6 both carry declared levels and both are timers today. If either
-    # is repaired, this test should be updated ALONG WITH the drift_reason --
-    # not silenced.
-    assert set(r["bounded_but_only_a_timer"]) == {
-        "H5_storage_growth", "H6_unsupervised_actions"}
+    # EMPTY as of 2026-08-21. H6 was retired (it is a cadence, not a harm
+    # class) and H5 gained eviction, which supplies the compensation term its
+    # fold needed. If a timer ever reappears here it should be because a NEW
+    # class was added without a sound shape -- update this test along with that
+    # class's drift_reason, never by silencing it.
+    assert r["bounded_but_only_a_timer"] == []
     assert r["unclassified_drift"] == []
 
 
@@ -69,11 +70,12 @@ def test_H4_is_the_only_class_whose_LEVEL_is_a_real_bound():
     """
     harm, _ = build_registries()
     sound_shape = {c.id for c in harm if c.drift_class in DriftClass.SOUND}
-    assert sound_shape == {"H4_authority", "H3_mesh_exit_rate"}
+    assert sound_shape == {"H4_authority", "H5_storage_growth",
+                           "H3_mesh_exit_rate"}
 
     real_bounds = {c.id for c in harm
                    if c.bound is not None and c.drift_class in DriftClass.SOUND}
-    assert real_bounds == {"H4_authority"}, (
+    assert real_bounds == {"H4_authority", "H5_storage_growth"}, (
         "a class other than H4 now carries a level whose shape makes it a real "
         "bound; that is a genuine change and this test should say which and why")
 
@@ -123,12 +125,12 @@ def test_a_drift_class_outside_the_four_cases_is_rejected_by_the_test_not_by_luc
 # =========================================================================== #
 #  A TIMER IS NOT A BOUND, so a level on one must not buy the claim.
 # =========================================================================== #
-def test_a_level_on_a_TIMER_cannot_buy_the_containment_claim():
-    """Without this, the claim was available while H5 and H6 carried SIGNED
-    levels over quantities R-EVID proved to be timers -- a containment
-    assertion whose entire content is "this agent has not run for ceil(L/b)
-    actions yet". That is H2_market_capital's retirement condition in a new
-    costume: reported as bounded while bounding nothing.
+def test_the_production_model_has_no_timers_left():
+    """H4 sound-by-silence, H5 sound-by-capacity, H3 sound-by-detection -- one
+    class in each of Theorem 5's three sound cases, and none in the fourth.
+
+    The blocking RULE is proven separately against a synthetic timer below,
+    because a rule with no instance left to catch is a rule nobody is testing.
     """
     from gyza.containment.engine import GuardEngine
 
@@ -136,14 +138,19 @@ def test_a_level_on_a_TIMER_cannot_buy_the_containment_claim():
     harm.load_bounds({"H3_mesh_exit_rate": 5e7})
     r = GuardEngine(harm, inv).readiness(authority_key_search=["/nonexistent"])
 
-    # Every OTHER obstacle is cleared in this construction...
+    # No timer remains in the PRODUCTION model, so this construction now
+    # clears every obstacle -- which is the honest state and is why the
+    # negative case below is asserted separately against a synthetic timer.
     assert r["unbounded"] == []
     assert r["uncovered"] == []
     assert r["unclassified_drift"] == []
     assert r["authority_key_colocated"] is None
-    # ...and the claim is still refused, because two levels are timers.
-    assert set(r["bounded_but_only_a_timer"]) == {
-        "H5_storage_growth", "H6_unsupervised_actions"}
+    assert r["bounded_but_only_a_timer"] == []
+    # Still False, and for the one honest remaining reason in this
+    # construction: `build_registries()` loads the signed FILE without an
+    # authority pubkey to verify it against, so provenance is
+    # SIGNED_UNVERIFIED. That is a provenance gap, not a drift gap.
+    assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
 
 
@@ -187,3 +194,31 @@ def test_the_retired_count_no_longer_blocks_the_claim_forever():
     # Declaring the RATE level must now actually clear the unbounded gate.
     harm.load_bounds({"H3_mesh_exit_rate": 5e7})
     assert harm.unbounded() == []
+
+
+def test_a_SYNTHETIC_timer_still_refuses_the_claim(tmp_path):
+    """The production model no longer contains a timer, so the blocking rule
+    must be proven against one that does -- otherwise the rule is untested and
+    would silently stop working the moment a timer reappeared."""
+    from gyza.containment.engine import GuardEngine
+    from gyza.containment.harm import BoundsProvenance, HarmModelRegistry
+    from gyza.containment.invariants import (
+        Invariant, InvariantClass, InvariantRegistry,
+    )
+
+    harm = HarmModelRegistry()
+    harm.register(HarmClass(
+        id="Z", description="d", quantity=_q, frame="f", frame_mutable=False,
+        code_path="p", drift_class=DriftClass.TIMER,
+        drift_reason="positive benign drift with no compensation term"))
+    harm.load_bounds({"Z": 100.0}, provenance=BoundsProvenance(
+        source="SIGNED", detail="t", authority_pubkey_hex="cd" * 32,
+        version=1, config_hash="h"))
+    inv = InvariantRegistry()
+    inv.register(Invariant(id="INV-Z", harm_class="Z",
+                           cls=InvariantClass.CUMULATIVE, description="covers Z"))
+
+    r = GuardEngine(harm, inv).readiness(authority_key_search=["/nonexistent"])
+    assert r["unbounded"] == []
+    assert r["bounded_but_only_a_timer"] == ["Z"]
+    assert r["can_claim_containment"] is False

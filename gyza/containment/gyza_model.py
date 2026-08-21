@@ -188,6 +188,21 @@ def _unsupervised_actions(s0: object, s: object) -> float:
 #: never carry a level, so leaving them registered would block the containment
 #: claim forever while looking like an open TODO.
 RETIRED_AS_HARM_CLASS: dict[str, str] = {
+    "H6_unsupervised_actions": (
+        "RETIRED 2026-08-21 -- RECLASSIFIED, NOT REPAIRED. It is a review "
+        "CADENCE and was registered as a harm class. Its quantity is the count "
+        "of signed envelopes, and an adversary doing harmful work signs exactly "
+        "as many as a benign agent doing useful work (R-EVID Part B: rho = "
+        "1.000 BY DEFINITION, evidence 0), so its SIGNED level of 10,000 "
+        "asserted only that the agent had not yet run 10,000 actions. "
+        "A TIMER IS EXACTLY WHAT A CADENCE SHOULD BE -- firing periodically is "
+        "its job -- so the mechanism was always correct and only the "
+        "classification was wrong. The interval is UNCHANGED at 10,000 and "
+        "still signed by the same authority; it now lives in the guard "
+        "configuration's `policy` as `review_cadence_actions`, where it no "
+        "longer claims to bound harm and no longer blocks the containment "
+        "claim as a bounded-but-timer class."
+    ),
     "H3_mesh_exit_sends": (
         "RETIRED 2026-08-21. THE MEASURAND CARRIES ZERO EVIDENCE: R-EVID Part B "
         "measured a benign node and an exfiltrating one emitting EXACTLY 1.000 "
@@ -375,10 +390,26 @@ def build_registries(
         quantity=_storage_growth,
         frame="the local artifact store",
         frame_mutable=False,
-        code_path="gyza/network/artifact_store.py:115 total_size_bytes",
-        drift_class=DriftClass.TIMER,
+        code_path="gyza/network/artifact_store.py:228 total_size_bytes",
+        drift_class=DriftClass.CAPACITY,
         drift_reason=(
-            "STOCK-SHAPED, FLOW-BEHAVED. total_size_bytes DOES decrement when "
+            "SOUND BY CAPACITY since 2026-08-21, and the capacity condition is "
+            "met BY CONSTRUCTION rather than by measurement. `ArtifactStore` "
+            "now evicts oldest-first when a write would exceed the cap, "
+            "freeing exactly enough to fit the incoming bytes -- so the "
+            "reversal rate is >= the creation rate at every step, which is "
+            "THEOREMS_C.md Theorem 6 satisfied definitionally. Each eviction "
+            "appends a tombstone, so the decrement is an attributable fact "
+            "rather than an absence, matching Wallet.net_balance. "
+            "IT WAS A TIMER UNTIL THEN: max_bytes REFUSED writes once full and "
+            "kept refusing, so the node stopped permanently at the declared "
+            "level -- a refusal is not a reversal. "
+            "WHAT EVICTION COSTS: the evicted artifact's BYTES are gone and its "
+            "content can no longer be inspected. Chain verification is "
+            "unaffected, since verify_chain checks signatures over hashes "
+            "carried in the envelopes. "
+            "PREVIOUS READING, kept because it is why this needed fixing: "
+            "total_size_bytes DOES decrement when "
             "an artifact is removed (measured: 10,000 -> 9,000 bytes), but "
             "ArtifactStore exposes no reversal at all and the sole unlink() in "
             "the tree (artifact_store.py:92) is corruption repair on a hash "
@@ -388,25 +419,6 @@ def build_registries(
             "still a timer, merely a slower one."),
     ))
 
-    harm.register(HarmClass(
-        id="H6_unsupervised_actions",
-        description="signed envelopes since the accounting origin — the review "
-                    "cadence, in the unit a human's attention is spent in",
-        quantity=_unsupervised_actions,
-        frame="the local envelope log",
-        frame_mutable=False,
-        code_path="gyza/blackboard.py count_envelopes_since",
-        drift_class=DriftClass.TIMER,
-        drift_reason=(
-            "rho = 1.000 BY DEFINITION, not by accident (R-EVID Part B). The "
-            "quantity is the count of signed envelopes, and an adversary doing "
-            "harmful work signs exactly as many as a benign agent doing useful "
-            "work -- the difference is not in the count, so evidence D = 0 and "
-            "NO level separates them. A timer is nevertheless exactly what a "
-            "review CADENCE should be: this class is correctly built and "
-            "mis-registered, and the remedy is reclassification to a cadence, "
-            "not repair of the bound."),
-    ))
 
     # H3 AS A RATE -- the shape decision, taken 2026-08-21.
     #
@@ -495,15 +507,6 @@ def build_registries(
         description=(
             "retained bytes stay within the declared bound. CUMULATIVE: a "
             "monotone total over one store, so like H1 it is valid only at a "
-            "serialization point and does not compose concurrently (C6/C7)."),
-    ))
-    inv.register(Invariant(
-        id="INV-H6-cadence",
-        harm_class="H6_unsupervised_actions",
-        cls=InvariantClass.CUMULATIVE,
-        description=(
-            "actions since the origin stay within the declared review cadence. "
-            "CUMULATIVE: a running count over one log, so it is valid only at a "
             "serialization point and does not compose concurrently (C6/C7)."),
     ))
     # H5 HAS NO DECLARED BOUND, DELIBERATELY. `guard_bounds.json` carries no

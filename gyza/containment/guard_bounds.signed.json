@@ -2,11 +2,13 @@
   "config": {
     "bounds": {
       "H4_authority": 0.0,
-      "H5_storage_growth": 10000000000.0,
-      "H6_unsupervised_actions": 10000
+      "H5_storage_growth": 10000000000.0
+    },
+    "policy": {
+      "review_cadence_actions": 10000
     },
     "tier_assignments": {},
-    "version": 1
+    "version": 2
   },
-  "signature": "e7e51725125ceff7c1606ac16fce0f54b8abad22ad430f1c52a4067a923e1d9cd983a6d6bcee877cc18c74f1bebf924f1e07c0c502341925d46500f99a467003"
+  "signature": "c1b847555688c8965b322e3b6f5d6b74af650e398705e7f1cd0663094b3a301fc945bb345f5fb7b7e86723ae7e400cd01cfc0176bf1409328cf0c77e58b1650c"
 }

@@ -139,11 +139,13 @@ def test_a_declared_bound_is_now_checkable_against_a_real_number(db):
 def test_cadence_wiring_builds_a_real_queue_and_registry():
     from gyza.containment.review import ReviewQueue, default_cadence_wiring
 
-    q, harm, origin = default_cadence_wiring()
+    q, cadence, origin = default_cadence_wiring()
     assert isinstance(q, ReviewQueue)
-    # FOUR: H3's count was retired 2026-08-21 and replaced by the rate, so the
-    # total is unchanged even though the H3 class is a different one.
-    assert harm is not None and len(list(harm)) == 4
+    # An INT since H6's retirement: the cadence interval comes from the guard
+    # configuration's signed `policy`, not from a harm class. The value is
+    # unchanged at 10,000 -- what changed is that it no longer claims to bound
+    # harm.
+    assert cadence == 10_000
     # GENESIS, and it must not move: an origin at process start refills the
     # budget on restart (ledger artifact #13).
     assert origin == 0
@@ -164,13 +166,14 @@ def test_cadence_escalates_at_the_bound_and_is_idempotent(tmp_path):
     from gyza.containment.gyza_model import build_registries
     from gyza.containment.review import ReviewQueue, check_cadence
 
-    harm, _ = build_registries()
-    q = ReviewQueue(str(tmp_path / "review.db"))
-    bound = harm.bound("H6_unsupervised_actions")
+    from gyza.containment.review import _signed_cadence_actions
 
-    assert check_cadence(q, harm, int(bound) - 1) is None, "below the bound"
-    first = check_cadence(q, harm, int(bound))
+    q = ReviewQueue(str(tmp_path / "review.db"))
+    bound = _signed_cadence_actions()
+
+    assert check_cadence(q, bound, int(bound) - 1) is None, "below the bound"
+    first = check_cadence(q, bound, int(bound))
     assert first is not None, "the bound must escalate"
     # idempotent: a second call with an escalation already pending opens none
-    assert check_cadence(q, harm, int(bound) + 500) is None
+    assert check_cadence(q, bound, int(bound) + 500) is None
     assert len(q.pending()) == 1

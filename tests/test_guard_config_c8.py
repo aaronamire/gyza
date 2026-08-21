@@ -40,8 +40,10 @@ from gyza.containment.harm import UnsignedBoundsError
 # production constructors, so the class measured 0.0 in every production
 # evaluation. Removing a bound is a TIGHTENING (an unset bound fails closed),
 # so no loosening record was required.
-BOUNDS = {"H4_authority": 0.0,
-          "H5_storage_growth": 1e10, "H6_unsupervised_actions": 10000}
+# H6 was RETIRED as a harm class 2026-08-21 (it is a review cadence, and its
+# interval now lives in the signed `policy`). These fixtures exercise
+# GuardConfigStore mechanics, so they use the two remaining real harm classes.
+BOUNDS = {"H4_authority": 0.0, "H5_storage_growth": 1e10}
 
 
 def _authority():
@@ -132,7 +134,7 @@ def test_TAMPERED_bounds_are_refused(tmp_path):
     seed, pub = _authority()
     p = _signed_file(tmp_path, seed)
     doc = json.loads(p.read_text())
-    doc["config"]["bounds"]["H6_unsupervised_actions"] = 10_000_000  # edit the policy
+    doc["config"]["bounds"]["H5_storage_growth"] = 10_000_000_000_000  # edit the policy
     p.write_text(json.dumps(doc))
 
     with pytest.raises(UnsignedBoundsError, match="did not verify"):
@@ -216,7 +218,7 @@ def test_the_store_still_REFUSES_a_silent_loosening(tmp_path):
     store = GuardConfigStore(pub)
     store.load_file(_signed_file(tmp_path, seed))
 
-    loose = dict(BOUNDS, H6_unsupervised_actions=500000)
+    loose = dict(BOUNDS, H5_storage_growth=5e10)
     cfg = {"version": 2, "bounds": loose, "tier_assignments": {}}
     with pytest.raises(GuardConfigError, match="LOOSEN"):
         store.load(cfg, sign_config(cfg, seed))
@@ -244,7 +246,7 @@ def test_gyza_status_REPORTS_that_the_bounds_are_unsigned(capsys):
     # The format moved from `10000.00` to `10,000` on 2026-08-19 when the
     # section began reporting MEASURED-of-BOUND instead of the bound alone --
     # a count of actions has no meaningful hundredths.
-    assert "H6_unsupervised_actions" in out and "10,000" in out
+    assert "H5_storage_growth" in out
     # AND the operator's POSITION against it, which is the point of the
     # section. Before that change H3/H5 printed a bound with no measurement and
     # every quantity was structurally 0 (research/H3_WIRING_GAP.md), so a bound
@@ -283,7 +285,7 @@ def test_a_correctly_signed_TIGHTENING_installs(tmp_path):
     # (unset fails closed -> refuse-all becomes admit-some), so the previous
     # version of this line stopped being a tightening the moment H2 was retired
     # out of BOUNDS.
-    tight = dict(BOUNDS, H6_unsupervised_actions=5000)
+    tight = dict(BOUNDS, H5_storage_growth=5e9)
     cfg = {"version": 2, "bounds": tight, "tier_assignments": {}}
     assert store.load(cfg, sign_config(cfg, seed)
-                      ).bounds["H6_unsupervised_actions"] == 5000
+                      ).bounds["H5_storage_growth"] == 5e9

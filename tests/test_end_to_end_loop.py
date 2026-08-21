@@ -68,7 +68,11 @@ def _loop(tmp_path, *, cadence_origin_ns=0):
         lsh=LSHIndex(seed=42), executor=_within_bounds_executor(256),
         min_reward_threshold=0.0, min_similarity_threshold=-1.0,
         verify_chain_before_claim=False,
-        review_queue=queue, harm_registry=harm,
+        # `harm_registry=` now carries the CADENCE INTERVAL, not a registry:
+        # H6 was retired as a harm class 2026-08-21 and the interval moved to
+        # the guard configuration's signed `policy`. A small value here is the
+        # legitimate dial for a unit test -- 10,000 real signatures is not.
+        review_queue=queue, harm_registry=2,
         cadence_origin_ns=cadence_origin_ns)
     return runner, bb, store, queue, harm, inv, ident, manifest
 
@@ -132,7 +136,7 @@ def test_the_harm_model_measures_what_the_loop_actually_did(tmp_path):
 
     measured = {c.id: c.measure(s0, s) for c in harm}
     assert set(measured) == {"H3_mesh_exit_rate", "H4_authority",
-                             "H5_storage_growth", "H6_unsupervised_actions"}
+                             "H5_storage_growth"}
     # H4 must be zero: the executor is WITHIN bounds, so no authority breach
     assert measured["H4_authority"] == 0.0
     assert runner.authority_violations == []
@@ -156,20 +160,17 @@ def test_the_cadence_fires_FROM_THE_RUNNER_not_from_a_human_asking(tmp_path):
     runner, bb, store, queue, harm, inv, ident, _m = _loop(tmp_path)
     assert queue.pending() == []
 
-    # lower the effective bound by moving the origin: 10,000 real signatures is
-    # not a unit test. The ORIGIN is the legitimate dial; the BOUND is declared.
-    harm.load_bounds({"H6_unsupervised_actions": 2})
-
     _do_work(runner, bb, 3)
     pend = queue.pending()
     assert len(pend) == 1, f"the runner never escalated: {queue.summary()}"
+    # The escalation still NAMES H6, which is correct: the cadence is about
+    # unsupervised actions whether or not that is a registered harm class.
     assert pend[0].harm_class == "H6_unsupervised_actions"
     assert pend[0].measured >= 2
 
 
 def test_review_and_resume_close_the_loop(tmp_path):
     runner, bb, store, queue, harm, inv, ident, _m = _loop(tmp_path)
-    harm.load_bounds({"H6_unsupervised_actions": 2})
     _do_work(runner, bb, 3)
 
     e = queue.pending()[0]
@@ -189,7 +190,6 @@ def test_review_and_resume_close_the_loop(tmp_path):
 def test_the_loop_SURVIVES_A_RESTART_with_its_history_intact(tmp_path):
     """Every durable surface the loop touches, reopened cold."""
     runner, bb, store, queue, harm, inv, ident, _m = _loop(tmp_path)
-    harm.load_bounds({"H6_unsupervised_actions": 2})
     _do_work(runner, bb, 3)
     e = queue.pending()[0]
     queue.resolve(e.record_id, "alice", RESUME, "checked")
@@ -216,7 +216,6 @@ def test_a_runner_with_no_review_queue_is_UNCHANGED(tmp_path):
     check would be coupled to the runner rather than opt-in."""
     runner, bb, store, queue, harm, inv, ident, _m = _loop(tmp_path)
     runner._review_queue = None
-    harm.load_bounds({"H6_unsupervised_actions": 1})
     _do_work(runner, bb, 3)
     assert queue.pending() == [], "escalated with no queue attached"
     assert bb.count_envelopes_since(0) >= 0

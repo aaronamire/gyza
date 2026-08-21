@@ -828,6 +828,10 @@ class AgentRunner:
         if self._review_queue is not None:
             try:
                 from gyza.containment.review import check_cadence
+                # `_harm_registry` here is the CADENCE INTERVAL since H6's
+                # retirement; check_cadence accepts an int or a legacy registry
+                # and resolves either, so a stale caller degrades to the old
+                # lookup rather than silently disabling the cadence.
                 check_cadence(self._review_queue, self._harm_registry,
                               self._bb.count_envelopes_since(
                                   self._cadence_origin_ns))

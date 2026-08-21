@@ -229,6 +229,18 @@ class VerifiedGuardConfig:
     which the constrained system installs its own policy."""
     version: int
     bounds: dict
+    #: POLICY IS NOT BOUNDS, and the separation is load-bearing.
+    #:
+    #: `bounds` are harm LEVELS -- each one claims that a quantity stays below
+    #: a number, and `can_claim_containment` spends them. `policy` holds signed
+    #: operating parameters that bound nothing: the review cadence is a TIMER
+    #: BY DESIGN (it must fire periodically; that is its job), and carrying it
+    #: in `bounds` made it a harm class whose "bound" of 10,000 asserted only
+    #: that the agent had not yet run 10,000 actions.
+    #:
+    #: Both are signed by the same authority and covered by the same signature.
+    #: What differs is what they license.
+    policy: dict
     tier_assignments: dict
     signature: str
     authority_pubkey_hex: str
@@ -237,6 +249,7 @@ class VerifiedGuardConfig:
     @property
     def as_dict(self) -> dict:
         return {"version": self.version, "bounds": dict(self.bounds),
+                "policy": dict(self.policy),
                 "tier_assignments": dict(self.tier_assignments)}
 
 
@@ -439,6 +452,7 @@ class GuardConfigStore:
         self._cfg = VerifiedGuardConfig(
             version=version,
             bounds=dict(config.get("bounds", {})),
+            policy=dict(config.get("policy", {})),
             tier_assignments=dict(config.get("tier_assignments", {})),
             signature=signature_hex,
             authority_pubkey_hex=self._authority.hex(),

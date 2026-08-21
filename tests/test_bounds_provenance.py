@@ -56,7 +56,10 @@ def test_the_envelope_actually_yields_BOUNDS_not_an_empty_model():
     """The trap in switching the default: a silently empty bounds set."""
     harm, _ = build_registries()
     assert harm.bound("H5_storage_growth") == 10_000_000_000.0
-    assert harm.bound("H6_unsupervised_actions") == 10_000
+    # H6 was retired as a harm class 2026-08-21; its interval lives in the
+    # signed `policy` now, so it is checked there rather than as a bound.
+    from gyza.containment.review import _signed_cadence_actions
+    assert _signed_cadence_actions() == 10_000
     assert harm.bound("H4_authority") == 0.0
 
 
@@ -108,7 +111,7 @@ def test_TAMPERING_WITH_THE_SIGNED_FILE_IS_DETECTABLE(tmp_path):
 
     # tampered: a raised bound with the ORIGINAL signature must be refused
     doc = json.loads(DEFAULT_BOUNDS_FILE.read_text())
-    doc["config"]["bounds"]["H6_unsupervised_actions"] = 10_000_000
+    doc["config"]["bounds"]["H5_storage_growth"] = 10_000_000_000_000
     bad = tmp_path / "tampered.signed.json"
     bad.write_text(json.dumps(doc))
     with pytest.raises((GuardConfigError, Exception)):

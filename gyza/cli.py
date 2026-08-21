@@ -340,8 +340,17 @@ def run_local_task(
     print(f"executor: {executor_label}")
 
     bb = Blackboard(rp["blackboard_db_path"])
+    # EVICTION ON, and it is what makes H5 a bound rather than a timer.
+    # Without it the store raises once the declared cap is reached and keeps
+    # raising: the node stops working permanently at H5's level. With it the
+    # store evicts oldest-first, appending a tombstone per eviction, so the
+    # quantity oscillates below the cap and the node runs indefinitely.
+    # Provenance is unaffected -- chains verify over hashes carried in the
+    # envelopes, not over stored bytes -- so what an eviction costs is the
+    # ability to inspect old CONTENT, not the ability to verify old CLAIMS.
     store = ArtifactStore(base_path=artifact_store_base,
-                          max_bytes=_declared_storage_cap())
+                          max_bytes=_declared_storage_cap(),
+                          evict_when_full=True)
     bb.attach_artifact_store(store)
 
     intent_id = str(_uuid.uuid7())
@@ -1091,8 +1100,19 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     # itself now comes from the uniform fold above -- this adds only the
     # actionable remainder, which is what an operator schedules against.
     try:
-        n = _measured.get("H6_unsupervised_actions")
-        cad = harm.bound("H6_unsupervised_actions")
+        # H6 was RETIRED as a harm class 2026-08-21, so neither the position nor
+        # the interval comes from the harm model any more. The position is
+        # folded from the same append-only envelope log it always was, and the
+        # interval from the guard configuration's SIGNED policy -- so the
+        # operator's displayed remainder and the runner's enforced one are still
+        # the same number, which is the property that mattered.
+        from gyza.containment.review import _signed_cadence_actions
+        _cbb = _P(_resolve(cfg.blackboard_db_path))
+        n = None
+        if _cbb.exists():
+            from gyza.blackboard import Blackboard as _BB4
+            n = float(_BB4(str(_cbb)).count_envelopes_since(0))
+        cad = _signed_cadence_actions(cfg.guard_bounds_path)
         if n is not None and cad:
             print(f"  review cadence: a human is due in "
                   f"{max(cad - n, 0):,.0f} actions")

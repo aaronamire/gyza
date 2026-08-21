@@ -138,13 +138,22 @@ def main() -> int:
     config = {
         "version": int(raw.get("version", 1)),
         "bounds": raw["bounds"],
+        # POLICY IS SIGNED TOO. It carries operating parameters that bound
+        # nothing -- the review cadence being the first -- and dropping it here
+        # would leave the cadence interval UNSIGNED, which is strictly worse
+        # than the state it replaced, where the interval was signed as a
+        # (meaningless) harm bound. Same authority, same signature, different
+        # licence: bounds claim a quantity stays below a number, policy does
+        # not claim anything.
+        "policy": raw.get("policy", {}),
         "tier_assignments": raw.get("tier_assignments", {}),
     }
     doc = {"config": config, "signature": sign_config(config, seed)}
     Path(args.out).write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n")
 
     pk = Ed25519PrivateKey.from_private_bytes(seed).public_key()
-    print(f"signed {len(config['bounds'])} bound(s) at version "
+    print(f"signed {len(config['bounds'])} bound(s) and "
+          f"{len(config['policy'])} policy value(s) at version "
           f"{config['version']} -> {args.out}")
     print(f"config hash    : {config_hash(config)}")
     print(f"authority pubkey: {pk.public_bytes_raw().hex()}")
