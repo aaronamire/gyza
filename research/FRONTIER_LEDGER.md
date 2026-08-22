@@ -191,3 +191,50 @@ That is precisely what distinguishes it from artifact #13's moving checkpoint,
 and an unenforced invariant is an assumption. No such check exists today because
 no windowed origin exists today; it must land in the same commit as the first
 one that does.
+
+## The attestation tier: filter or authority? — OPEN, AND IT BLOCKS ARENA 1 (2026-08-23)
+
+Arena 2 (`research/arenas/arena2_compromised/`, preregistered `8e3e048`) ran a
+tier-0 agent against a tier-3 work item. It claimed it, executed it, and
+**produced a valid signed ICP envelope for it.**
+
+`required_tier` is read at exactly one place — `blackboard.py:678`, inside
+`get_unclaimed`'s `WHERE` clause, with the agent's own tier supplied by the
+runner at `runner.py:292`. `try_claim` does not read it. Neither does the
+signing path. The filter is on **polling**, so it binds only an agent that
+learns of work by polling.
+
+**This is not a violation of a stated invariant.** Nothing in the tree says an
+agent may not execute above its tier, and `gyza audit` correctly returns VALID
+for the envelope — the tier is not in the manifest, so it is not in the
+envelope, so it is not on the accountable surface. The tier is also not among
+`CapabilitySpec`'s five dimensions (`ro`, `rw`, `network`, `mem_cap`,
+`rate_cap`), so the monotone-attenuation proof at `delegation.py:264` says
+nothing about it and no extension of the proof as written ever will.
+
+**The defect is the ambiguity itself.** A field validated `0..3`
+(`schema.py:72`), named `required_tier`, carrying a trust level that a
+certificate upgrades (`attestation_adapter.py:190`) and that gates verify-on-
+fetch elsewhere (`docs/invariants.md` INV-X-B4), is implemented as a query
+filter. An unenforced invariant is an assumption.
+
+**Why this is now urgent rather than merely open.** Arena 2 reached the gap by
+*attacking* — calling `try_claim` with an id it was not offered. **Arena 1 will
+reach it by operating normally.** On a contested network, work-item ids travel
+by gossip and by DAG parentage, which are exactly the paths that bypass
+`get_unclaimed`. In a partitioned multi-host run the polling filter is not a
+weak boundary, it is an absent one, and any tier-related claim Arena 1 makes
+would be measuring a filter that its own topology routes around.
+
+**Two remedies, not equivalent, and a USER DECISION:**
+
+- **(a) Enforce it** in `try_claim` and at the signing gate. This makes the tier
+  an *authority dimension*, which means the attenuation theorem must be extended
+  to cover it — a sixth dimension in `CapabilitySpec`, with monotonicity proven
+  and the Rust parity fixtures regenerated. Honest, and not small.
+- **(b) Rename it** to state that it is a routing hint carrying no authority
+  (`preferred_tier`, or `routing_tier`), and say so where it is defined. Cheap,
+  and it makes the code tell the truth.
+
+**(b) is cheaper; (a) is what the name promises.** Deciding is prior to Arena 1,
+because Arena 1 cannot honestly report on a boundary whose status is undecided.
