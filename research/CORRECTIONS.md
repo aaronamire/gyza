@@ -633,3 +633,52 @@ R-EVID before the framing hardened, not after.
 **What survives is in `PRIOR_ART.md` §4** and it is narrower: the
 classification-as-audit-method, the measured finding that a real system's signed
 bounds are mostly timers, and the defects the method found.
+
+---
+
+## #33 — I proposed the wrong remedy for the tier gap, and the label agreed with me (2026-08-23)
+
+Arena 2 found that `required_tier` was enforced only in `get_unclaimed`'s WHERE
+clause. `FRONTIER_LEDGER.md` offered two remedies: **(a)** make the tier a sixth
+attenuated dimension of `CapabilitySpec` and extend the monotone-attenuation
+theorem to cover it, or **(b)** rename it to a routing hint carrying no
+authority. I described (a) as "what the name promises".
+
+**(a) is a category error, and it would have made the system worse.** Three
+independent reasons, each checkable against the tree:
+
+1. **The hazard is a FLOOR, the theorem is a CEILING.** `required_tier` means
+   "this work needs an executor attested *at least* this well" — a floor on the
+   executor at the moment of execution. Attenuation is `child ⊆ parent`, i.e.
+   `child.tier ≤ parent.tier` — a ceiling on a delegate at the moment of
+   delegation. Different quantities, different moments, sharing an integer.
+2. **It refuses the safe direction and permits the hazard.** Under (a) a tier-1
+   agent delegating to a *better*-attested tier-3 agent is REFUSED (`3 ≤ 1` is
+   false), though that subcontractor is exactly what a tier-3 work item wants.
+   Meanwhile a tier-3 agent handing tier-3 work to a tier-0 agent — the real
+   hazard — passes cleanly, since `0 ≤ 3`.
+3. **It is undefined for one of the three projections.** `CapabilitySpec` is
+   projected from a manifest, a delegation grant, and a bubblewrap enforcement
+   record (`delegation.py:179`); that is what buys "one predicate covers every
+   edge". A bwrap record has no notion of attestation, so the sixth dimension
+   would carry a `None` meaning *not applicable*, colliding with the `mem_cap` /
+   `rate_cap` `None` that means *not declared* — an asymmetry the module calls
+   load-bearing precisely so an omission cannot launder a granted cap.
+
+**What was implemented instead** is neither (a) nor (b): the tier is a
+**precondition on the executor**, refused at `AgentRunner._require_attested_tier`
+*before the work runs*, reading the compositor-signed manifest. The claim-time
+filter is advisory, self-reported, and documented as defeated by a liar.
+
+**The species.** This is the same shape the program keeps meeting — a check
+landing on something that CORRELATES with the protected quantity rather than the
+quantity itself — but one level up, in the *remedy* rather than in the code.
+Both (a) and the correct fix compare the same two integers; only one of them
+compares them at the moment and in the direction that the hazard occurs. **The
+integers agreeing is not the mechanism agreeing**, which is precisely what
+Arena 2's own A8 defect had taught, four hours earlier, about attributing a
+refusal to a mechanism that did not fire.
+
+**Not a ledger artifact:** it produced no clean number that turned out false. It
+was found by re-deriving a recommendation when asked to justify it, which is the
+same move that caught three defects in the CLAUDE.md rewrite session.

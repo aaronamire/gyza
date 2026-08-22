@@ -238,3 +238,25 @@ would be measuring a filter that its own topology routes around.
 
 **(b) is cheaper; (a) is what the name promises.** Deciding is prior to Arena 1,
 because Arena 1 cannot honestly report on a boundary whose status is undecided.
+
+> **RESOLVED 2026-08-23 — and NEITHER (a) NOR (b) was the answer.** The tier is
+> a **precondition on the executor**, not an attenuated capability and not a
+> mere routing hint. `AgentRunner._require_attested_tier` refuses work whose
+> `required_tier` exceeds the compositor-signed manifest's `attestation_tier`,
+> **before the work runs** — strictly better than the bounds gate, which can
+> only withhold a signature after the fact. The claim-time filter passed through
+> `try_claim` / `try_claim_direct` / `NetworkBlackboard.try_claim` is ADVISORY:
+> the tier is self-reported there, a compromised agent lies, and a test pins
+> that limit so nobody later reads it as a boundary.
+>
+> **Option (a) as written above was wrong** — it refuses a better-attested
+> subcontractor while permitting the real hazard, and is undefined for the
+> enforcement-record projection. `research/CORRECTIONS.md` #33 records why in
+> full, and `tests/test_attestation_tier_precondition.py` fails if anyone adds
+> `tier` to `CapabilitySpec`.
+>
+> **What remains open, and it is smaller:** `required_tier` is not committed in
+> the ICP envelope, so a third party auditing a bundle offline cannot re-derive
+> the tier check the way it can re-derive the manifest-bounds check. Closing
+> that means changing the signed payload — Rust parity fixtures included — and
+> is a release decision, not housekeeping.

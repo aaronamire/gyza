@@ -345,6 +345,8 @@ class AgentRunner:
             try:
                 claimed = self._bb.try_claim(
                     best_item.id, self._identity.agent_id, self._hlc,
+                    claimant_tier=int(
+                        self._identity.manifest.get("attestation_tier", 0)),
                 )
             except Exception:
                 # Transient DB failure — back off briefly.
@@ -491,7 +493,50 @@ class AgentRunner:
             LOG.warning("context not attested", exc_info=True)
             return None
 
+    def _require_attested_tier(self, item: WorkItem) -> None:
+        """Refuse work whose `required_tier` exceeds this agent's ATTESTED tier.
+
+        THE TIER IS A PRECONDITION, NOT A CAPABILITY. It was tempting to add it
+        to `CapabilitySpec` as a sixth attenuated dimension; that is a category
+        error and Arena 2's write-up records why. Attenuation is a CEILING on a
+        delegate (`child <= parent`), and the hazard here is a FLOOR on the
+        executor (`granted >= required`). The two constrain different things at
+        different moments, and the attenuated form would have refused the SAFE
+        direction -- a tier-1 agent subcontracting to a better-attested tier-3
+        agent -- while permitting the actual hazard, a tier-3 agent handing
+        tier-3 work to a tier-0 one. `CapabilitySpec` also projects from a
+        bubblewrap enforcement record, which has no notion of attestation at
+        all, so the sixth dimension would be undefined for one of its three
+        sources.
+
+        REFUSED BEFORE THE WORK RUNS, which is strictly better than the bounds
+        gate below can manage. That gate can only withhold the signature after
+        the fact -- "the work ALREADY RAN outside its declared bounds" -- but a
+        tier is knowable from the manifest and the item alone, so high-tier work
+        is never executed, and its inputs are never even read.
+
+        NOT recorded as an H4 authority violation. H4 counts executed actions
+        whose enforcement exceeded the manifest; nothing ran here, and widening
+        H4 to cover refusals would break the property that makes it the one real
+        harm class -- a benign rate of exactly 0.000.
+
+        The absent-tier default is 0, so a manifest that does not declare a tier
+        can only take tier-0 work. "I did not say" fails closed, as it does for
+        the enforcement record.
+        """
+        granted = int(self._identity.manifest.get("attestation_tier", 0))
+        required = int(getattr(item, "required_tier", 0) or 0)
+        if required > granted:
+            raise RuntimeError(
+                f"refusing to execute {item.id}: it requires attestation tier "
+                f"{required} and this agent is attested at tier {granted}. The "
+                f"tier is a precondition on the executor, not an attenuated "
+                f"capability."
+            )
+
     def _execute(self, item: WorkItem) -> dict[str, Any]:
+        # BEFORE anything else, including reading the inputs.
+        self._require_attested_tier(item)
         t0 = time.monotonic_ns()
         inputs = self._gather_inputs(item)
 

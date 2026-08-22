@@ -525,7 +525,10 @@ def main() -> int:
            "is all-or-nothing, so this is a known boundary of the architecture, "
            "not a hypothesis under test (research/H3_BLIND_CHANNEL.md)", False)
 
-    out = Path(__file__).parent / "arena2.json"
+    # Optional output name so a POST-FIX re-run cannot overwrite the
+    # preregistered record. Nothing about what is measured changes.
+    out = Path(__file__).parent / (sys.argv[1] if len(sys.argv) > 1
+                                   else "arena2.json")
     out.write_text(json.dumps({"preregistration_commit": "8e3e048",
                                "results": _RESULTS}, indent=2))
     w = max(len(r["attack"]) for r in _RESULTS)

@@ -151,14 +151,18 @@ class NetworkBlackboard(Blackboard):
             ))
         return result
 
-    def try_claim(self, work_item_id, agent_pubkey, hlc):
+    def try_claim(self, work_item_id, agent_pubkey, hlc, claimant_tier=None):
         # Bump the gossip-side HLC so cross-cluster total order
         # observes our claim. We use the agent's own HLC to drive the
         # claim (parent class semantics) but ALSO advance the gossip
         # HLC to keep its node-id slot fresh — this matters when a
         # remote cluster's HLC.recv() later sees our claim and decides
         # whether to ratchet forward.
-        won = super().try_claim(work_item_id, agent_pubkey, hlc)
+        # Pass the tier THROUGH. An override that drops it would silently
+        # reintroduce the gap on exactly the deployment -- networked, where
+        # item ids arrive by gossip -- that made it reachable in the first place.
+        won = super().try_claim(work_item_id, agent_pubkey, hlc,
+                                claimant_tier=claimant_tier)
         if won and self._gossip is not None and self._gossip_project_id is not None:
             compositor_pubkey = (
                 self._gossip_hlc.node_id if self._gossip_hlc is not None else ""

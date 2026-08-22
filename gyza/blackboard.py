@@ -339,15 +339,49 @@ class Blackboard:
             ),
         )
 
-    def try_claim(self, work_item_id: str, agent_pubkey: str, hlc: HLC) -> bool:
+    def try_claim(self, work_item_id: str, agent_pubkey: str, hlc: HLC,
+                  claimant_tier: int | None = None) -> bool:
+        """Claim a work item.
+
+        `claimant_tier` is ADVISORY AND SELF-REPORTED. It closes the path Arena
+        2 walked -- `get_unclaimed` filters by `required_tier` in its WHERE
+        clause, so an agent that learns an item id any OTHER way (gossip, a DAG
+        parent, a log line) was never filtered at all -- but it is NOT the
+        boundary, because a compromised agent simply passes a higher number.
+        The boundary is `AgentRunner._require_attested_tier`, which reads the
+        COMPOSITOR-SIGNED manifest rather than an argument.
+
+        Saying that plainly is the point. A self-reported check described as an
+        authorization boundary would be the same overclaim as the "kernel-
+        enforced" sandbox: true-sounding, and load-bearing for nobody.
+
+        `None` means "did not say" and fails closed to tier 0, matching the
+        enforcement record's positive-declaration rule.
+        """
         l, c, node = hlc.now()
         if self._raft is not None:
+            # The tier is checked LOCALLY, before proposing. The Raft state
+            # machine replicates the claim, not the claimant's attestation, so
+            # a replica cannot re-derive this -- another reason it is advisory.
+            if not self._tier_permits(work_item_id, claimant_tier):
+                return False
             return bool(self._raft.raft_claim_work_item(
                 work_item_id, agent_pubkey, l, c, node,
                 self._raft._identity.pubkey_hex,
                 sync=True, timeout=10.0,
             ))
-        return self.try_claim_direct(work_item_id, agent_pubkey, l, c, node)
+        return self.try_claim_direct(work_item_id, agent_pubkey, l, c, node,
+                                     claimant_tier=claimant_tier)
+
+    def _tier_permits(self, work_item_id: str,
+                      claimant_tier: int | None) -> bool:
+        row = self._conn().execute(
+            "SELECT required_tier FROM work_items WHERE id=?",
+            (work_item_id,),
+        ).fetchone()
+        if row is None:
+            return True          # missing item is the caller's problem, not this check's
+        return int(row["required_tier"] or 0) <= int(claimant_tier or 0)
 
     def try_claim_direct(
         self,
@@ -356,6 +390,7 @@ class Blackboard:
         hlc_l: int,
         hlc_c: int,
         hlc_node: str,
+        claimant_tier: int | None = None,
     ) -> bool:
         # Derive claimed_at_ns from the HLC's millisecond component so
         # every node records the same value when applying the same
@@ -365,10 +400,15 @@ class Blackboard:
         conn.execute("BEGIN IMMEDIATE")
         try:
             row = conn.execute(
-                "SELECT claimed_by FROM work_items WHERE id=?",
+                "SELECT claimed_by, required_tier FROM work_items WHERE id=?",
                 (work_item_id,),
             ).fetchone()
             if row is None or row["claimed_by"] is not None:
+                conn.execute("ROLLBACK")
+                return False
+            # Advisory tier filter -- see `try_claim`. Inside the same
+            # transaction as the claimed_by read so it cannot race it.
+            if int(row["required_tier"] or 0) > int(claimant_tier or 0):
                 conn.execute("ROLLBACK")
                 return False
             cur = conn.execute(
