@@ -173,3 +173,114 @@ def test_the_REAL_shipped_v0_1_3_config_is_refused_after_v3(tmp_path):
     with pytest.raises(GuardConfigError, match="previously installed"):
         GuardConfigStore(pub, history_path=hist).load(
             old["config"], old["signature"])
+
+
+# =========================================================================== #
+#  A HIGHER VERSION IS NOT A LICENCE TO LOOSEN
+#
+#  The rollback floor closed the NO-KEY attack: replaying an old signed file.
+#  It does nothing about a key-holder signing a NEW version with looser bounds,
+#  which installed cleanly on any restart -- every signature verifying, `gyza
+#  status` reporting SIGNED, and the containment claim now over bounds someone
+#  else chose. Version monotonicity and PERMISSIVENESS monotonicity are
+#  different properties and the first does not imply the second.
+#
+#  This does not stop a key-holder; nothing does. It makes loosening an act
+#  that must be DECLARED through `install_loosening` with a separately signed
+#  record -- even across a restart, which is what that mechanism was for.
+# =========================================================================== #
+
+def test_a_cold_store_REFUSES_a_LOOSENED_higher_version(tmp_path):
+    seed, pub = _authority()
+    hist = tmp_path / "history.jsonl"
+    tight = _cfg(3, {"H4_authority": 0.0, "H5_storage_growth": 1e9})
+    loose = _cfg(4, {"H4_authority": 999.0, "H5_storage_growth": 1e15})
+
+    GuardConfigStore(pub, history_path=hist).load(tight, sign_config(tight, seed))
+    with pytest.raises(GuardConfigError, match="LOOSEN"):
+        GuardConfigStore(pub, history_path=hist).load(loose, sign_config(loose, seed))
+
+
+def test_a_cold_store_ACCEPTS_a_TIGHTENED_higher_version(tmp_path):
+    """The counter-control. A check that refused every new version would be a
+    check nobody could operate around, and tightening must stay cheap."""
+    seed, pub = _authority()
+    hist = tmp_path / "history.jsonl"
+    tight = _cfg(3, {"H5_storage_growth": 1e9})
+    tighter = _cfg(4, {"H5_storage_growth": 1e8})
+
+    GuardConfigStore(pub, history_path=hist).load(tight, sign_config(tight, seed))
+    got = GuardConfigStore(pub, history_path=hist).load(
+        tighter, sign_config(tighter, seed))
+    assert got.bounds["H5_storage_growth"] == 1e8
+
+
+def test_a_DECLARED_loosening_still_works_across_a_restart(tmp_path):
+    """Loosening is PERMITTED -- it is a distinct operation, not a forbidden
+    one. If this failed, the check would have turned a process control into a
+    brick wall and operators would route around it."""
+    from gyza.containment.guardconfig import LooseningRecord, sign_loosening
+
+    seed, pub = _authority()
+    hist = tmp_path / "history.jsonl"
+    tight = _cfg(3, {"H5_storage_growth": 1e9})
+    loose = _cfg(4, {"H5_storage_growth": 1e10})
+
+    GuardConfigStore(pub, history_path=hist).load(tight, sign_config(tight, seed))
+
+    # A NEW process: load what is in force, then loosen with a signed record.
+    store = GuardConfigStore(pub, history_path=hist)
+    store.load(tight, sign_config(tight, seed))
+    rec = LooseningRecord(changes=(("H5_storage_growth", 1e9, 1e10),),
+                          reason="retention window extended")
+    got = store.install_loosening(loose, sign_config(loose, seed), rec,
+                                  sign_loosening(rec, seed), requested_by="op")
+    assert got.bounds["H5_storage_growth"] == 1e10
+    assert store.alarms and "GUARD-LOOSENED" in store.alarms[0]
+
+    # ...and the now-looser configuration becomes the baseline, so a later cold
+    # load of it is not itself treated as a fresh loosening.
+    after = GuardConfigStore(pub, history_path=hist).load(
+        loose, sign_config(loose, seed))
+    assert after.version == 4
+
+
+def test_the_chain_covers_the_BOUNDS_it_protects(tmp_path):
+    """An unprotected field is a field an attacker edits instead of attacking
+    the check. If `bounds` were outside the link, the recorded baseline could
+    be rewritten without breaking the chain, and the loosening check would
+    compare against whatever the attacker chose."""
+    import json
+
+    seed, pub = _authority()
+    hist = tmp_path / "history.jsonl"
+    cfg = _cfg(3, {"H5_storage_growth": 1e9})
+    GuardConfigStore(pub, history_path=hist).load(cfg, sign_config(cfg, seed))
+    GuardConfigStore(pub, history_path=hist).load(cfg, sign_config(cfg, seed))
+
+    lines = hist.read_text().splitlines()
+    first = json.loads(lines[0])
+    assert "bounds" in first, "the history does not record bounds at all"
+    first["bounds"] = {"H5_storage_growth": 1e15}          # forge the baseline
+    hist.write_text("\n".join([json.dumps(first, sort_keys=True), lines[1]]) + "\n")
+
+    with pytest.raises(GuardConfigError, match="chain breaks"):
+        GuardConfigStore(pub, history_path=hist).load(cfg, sign_config(cfg, seed))
+
+
+def test_BOTH_hash_sites_agree_on_what_a_link_commits_to():
+    """The defect this cost an hour on. Two sites computed a link from two
+    hand-written field lists; one kept the pre-bounds shape while the writer
+    moved on, so every honest chain verified as BROKEN -- an integrity check
+    failing on good data, which is the worst kind because the reflex is to
+    weaken it. Both now call one function."""
+    import inspect
+
+    from gyza.containment import guardconfig as gc
+
+    for fn in (gc.GuardConfigStore._version_floor,
+               gc.GuardConfigStore._record_install):
+        src = inspect.getsource(fn)
+        assert "_link_payload" in src, (
+            f"{fn.__name__} hand-rolls the link payload; it will drift from "
+            f"the other site the next time a field is added")

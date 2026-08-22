@@ -125,6 +125,24 @@ def config_hash(config: dict) -> str:
     return blake3.blake3(canonical_bytes(config)).hexdigest()
 
 
+def _link_payload(rec: dict) -> dict:
+    """The fields a history link commits to.
+
+    `bounds` IS INCLUDED. A chain that covered only version and hash would let
+    someone rewrite the recorded bounds without breaking a link, and the
+    cold-load loosening check reads exactly those bounds -- an unprotected
+    field is a field an attacker edits instead of attacking the check.
+
+    Absent on entries written before 2026-08-22; `.get` keeps those links
+    verifiable rather than invalidating a history that was honestly written.
+    """
+    out = {"version": rec["version"], "config_hash": rec["config_hash"],
+           "at_ns": rec["at_ns"], "prev": rec["prev"]}
+    if "bounds" in rec:
+        out["bounds"] = rec["bounds"]
+    return out
+
+
 def authority_key_is_colocated(pubkey_hex: str,
                                search: "list[str] | None" = None) -> str | None:
     """Return the path of a PRIVATE authority key on this host, or None.
@@ -462,17 +480,21 @@ class GuardConfigStore:
         if self._history_path is None or not self._history_path.exists():
             return 0
         floor, prev = 0, ""
+        self._last_recorded_bounds = None
         for i, line in enumerate(
                 self._history_path.read_text().splitlines(), start=1):
             if not line.strip():
                 continue
             try:
                 rec = json.loads(line)
+                # `_link_payload`, NOT an inline dict. Two sites computing a
+                # link from two hand-written field lists WILL drift: this one
+                # kept the pre-bounds shape while the writer moved on, so every
+                # chain verified as broken -- an integrity check failing on
+                # honest data, which is the worst kind because the reflex is to
+                # weaken it.
                 link = blake3.blake3(
-                    canonical_bytes({"version": rec["version"],
-                                     "config_hash": rec["config_hash"],
-                                     "at_ns": rec["at_ns"],
-                                     "prev": rec["prev"]})).hexdigest()
+                    canonical_bytes(_link_payload(rec))).hexdigest()
             except Exception as exc:                         # noqa: BLE001
                 raise GuardConfigError(
                     f"guard-config history is unreadable at line {i} ({exc}). "
@@ -487,9 +509,14 @@ class GuardConfigStore:
                     f"edited, which is what a rollback requires.")
             prev = link
             floor = max(floor, int(rec["version"]))
+            # The LAST entry in chain order is what an incoming config is
+            # compared against -- not the highest version, because the most
+            # recent install is the state actually in force.
+            self._last_recorded_bounds = rec.get("bounds")
         return floor
 
-    def _record_install(self, version: int, config_hash_hex: str) -> None:
+    def _record_install(self, version: int, config_hash_hex: str,
+                        bounds: "dict | None" = None) -> None:
         """Append one install to the chained history. Best-effort on I/O, but
         a failure is LOGGED -- an install nobody recorded lowers the floor for
         the next start."""
@@ -502,11 +529,15 @@ class GuardConfigStore:
                     if not line.strip():
                         continue
                     r = json.loads(line)
-                    prev = blake3.blake3(canonical_bytes(
-                        {"version": r["version"], "config_hash": r["config_hash"],
-                         "at_ns": r["at_ns"], "prev": r["prev"]})).hexdigest()
+                    prev = blake3.blake3(
+                        canonical_bytes(_link_payload(r))).hexdigest()
             rec = {"version": int(version), "config_hash": config_hash_hex,
-                   "at_ns": time.time_ns(), "prev": prev}
+                   "at_ns": time.time_ns(), "prev": prev,
+                   # THE BOUNDS THEMSELVES, so a COLD load can tell whether an
+                   # incoming configuration LOOSENS. Version alone cannot: a
+                   # correctly-signed v4 raising every bound is a HIGHER version
+                   # and passes the floor.
+                   "bounds": dict(bounds or {})}
             self._history_path.parent.mkdir(parents=True, exist_ok=True)
             with self._history_path.open("a") as fh:
                 fh.write(json.dumps(rec, sort_keys=True) + "\n")
@@ -529,6 +560,42 @@ class GuardConfigStore:
                 f"configuration is a ROLLBACK -- every signature verifies and "
                 f"the bounds silently revert. Monotonicity is checked across "
                 f"restarts, not only within one process.")
+        # ORDER MATTERS. A rollback to an older, looser configuration trips
+        # BOTH checks, and "this is a rollback" is the more specific and more
+        # actionable diagnosis -- an operator told "this loosens" would go
+        # looking for a loosening record when the real answer is that they
+        # served a stale file.
+        if self._cfg is None and not _allow_loosening:
+            recorded = getattr(self, "_last_recorded_bounds", None)
+            if recorded is not None:
+                loosened = [c for c in diff_bounds(recorded,
+                                                   config.get("bounds", {}))
+                            if c.direction == "LOOSENED"]
+                if loosened:
+                    detail = ", ".join(
+                        f"{c.bound_id}: {c.old} -> {c.new}" for c in loosened)
+                    raise GuardConfigError(
+                        f"refusing to install: {len(loosened)} bound(s) LOOSEN "
+                        f"against this host's last recorded configuration "
+                        f"({detail}). A HIGHER VERSION IS NOT A LICENCE TO "
+                        f"LOOSEN -- version monotonicity and permissiveness "
+                        f"monotonicity are different properties, and a "
+                        f"correctly-signed v{version} raising every bound "
+                        f"passes the first and fails this. Loosening is "
+                        f"permitted through install_loosening() with a "
+                        f"separately signed LooseningRecord naming every bound "
+                        f"that moves.")
+            elif self._version_floor() > 0:
+                # A history exists but predates bounds recording. We cannot
+                # compare, and saying so is the honest state: refusing would
+                # brick every host upgrading across this change, and silently
+                # passing would be the reassuring direction. The next install
+                # records bounds and the check goes live.
+                logging.getLogger(__name__).warning(
+                    "[guardconfig] the install history predates bounds "
+                    "recording, so a cold-load loosening cannot be detected "
+                    "for THIS install; the next one records bounds and closes "
+                    "the gap")
         if self._cfg is not None and version <= self._cfg.version:
             # Monotone versioning: a valid OLD config must not be replayable to
             # reinstate loosened bounds that were since tightened.
@@ -564,7 +631,8 @@ class GuardConfigStore:
             authority_pubkey_hex=self._authority.hex(),
             config_hash=config_hash(config),
         )
-        self._record_install(version, self._cfg.config_hash)
+        self._record_install(version, self._cfg.config_hash,
+                             bounds=self._cfg.bounds)
         return self._cfg
 
     def install_loosening(self, config: dict, signature_hex: str,
