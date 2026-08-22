@@ -322,7 +322,11 @@ def test_relocating_the_key_does_NOT_silence_the_colocation_check(tmp_path,
     home = tmp_path / "home"
     monkeypatch.setenv("HOME", str(home))
     for rel in (".gyza/authority.key", ".gyza-authority/authority.key",
-                ".config/gyza/authority.key", "authority.key"):
+                ".config/gyza/authority.key", "authority.key",
+                # A VISIBLE folder, added the same day it was created. A key
+                # moved somewhere the detector does not look would clear the
+                # warning without achieving separation.
+                "gyza-keys/authority.key"):
         kf = home / rel
         kf.parent.mkdir(parents=True, exist_ok=True)
         kf.write_bytes(seed)

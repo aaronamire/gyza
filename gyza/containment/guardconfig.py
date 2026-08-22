@@ -166,6 +166,12 @@ def authority_key_is_colocated(pubkey_hex: str,
     candidates = search or [
         "~/.gyza/authority.key",
         "~/.gyza-authority/authority.key",
+        # A VISIBLE location, added 2026-08-22 because the operator could not
+        # find the key in a dot-directory. Added to this list IN THE SAME
+        # CHANGE that created the folder: moving a key somewhere the detector
+        # does not look silences the warning without achieving any separation,
+        # which is the failure this list exists to prevent.
+        "~/gyza-keys/authority.key",
         "~/.config/gyza/authority.key",
         "~/authority.key",
         "./authority.key",
