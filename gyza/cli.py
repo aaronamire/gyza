@@ -604,6 +604,36 @@ def cmd_serve(args: argparse.Namespace) -> int:
         return 1
 
     sandboxed = not args.no_sandbox
+    # WHAT the agents do, separate from WHETHER they are sandboxed. `serve`
+    # shipped able to run only mock work because one field meant both, so a
+    # sandboxed fleet did nothing real and looked production-ready.
+    argv_cmd = list(args.agent_argv or [])
+    if argv_cmd and argv_cmd[0] == "--":
+        argv_cmd = argv_cmd[1:]
+    if argv_cmd:
+        # Resolve host-side: the sandbox gets a fresh environment, so a bare
+        # name would not resolve inside, and failing here is a clearer error
+        # than a sandbox exec failure. Same reasoning as `gyza exec`.
+        resolved = shutil.which(argv_cmd[0])
+        if resolved is None:
+            print(f"command not found: {argv_cmd[0]}", file=sys.stderr)
+            return 1
+        argv_cmd[0] = resolved
+
+    kind = "mock"
+    if argv_cmd:
+        kind = "command"
+    elif args.anthropic:
+        kind = "anthropic"
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            print("--anthropic needs ANTHROPIC_API_KEY in the environment",
+                  file=sys.stderr)
+            return 1
+    if kind != "mock" and not sandboxed:
+        print(f"--{kind} with --no-sandbox is refused: real work outside "
+              f"bubblewrap carries no bounds-proof, and the envelopes would "
+              f"imply containment that never happened.", file=sys.stderr)
+        return 1
     if sandboxed and shutil.which("bwrap") is None:
         # Same refusal as `gyza run`: this will NOT fall back to unenforced
         # execution, because a roster of agents believing they are contained
@@ -635,7 +665,9 @@ def cmd_serve(args: argparse.Namespace) -> int:
             artifact_store_path=_resolve("~/.gyza/artifacts"),
             poll_interval_s=float(args.poll_interval),
             min_reward=0.0, min_similarity=-1.0,
-            executor_kind="sandboxed" if sandboxed else "mock",
+            sandboxed=sandboxed, executor_kind=kind,
+            command_argv=tuple(argv_cmd) if argv_cmd else None,
+            model=args.model,
         ))
 
     sup = RunnerProcessSupervisor(roster, max_restarts=args.max_restarts,
@@ -648,8 +680,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
     _signal.signal(_signal.SIGINT, _sigterm)
     _signal.signal(_signal.SIGTERM, _sigterm)
 
-    print(f"serving {n} agent(s), "
-          f"{'sandboxed' if sandboxed else 'MOCK (no containment)'}, "
+    print(f"serving {n} agent(s): {kind} executor, "
+          f"{'sandboxed' if sandboxed else 'UNSANDBOXED (no containment)'}, "
           f"max {args.max_restarts} restarts each")
     sup.start()
     try:
@@ -2930,6 +2962,20 @@ def build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument(
         "--no-sandbox", action="store_true",
         help="run MOCK executors with no containment (testing only)")
+    # `-- COMMAND [ARGS...]`, matching `gyza exec`. A bare
+    # `--command X -a` loses `-a` to the top-level parser, and inventing a
+    # different convention for the same job is worse than the flag being long.
+    # NAMED `agent_argv`, NOT `command`. `add_subparsers(dest="command")`
+    # already owns that name, so a positional called `command` silently
+    # overwrites the subcommand the dispatcher reads -- every invocation fell
+    # through to the top-level usage message with no error explaining why.
+    p_serve.add_argument(
+        "agent_argv", nargs="*", default=[], metavar="-- COMMAND [ARGS...]",
+        help="run this as each agent's action, inside the sandbox")
+    p_serve.add_argument(
+        "--anthropic", action="store_true",
+        help="use the Anthropic executor (needs ANTHROPIC_API_KEY)")
+    p_serve.add_argument("--model", default=None)
 
     p_audit = sub.add_parser(
         "audit",

@@ -293,3 +293,78 @@ def test_progress_is_read_from_the_APPEND_ONLY_LOG_not_self_reported():
 
     src = inspect.getsource(RunnerProcessSupervisor._completions_since)
     assert "count_agent_envelopes_since" in src
+
+
+# =========================================================================== #
+#  THE FLEET MUST BE ABLE TO DO REAL WORK
+#
+#  `serve` shipped able to run only MOCK executors, because ONE field meant
+#  two independent things: `executor_kind` was set to "sandboxed", so it
+#  answered "is it contained?" and was read as "what does it do?". A sandboxed
+#  fleet did nothing real and looked production-ready.
+# =========================================================================== #
+
+def test_sandboxing_and_WHAT_THE_AGENT_DOES_are_separate_fields():
+    from gyza.supervisor import RunnerSpec
+
+    s = RunnerSpec(agent_id="a", agent_state_path="x", blackboard_path="x",
+                   memory_path="x", spec_db_path="x", artifact_store_path="x")
+    assert hasattr(s, "sandboxed") and hasattr(s, "executor_kind")
+    assert s.sandboxed is False, "an unconfigured host must not assume containment"
+    assert s.executor_kind == "mock", "and must not assume real work either"
+
+
+@pytest.mark.parametrize("kind,kwargs,expect", [
+    ("mock", {}, "make_mock_executor"),
+    ("command", {"command_argv": ("/bin/echo", "hi")}, "make_command_executor"),
+    ("anthropic", {"model": "m"}, "make_anthropic_executor"),
+])
+def test_every_executor_kind_maps_to_a_real_factory(kind, kwargs, expect):
+    from gyza.supervisor import RunnerSpec, _executor_target
+
+    s = RunnerSpec(agent_id="a", agent_state_path="x", blackboard_path="x",
+                   memory_path="x", spec_db_path="x", artifact_store_path="x",
+                   executor_kind=kind, **kwargs)
+    target, _init = _executor_target(s)
+    assert target.endswith(expect)
+
+
+def test_a_command_kind_with_NO_command_is_refused():
+    from gyza.supervisor import RunnerSpec, _executor_target
+
+    s = RunnerSpec(agent_id="a", agent_state_path="x", blackboard_path="x",
+                   memory_path="x", spec_db_path="x", artifact_store_path="x",
+                   executor_kind="command")
+    with pytest.raises(ValueError, match="command_argv"):
+        _executor_target(s)
+
+
+def test_the_API_KEY_is_NOT_carried_in_the_spec():
+    """A secret in a dataclass is a secret in a pickle, in a traceback, and in
+    any log that repr()s the roster. The child reads it from its environment."""
+    import dataclasses
+
+    from gyza.supervisor import RunnerSpec
+
+    names = {f.name for f in dataclasses.fields(RunnerSpec)}
+    assert not any("key" in n or "secret" in n or "token" in n for n in names), (
+        f"RunnerSpec gained a credential-shaped field: {sorted(names)}")
+
+
+def test_REAL_work_outside_the_sandbox_is_REFUSED(tmp_path):
+    """An unsandboxed agent doing real work would sign envelopes implying
+    containment that never happened. Mock is the only thing allowed to run
+    without bubblewrap, because mock output claims nothing."""
+    from gyza.supervisor import RunnerSpec, run_runner_process
+
+    state = tmp_path / "agent.json"
+    state.write_text('{"seed_hex": "%s", "manifest": {}}' % ("11" * 32))
+    s = RunnerSpec(agent_id="a", agent_state_path=str(state),
+                   blackboard_path=str(tmp_path / "bb.db"),
+                   memory_path=str(tmp_path / "m"),
+                   spec_db_path=str(tmp_path / "s.db"),
+                   artifact_store_path=str(tmp_path / "cas"),
+                   sandboxed=False, executor_kind="command",
+                   command_argv=("/bin/echo", "hi"))
+    with pytest.raises(Exception, match="bounds-proof|refused|manifest"):
+        run_runner_process(s)

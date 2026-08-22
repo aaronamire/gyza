@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import logging
 import multiprocessing as mp
+import os
 import threading
 import time
 from dataclasses import dataclass
@@ -479,12 +480,27 @@ class RunnerSpec:
     poll_interval_s: float = 1.0
     min_reward: float = 0.0
     min_similarity: float = -1.0
-    #: "sandboxed" or "mock". NOT a callable: a spawn child unpickles this, and
-    #: a function object would not survive the boundary. Mock is the default so
-    #: an unconfigured host cannot silently run unsandboxed work believing it
-    #: is contained -- `serve` passes "sandboxed" explicitly and refuses to
-    #: start without bubblewrap.
+    #: Whether the work runs INSIDE bubblewrap. NOT a callable: a spawn child
+    #: unpickles this, and a function object would not survive the boundary.
+    #: False by default so an unconfigured host cannot silently run unsandboxed
+    #: work believing it is contained -- `serve` sets it explicitly and refuses
+    #: to start without bubblewrap.
+    sandboxed: bool = False
+    #: WHAT the agent actually does: "mock" | "command" | "anthropic".
+    #: Separated from `sandboxed` because they are independent questions, and
+    #: conflating them is why this shipped able to run only mock work: the
+    #: field meant "is it sandboxed" and was read as "what does it do", so a
+    #: sandboxed fleet did nothing real and looked production-ready.
     executor_kind: str = "mock"
+    #: For executor_kind == "command". A tuple, not a list, because the spec is
+    #: frozen and must hash.
+    command_argv: "tuple[str, ...] | None" = None
+    command_cwd: "str | None" = None
+    #: For executor_kind == "anthropic". THE API KEY IS DELIBERATELY ABSENT:
+    #: the child reads ANTHROPIC_API_KEY from its environment. A secret in a
+    #: dataclass is a secret in a pickle, in a traceback, and in any log that
+    #: repr()s the roster.
+    model: "str | None" = None
 
 
 @dataclass
@@ -744,6 +760,30 @@ class RunnerProcessSupervisor:
                     self._spawn(c)
 
 
+def _executor_target(spec: "RunnerSpec") -> "tuple[str, dict]":
+    """Map `executor_kind` to the factory the sandbox should instantiate.
+
+    Returned as a DOTTED PATH plus kwargs rather than a callable, because
+    `make_sandboxed_executor` builds the executor INSIDE bwrap -- so the
+    command, or the Anthropic client, inherits the sandbox's namespaces and
+    rlimits rather than merely being wrapped by something that does.
+    """
+    if spec.executor_kind == "mock":
+        return "gyza.runner:make_mock_executor", {
+            "response": f"[{spec.agent_id[:8]}] done"}
+    if spec.executor_kind == "command":
+        if not spec.command_argv:
+            raise ValueError(
+                "executor_kind='command' requires command_argv")
+        return "gyza.runner:make_command_executor", {
+            "argv": list(spec.command_argv), "cwd": spec.command_cwd}
+    if spec.executor_kind == "anthropic":
+        return "gyza.runner:make_anthropic_executor", {
+            "api_key": os.environ.get("ANTHROPIC_API_KEY", ""),
+            "model": spec.model or "claude-sonnet-4-5"}
+    raise ValueError(f"unknown executor_kind {spec.executor_kind!r}")
+
+
 def run_runner_process(spec: "RunnerSpec") -> None:
     """Child entry point: build one runner from a spec and poll until killed.
 
@@ -769,17 +809,35 @@ def run_runner_process(spec: "RunnerSpec") -> None:
     saved = _json.loads(Path(spec.agent_state_path).read_text())
     ident = _Ident(bytes.fromhex(saved["seed_hex"]), saved["manifest"])
 
-    if spec.executor_kind == "sandboxed":
+    inner, init_kwargs = _executor_target(spec)
+    if spec.sandboxed:
         from gyza.containment.egress import default_egress_recorder
         from gyza.sandbox.config import sandbox_config_from_manifest
         from gyza.sandbox.executor import make_sandboxed_executor
+        scfg = sandbox_config_from_manifest(ident.manifest)
+        if spec.executor_kind == "anthropic":
+            # The key crosses into the sandbox as an env var, exactly as
+            # `gyza run` does it, and is read from THIS process's environment
+            # rather than carried in the spec.
+            import dataclasses as _dc
+            key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not key:
+                raise RuntimeError(
+                    "executor_kind='anthropic' needs ANTHROPIC_API_KEY in the "
+                    "environment; it is deliberately not carried in RunnerSpec")
+            scfg = _dc.replace(scfg, env_set={"ANTHROPIC_API_KEY": key})
         executor = make_sandboxed_executor(
-            "gyza.runner:make_mock_executor",
-            init_kwargs={"response": f"[{ident.agent_id[:8]}] done"},
-            config=sandbox_config_from_manifest(ident.manifest),
+            inner, init_kwargs=init_kwargs, config=scfg,
             egress_recorder=default_egress_recorder(spec.blackboard_path),
         )
     else:
+        from gyza.runner import make_mock_executor
+        if spec.executor_kind != "mock":
+            raise RuntimeError(
+                f"executor_kind={spec.executor_kind!r} without a sandbox is "
+                f"refused: real work outside bubblewrap carries no "
+                f"bounds-proof, and an agent doing it would sign envelopes "
+                f"that imply containment it never had")
         executor = make_mock_executor()
 
     bb = _BB(spec.blackboard_path)
@@ -797,8 +855,8 @@ def run_runner_process(spec: "RunnerSpec") -> None:
         poll_interval_s=spec.poll_interval_s,
         verify_chain_before_claim=False,
         # A sandboxed child stamps an enforcement record, so it can and must
-        # refuse to sign without one. A mock child cannot.
-        require_enforcement=(spec.executor_kind == "sandboxed"),
+        # refuse to sign without one. An unsandboxed one cannot.
+        require_enforcement=spec.sandboxed,
     )
     runner.start()
     try:
