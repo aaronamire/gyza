@@ -638,7 +638,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
             executor_kind="sandboxed" if sandboxed else "mock",
         ))
 
-    sup = RunnerProcessSupervisor(roster, max_restarts=args.max_restarts)
+    sup = RunnerProcessSupervisor(roster, max_restarts=args.max_restarts,
+                                  stall_timeout_s=args.stall_timeout)
     stopping = {"now": False}
 
     def _sigterm(_sig, _frm):
@@ -2920,6 +2921,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument("--agents", type=int, default=1)
     p_serve.add_argument("--poll-interval", type=float, default=1.0)
     p_serve.add_argument("--max-restarts", type=int, default=5)
+    p_serve.add_argument(
+        "--stall-timeout", type=float, default=900.0,
+        help="restart an agent that is ALIVE but has completed nothing for "
+             "this long WHILE WORK IS AVAILABLE (idle agents are never "
+             "restarted). Above the 300s sandbox cap by default.")
     p_serve.add_argument("--memory-mb", type=int, default=512)
     p_serve.add_argument(
         "--no-sandbox", action="store_true",

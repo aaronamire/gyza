@@ -495,6 +495,13 @@ class _Child:
     last_start_ns: int = 0
     gave_up: bool = False
     last_exit: "int | None" = None
+    #: Wall clock of the last observed COMPLETION, or of the last tick at which
+    #: this child had nothing to do. Both reset it, because idleness is health.
+    last_progress_ns: int = 0
+    completions: int = 0
+    stall_restarts: int = 0
+    #: Did we observe this child holding a claim during the current window?
+    saw_attempt: bool = False
 
 
 class RunnerProcessSupervisor:
@@ -521,6 +528,7 @@ class RunnerProcessSupervisor:
         restart_window_s: float = 300.0,
         backoff_s: float = 1.0,
         poll_interval_s: float = 0.5,
+        stall_timeout_s: float = 900.0,
         target: "Callable[[RunnerSpec], None] | None" = None,
     ):
         if max_restarts < 0:
@@ -530,6 +538,19 @@ class RunnerProcessSupervisor:
         self._restart_window_ns = int(restart_window_s * 1e9)
         self._backoff_s = float(backoff_s)
         self._poll_s = float(poll_interval_s)
+        #: LIVENESS IS NOT PROGRESS, and this is the number that separates them.
+        #:
+        #: Watching `proc.is_alive()` was not enough, and a real defect proved
+        #: it: `EpisodicMemory` raised on every write, `_run_loop` caught the
+        #: error, released the claim and looped, so three agents polled and
+        #: failed forever while every process stayed alive and this supervisor
+        #: reported them healthy. A heartbeat would not have caught it either
+        #: -- the loop WAS running. Only progress distinguishes the two.
+        #:
+        #: SIZED ABOVE THE LONGEST LEGITIMATE ACTION, like the claim lease and
+        #: for the same reason: the sandbox caps an action at 300 s, so a
+        #: shorter window would restart an agent that is simply working.
+        self._stall_timeout_ns = int(stall_timeout_s * 1e9)
         #: Injectable so a test can supervise a process whose failure it
         #: controls. Production passes None and gets `run_runner_process`.
         self._target = target or run_runner_process
@@ -543,7 +564,10 @@ class RunnerProcessSupervisor:
             return
         self._stop.clear()
         with self._lock:
+            now = time.time_ns()
             for c in self._children:
+                c.last_progress_ns = now
+                c.saw_attempt = False
                 self._spawn(c)
         self._thread = threading.Thread(
             target=self._watch_loop, name="gyza-proc-supervisor", daemon=True)
@@ -577,6 +601,8 @@ class RunnerProcessSupervisor:
                 "alive": bool(c.proc is not None and c.proc.is_alive()),
                 "pid": getattr(c.proc, "pid", None),
                 "restarts": c.restarts,
+                "stall_restarts": c.stall_restarts,
+                "completions": c.completions,
                 "gave_up": c.gave_up,
                 "last_exit": c.last_exit,
             } for c in self._children]
@@ -590,12 +616,103 @@ class RunnerProcessSupervisor:
         c.proc.start()
         c.last_start_ns = time.time_ns()
 
+    def _holds_a_claim(self, spec: "RunnerSpec") -> "bool | None":
+        """Is this agent holding work right now? `None` means unanswerable,
+        which is NOT 'no' and must not convict.
+
+        THIS REPLACED "is work available", AND MY OWN NEGATIVE CONTROL IS WHY.
+        Availability convicts the wrong agent: a board can hold unclaimed items
+        this agent will never take -- wrong tier, wrong specialisation, or
+        already in its local failed set -- and an idle fleet was restarted for
+        work that was never its to do.
+
+        ATTEMPTING is the precise signal. An agent that claims and finishes
+        nothing is broken; an agent that claims nothing is choosing, and
+        choosing is not failing. Sampled rather than integrated because a claim
+        is transient -- the failure loop claims, fails, releases, and claims
+        again -- so a single tick may miss it while a window will not.
+        """
+        try:
+            from gyza.blackboard import Blackboard
+            row = Blackboard(spec.blackboard_path)._conn().execute(
+                "SELECT 1 FROM work_items WHERE claimed_by=? "
+                "AND completed_at_ns IS NULL LIMIT 1",
+                (spec.agent_id,),
+            ).fetchone()
+            return row is not None
+        except Exception:                                    # noqa: BLE001
+            return None
+
+    def _completions_since(self, spec: "RunnerSpec", since_ns: int) -> "int | None":
+        """Completions read from the APPEND-ONLY ENVELOPE LOG, not from a
+        channel the child reports on.
+
+        A child that reports its own health is a child that can lie about it by
+        being broken in the reporting path -- and the log is already durable,
+        already per-agent, and already the thing every other part of this
+        system treats as the record of what happened.
+        """
+        try:
+            from gyza.blackboard import Blackboard
+            return int(Blackboard(spec.blackboard_path)
+                       .count_agent_envelopes_since(spec.agent_id, since_ns))
+        except Exception:                                    # noqa: BLE001
+            return None
+
+    def _check_progress(self, c: "_Child", now: int) -> bool:
+        """True iff `c` should be restarted for making no progress."""
+        done = self._completions_since(c.spec, c.last_progress_ns)
+        if done is None:
+            return False                    # cannot tell: never restart on it
+        if done > 0:
+            c.completions += done
+            c.last_progress_ns = now
+            return False
+        if self._holds_a_claim(c.spec) is True:
+            c.saw_attempt = True
+        if now - c.last_progress_ns < self._stall_timeout_ns:
+            return False
+        if not c.saw_attempt:
+            # IDLE IS HEALTHY, and so is DECLINING. An agent that claimed
+            # nothing in the window either had nothing to do or wanted none of
+            # what was there; neither is a fault, and restarting it would be a
+            # supervisor that punishes a quiet queue or a specialised agent.
+            c.last_progress_ns = now
+            return False
+        # It held work and finished none of it, for a window longer than the
+        # sandbox can legitimately take. That is the defect this exists for.
+        c.saw_attempt = False
+        return True
+
     def _watch_loop(self) -> None:
         while not self._stop.wait(self._poll_s):
             with self._lock:
                 for c in self._children:
-                    if c.gave_up or c.proc is None or c.proc.is_alive():
+                    if c.gave_up or c.proc is None:
                         continue
+                    if c.proc.is_alive():
+                        if not self._check_progress(c, time.time_ns()):
+                            continue
+                        # Alive and not progressing while work waits. Treated
+                        # exactly like a crash from here down, including the
+                        # crash-loop ceiling -- a runner that cannot make
+                        # progress twice will not make it a third time, and
+                        # hiding that behind restarts is what the ceiling is
+                        # for.
+                        c.stall_restarts += 1
+                        LOG.error(
+                            "[supervisor] %s is ALIVE but has completed "
+                            "nothing for %.0fs while work is available; "
+                            "restarting. Liveness is not progress.",
+                            c.spec.agent_id[:8],
+                            self._stall_timeout_ns / 1e9)
+                        c.proc.terminate()
+                        c.proc.join(timeout=10.0)
+                        if c.proc.is_alive():
+                            c.proc.kill()
+                            c.proc.join(timeout=2.0)
+                        c.last_progress_ns = time.time_ns()
+                        c.saw_attempt = False
                     c.last_exit = c.proc.exitcode
                     # A clean exit is not a crash. A runner that returns 0 has
                     # finished; restarting it would fight its own decision.

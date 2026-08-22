@@ -154,3 +154,142 @@ def test_the_spec_is_PICKLABLE_because_spawn_children_unpickle_it():
 
     s = _spec("p")
     assert pickle.loads(pickle.dumps(s)) == s
+
+
+# =========================================================================== #
+#  LIVENESS IS NOT PROGRESS
+#
+#  Watching `proc.is_alive()` was not enough, and a real defect proved it:
+#  `EpisodicMemory` raised on every write, `_run_loop` caught the error,
+#  released the claim and looped, so three agents polled and failed forever
+#  while every process stayed alive and this supervisor called them healthy.
+#
+#  A HEARTBEAT WOULD NOT HAVE CAUGHT IT. The loop was running; it was even
+#  doing work. What it was not doing was FINISHING any. Only progress separates
+#  those, and progress has a trap of its own -- an agent with nothing to do
+#  makes none and is perfectly healthy -- so the signal must be conditional:
+#  work was available AND this agent completed none of it.
+# =========================================================================== #
+
+def _target_busy_but_useless(spec):
+    """Alive, looping, achieving nothing -- defect 1, distilled."""
+    while True:
+        time.sleep(0.05)
+
+
+class _FakeBoard:
+    """Stands in for the blackboard so a test controls both facts the
+    supervisor reads: completions, and whether the agent is ATTEMPTING work.
+
+    `attempting` rather than `work_available`, and my own negative control is
+    why: availability convicted an IDLE fleet, because the board held old
+    items those agents were never going to take. Claiming-and-not-finishing is
+    the defect; claiming nothing is a choice.
+    """
+
+    def __init__(self, completions=0, attempting=True):
+        self.completions = completions
+        self.attempting = attempting
+
+
+def _install_board(monkeypatch, sup, board):
+    monkeypatch.setattr(sup, "_completions_since",
+                        lambda spec, since: board.completions)
+    monkeypatch.setattr(sup, "_holds_a_claim", lambda spec: board.attempting)
+
+
+def test_an_ALIVE_but_stalled_agent_is_restarted(monkeypatch):
+    board = _FakeBoard(completions=0, attempting=True)
+    sup = RunnerProcessSupervisor(
+        [_spec("stalled")], max_restarts=5, backoff_s=0.05,
+        poll_interval_s=0.05, stall_timeout_s=0.2,
+        target=_target_busy_but_useless)
+    _install_board(monkeypatch, sup, board)
+    sup.start()
+    try:
+        assert _wait(lambda: sup.status()[0]["stall_restarts"] >= 1), sup.status()
+    finally:
+        sup.stop(timeout_s=10)
+
+
+def test_an_agent_that_CLAIMS_NOTHING_is_NOT_restarted(monkeypatch):
+    """THE COUNTER-CONTROL, and it caught a real false positive in the first
+    version of this signal. An idle fleet was restarted because the board held
+    unclaimed items those agents were never going to take -- wrong tier, wrong
+    specialisation, already failed locally. Declining is not failing."""
+    board = _FakeBoard(completions=0, attempting=False)
+    sup = RunnerProcessSupervisor(
+        [_spec("idle")], max_restarts=5, backoff_s=0.05,
+        poll_interval_s=0.05, stall_timeout_s=0.2,
+        target=_target_sleep_forever)
+    _install_board(monkeypatch, sup, board)
+    sup.start()
+    try:
+        time.sleep(1.5)                  # many stall windows
+        st = sup.status()[0]
+        assert st["stall_restarts"] == 0, "an idle agent was restarted"
+        assert st["alive"] is True
+    finally:
+        sup.stop(timeout_s=10)
+
+
+def test_a_PROGRESSING_agent_is_not_restarted_however_slow_the_queue(monkeypatch):
+    board = _FakeBoard(completions=1, attempting=True)
+    sup = RunnerProcessSupervisor(
+        [_spec("working")], max_restarts=5, backoff_s=0.05,
+        poll_interval_s=0.05, stall_timeout_s=0.2,
+        target=_target_sleep_forever)
+    _install_board(monkeypatch, sup, board)
+    sup.start()
+    try:
+        time.sleep(1.0)
+        st = sup.status()[0]
+        assert st["stall_restarts"] == 0, "a progressing agent was restarted"
+        assert st["completions"] > 0
+    finally:
+        sup.stop(timeout_s=10)
+
+
+def test_an_UNREADABLE_blackboard_never_convicts(monkeypatch):
+    """An unanswerable question must not convict. If the supervisor cannot
+    read progress or availability, restarting on that silence would make a
+    busy database look like a broken fleet."""
+    sup = RunnerProcessSupervisor(
+        [_spec("unknown")], max_restarts=5, backoff_s=0.05,
+        poll_interval_s=0.05, stall_timeout_s=0.2,
+        target=_target_sleep_forever)
+    monkeypatch.setattr(sup, "_completions_since", lambda spec, since: None)
+    monkeypatch.setattr(sup, "_holds_a_claim", lambda spec: None)
+    sup.start()
+    try:
+        time.sleep(1.0)
+        assert sup.status()[0]["stall_restarts"] == 0
+    finally:
+        sup.stop(timeout_s=10)
+
+
+def test_a_STALL_LOOP_hits_the_same_ceiling_as_a_crash_loop(monkeypatch):
+    """A runner that cannot make progress twice will not make it a third time.
+    Hiding that behind restarts is what the ceiling exists to prevent."""
+    board = _FakeBoard(completions=0, attempting=True)
+    sup = RunnerProcessSupervisor(
+        [_spec("hopeless")], max_restarts=2, backoff_s=0.05,
+        poll_interval_s=0.05, stall_timeout_s=0.15,
+        target=_target_busy_but_useless)
+    _install_board(monkeypatch, sup, board)
+    sup.start()
+    try:
+        assert _wait(lambda: sup.status()[0]["gave_up"], timeout_s=25), sup.status()
+        assert sup.status()[0]["restarts"] == 2
+    finally:
+        sup.stop(timeout_s=10)
+
+
+def test_progress_is_read_from_the_APPEND_ONLY_LOG_not_self_reported():
+    """A child that reports its own health can be broken in the reporting path
+    and still claim to be fine. The envelope log is durable, per-agent, and
+    already what every other part of this system treats as the record."""
+    import inspect
+
+    src = inspect.getsource(RunnerProcessSupervisor._completions_since)
+    assert "count_agent_envelopes_since" in src
