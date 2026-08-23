@@ -320,6 +320,13 @@ def verify_bundle(bundle: dict) -> AuditReport:
         if isinstance(manifests.get(h), dict) else None,
         require_closed=True,
         require_all_artifacts=True,
+        # GOVERNED FOR THE THIRD PARTY TOO. `governed` defaults to False and
+        # only `gyza audit` -- the LOCAL operator, who already trusts the
+        # machine -- was passing it. The third party, who trusts nothing and is
+        # the entire reason this format exists, was told the verdict without
+        # being told which checks ran under an attested specification, or that
+        # any check did not. That asymmetry was exactly backwards.
+        governed=True,
     )
 
 

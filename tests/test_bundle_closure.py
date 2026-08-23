@@ -148,3 +148,54 @@ def test_a_producer_can_still_sign_a_closure_over_a_set_it_chose():
         "a producer that omits BEFORE closing still verifies -- this is the "
         "documented limit, not a defect"
     )
+
+
+# --------------------------------------------------------------------------- #
+#  The THIRD PARTY gets governance too                                          #
+# --------------------------------------------------------------------------- #
+def test_verify_bundle_routes_checks_through_the_ATTESTED_registry(tmp_path):
+    """`governed` defaults to False and only `gyza audit` -- the LOCAL
+    operator, who already trusts the machine -- was passing it. The third
+    party, who trusts nothing and is the reason the format exists, was given a
+    verdict without being told which checks ran under an attested
+    specification. That asymmetry was backwards.
+
+    Asserted by SOURCE, so it cannot regress silently to the default.
+    """
+    import inspect
+
+    from gyza.evidence import verify_bundle
+    src = inspect.getsource(verify_bundle)
+    assert "governed=True" in src, (
+        "verify_bundle stopped requesting governance; the third-party path "
+        "would silently fall back to governed=False"
+    )
+
+
+def test_a_real_bundle_reports_governed_checks(tmp_path):
+    """Not just the flag -- the ledger must actually produce claims."""
+    import json
+
+    from gyza.blackboard import Blackboard
+    from gyza.evidence import create_bundle, verify_bundle
+    from gyza.identity import LocalCompositor, manifest_canonical_bytes
+    from gyza.network.artifact_store import ArtifactStore
+    from tests.test_task_decomposition import _agent, _item, _runner
+
+    bb = Blackboard(str(tmp_path / "b.db"))
+    ident = _agent(tmp_path)
+    r = _runner(tmp_path, ident, bb, lambda p, c: {"text": "ok"})
+    w = _item(bb, claim_for=ident.agent_id)
+    r._complete(w, r._execute(w), success=True)
+
+    store = bb._artifact_store
+    store.store(manifest_canonical_bytes(ident.manifest))
+    envs = bb.reconstruct_dag(w.lineage_root)
+    b = create_bundle(
+        envs, resolve_artifact=lambda h: store.get(h),
+        resolve_manifest=lambda h: (json.loads(store.get(h))
+                                    if store.get(h) else None),
+        intent_id=w.lineage_root)
+    rep = verify_bundle(b)
+    assert rep.governance is not None, "no governance on the third-party path"
+    assert rep.governance.n_claims > 0
