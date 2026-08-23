@@ -527,7 +527,7 @@ class AgentRunner:
                                              parent.required_tier)),
                                   parent.required_tier),
                 input_hashes=list(sp.get("input_hashes", [])),
-                output_spec=dict(sp.get("output_spec", {"kind": "subtask"})),
+                output_spec=self._child_output_spec(sp, parent),
                 streaming_ok=False, claimed_by=None, claimed_at_ns=None,
                 claim_hlc_l=0, claim_hlc_c=0, claim_hlc_node="",
                 completed_at_ns=None, output_hash=None,
@@ -538,6 +538,20 @@ class AgentRunner:
         LOG.info("[runner] %s decomposed %s into %d subtask(s)",
                  self._identity.agent_id[:8], parent.id[:14], len(made))
         return made
+
+    @staticmethod
+    def _child_output_spec(sp: dict, parent: WorkItem) -> dict:
+        """A combiner's `of` pointer is set by the RUNNER, never by the caller.
+
+        The dependency gate resolves siblings through `of`/`parent_id`; letting
+        an executor name a different parent would let it gate a combine on
+        someone else's children, or on none at all. It is the same rule as the
+        tier: the value a check depends on is not self-declared.
+        """
+        spec = dict(sp.get("output_spec", {"kind": "subtask"}))
+        if spec.get("kind") == Blackboard.COMBINE_KIND:
+            spec["of"] = parent.id
+        return spec
 
     def _manifest_max_children(self) -> int:
         spawn = (self._identity.manifest.get("capabilities", {})
@@ -586,6 +600,37 @@ class AgentRunner:
         return list(self._authority_violations)
 
     def _gather_inputs(self, item: WorkItem) -> list[Artifact]:
+        # A COMBINER RESOLVES ITS SIBLINGS' OUTPUTS AT EXECUTE TIME.
+        #
+        # Its inputs cannot be declared when it is spawned -- the children have
+        # not run, so their output hashes do not exist yet. They are resolved
+        # here and written onto `item.input_hashes`, which is what `_complete`
+        # signs into the envelope. That is the point: the combine action's
+        # envelope then COMMITS to precisely which child outputs it consumed,
+        # so a verifier can check that a combination really used the children
+        # it claims to have used, rather than taking the combiner's word.
+        #
+        # The dependency gate in `get_unclaimed` guarantees every sibling has
+        # completed before this item is servable, so this cannot silently
+        # combine a partial result. It is re-checked here anyway, because the
+        # gate protects the POLLING path and an item reached any other way --
+        # gossip, a direct id, a reclaim -- has not passed through it.
+        spec = item.output_spec if isinstance(item.output_spec, dict) else {}
+        if spec.get("kind") == Blackboard.COMBINE_KIND and item.parent_id:
+            pending = self._bb.pending_siblings(item)
+            if pending:
+                raise RuntimeError(
+                    f"refusing to combine {item.id}: {len(pending)} sibling(s) "
+                    f"have not completed. Combining a partial result and "
+                    f"signing it would attest to a whole that does not exist."
+                )
+            resolved = [c.output_hash
+                        for c in self._bb.children_of(item.parent_id)
+                        if c.id != item.id and c.output_hash]
+            merged = list(item.input_hashes)
+            merged += [h for h in resolved if h not in merged]
+            item.input_hashes = merged
+
         out: list[Artifact] = []
         for h in item.input_hashes:
             a = self._bb.get_artifact(h)

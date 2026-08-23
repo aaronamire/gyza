@@ -246,3 +246,84 @@ def test_lineage_depth_survives_a_cycle(tmp_path):
     bb._conn().execute("UPDATE work_items SET parent_id=? WHERE id=?",
                        (b.id, a.id))
     assert bb.lineage_depth(b.id) < 64
+
+
+# --------------------------------------------------------------------------- #
+#  THE FULL LOOP: decompose -> execute in parallel -> COMBINE -> audit          #
+# --------------------------------------------------------------------------- #
+def _plan(n):
+    """An executor that splits into n subtasks plus a combiner."""
+    def _e(_p, _c):
+        subs = [{"description": f"part {i}"} for i in range(n)]
+        subs.append({"description": "combine",
+                     "output_spec": {"kind": Blackboard.COMBINE_KIND}})
+        return {"text": "planned", "__subtasks__": subs}
+    return _e
+
+
+def test_the_whole_loop_decompose_execute_combine(tmp_path):
+    bb = Blackboard(str(tmp_path / "b.db"))
+    planner = _agent(tmp_path, max_children=4, name="p")
+    rp = _runner(tmp_path, planner, bb, _plan(2), name="p")
+    root = _item(bb, claim_for=planner.agent_id)
+    rp._complete(root, rp._execute(root), success=True)
+
+    kids = bb.children_of(root.id)
+    assert len(kids) == 3
+    comb = [k for k in kids
+            if k.output_spec.get("kind") == Blackboard.COMBINE_KIND][0]
+    assert comb.output_spec["of"] == root.id, "the runner must set `of`"
+
+    # The combiner is NOT servable while leaves are outstanding.
+    assert comb.id not in {w.id for w in bb.get_unclaimed(0.0, 0)}
+
+    # Two workers drain the leaves.
+    w1 = _agent(tmp_path, name="w")
+    rw = _runner(tmp_path, w1, bb, lambda p, c: {"text": "leaf done"}, name="w")
+    for k in kids:
+        if k.id == comb.id:
+            continue
+        assert bb.try_claim(k.id, w1.agent_id, HLC(node_id="w"), claimant_tier=0)
+        rw._complete(k, rw._execute(k), success=True)
+
+    # Now it IS servable.
+    assert comb.id in {w.id for w in bb.get_unclaimed(0.0, 0)}
+
+    seen = {}
+    def _combine(_prompt, ctx):
+        seen["inputs"] = [a.hash for a in ctx["inputs"]]
+        return {"text": "combined " + str(len(ctx["inputs"]))}
+
+    rc = _runner(tmp_path, w1, bb, _combine, name="w")
+    assert bb.try_claim(comb.id, w1.agent_id, HLC(node_id="w"), claimant_tier=0)
+    rc._complete(comb, rc._execute(comb), success=True)
+
+    # The combiner SAW both child outputs...
+    leaf_hashes = {bb.get_work_item(k.id).output_hash
+                   for k in kids if k.id != comb.id}
+    assert set(seen["inputs"]) == leaf_hashes
+
+    # ...and its ENVELOPE COMMITS to exactly those child outputs.
+    env_hash = bb.get_work_item(comb.id).icp_envelope_hash
+    assert env_hash is not None
+    env = bb.get_envelope(env_hash)
+    assert set(env.input_hashes) >= leaf_hashes, (
+        "the combine envelope does not commit to the children it consumed")
+
+
+def test_a_combiner_reached_OUTSIDE_the_poll_path_still_refuses(tmp_path):
+    """The gate protects polling. An item reached by gossip, a direct id or a
+    reclaim has not passed through it, so the check is repeated at execute."""
+    bb = Blackboard(str(tmp_path / "b.db"))
+    planner = _agent(tmp_path, max_children=4, name="p")
+    rp = _runner(tmp_path, planner, bb, _plan(2), name="p")
+    root = _item(bb, claim_for=planner.agent_id)
+    rp._complete(root, rp._execute(root), success=True)
+    comb = [k for k in bb.children_of(root.id)
+            if k.output_spec.get("kind") == Blackboard.COMBINE_KIND][0]
+
+    # Bypass get_unclaimed entirely, as gossip or a direct id would.
+    assert bb.try_claim(comb.id, planner.agent_id, HLC(node_id="p"),
+                        claimant_tier=0)
+    with pytest.raises(RuntimeError, match="have not completed"):
+        rp._execute(comb)
