@@ -142,6 +142,11 @@ def audit_provenance(
                     else "envelope_dag_open",
                     envs, note=f"{len(envs)} envelopes")
 
+    # Action-id index for DAG-level claims. `action_id` IS the work-item id
+    # (runner.py sets it), which is what lets a bundle-only verifier connect a
+    # parent's signed child list to those children's envelopes.
+    by_action = {e.action_id: e for e in envs}
+
     rows: list[ActionAudit] = []
     for env in envs:
         eh = compute_envelope_hash(env)
@@ -162,6 +167,26 @@ def audit_provenance(
             # which is exactly the distinction `reason` draws below.
             ledger.emit("artifact_content_address", art, env.output_hash,
                         note=env.action_id)
+
+            # COORDINATION CLAIMS, emitted only where the evidence exists.
+            # A decomposition announces itself in its own signed artifact, so
+            # an action that did not decompose emits nothing rather than
+            # emitting a vacuous pass -- a claim that is trivially true on
+            # every input measures nothing and would inflate the governed
+            # count with checks that never had a chance to fail.
+            obj = None
+            if art is not None:
+                try:
+                    obj = json.loads(art)
+                except (ValueError, TypeError):
+                    obj = None
+            if isinstance(obj, dict) and obj.get("__subtasks__"):
+                ledger.emit("decomposition_within_manifest", obj,
+                            resolve_manifest(env.capability_manifest_hash),
+                            note=env.action_id)
+                if obj.get("__combine__"):
+                    ledger.emit("combine_covers_siblings", obj, by_action,
+                                note=env.action_id)
 
         binding_ok = (
             art is not None

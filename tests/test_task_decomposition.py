@@ -42,7 +42,11 @@ def _runner(tmp_path, ident, bb, executor, name="d"):
     from gyza.network.artifact_store import ArtifactStore
     from gyza.runner import AgentRunner
 
-    bb.attach_artifact_store(ArtifactStore(base_path=str(tmp_path / f"{name}cas")))
+    # ONE store per blackboard, as production has. Attaching a fresh store per
+    # runner orphaned every artifact the previous runner wrote, which made the
+    # governed-claim tests fail for a harness reason that looked exactly like
+    # "the claim was never emitted".
+    bb.attach_artifact_store(ArtifactStore(base_path=str(tmp_path / "cas")))
     v = np.zeros(EMBEDDING_DIM, dtype=np.float32); v[0] = 1.0
     return AgentRunner(
         identity=ident, blackboard=bb,
@@ -327,3 +331,100 @@ def test_a_combiner_reached_OUTSIDE_the_poll_path_still_refuses(tmp_path):
                         claimant_tier=0)
     with pytest.raises(RuntimeError, match="have not completed"):
         rp._execute(comb)
+
+
+# --------------------------------------------------------------------------- #
+#  THE DECOMPOSITION IS GOVERNED, not merely signed                             #
+# --------------------------------------------------------------------------- #
+def _audit_decomposed(tmp_path, n=2, tamper=None):
+    import json as _json
+
+    from gyza.audit import audit_provenance
+    from gyza.identity import manifest_canonical_bytes
+
+    bb = Blackboard(str(tmp_path / "b.db"))
+    planner = _agent(tmp_path, max_children=4, name="p")
+    rp = _runner(tmp_path, planner, bb, _plan(n), name="p")
+    root = _item(bb, claim_for=planner.agent_id)
+    rp._complete(root, rp._execute(root), success=True)
+
+    kids = bb.children_of(root.id)
+    comb = [k for k in kids
+            if k.output_spec.get("kind") == Blackboard.COMBINE_KIND][0]
+    w = _agent(tmp_path, name="w")
+    rw = _runner(tmp_path, w, bb, lambda p, c: {"text": "leaf"}, name="w")
+    for k in kids:
+        if k.id == comb.id:
+            continue
+        bb.try_claim(k.id, w.agent_id, HLC(node_id="w"), claimant_tier=0)
+        rw._complete(k, rw._execute(k), success=True)
+    rc = _runner(tmp_path, w, bb, lambda p, c: {"text": "combined"}, name="w")
+    bb.try_claim(comb.id, w.agent_id, HLC(node_id="w"), claimant_tier=0)
+    rc._complete(comb, rc._execute(comb), success=True)
+
+    store = bb._artifact_store
+    for m in (planner.manifest, w.manifest):
+        store.store(manifest_canonical_bytes(m))
+    envs = bb.reconstruct_dag(root.lineage_root)
+    if tamper:
+        envs = tamper(envs, root, comb)
+    return audit_provenance(
+        envs, resolve_artifact=lambda h: store.get(h),
+        resolve_manifest=lambda h: (_json.loads(store.get(h))
+                                    if store.get(h) else None),
+        require_closed=False, require_all_artifacts=False, governed=True)
+
+
+def test_a_decomposition_emits_GOVERNED_coordination_claims(tmp_path):
+    rep = _audit_decomposed(tmp_path)
+    assert rep.governance is not None
+    types = {c.claim_type for c in rep.governance.verdicts}
+    assert "decomposition_within_manifest" in types
+    assert "combine_covers_siblings" in types
+    bad = [c for c in rep.governance.verdicts
+           if c.claim_type in ("decomposition_within_manifest",
+                               "combine_covers_siblings")
+           and c.status != "VERIFIED"]
+    assert not bad, [(c.claim_type, c.status, c.detail) for c in bad]
+
+
+def test_an_action_that_did_NOT_decompose_emits_nothing(tmp_path):
+    """Negative control. A claim that is trivially true on every input
+    measures nothing and would inflate the governed count with checks that
+    never had a chance to fail."""
+    from gyza.audit import audit_provenance
+    import json as _json
+    from gyza.identity import manifest_canonical_bytes
+
+    bb = Blackboard(str(tmp_path / "b.db"))
+    ident = _agent(tmp_path)
+    r = _runner(tmp_path, ident, bb, lambda p, c: {"text": "plain"})
+    w = _item(bb, claim_for=ident.agent_id)
+    r._complete(w, r._execute(w), success=True)
+    store = bb._artifact_store
+    store.store(manifest_canonical_bytes(ident.manifest))
+    rep = audit_provenance(
+        bb.reconstruct_dag(w.lineage_root),
+        resolve_artifact=lambda h: store.get(h),
+        resolve_manifest=lambda h: (_json.loads(store.get(h))
+                                    if store.get(h) else None),
+        require_closed=False, require_all_artifacts=False, governed=True)
+    types = {c.claim_type for c in rep.governance.verdicts}
+    assert "decomposition_within_manifest" not in types
+    assert "combine_covers_siblings" not in types
+
+
+def test_a_DROPPED_sibling_is_caught_by_combine_covers_siblings(tmp_path):
+    """The check earns its place: remove one child's envelope and the
+    combination is no longer covered."""
+    def _drop(envs, root, comb):
+        drop = {k for k in {e.action_id for e in envs}
+                if k not in (root.id, comb.id)}
+        victim = sorted(drop)[0]
+        return [e for e in envs if e.action_id != victim]
+
+    rep = _audit_decomposed(tmp_path, n=2, tamper=_drop)
+    ccs = [c for c in rep.governance.verdicts
+           if c.claim_type == "combine_covers_siblings"]
+    assert ccs, "the claim was not emitted"
+    assert all(c.status == "REFUTED" for c in ccs), [c.status for c in ccs]

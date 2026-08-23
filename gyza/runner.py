@@ -507,6 +507,7 @@ class AgentRunner:
                 f"(DEPTH_CAP_REACHED)")
 
         made: list[str] = []
+        combine_id: str | None = None
         for sp in specs:
             emb = sp.get("embedding")
             if emb is None:
@@ -535,9 +536,11 @@ class AgentRunner:
                 created_at_ns=time.time_ns(), ttl_ns=parent.ttl_ns)
             self._bb.post_work_item(child)
             made.append(child.id)
+            if child.output_spec.get("kind") == Blackboard.COMBINE_KIND:
+                combine_id = child.id
         LOG.info("[runner] %s decomposed %s into %d subtask(s)",
                  self._identity.agent_id[:8], parent.id[:14], len(made))
-        return made
+        return made, combine_id
 
     @staticmethod
     def _child_output_spec(sp: dict, parent: WorkItem) -> dict:
@@ -871,8 +874,17 @@ class AgentRunner:
         # over-wide decomposition produces no envelope at all.
         subtasks = raw.get("__subtasks__")
         if subtasks:
-            artifact_obj["__subtasks__"] = self._spawn_subtasks(
-                item, list(subtasks))
+            made, combine_id = self._spawn_subtasks(item, list(subtasks))
+            artifact_obj["__subtasks__"] = made
+            # WHICH child combines is recorded IN THE SIGNED BYTES. It lives on
+            # the work item's `output_spec`, which no envelope carries, so a
+            # third party holding only a bundle could not otherwise tell which
+            # action was supposed to gather the others -- and therefore could
+            # not check that a combination used ALL of its siblings. Putting
+            # the identity of the combiner under the signature is what makes
+            # that property verifiable at all.
+            if combine_id:
+                artifact_obj["__combine__"] = combine_id
         canonical = json.dumps(
             artifact_obj, sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")

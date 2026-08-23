@@ -162,6 +162,74 @@ def _external_send_content(claim, emitted: bytes) -> bool:
     return verify_send_claim(claim, emitted, policy=None)
 
 
+def _decomposition_within_manifest(artifact_obj, manifest) -> bool:
+    """RECOMPUTES that a decomposition stayed inside its signed spawn grant.
+
+    The runner already refuses to sign an over-wide decomposition, so a signed
+    envelope implies this -- IF you trust the runner. This verifier is what
+    lets a third party stop trusting it: the fan-out and the grant are both in
+    the bundle, so the property can be recomputed from evidence alone. Exactly
+    the relationship `enforcement_within_manifest` has to the bounds gate.
+
+    SCOPE, STATED. It checks spawn AUTHORITY and FAN-OUT. It does NOT check
+    depth: work-DAG depth is a property of the blackboard and appears in no
+    envelope, so a bundle cannot carry it. `MAX_TASK_DEPTH` is therefore
+    enforced at production only, and this verifier does not pretend otherwise.
+    A check that silently covered less than its name implies would be worse
+    than an absent one.
+    """
+    subs = (artifact_obj or {}).get("__subtasks__") or []
+    if not subs:
+        return True
+    spawn = ((manifest or {}).get("capabilities", {}) or {}).get("spawn", {}) or {}
+    if not spawn.get("permitted"):
+        return False
+    cap = int((spawn.get("resource_budget", {}) or {}).get("max_children", 0) or 0)
+    return len(subs) <= cap
+
+
+def _combine_covers_siblings(artifact_obj, by_action) -> bool:
+    """RECOMPUTES that a combination consumed EVERY sibling, not merely some.
+
+    A combiner's envelope commits to the input hashes it consumed. This checks
+    those against the children the parent SIGNED that it created, so a
+    combination that quietly dropped an inconvenient subtask is caught.
+
+    IT CATCHES OMISSION AT THE DAG LEVEL, which complements the bundle-level
+    closure record: closure proves the envelope SET is intact, and this proves
+    the combination consumed everything the parent said it created. The two are
+    independent -- a bundle can be complete and still contain a combination
+    that ignored one of its inputs.
+    """
+    subs = (artifact_obj or {}).get("__subtasks__") or []
+    combine_id = (artifact_obj or {}).get("__combine__")
+    if not subs or not combine_id:
+        return True                       # not a decomposition with a combiner
+    comb = by_action.get(combine_id)
+    if comb is None:
+        # The combiner is named in signed bytes but absent from the evidence.
+        # "It did not run" and "it was removed" are different claims and this
+        # cannot tell them apart, so it FAILS CLOSED rather than guessing.
+        return False
+    siblings = [c for c in subs if c != combine_id]
+
+    # THE COMBINER RAN, so every sibling MUST have completed -- the dependency
+    # gate refuses to serve a combiner while any sibling is outstanding. A
+    # sibling named in the parent's signed child list but absent from the
+    # evidence is therefore a REMOVAL, not work in progress, and this fails
+    # closed on it.
+    #
+    # The first version of this skipped absent siblings, which narrowed the
+    # expectation to whatever survived and passed vacuously -- it would have
+    # certified a combination after its inconvenient input had been deleted.
+    # A test that dropped a child is what caught it.
+    if any(c not in by_action for c in siblings):
+        return False
+
+    expected = {by_action[c].output_hash for c in siblings}
+    return expected <= set(comb.input_hashes)
+
+
 NATIVE: list[Verifier] = [
     Verifier("envelope_signature", _envelope_signature, "gyza/icp.py:101 verify_envelope"),
     Verifier("envelope_chain", _envelope_chain, "gyza/icp.py:124 verify_chain"),
@@ -172,6 +240,10 @@ NATIVE: list[Verifier] = [
     Verifier("manifest_identity", _manifest_identity, "gyza/identity.py:101 _manifest_payload_hash"),
     Verifier("enforcement_within_manifest", _enforcement_within_manifest,
              "gyza/sandbox/config.py:286 enforcement_satisfies_manifest"),
+    Verifier("decomposition_within_manifest", _decomposition_within_manifest,
+             "gyza/runner.py _spawn_subtasks (manifest spawn grant)"),
+    Verifier("combine_covers_siblings", _combine_covers_siblings,
+             "gyza/runner.py _gather_inputs (combiner input resolution)"),
     Verifier("delegation_attenuation", _delegation_attenuation,
              "gyza/economy/delegation.py:264 verify_delegation"),
     # Cited :348 (inside `sign_as_payer`) until 2026-08-14 — the SIGNER, not
