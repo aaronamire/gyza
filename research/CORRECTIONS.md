@@ -682,3 +682,44 @@ refusal to a mechanism that did not fire.
 **Not a ledger artifact:** it produced no clean number that turned out false. It
 was found by re-deriving a recommendation when asked to justify it, which is the
 same move that caught three defects in the CLAUDE.md rewrite session.
+
+---
+
+## #34 — our own proposal quoted the mock-runner ceiling as the deployment envelope (2026-08-24)
+
+`research/scale/FINDINGS_COORDINATION_CEILING.md` is careful. It decomposes
+throughput **by agent kind**, states that a sandboxed action costs 305 ms, that
+one core sustains **3.3 such actions per second**, and — in bold — that *"this
+dominates everything else by 3,362×; coordination throughput is irrelevant next
+to it for any agent doing real work."* It converts honestly: 500 real agents at
+one action per second is **~150 cores**, and 500,000 sandboxed runners is *"not
+feasible in any configuration measured here."*
+
+**The DICE technical volume then quoted the other row.** Its §3.3 read:
+
+> *"That places 500 agents comfortably inside the envelope (400× headroom) and
+> 500,000 AgentRunners about 2.5× beyond a single blackboard."*
+
+Those figures are the **mock-runner poll ceiling measured on an empty board** —
+a read that returns nothing, scores nothing and claims nothing. Presented as a
+deployment envelope, they overstate capacity by roughly the 3,362× the source
+document had already flagged.
+
+**The species is artifact #17's**, and this is its second appearance: two
+numbers with compatible units and a plausible ordering, joined into one story
+about different populations. The first instance plotted a coverage statistic
+against a chain-survival statistic. This one plotted *polls* against *actions*.
+
+**What makes it worth recording rather than quietly fixing:** the research was
+right and the summary of it was wrong. The error entered at the boundary where
+a measurement is restated for a different audience — which is exactly where
+`#32` entered too (*"citing prior art in a §6 does not protect a claim if the
+headline is written as though §6 were not there"*). **The restatement is a
+distinct artifact from the measurement and needs its own check.**
+
+Fixed by carrying the source document's own decomposition table into the
+proposal verbatim, leading with the sandbox row, and stating the ~150-core
+figure rather than the 400× one.
+
+**Not a ledger artifact:** the ledger is for clean numbers that turned out
+false. Both numbers here are true; only their application was wrong.
