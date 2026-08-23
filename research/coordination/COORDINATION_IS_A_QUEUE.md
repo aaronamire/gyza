@@ -189,3 +189,68 @@ agent creates work, `parent_id` is still never written, and the decomposer
 still raises. Sections 1-3 above stand unchanged. **This was the prerequisite,
 not the feature** — there was no point generating more work for a queue that
 got slower as agents were added.
+
+---
+
+# CORRECTION 2026-08-23 (later the same day): the plateau was the TEST HOST
+
+The post-fix table above shows throughput peaking at 4 agents and declining
+(151 / 244 / 247 / 204 / 175 for 1..16). I read that as a per-node
+architectural ceiling — one SQLite blackboard being a single-writer resource —
+and went on to test whether PARTITIONING recovers scaling. It appeared not to:
+independent blackboards, no gossip, no coordination, and aggregate throughput
+was flat to declining (285 / 280 / 268 / 214 for 1/2/4/8 partitions).
+
+**That conclusion is void, and the reason is standing rule #4.**
+
+> **This host has FOUR cores** (i5-7200U), and the poll path is **99%
+> CPU-bound at ~0.1 ms per poll**. One agent per core saturates it. The
+> 8-partition run put **32 processes on 4 cores** — 8x oversubscribed, load
+> average 9.52 — so it measured context-switching on a 2016 laptop, not any
+> property of Gyza.
+
+I computed the feasibility ceiling of the system under test and not of the
+apparatus, which is exactly the failure rule #4 was written for and exactly
+how it has failed the previous five times.
+
+## The measurement that survives
+
+Re-run with total processes **≤ nproc**, on a settled machine:
+
+| partitions | agents | claims/s | vs 1 partition |
+|---:|---:|---:|---:|
+| 1 | 1 | 173 | 1.00x |
+| 2 | 2 | 299 | **1.73x** |
+| 4 | 4 | 318 | 1.84x |
+
+**Partitioning scales near-linearly while cores are available.** 1 -> 2 gives
+1.73x against a ceiling of 2.00x; 2 -> 4 adds almost nothing, because the
+fourth core is absorbing the parent process and the OS.
+
+## What may and may not be claimed
+
+- **May:** the per-agent poll path costs ~0.1 ms and is CPU-bound;
+  partitioning recovers near-linear aggregate throughput at 2 partitions;
+  per-core throughput is roughly 80-170 claims/s depending on contention.
+- **May NOT:** anything about scaling beyond ~4 concurrent agents. **It is not
+  merely untested, it is untestable on this hardware** — the apparatus
+  saturates below the interesting region.
+
+## What survives from the original result, and why
+
+**The 44x contention fix stands.** That was a before/after comparison at
+IDENTICAL agent counts on the same host, so the apparatus was constant and
+divides out. The defect was algebraic — a claim win rate falling as 1/N, the
+signature of N agents contending for one row — and it is gone.
+
+What did NOT survive was the *absolute interpretation*: "the queue plateaus at
+~250 claims/s regardless of agent count" is a statement about a 4-core laptop.
+
+## Consequence for the program
+
+This converts a stated assumption into a measured requirement. The technical
+plan's risk **R5 — compute for large-agent experiments** was an assertion that
+large-N work needs infrastructure not currently held. It is now a measurement:
+**the scalability question cannot be answered on this machine at all**, because
+the interesting region begins above the core count. A thousand-agent claim
+requires hardware before it requires code.
