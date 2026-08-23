@@ -992,6 +992,10 @@ def cmd_verify(args: argparse.Namespace) -> int:
         return 1
     title = f"GYZA EVIDENCE VERIFY — bundle {bundle_hash(bundle)[:16]}…"
     print(render_audit_report(report, title=title))
+    # Completeness is reported on EVERY verify, including when it is absent.
+    # A reader who is not told is entitled to assume the verdict covers it.
+    from gyza.evidence import verify_closure
+    print(verify_closure(bundle).line)
     return 0 if report.valid else 1
 
 
