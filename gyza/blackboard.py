@@ -704,7 +704,20 @@ class Blackboard:
             self._conn().commit()
         return reclaimed
 
-    def get_unclaimed(self, min_reward: float, tier: int) -> list[WorkItem]:
+    def get_unclaimed(self, min_reward: float, tier: int,
+                      limit: int | None = None) -> list[WorkItem]:
+        """Unclaimed, live items at or below `tier`, best-rewarded first.
+
+        `limit` BOUNDS THE FETCH, and the default of None (unbounded) is kept
+        only for backwards compatibility -- it is the wrong default for a
+        polling loop. Measured 2026-08-23: with no limit, every agent on every
+        poll materialises the ENTIRE unclaimed backlog, each row carrying a
+        384-float embedding, and then scores all of them. Cost is O(backlog)
+        per poll per agent, so system cost is O(agents x backlog) per interval
+        and it grows as the backlog grows. That, not lock contention, is what
+        capped throughput at ~55 claims/s with a 99% claim win rate -- the
+        agents were not fighting, they were each re-reading the whole board.
+        """
         # TTL filter: an item whose (created_at_ns + ttl_ns) is in the
         # past is expired and must not be served. We don't garbage-
         # collect here — agents shouldn't pay write latency for
@@ -718,8 +731,9 @@ class Blackboard:
               AND required_tier <= ?
               AND (created_at_ns + ttl_ns) > ?
             ORDER BY reward DESC, created_at_ns ASC
+            LIMIT ?
             """,
-            (min_reward, tier, now_ns),
+            (min_reward, tier, now_ns, -1 if limit is None else int(limit)),
         ).fetchall()
         return [_row_to_work_item(r) for r in rows]
 

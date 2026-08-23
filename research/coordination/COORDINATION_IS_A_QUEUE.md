@@ -116,3 +116,76 @@ construction, no matter how good review sampling ever gets.
 **Planetary scale requires agents to generate work for each other. Nothing in
 the production path does.** That is not a tuning problem or a wiring gap — the
 decomposer raises, and the model it would schedule over is not adopted.
+
+
+---
+
+# FIXED 2026-08-23 — both defects, measured before and after
+
+The negative scaling had **two independent causes, and they interact**, so
+neither could be fixed alone: bounding the fetch makes the herd *worse*,
+because fewer candidates means more agents converging on the same row.
+
+| | 1 | 2 | 4 | 8 | 16 agents |
+|---|---:|---:|---:|---:|---:|
+| homogeneous claims/s **before** | 24 | 22 | 12 | 7 | **4** |
+| homogeneous claims/s **after** | 151 | 244 | 247 | 204 | **175** |
+| win rate **before** | 100% | 50.4% | 27.9% | 19.9% | **11.4%** |
+| win rate **after** | 100% | 99.2% | 98.2% | 95.5% | **91.1%** |
+| heterogeneous claims/s **before** | 24 | 52 | 57 | 53 | 49 |
+| heterogeneous claims/s **after** | 145 | 207 | 212 | 180 | **141** |
+
+**44x at 16 agents in the pathological case**, ~4x across the benign case, and
+the queue now DRAINS: every run claims all 1500 items, where before a 16-agent
+fleet managed 69. **Zero double-claims at every N, before and after** — the
+correctness property was never the problem and is not disturbed by the fix.
+
+**D1 — a strict argmax over a deterministically ordered list.**
+`_score_items` took the maximum-similarity item with `>`, so ties kept
+`items[0]`, and `get_unclaimed` orders identically for everyone. Whenever
+scores tie — normal for homogeneous work, eventual for agents whose
+specializations converge — every agent wants the same row. The win rate then
+falls as **1/N almost exactly**, which is the algebraic signature of N agents
+contending for one item and is what identified the mechanism.
+
+Fixed by breaking **ties** at random within `SELECTION_TIE_EPSILON`. Randomising
+only among ties rather than sampling the top-K is deliberate: where a genuine
+best exists it is still returned, so the change costs nothing in the case it is
+not needed. It decorrelates agents; it does not weaken selection. Pinned by a
+negative control (`test_a_UNIQUE_best_is_still_returned`).
+
+**D2 — an unbounded fetch.** `get_unclaimed` had no `LIMIT`, so every agent on
+every poll materialised the entire unclaimed backlog, each row carrying a
+384-float embedding, and scored all of them: O(agents x backlog) per interval,
+worsening as the backlog grows. This, not lock contention, capped the benign
+arm at ~55 claims/s **at a 99% win rate** — the agents were not fighting, they
+were each re-reading the whole board. Fixed with an optional `limit`
+(`POLL_CANDIDATES = 128` from the runner; `None` stays unbounded so no existing
+caller changes).
+
+## A confound in the counter-metric, recorded rather than reported as a result
+
+Mean similarity of claimed items appears to fall (0.069 -> 0.003 at N=1), which
+reads as a match-quality regression bought with throughput. **It is not
+comparable.** Before the fix a single agent claimed 363 of 1500 items in the
+window, so the mean covers only its BEST matches; after, it drains all 1500 and
+the mean includes every poor match. The denominators differ by up to 20x.
+
+This is artifact #17's species — two numbers with the same units, the same
+plausible ordering, and different populations. A sound comparison would fix the
+number of claims (e.g. mean similarity over the first 100) and has not been run,
+so **no claim about match quality is made in either direction.**
+
+**A genuine risk does remain, separately:** bounding candidates by REWARD order
+does not preserve embedding diversity, so a well-matched item can sit outside
+the top 128. The principled fix is similarity-aware fetching through the LSH
+index that already exists (`gyza/demand.py`), which would bound the fetch
+*and* preserve match quality. Not done; scoped, not hand-waved.
+
+## What this does and does not change
+
+It makes the **work queue** scale. It does **not** make Gyza coordinate: no
+agent creates work, `parent_id` is still never written, and the decomposer
+still raises. Sections 1-3 above stand unchanged. **This was the prerequisite,
+not the feature** — there was no point generating more work for a queue that
+got slower as agents were added.

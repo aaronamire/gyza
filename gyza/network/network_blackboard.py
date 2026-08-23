@@ -305,8 +305,12 @@ class NetworkBlackboard(Blackboard):
         """
         self._free_rider_filter = keep
 
-    def get_unclaimed(self, min_reward: float, tier: int) -> list[WorkItem]:
-        items = super().get_unclaimed(min_reward, tier)
+    def get_unclaimed(self, min_reward: float, tier: int,
+                      limit: int | None = None) -> list[WorkItem]:
+        # `limit` passed THROUGH. An override that dropped it would
+        # silently restore the unbounded fetch on exactly the networked
+        # deployment where the backlog is largest.
+        items = super().get_unclaimed(min_reward, tier, limit=limit)
         f = self._free_rider_filter
         if f is None:
             return items
