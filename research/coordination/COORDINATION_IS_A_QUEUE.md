@@ -82,10 +82,21 @@ queue at all. Two mechanisms, independent:
    (`ORDER BY reward DESC, created_at_ns ASC`), so every agent's "best item" is
    the same item. N−1 agents lose each race and immediately retry.
 2. **Reap-on-every-poll.** `_run_loop` calls `reclaim_expired_claims()` before
-   every poll — a WRITE, from every agent, every interval, against SQLite's
-   single writer, whether or not anything is expired. Reaping cost scales with
-   agent count and is independent of how much work exists. At 1,000 agents on a
-   0.5 s poll this is 2,000 writes/second of pure overhead.
+   every poll, from every agent, every interval.
+
+   > **CORRECTION 2026-08-23, same day.** This entry originally said "a WRITE …
+   > whether or not anything is expired." **That is false.**
+   > `reclaim_expired_claims` (`blackboard.py`) is already read-first: it
+   > `SELECT`s expired rows and `UPDATE`s only the rows returned, so an empty
+   > result performs **no write**. The steady-state cost is a *read* per poll
+   > per agent — O(agents) index scans, concurrent under WAL — and it becomes a
+   > write only when a lease has genuinely expired.
+   >
+   > I asserted a write path without reading the function. The measured
+   > negative scaling in the table above is unaffected and reproduces; what was
+   > wrong was my attribution of *why*. Mechanism (1) is therefore the
+   > candidate that survives, and which mechanism dominates is now an open
+   > question to be settled by profiling rather than by assertion.
 
 **Scope of this measurement, stated:** all items carried identical embeddings,
 so specialization could not diversify selection. This is therefore the
