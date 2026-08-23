@@ -63,6 +63,13 @@ from gyza.schema import Artifact, HLC, WorkItem
 #: window could restore the lifetime-quota semantics this replaced, or erase the
 #: cap entirely by declaring a window longer than the deployment. The window is
 #: a property of the enforcement, not of the grant.
+#: Hard ceiling on task-decomposition depth. Distinct from
+#: MAX_DELEGATION_DEPTH (which bounds AUTHORITY hops) because this bounds
+#: WORK hops -- an agent may decompose without delegating any authority --
+#: but it is the same hazard, unbounded recursion, so it gets its own
+#: explicit constant rather than silently reusing the other one.
+MAX_TASK_DEPTH = 3
+
 SELECTION_TIE_EPSILON = 1e-3
 #: Candidates fetched per poll. Bounds O(backlog) work per agent per poll.
 POLL_CANDIDATES = 128
@@ -454,6 +461,92 @@ class AgentRunner:
             return False
         return True
 
+    # ------------------------------------------------------------------
+    # Decomposition — the producer side of the work DAG
+    # ------------------------------------------------------------------
+    def _spawn_subtasks(self, parent: WorkItem,
+                        specs: list[dict]) -> list[str]:
+        """Post child work items for `parent`, bounded by the SIGNED manifest.
+
+        Until now nothing in `gyza/` ever wrote a non-None `parent_id`: the
+        work-DAG edge was schema'd, indexed, gossiped and deserialized, and no
+        producer existed. This is that producer.
+
+        THE BOUNDS COME FROM THE MANIFEST, NOT FROM THIS FILE.
+        `spawn.permitted` and `spawn.resource_budget.max_children` have been in
+        the compositor-signed manifest since identity.py and had NO consumer
+        anywhere -- declared authority that bound nothing. They are the
+        fork-bomb bound, and this is the first code to read them, so a
+        decomposition is now attenuated by the same signed authority that
+        bounds every other capability.
+
+        Refusals are RuntimeErrors and therefore reach the same place a bounds
+        violation does: no envelope is produced, so a signed envelope continues
+        to imply the action stayed inside its grant.
+        """
+        if not specs:
+            return []
+        cap = self._manifest_max_children()
+        if cap <= 0:
+            raise RuntimeError(
+                f"refusing to decompose {parent.id}: this agent's manifest "
+                f"grants no spawn authority (max_children={cap})")
+        if len(specs) > cap:
+            raise RuntimeError(
+                f"refusing to decompose {parent.id} into {len(specs)} "
+                f"subtasks: the manifest caps children at {cap}")
+
+        depth = self._bb.lineage_depth(parent.id)
+        if depth + 1 > MAX_TASK_DEPTH:
+            # Termination.DEPTH_CAP_REACHED -- an explicit reason, not a
+            # timeout. A task that ends without a recorded reason cannot be
+            # audited (gyza/coordination/task.py).
+            raise RuntimeError(
+                f"refusing to decompose {parent.id}: depth {depth + 1} "
+                f"exceeds MAX_TASK_DEPTH={MAX_TASK_DEPTH} "
+                f"(DEPTH_CAP_REACHED)")
+
+        made: list[str] = []
+        for sp in specs:
+            emb = sp.get("embedding")
+            if emb is None:
+                emb = np.array(parent.desc_embedding, dtype=np.float32)
+            child = WorkItem(
+                id=str(uuid.uuid7()),
+                lineage_root=parent.lineage_root,
+                parent_id=parent.id,
+                description=str(sp.get("description", "subtask")),
+                desc_embedding=np.asarray(emb, dtype=np.float32),
+                reward=float(sp.get("reward", parent.reward)),
+                reward_updated_ns=time.time_ns(),
+                # A child may never require a HIGHER tier than its parent:
+                # that would let a low-tier decomposer mint work only
+                # better-attested agents may take, manufacturing demand for
+                # authority it does not hold.
+                required_tier=min(int(sp.get("required_tier",
+                                             parent.required_tier)),
+                                  parent.required_tier),
+                input_hashes=list(sp.get("input_hashes", [])),
+                output_spec=dict(sp.get("output_spec", {"kind": "subtask"})),
+                streaming_ok=False, claimed_by=None, claimed_at_ns=None,
+                claim_hlc_l=0, claim_hlc_c=0, claim_hlc_node="",
+                completed_at_ns=None, output_hash=None,
+                icp_envelope_hash=None, success=None,
+                created_at_ns=time.time_ns(), ttl_ns=parent.ttl_ns)
+            self._bb.post_work_item(child)
+            made.append(child.id)
+        LOG.info("[runner] %s decomposed %s into %d subtask(s)",
+                 self._identity.agent_id[:8], parent.id[:14], len(made))
+        return made
+
+    def _manifest_max_children(self) -> int:
+        spawn = (self._identity.manifest.get("capabilities", {})
+                 .get("spawn", {}) or {})
+        if not spawn.get("permitted"):
+            return 0
+        return int((spawn.get("resource_budget", {}) or {})
+                   .get("max_children", 0) or 0)
+
     def _score_items(self, items: list[WorkItem]) -> tuple[WorkItem, float]:
         """Best-matching item for this agent, WITH TIES BROKEN AT RANDOM.
 
@@ -720,6 +813,21 @@ class AgentRunner:
         artifact_obj: dict = {"text": raw.get("text", "")}
         if enforcement is not None:
             artifact_obj["__enforcement__"] = enforcement
+
+        # DECOMPOSITION IS AN ORDINARY SIGNED ACTION. An executor asks for one
+        # by returning `__subtasks__`, exactly as the sandbox wrapper stamps
+        # `__enforcement__`. The child ids are folded into the artifact, so the
+        # envelope's output_hash COMMITS to the decomposition: who split this
+        # task, under which manifest, into precisely which children, is
+        # signed and offline-verifiable. No new envelope type, no schema
+        # change, and the DAG's shape becomes as accountable as its actions.
+        #
+        # Spawned BEFORE the artifact is hashed, and a refusal raises, so an
+        # over-wide decomposition produces no envelope at all.
+        subtasks = raw.get("__subtasks__")
+        if subtasks:
+            artifact_obj["__subtasks__"] = self._spawn_subtasks(
+                item, list(subtasks))
         canonical = json.dumps(
             artifact_obj, sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")

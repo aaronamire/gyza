@@ -735,7 +735,30 @@ class Blackboard:
             """,
             (min_reward, tier, now_ns, -1 if limit is None else int(limit)),
         ).fetchall()
-        return [_row_to_work_item(r) for r in rows]
+        items = [_row_to_work_item(r) for r in rows]
+
+        # DEPENDENCY GATE. A combiner must not be served while any sibling is
+        # still outstanding, or it would combine a partial result and sign it.
+        # Filtered here rather than in SQL because `output_spec` is JSON; the
+        # cost is paid only for rows that actually declare COMBINE_KIND, and
+        # combiners are rare relative to leaves.
+        ready = []
+        for w in items:
+            spec = w.output_spec if isinstance(w.output_spec, dict) else {}
+            if spec.get("kind") != self.COMBINE_KIND or not w.parent_id:
+                ready.append(w)
+                continue
+            if not self.pending_siblings(w):
+                ready.append(w)
+        return ready
+
+    def pending_siblings(self, item: WorkItem) -> list[str]:
+        """Ids of this item's siblings that have not completed. A combiner
+        with a non-empty result is not yet servable."""
+        if not item.parent_id:
+            return []
+        return [c.id for c in self.children_of(item.parent_id)
+                if c.id != item.id and c.completed_at_ns is None]
 
     def release_claim(self, work_item_id: str) -> bool:
         """
@@ -754,6 +777,41 @@ class Blackboard:
             (work_item_id,),
         )
         return cur.rowcount == 1
+
+    #: `output_spec["kind"]` marking an item that COMBINES its siblings'
+    #: results. Such an item is not servable until every other child of its
+    #: parent has completed. Carried in `output_spec` rather than a new column
+    #: so decomposition needs no schema migration.
+    COMBINE_KIND = "combine"
+
+    def get_work_item(self, work_item_id: str) -> WorkItem | None:
+        row = self._conn().execute(
+            "SELECT * FROM work_items WHERE id=?", (work_item_id,),
+        ).fetchone()
+        return _row_to_work_item(row) if row is not None else None
+
+    def children_of(self, parent_id: str) -> list[WorkItem]:
+        rows = self._conn().execute(
+            "SELECT * FROM work_items WHERE parent_id=? ORDER BY created_at_ns",
+            (parent_id,),
+        ).fetchall()
+        return [_row_to_work_item(r) for r in rows]
+
+    def lineage_depth(self, work_item_id: str, cap: int = 64) -> int:
+        """Number of parent hops above this item. 0 for a root.
+
+        `cap` is a CYCLE GUARD, not a policy: `parent_id` is written by agents
+        now, so a malformed or hostile graph must not be able to hang a walk.
+        The policy bound is the caller's.
+        """
+        depth, cur, seen = 0, self.get_work_item(work_item_id), {work_item_id}
+        while cur is not None and cur.parent_id and depth < cap:
+            if cur.parent_id in seen:
+                break                      # cycle; stop rather than loop
+            seen.add(cur.parent_id)
+            cur = self.get_work_item(cur.parent_id)
+            depth += 1
+        return depth
 
     def get_by_lineage(self, lineage_root: str) -> list[WorkItem]:
         rows = self._conn().execute(
