@@ -96,6 +96,7 @@ def _load_or_issue_local_agent(
     compositor, state_path: Path, *, memory_mb: int, allowed_hosts: list[str],
     read_paths: "list[str] | None" = None,
     write_paths: "list[str] | None" = None,
+    max_children: int = 0,
 ):
     """
     The local agent persists across runs — one identity accumulating an
@@ -119,7 +120,13 @@ def _load_or_issue_local_agent(
             budget = caps["spawn"]["resource_budget"]
             hosts = caps["network"]["allowed_hosts"]
             fs = caps["filesystem"]
+            # `max_children` IS PART OF THE GRANT and belongs in this
+            # comparison. Omitting it would reuse a saved zero-spawn manifest
+            # when the operator asked for spawn authority, so the flag would
+            # appear to work and grant nothing -- the same species as a
+            # field-by-field rebuild that silently drops the field added last.
             if (budget.get("memory_limit_mb") == memory_mb
+                    and int(budget.get("max_children", 0) or 0) == int(max_children)
                     and sorted(hosts) == sorted(allowed_hosts)
                     and sorted(fs.get("read", [])) == sorted(read_paths)
                     and sorted(fs.get("write", [])) == sorted(write_paths)):
@@ -133,6 +140,12 @@ def _load_or_issue_local_agent(
         agent_type="local.worker", model_path="local",
         fs_read_paths=read_paths, fs_write_paths=write_paths,
         allowed_hosts=allowed_hosts,
+        # LEAST PRIVILEGE BY DEFAULT: max_children=0 means an agent cannot
+        # decompose at all, and `spawn_permitted` stays empty so the runner's
+        # gate refuses on the FIRST condition rather than on a zero cap.
+        # Spawn authority is an explicit operator grant, never a default.
+        spawn_permitted=["worker"] if int(max_children) > 0 else [],
+        max_children=int(max_children),
         memory_limit_mb=memory_mb, attestation_tier=0,
     )
     state_path.parent.mkdir(parents=True, exist_ok=True)
@@ -655,7 +668,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
         state = agents_dir / f"agent-{i:03d}.json"
         ident = _load_or_issue_local_agent(
             compositor, state, memory_mb=args.memory_mb, allowed_hosts=[],
-            read_paths=[], write_paths=[])
+            read_paths=[], write_paths=[],
+            max_children=int(getattr(args, "spawn_children", 0) or 0))
         roster.append(RunnerSpec(
             agent_id=ident.agent_id,
             agent_state_path=str(state),
@@ -2963,6 +2977,11 @@ def build_parser() -> argparse.ArgumentParser:
              "this long WHILE WORK IS AVAILABLE (idle agents are never "
              "restarted). Above the 300s sandbox cap by default.")
     p_serve.add_argument("--memory-mb", type=int, default=512)
+    p_serve.add_argument(
+        "--spawn-children", type=int, default=0, metavar="N",
+        help="grant each agent authority to decompose a task into at most N "
+             "subtasks. DEFAULT 0 — least privilege: without this flag an "
+             "agent cannot create work for another agent at all.")
     p_serve.add_argument(
         "--no-sandbox", action="store_true",
         help="run MOCK executors with no containment (testing only)")
