@@ -428,3 +428,96 @@ def test_a_DROPPED_sibling_is_caught_by_combine_covers_siblings(tmp_path):
            if c.claim_type == "combine_covers_siblings"]
     assert ccs, "the claim was not emitted"
     assert all(c.status == "REFUTED" for c in ccs), [c.status for c in ccs]
+
+
+# --------------------------------------------------------------------------- #
+#  THE COMPROMISED RUNNER — the case third-party verification exists for        #
+# --------------------------------------------------------------------------- #
+def _compromised_bundle(tmp_path, *, cap=2, declared=9, permitted=("worker",)):
+    """An agent that SKIPS ITS OWN SPAWN GATE and signs the result with a real
+    key. Every hash and every signature verifies; only recomputing the bound
+    against the signed manifest catches it."""
+    import json as _json
+
+    import blake3
+
+    from gyza.icp import ICPEnvelope, sign_envelope
+
+    ident = _agent(tmp_path, max_children=cap, permitted=permitted)
+    obj = {"text": "split", "__subtasks__": [f"c{i}" for i in range(declared)]}
+    canon = _json.dumps(obj, sort_keys=True, separators=(",", ":"),
+                        allow_nan=False).encode()
+    env = sign_envelope(ICPEnvelope(
+        intent_id="ci", action_id="a0", agent_pubkey=ident.pubkey_hex,
+        capability_manifest_hash=ident.manifest_hash,
+        # NON-EMPTY: verify_dag requires it ("input_hashes empty" is a DAG
+        # invariant), and the runner supplies the same sentinel for a root.
+        input_hashes=["00" * 32],
+        output_hash=blake3.blake3(canon).hexdigest(),
+        parent_envelope_hash=None, timestamp_ns=1, inference_backend="mock",
+        model_identifier="mock", duration_ms=1, tokens_in=0, tokens_out=0),
+        ident._seed)
+    return ident, env, canon, obj
+
+
+def test_an_OVER_WIDE_decomposition_is_caught_even_when_correctly_signed(tmp_path):
+    from gyza.audit import audit_provenance
+    from gyza.identity import manifest_canonical_bytes
+
+    ident, env, canon, _ = _compromised_bundle(tmp_path, cap=2, declared=9)
+    mans = {ident.manifest_hash: ident.manifest}
+    rep = audit_provenance(
+        [env], resolve_artifact={env.output_hash: canon}.get,
+        resolve_manifest=mans.get, require_closed=False,
+        require_all_artifacts=True)
+    assert rep.valid is False, "an over-wide decomposition verified as VALID"
+    assert "manifest cap of 2" in " ".join(r.reason for r in rep.actions)
+
+
+def test_a_decomposition_with_NO_spawn_authority_is_caught(tmp_path):
+    from gyza.audit import audit_provenance
+
+    ident, env, canon, _ = _compromised_bundle(
+        tmp_path, cap=0, declared=3, permitted=())
+    rep = audit_provenance(
+        [env], resolve_artifact={env.output_hash: canon}.get,
+        resolve_manifest={ident.manifest_hash: ident.manifest}.get,
+        require_closed=False, require_all_artifacts=True)
+    assert rep.valid is False
+    assert "no spawn authority" in " ".join(r.reason for r in rep.actions)
+
+
+def test_a_WITHIN_BOUNDS_decomposition_still_verifies(tmp_path):
+    """Negative control. A check that refused every decomposition would make
+    the capability unusable and prove nothing."""
+    from gyza.audit import audit_provenance
+
+    ident, env, canon, _ = _compromised_bundle(tmp_path, cap=4, declared=3)
+    rep = audit_provenance(
+        [env], resolve_artifact={env.output_hash: canon}.get,
+        resolve_manifest={ident.manifest_hash: ident.manifest}.get,
+        require_closed=False, require_all_artifacts=True)
+    assert rep.valid is True, [r.reason for r in rep.actions]
+
+
+def test_the_verdict_is_the_SAME_with_and_without_governance(tmp_path):
+    """THE INVARIANT THIS FIX WAS SHAPED BY, re-asserted for decomposition.
+
+    The first attempt let a REFUTED governance claim flip the verdict.
+    `test_governed_TRUE_changes_NOTHING_about_the_verdict` caught it, and it
+    was right to: if governance could move a verdict, VALID would be a property
+    of which registry version a verifier holds rather than of the bundle, and
+    two honest third parties could disagree. The Rust implementation carries
+    none of these verifiers at all. So the bound is a ROW check.
+    """
+    from gyza.audit import audit_provenance
+
+    for cap, declared in ((2, 9), (4, 3)):
+        ident, env, canon, _ = _compromised_bundle(
+            tmp_path, cap=cap, declared=declared)
+        kw = dict(resolve_artifact={env.output_hash: canon}.get,
+                  resolve_manifest={ident.manifest_hash: ident.manifest}.get,
+                  require_closed=False, require_all_artifacts=True)
+        assert (audit_provenance([env], **kw).valid
+                == audit_provenance([env], governed=True, **kw).valid), (
+            f"the verdict moved when governance was enabled (cap={cap})")

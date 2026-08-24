@@ -234,6 +234,50 @@ def audit_provenance(
                     ledger.emit("enforcement_within_manifest", enf, manifest,
                                 note=env.action_id)
 
+            # A DECOMPOSITION IS BOUNDED BY THE SAME MANIFEST, AND THE CHECK
+            # BELONGS HERE RATHER THAN ONLY IN THE LEDGER.
+            #
+            # Written first as a governance claim alone, it left a real hole: a
+            # constructed COMPROMISED RUNNER -- one that skips its own spawn
+            # gate and signs the result with a real key, so every hash and
+            # signature verifies -- produced a bundle whose coordination claims
+            # were REFUTED while the headline still read VERDICT: VALID.
+            #
+            # THE FIX IS NOT TO LET GOVERNANCE MOVE THE VERDICT.
+            # `test_governed_TRUE_changes_NOTHING_about_the_verdict` defends
+            # that across six scenarios and is right to: if enabling governance
+            # could change a verdict, VALID would be a property of WHICH
+            # REGISTRY VERSION A VERIFIER HOLDS rather than of the bundle, and
+            # two honest third parties could disagree. The Rust implementation
+            # carries none of these verifiers at all.
+            #
+            # So the bound is a ROW CHECK, exactly as
+            # `enforcement_satisfies_manifest` already is. Outside the
+            # enforcement branch because a decomposition is bounded whether or
+            # not the action also carried a sandbox record.
+            subs = obj.get("__subtasks__") if isinstance(obj, dict) else None
+            if subs:
+                dman = resolve_manifest(env.capability_manifest_hash)
+                if dman is None:
+                    within_bounds = False
+                    reason = reason or (
+                        "manifest not resolvable for a decomposition")
+                else:
+                    spawn = ((dman.get("capabilities", {}) or {})
+                             .get("spawn", {}) or {})
+                    cap = int((spawn.get("resource_budget", {}) or {})
+                              .get("max_children", 0) or 0)
+                    if not spawn.get("permitted"):
+                        within_bounds = False
+                        reason = reason or (
+                            f"decomposed into {len(subs)} subtask(s) with no "
+                            f"spawn authority")
+                    elif len(subs) > cap:
+                        within_bounds = False
+                        reason = reason or (
+                            f"decomposed into {len(subs)} subtask(s) against a "
+                            f"manifest cap of {cap}")
+
         # A missing artifact fails closed under require_all_artifacts (a
         # withheld artifact could conceal an over-bound execution); with the
         # flag off, an unresolvable row is *skipped* — treated as not-yet-

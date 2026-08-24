@@ -34,6 +34,29 @@ from gyza.sandbox.runner import (
 LOG = logging.getLogger("gyza.sandbox.executor")
 
 
+def _json_safe_artifact(a):
+    """One artifact, projected onto what can cross the sandbox boundary."""
+    if isinstance(a, (dict, str, int, float, bool)) or a is None:
+        return a
+    import base64 as _b64
+
+    raw = getattr(a, "data", b"") or b""
+    out = {
+        "hash": getattr(a, "hash", None),
+        "signer_pubkey": getattr(a, "signer_pubkey", None),
+        "size": len(raw),
+        "data_b64": _b64.b64encode(raw).decode("ascii"),
+    }
+    try:
+        out["text"] = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        # NOT an error and NOT silently empty: binary artifacts are legitimate
+        # and `data_b64` above carries them losslessly. Omitting `text` says
+        # "these bytes are not text", which is different from "no bytes".
+        pass
+    return out
+
+
 def _json_safe_context(context: dict) -> dict:
     """
     Project the runner's executor context onto what can cross the
@@ -48,6 +71,25 @@ def _json_safe_context(context: dict) -> dict:
     raises, which is the honest outcome for an unserializable contract.
     """
     safe = dict(context)
+
+    # `inputs` CARRIES Artifact OBJECTS, NOT DICTS, AND NOTHING CHECKED IT.
+    # This docstring asserted that "inputs (parsed artifact dicts) pass through
+    # unchanged" from the day it was written; the runner has always passed
+    # `Artifact` dataclasses. The assumption held only because every sandboxed
+    # workflow so far had EMPTY `input_hashes`, so the list was empty and JSON
+    # never saw one. The first action that consumed an artifact inside a
+    # sandbox -- a combiner gathering its siblings' outputs -- failed with
+    # "Object of type Artifact is not JSON serializable".
+    #
+    # An unenforced invariant is an assumption. Artifacts are now projected the
+    # same way `item` is: to the fields an executor can legitimately act on.
+    # `data` is bytes, so it crosses as base64 under an explicit name, with a
+    # decoded `text` alongside when the bytes are UTF-8 -- the common case, and
+    # the one an executor actually wants.
+    ins = safe.get("inputs")
+    if isinstance(ins, list):
+        safe["inputs"] = [_json_safe_artifact(a) for a in ins]
+
     item = safe.get("item")
     if item is not None and not isinstance(
         item, (dict, str, int, float, bool, list)

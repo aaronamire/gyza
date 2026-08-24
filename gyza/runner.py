@@ -1191,6 +1191,45 @@ def make_mock_executor(response: str = "mock output") -> Callable[[str, dict], d
     return _executor
 
 
+def make_planning_executor(
+    parts: int = 2,
+    combine: bool = True,
+    description: str = "subtask",
+) -> Callable[[str, dict], dict]:
+    """An executor whose action is to REQUEST A DECOMPOSITION.
+
+    The reference implementation of the `__subtasks__` contract, and the
+    counterpart to `make_command_executor`: one does external work, this one
+    divides it. An executor asks for a split exactly as the sandbox wrapper
+    stamps `__enforcement__` -- by returning a key the runner recognises --
+    so decomposition needs no separate code path and inherits the signing
+    gate, the manifest spawn bound and the depth cap unchanged.
+
+    THE SPLIT HERE IS SCRIPTED, AND THAT IS THE HONEST SHAPE FOR A REFERENCE
+    IMPLEMENTATION. In a real deployment the decision of how to divide a task
+    comes from a model, and whether that division is GOOD is a correctness
+    property of natural-language reasoning, which this program measured as not
+    cheaply verifiable. What the substrate can prove is unchanged either way:
+    that the split stayed inside the signed grant, and which children it
+    produced. Bounding the decision is the mechanism; judging it is not.
+    """
+    def _executor(_prompt: str, _context: dict) -> dict:
+        subs: list[dict] = [{"description": f"{description} {i}"}
+                            for i in range(parts)]
+        if combine:
+            subs.append({"description": f"combine {parts} result(s)",
+                         "output_spec": {"kind": "combine"}})
+        return {
+            "text": f"decomposed into {parts} part(s)"
+                    f"{' plus a combiner' if combine else ''}",
+            "__subtasks__": subs,
+            "tokens_in": 0, "tokens_out": 0,
+            "model_identifier": "scripted-planner",
+            "inference_backend": "none",
+        }
+    return _executor
+
+
 def make_command_executor(
     argv: list[str],
     max_output_bytes: int = 1_000_000,
