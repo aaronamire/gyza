@@ -268,7 +268,11 @@ def test_the_owner_attestation_registers_17_and_refuses_the_2_semantic():
     # policy bound out. The two IRREDUCIBLY SEMANTIC drafts are still refused,
     # and no attestation can admit them — that is the invariant here, not the
     # count.
-    assert len(auth.claim_types()) == 17
+    # 17 -> 19: the two coordination verifiers were attested 2026-08-24 under
+    # group 1's existing basis. The INVARIANT this test is about is unchanged
+    # and asserted below -- the irreducibly semantic pair is still refused, and
+    # no attestation can admit it.
+    assert len(auth.claim_types()) == 19
     # `envelope_dag` and `external_send_content` were blocked on DETERMINACY
     # and were repaired 2026-08-15 (split / policy bound out). What remains is
     # the IRREDUCIBLY SEMANTIC pair, which no attestation can admit — and that

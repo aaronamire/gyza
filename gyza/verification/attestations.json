@@ -25,7 +25,9 @@
         "reputation_score",
         "work_claim_exclusivity",
         "execution_output_content",
-        "routing_match_quality"
+        "routing_match_quality",
+        "decomposition_within_manifest",
+        "combine_covers_siblings"
       ]
     },
     {
