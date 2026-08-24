@@ -135,7 +135,7 @@ def test_the_harm_model_measures_what_the_loop_actually_did(tmp_path):
                     stored_bytes=store.total_size_bytes(), **kw)
 
     measured = {c.id: c.measure(s0, s) for c in harm}
-    assert set(measured) == {"H3_mesh_exit_rate", "H4_authority",
+    assert set(measured) == {"H3_mesh_exit_rate", "H4_authority", "H7_irreversible_actions",
                              "H5_storage_growth"}
     # H4 must be zero: the executor is WITHIN bounds, so no authority breach
     assert measured["H4_authority"] == 0.0

@@ -879,6 +879,22 @@ class Blackboard:
         ).fetchone()
         return int(row["n"] if row is not None else 0)
 
+    def envelopes_since(self, origin_ns: int = 0) -> list:
+        """The envelopes `count_envelopes_since` counts, as objects.
+
+        Same append-only log, same filter, same ordering — so a fold over this
+        and a count over that cannot disagree about what happened. H7 needs the
+        rows rather than the tally, because reversibility is a property of each
+        action's enforcement record and not of how many actions there were.
+        """
+        from gyza.icp import ICPEnvelope
+        rows = self._conn().execute(
+            "SELECT payload_json FROM icp_envelopes WHERE timestamp_ns >= ? "
+            "ORDER BY timestamp_ns ASC",
+            (int(origin_ns),),
+        ).fetchall()
+        return [ICPEnvelope(**json.loads(r["payload_json"])) for r in rows]
+
     def count_agent_envelopes_since(self, agent_pubkey: str,
                                     origin_ns: int = 0) -> int:
         """Signed envelopes by ONE agent since `origin_ns`.

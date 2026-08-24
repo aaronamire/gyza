@@ -83,7 +83,7 @@ def test_every_registered_quantity_measures_REAL_production_state(tmp_path):
         assert isinstance(v, float) and v == v, hc.id      # not NaN
         measured[hc.id] = v
 
-    assert set(measured) == {"H3_mesh_exit_rate", "H4_authority",
+    assert set(measured) == {"H3_mesh_exit_rate", "H4_authority", "H7_irreversible_actions",
                              "H5_storage_growth"}
     assert "H2_market_capital" not in measured, "H2 was retired 2026-08-17"
     # H1 must SEE the 10-credit outflow. If it did not, this whole file would

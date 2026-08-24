@@ -256,6 +256,62 @@ def storage_cap_bytes(bounds_file: "str | Path | None" = None) -> int | None:
         return None
 
 
+def _irreversible_actions(s0: object, s: object) -> float:
+    """H7 -- growth in unrecoverable actions between two states.
+
+    A DIFFERENCE over an append-only count, so it cannot go negative and no
+    stored aggregate exists for an unmodelled path to write behind the guard's
+    back. Reads only environment state; imports nothing from any guard module.
+    """
+    # DIRECT ATTRIBUTE ACCESS, NEVER getattr WITH A DEFAULT. A quantity that
+    # returns 0 for a state missing its field is indistinguishable from a
+    # system that is safe, and that is precisely how three of four harm classes
+    # came to be pinned at 0 while carrying signed bounds. An AttributeError
+    # here is the correct outcome: it says "this state was not folded", which
+    # is a different claim from "nothing happened".
+    a = int(s0.irreversible_actions or 0)
+    b = int(s.irreversible_actions or 0)
+    return float(max(0, b - a))
+
+
+def irreversible_actions_since(blackboard: object, origin_ns: int = 0) -> int:
+    """H7's SINGLE SOURCE: fold signed enforcement records into a count.
+
+    The enforcement record lives inside each action's output artifact, which
+    the envelope's `output_hash` commits to -- so this reads exactly what a
+    third party verifying a bundle would read, and cannot drift from it.
+
+    AN ENVELOPE WHOSE ARTIFACT DOES NOT RESOLVE COUNTS AS UNPROVEN, not as
+    reversible. A withheld artifact must never be cheaper than a disclosed one,
+    or withholding becomes the optimal strategy for an agent that wants its
+    irreversible actions uncounted.
+    """
+    import json as _json
+
+    from gyza.containment.irreversibility import UNPROVEN, classify
+
+    envs = blackboard.envelopes_since(int(origin_ns))
+
+    n = 0
+    for env in envs:
+        raw = None
+        try:
+            art = blackboard.get_artifact(env.output_hash)
+            raw = art.data if art is not None else None
+        except Exception:                                      # noqa: BLE001
+            raw = None
+        enf = None
+        if raw:
+            try:
+                obj = _json.loads(raw)
+                enf = obj.get("__enforcement__") if isinstance(obj, dict) else None
+            except (ValueError, TypeError):
+                enf = None
+        if classify(enf, action_id=env.action_id).counted:
+            n += 1
+    return n
+
+
 def mesh_exit_sends_since(blackboard: object, origin_ns: int = 0) -> int:
     """THE single source for H3's count, filtered the one correct way.
 
@@ -381,6 +437,37 @@ def build_registries(
             "compliant execution cannot increment it. The walk never takes a "
             "step, which is why a bound of 0 never false-alarms. This is the "
             "only registered class whose level is a bound rather than a timer."),
+    ))
+
+    # ---- C-2: the class the model said it did not have --------------------
+    harm.register(HarmClass(
+        id="H7_irreversible_actions",
+        description="count of actions whose effects cannot be shown to be "
+                    "recoverable: network was granted, a writable path lay "
+                    "outside any append-only store, or no enforcement record "
+                    "was stamped at all",
+        quantity=_irreversible_actions,
+        frame="signed enforcement records since the accounting origin",
+        frame_mutable=False,
+        code_path="gyza/containment/irreversibility.py classify/fold",
+        drift_class=DriftClass.SILENCE,
+        drift_reason=(
+            "SOUND BY SILENCE, AND THE CONDITION IS A PROPERTY OF THE GRANT "
+            "RATHER THAN OF THE AGENT -- which is what makes it checkable. An "
+            "agent whose sandbox grants no network and no writes outside an "
+            "append-only store CANNOT increment this quantity however it "
+            "behaves, so b = 0 exactly and a bound of 0 is a real bound with "
+            "false-alarm probability 0. "
+            "THE CONVERSE IS STATED RATHER THAN HIDDEN: under a grant that "
+            "DOES include the network, every action increments it, b > 0, and "
+            "by THEOREMS_C.md any cumulative level over it is a TIMER that "
+            "refuses the agent at ceil(L/b) whatever it did. So containment "
+            "over irreversible effect is claimable exactly for agents that "
+            "were never given the means, and `benign_rate_is_zero` is the "
+            "predicate that says which deployment is in which case. That is a "
+            "narrower claim than 'we bound irreversible harm' and it is the "
+            "one the architecture can actually support."
+        ),
     ))
 
     harm.register(HarmClass(

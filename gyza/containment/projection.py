@@ -92,6 +92,11 @@ class GyzaState:
     # being a timer.
     mesh_exit_bytes_in_window: int = 0
     mesh_exit_window_ns: int = 0
+    #: C-2. Count of actions whose effects cannot be shown to be recoverable,
+    #: folded from SIGNED enforcement records by
+    #: `gyza.containment.irreversibility.fold_irreversible`. The caller folds;
+    #: this module only projects.
+    irreversible_actions: int = 0
 
     def __post_init__(self) -> None:
         if not self.owner:
@@ -144,6 +149,7 @@ def project_now(
     mesh_exit_sends: int = 0,
     mesh_exit_bytes_in_window: int = 0,
     mesh_exit_window_ns: int = 0,
+    irreversible_actions: int = 0,
 ) -> GyzaState:
     """State as of now — the `s_next` of a guard evaluation."""
     return GyzaState(
@@ -157,6 +163,7 @@ def project_now(
         mesh_exit_sends=int(mesh_exit_sends),
         mesh_exit_bytes_in_window=int(mesh_exit_bytes_in_window),
         mesh_exit_window_ns=int(mesh_exit_window_ns),
+        irreversible_actions=int(irreversible_actions),
     )
 
 

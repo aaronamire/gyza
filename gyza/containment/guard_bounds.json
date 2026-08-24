@@ -74,14 +74,16 @@
     "diff_bounds classifies ADDING a bound as a LOOSENING (an unbounded class",
     "fails closed and admits nothing, so refuse-all -> admit-some). This is",
     "the first declared level for a measured-not-bounded class, declared by",
-    "the authority holder as a deliberate act, and recorded here as one."
+    "the authority holder as a deliberate act, and recorded here as one.",
+    "H7_irreversible_actions = 0 (2026-08-24, UNSIGNED DEV STATE). 0 is the only level that is a BOUND rather than a timer: benign drift is exactly 0 under a grant with no network and no writes outside an append-only store, and strictly positive under any other grant. This file is the honest development state; the SIGNED configuration still lacks H7, so `gyza status` with an authority key correctly reports the class UNBOUNDED and can_claim_containment FALSE until the owner signs guard_bounds.v4.draft.json. See research/IRREVERSIBILITY.md."
   ],
   "version": 3,
   "declared": "2026-07-31; v2 2026-08-21; v3 2026-08-21",
   "bounds": {
     "H4_authority": 0.0,
     "H5_storage_growth": 10000000000.0,
-    "H3_mesh_exit_rate": 300000000
+    "H3_mesh_exit_rate": 300000000,
+    "H7_irreversible_actions": 0.0
   },
   "policy": {
     "review_cadence_actions": 10000

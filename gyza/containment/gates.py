@@ -122,7 +122,8 @@ def observe_now(*, owner: str, blackboard: object | None = None,
     `tests/test_containment_observes_real_state.py` exists to prevent.
     """
     from gyza.containment.gyza_model import (
-        mesh_exit_bytes_in_window, mesh_exit_sends_since,
+        irreversible_actions_since, mesh_exit_bytes_in_window,
+        mesh_exit_sends_since,
     )
 
     origin = genesis_origin()
@@ -136,8 +137,15 @@ def observe_now(*, owner: str, blackboard: object | None = None,
     # count comes from, so the two readings cannot disagree about what left.
     exit_bytes = (mesh_exit_bytes_in_window(blackboard, mesh_exit_window_ns)
                   if blackboard else 0)
+    # H7. Folded from the SAME append-only envelope log as the count above, so
+    # the two readings cannot disagree about what happened -- and folded from
+    # the signed enforcement record inside each action's artifact, which is
+    # exactly what a third party verifying a bundle reads.
+    irreversible = (irreversible_actions_since(blackboard, origin.envelope_ns)
+                    if blackboard else 0)
 
     return project_now(
+        irreversible_actions=irreversible,
         owner=owner, ledger_entries=list(ledger_entries),
         active_holds=active_holds, capital_entries=[],
         authority_violations=tuple(authority_violations),
