@@ -333,7 +333,7 @@ def sandboxed_mock_executor(
     """Sandboxed wrapper around ``runner.make_mock_executor``."""
     cfg = config or SandboxConfig(requires_network=False)
     return make_sandboxed_executor(
-        "gyza.runner:make_mock_executor",
+        "gyza.executors:make_mock_executor",
         init_kwargs={"response": response},
         config=cfg,
     )

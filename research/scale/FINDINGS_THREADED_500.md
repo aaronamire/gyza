@@ -102,3 +102,65 @@ hobby budget, and that number is honest where "13 minutes" was not.
 laptop. What more hardware buys is *rate*, and what more MACHINES buy —
 separately and more interestingly — is *distribution*, which is the only way to
 get real WAN latency into a DDIL measurement.
+
+---
+
+# The light-factory fix: 2.6x throughput, no hardware (2026-08-25)
+
+The finding above named the highest-leverage optimisation available and scoped
+it rather than doing it. Done now. `make_mock_executor`,
+`make_command_executor` and `make_planning_executor` moved from
+`gyza/runner.py` to a new top-level `gyza/executors.py` that imports nothing
+beyond the standard library.
+
+**Top-level rather than under `gyza/sandbox/`, and the placement was measured:**
+
+```
+bare interpreter      0.034 s
+import gyza          0.039 s      <- package root is cheap
+import gyza.sandbox   0.207 s      <- would have cost 5x more
+import gyza.runner    0.506 s      <- what every action used to pay
+import gyza.executors 0.048 s      <- 10.5x cheaper
+```
+
+## Result
+
+| agents | act/s before | act/s after | wall s before | wall s after |
+|---:|---:|---:|---:|---:|
+| 10 | 0.90 | **1.37** | 22.2 | 14.6 |
+| 50 | 2.90 | **6.96** | 34.5 | 14.4 |
+| 100 | 3.01 | **7.33** | 66.4 | 26.9 |
+| 250 | 3.24 | **7.37** | 144.0 | 59.2 |
+| 500 | 2.97 | **7.79** | 202.5 | **82.9** |
+
+**Service time 2.6 s -> 1.03 s.** Mean admission wait at 500 agents 85 s -> 33 s.
+`database is locked` failures at 500: 15 -> 7. Memory is unchanged (0.15 MB per
+agent), because nothing about the agent changed — only what its sandbox pays to
+start.
+
+**Throughput is still FLAT above 50 agents** (6.96, 7.33, 7.37, 7.79). The fix
+raised the ceiling; it did not remove it. The ceiling is
+`admission limit / service time` and the only lever on it is cores.
+
+`tests/test_executor_import_cost.py` pins this four ways, including a check
+that no `gyza.runner:` qualname survives in any sandbox call site — a cheap
+module nothing points at saves nothing.
+
+## Ceilings, separated — because "maximum agents" is two different questions
+
+**Agents that EXIST and coordinate — RAM-bound.** Baseline ~950 MB per process
+(imports plus the embedder's 88 MB) plus **0.15 MB per agent**. On this box's
+2.6 GB of available RAM the arithmetic gives several thousand. **Measured to
+500; anything beyond that is arithmetic, and arithmetic of exactly this kind
+has been wrong three times this week.** The next real limit is visible in the
+data rather than predicted: `database is locked` appears at 500 and not at 250,
+so SQLite write contention on one blackboard binds before RAM does.
+
+**Agents doing USEFUL WORK — core-bound, and unaffected by agent count.**
+~7.8 actions/sec on four cores, which is ~1.95 actions/sec per core. 500 agents
+share that, so each one gets 0.016 actions/sec. Adding agents past ~16 buys
+queueing and nothing else.
+
+**Those two numbers answer different questions and must not be quoted as one.**
+"500 agents coordinating with signed provenance" is true and measured. "500
+agents working at scale" is not.

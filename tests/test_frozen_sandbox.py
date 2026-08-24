@@ -58,7 +58,7 @@ def test_direct_sentinel_invocation_never_yields_bubblewrap(monkeypatch):
     # invokes the sentinel directly can never manufacture a bubblewrap
     # record, exactly like the Revision-1 fabrication fix one level up.
     req = _frame({
-        "factory": "gyza.runner:make_mock_executor",
+        "factory": "gyza.executors:make_mock_executor",
         "init_kwargs": {"response": "hi-from-entry"},
         "prompt": "p",
         "context": {},
@@ -130,7 +130,7 @@ def _run_frozen_captured(monkeypatch, cfg: SandboxConfig):
     monkeypatch.setattr(runner.subprocess, "run", _capture)
     with pytest.raises(_Captured) as ei:
         runner.run_sandboxed(
-            factory_qualname="gyza.runner:make_mock_executor",
+            factory_qualname="gyza.executors:make_mock_executor",
             init_kwargs={"response": "x"},
             prompt="p", context={}, config=cfg,
         )
@@ -210,7 +210,7 @@ def test_source_path_unchanged_by_the_frozen_branch(monkeypatch):
     cfg = SandboxConfig(backend=SandboxBackend.BUBBLEWRAP, max_memory_mb=512)
     with pytest.raises(_Captured) as ei:
         runner.run_sandboxed(
-            factory_qualname="gyza.runner:make_mock_executor",
+            factory_qualname="gyza.executors:make_mock_executor",
             init_kwargs={"response": "x"}, prompt="p", context={}, config=cfg,
         )
     argv = ei.value.argv

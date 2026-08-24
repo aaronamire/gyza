@@ -769,13 +769,13 @@ def _executor_target(spec: "RunnerSpec") -> "tuple[str, dict]":
     rlimits rather than merely being wrapped by something that does.
     """
     if spec.executor_kind == "mock":
-        return "gyza.runner:make_mock_executor", {
+        return "gyza.executors:make_mock_executor", {
             "response": f"[{spec.agent_id[:8]}] done"}
     if spec.executor_kind == "command":
         if not spec.command_argv:
             raise ValueError(
                 "executor_kind='command' requires command_argv")
-        return "gyza.runner:make_command_executor", {
+        return "gyza.executors:make_command_executor", {
             "argv": list(spec.command_argv), "cwd": spec.command_cwd}
     if spec.executor_kind == "anthropic":
         return "gyza.runner:make_anthropic_executor", {

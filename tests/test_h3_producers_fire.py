@@ -182,7 +182,7 @@ def test_sandbox_grants_are_actually_RECORDED_end_to_end(db):
 
     rec = default_egress_recorder(db)
     ex = make_sandboxed_executor(
-        "gyza.runner:make_mock_executor", init_kwargs={"response": "hi"},
+        "gyza.executors:make_mock_executor", init_kwargs={"response": "hi"},
         config=SandboxConfig(requires_network=True), egress_recorder=rec)
     try:
         ex("probe", {})
@@ -205,7 +205,7 @@ def test_a_sandbox_WITHOUT_network_records_no_grant(db):
 
     rec = default_egress_recorder(db)
     ex = make_sandboxed_executor(
-        "gyza.runner:make_mock_executor", init_kwargs={"response": "hi"},
+        "gyza.executors:make_mock_executor", init_kwargs={"response": "hi"},
         config=SandboxConfig(requires_network=False), egress_recorder=rec)
     try:
         ex("probe", {})

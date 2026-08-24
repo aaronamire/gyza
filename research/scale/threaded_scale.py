@@ -68,7 +68,7 @@ def run(out: Path, n_agents: int, per_agent: int) -> dict:
     cfg = SandboxConfig(ro_paths=[], rw_paths=[], requires_network=False,
                         max_memory_mb=512)
     execu = make_sandboxed_executor(
-        "gyza.runner:make_command_executor",
+        "gyza.executors:make_command_executor",
         init_kwargs={"argv": ["/usr/bin/uname", "-a"]}, config=cfg)
 
     a0 = ADMISSION.stats()

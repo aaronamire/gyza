@@ -299,7 +299,7 @@ def run_local_task(
             granted = {str(Path(p).resolve()) for p in read_paths + write_paths}
             cmd_cwd = host_cwd if str(Path(host_cwd).resolve()) in granted else None
             executor = make_sandboxed_executor(
-                "gyza.runner:make_command_executor",
+                "gyza.executors:make_command_executor",
                 init_kwargs={"argv": command_argv, "cwd": cmd_cwd},
                 config=scfg,
                 egress_recorder=_egress,
@@ -320,7 +320,7 @@ def run_local_task(
             executor_label = f"anthropic {model or cfg.default_model} (sandboxed)"
         else:
             executor = make_sandboxed_executor(
-                "gyza.runner:make_mock_executor",
+                "gyza.executors:make_mock_executor",
                 init_kwargs={"response": "[mock executor — no AI] "
                                          f"task acknowledged: {task[:120]}"},
                 config=scfg,
