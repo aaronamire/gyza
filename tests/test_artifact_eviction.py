@@ -146,3 +146,49 @@ def test_eviction_does_NOT_break_chain_verification(tmp_path):
 
     ok, _idx = verify_chain([env])
     assert ok, "chain failed to verify after its input artifact was evicted"
+
+
+def test_concurrent_threads_storing_the_SAME_bytes_do_not_collide(tmp_path):
+    """The tmp name carried only the PID, with a comment saying that was
+    enough for "two processes". Threads share a pid, so two of them storing
+    identical content built the same tmp path and one renamed it out from
+    under the other. Found on the first threaded agent run, at 50 agents.
+    """
+    import threading
+
+    from gyza.network.artifact_store import ArtifactStore
+
+    store = ArtifactStore(base_path=str(tmp_path / "cas"))
+    payload = b"identical bytes from every writer"
+    errs: list[str] = []
+    hashes: list[str] = []
+    lk = threading.Lock()
+
+    def w():
+        for _ in range(12):
+            try:
+                h = store.store(payload)
+                with lk: hashes.append(h)
+            except Exception as e:                              # noqa: BLE001
+                with lk: errs.append(f"{type(e).__name__}: {e}")
+
+    ts = [threading.Thread(target=w) for _ in range(24)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+
+    assert errs == [], errs[:3]
+    assert len(set(hashes)) == 1, "content addressing broke under concurrency"
+    assert store.get(hashes[0]) == payload
+
+
+def test_a_failed_write_leaves_no_stray_tmp(tmp_path):
+    """A .tmp file is not content-addressable, so a leaked one is invisible."""
+    from unittest.mock import patch
+
+    from gyza.network.artifact_store import ArtifactStore
+
+    store = ArtifactStore(base_path=str(tmp_path / "cas"))
+    with patch("os.replace", side_effect=OSError("disk full")):
+        with pytest.raises(OSError):
+            store.store(b"doomed")
+    assert list((tmp_path / "cas").rglob("*.tmp*")) == []

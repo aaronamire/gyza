@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import os
+import uuid
 from pathlib import Path
 
 import blake3
@@ -104,11 +105,29 @@ class ArtifactStore:
                 )
                 self._warned_at_80pct = True
         path.parent.mkdir(parents=True, exist_ok=True)
-        # Tmp name carries the PID so two processes writing the same
-        # content at once don't trip over each other's tmp file.
-        tmp = path.with_suffix(f".tmp.{os.getpid()}")
-        tmp.write_bytes(data)
-        os.replace(tmp, path)
+        # Tmp name must be unique per WRITER, and a PID is not.
+        #
+        # This carried only `os.getpid()`, with a comment stating it was there
+        # "so two processes writing the same content at once don't trip over
+        # each other's tmp file". True, and it does not cover THREADS: they
+        # share a pid, so two threads storing the same bytes built the same tmp
+        # path and one os.replace'd it out from under the other, raising
+        # FileNotFoundError in the loser. Invisible while every agent was its
+        # own OS process; reproduced on the first threaded run, at 50 agents.
+        #
+        # A documented invariant whose named mechanism does not cover the case
+        # is an assumption. The token below is unique per write, so it holds
+        # for threads, processes and coroutines alike without needing to know
+        # which one the caller used.
+        tmp = path.with_suffix(f".tmp.{os.getpid()}.{uuid.uuid4().hex}")
+        try:
+            tmp.write_bytes(data)
+            os.replace(tmp, path)
+        except BaseException:
+            # Never leave a partial temp behind: the store is content-addressed
+            # and a stray .tmp is not addressable, so it would leak silently.
+            tmp.unlink(missing_ok=True)
+            raise
         return h
 
     def get(self, hash_hex: str) -> bytes | None:

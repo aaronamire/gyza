@@ -20,6 +20,8 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
+import time
 from typing import Any, Callable
 
 from gyza.release import CURRENT_RELEASE as _CURRENT_RELEASE
@@ -32,6 +34,107 @@ from gyza.sandbox.runner import (
 
 
 LOG = logging.getLogger("gyza.sandbox.executor")
+
+
+# --------------------------------------------------------------------------- #
+#  SANDBOX ADMISSION CONTROL                                                    #
+# --------------------------------------------------------------------------- #
+#
+# A sandboxed action is a bubblewrap PROCESS: namespace setup, seccomp filter,
+# then ~305 ms of real work (measured, n=12). One core sustains ~3.3 of them.
+#
+# Nothing limited how many could be in flight. That was survivable while the
+# only deployments were a handful of agents in separate OS processes, and it
+# stops being survivable the moment agents are THREADS -- 500 threads reaching
+# this function together is 500 simultaneous namespace setups on a machine that
+# can usefully run about eight.
+#
+# BLOCKING IS THE CORRECT BEHAVIOUR, and the alternative was considered and
+# rejected. Raising on a full queue would convert a slow system into a failing
+# one, and the caller's only sensible response would be to retry -- which is
+# the same wait, with the claim released and re-taken in between. Blocking here
+# is backpressure applied where the scarce resource actually is.
+#
+# It cannot deadlock: every admitted run carries its own wall-clock timeout
+# (`SandboxTimeoutError`), so a slot is always released, and nothing inside a
+# sandbox re-enters this function -- decomposition posts work items, it does
+# not recurse into the sandbox.
+
+def _default_concurrency() -> int:
+    """Twice the core count, floor 2.
+
+    Not the core count itself: a sandboxed action is only partly CPU-bound --
+    it spends time in namespace setup and process teardown where the core is
+    idle -- so admitting exactly `nproc` leaves cores stalled between runs.
+    Not much more than twice either: past that the runs contend for the same
+    cores and each one slows down, which buys queueing delay and no throughput.
+    Override with `GYZA_SANDBOX_CONCURRENCY` to measure that curve rather than
+    trust this reasoning.
+    """
+    env = os.environ.get("GYZA_SANDBOX_CONCURRENCY", "").strip()
+    if env:
+        try:
+            return max(1, int(env))
+        except ValueError:
+            LOG.warning("[sandbox] ignoring non-numeric "
+                        "GYZA_SANDBOX_CONCURRENCY=%r", env)
+    return max(2, (os.cpu_count() or 2) * 2)
+
+
+class _Admission:
+    """Process-wide gate on concurrent sandbox runs, with its own accounting.
+
+    The accounting is not decoration. Without it, "the sandbox is slow" and
+    "we are queued behind other agents" are indistinguishable in a throughput
+    number, and those have opposite remedies -- more cores versus fewer agents.
+    """
+
+    def __init__(self) -> None:
+        self._limit = _default_concurrency()
+        self._sem = threading.BoundedSemaphore(self._limit)
+        self._lock = threading.Lock()
+        self.admitted = 0
+        self.wait_s = 0.0
+        self.peak_waiting = 0
+        self._waiting = 0
+
+    @property
+    def limit(self) -> int:
+        return self._limit
+
+    def stats(self) -> dict:
+        with self._lock:
+            return {"limit": self._limit, "admitted": self.admitted,
+                    "total_wait_s": round(self.wait_s, 3),
+                    "peak_waiting": self.peak_waiting}
+
+    def __enter__(self):
+        with self._lock:
+            self._waiting += 1
+            self.peak_waiting = max(self.peak_waiting, self._waiting)
+        t0 = time.monotonic()
+        self._sem.acquire()
+        waited = time.monotonic() - t0
+        with self._lock:
+            self._waiting -= 1
+            self.admitted += 1
+            self.wait_s += waited
+        return self
+
+    def __exit__(self, *exc):
+        self._sem.release()
+        return False
+
+
+#: Process-wide. Threads in one process share it, which is the case it exists
+#: for; separate OS processes each get their own, so a multi-process deployment
+#: must size `GYZA_SANDBOX_CONCURRENCY` per process rather than globally.
+ADMISSION = _Admission()
+
+
+def sandbox_admission_stats() -> dict:
+    """Queueing accounting, for a caller measuring where time actually went."""
+    return ADMISSION.stats()
 
 
 def _json_safe_artifact(a):
@@ -151,6 +254,10 @@ def make_sandboxed_executor(
     init = dict(init_kwargs or {})
 
     def _wrapped(prompt: str, context: dict) -> dict:
+        with ADMISSION:
+            return _run(prompt, context)
+
+    def _run(prompt: str, context: dict) -> dict:
         result = run_sandboxed(
             factory_qualname=factory_qualname,
             init_kwargs=init,
