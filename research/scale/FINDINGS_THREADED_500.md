@@ -164,3 +164,59 @@ queueing and nothing else.
 **Those two numbers answer different questions and must not be quoted as one.**
 "500 agents coordinating with signed provenance" is true and measured. "500
 agents working at scale" is not.
+
+---
+
+# Where the single-board wall is (2026-08-25)
+
+The section above said the single-board ceiling was "probably ~1,000-2,000" and
+that finding it means running the ladder further rather than multiplying.
+Ran it. One action per agent, so agent COUNT is the variable:
+
+| agents | signed | failed | act/s | RSS MB |
+|---:|---:|---:|---:|---:|
+| 500 | 231 | **0** | 9.88 | 487 |
+| 750 | 298 | **0** | 9.45 | 789 |
+| 1000 | 347 | **154** | 6.55 | 1025 |
+| 1500 | 340 | **538** | 6.18 | 1331 |
+
+**Clean to 750. First failures at 1000. Wall at 1500**, where failures exceed
+successes and the ladder stops by design — past that it would measure the OOM
+killer rather than Gyza.
+
+**Every failure is `database is locked`.** Not memory: RSS at the wall is
+1.3 GB against ~2.6 GB available, and it grew smoothly. **SQLite write
+contention on one blackboard is what binds**, exactly as the 500-agent run
+predicted from its 15 stray failures, and it is the partitioning argument
+arriving as a measurement rather than an assertion.
+
+**Throughput held at ~9.5 act/s through 750 and degraded to ~6 past the wall** —
+failing writes cost time and produce nothing.
+
+> **Single-board operating range: up to ~750 agents. The scaling lever above
+> that is a second blackboard, not a bigger machine.**
+
+Partitioning was already measured to scale near-linearly (1.73x at two
+partitions), so the architecture's answer to this wall is the one it already
+had.
+
+## Methodology note: three attempts to call a Go test failure "mine"
+
+While this ran, the Go suite reported `TestRequestAttestationHappyPath`
+failing, then `TestSenderSeqDedupRejects` — a different test each run, which is
+the signature of load rather than code. Resolving it took three wrong turns
+worth recording:
+
+1. **The suites were run concurrently with a 1500-thread ladder**, violating a
+   standing rule. Mine.
+2. **"Passes in isolation" was tested as isolation from other TESTS, not from
+   LOAD.** The box was still at load 4-7.
+3. **Waiting for load < 0.5 was unreachable**: two six-day-old editor processes
+   put this machine's BASELINE at ~2.4 on four cores. A quiet machine was never
+   available, which is why CLAUDE.md's "passes in isolation" could not be
+   reproduced today.
+
+The decisive test was none of those. **`go list -deps ./internal/gossip` shows
+zero dependency on `internal/bootstrap`**, the only package changed — so the
+change cannot reach that test at all. A dependency fact settled in one command
+what three timing experiments could not.

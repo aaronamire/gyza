@@ -149,7 +149,7 @@ def main() -> int:
     out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
     max_n = int(sys.argv[2]) if len(sys.argv) > 2 else 500
     per = int(sys.argv[3]) if len(sys.argv) > 3 else 3
-    ladder = [n for n in (10, 50, 100, 250, 500) if n <= max_n]
+    ladder = [n for n in (500, 750, 1000, 1500, 2000, 3000) if n <= max_n]
     print(f"cores={os.cpu_count()}  sandbox admission limit={ADMISSION.limit}  "
           f"{per} action(s)/agent\n")
     print(f"{'agents':>7} {'signed':>7} {'fail':>5} {'wall_s':>7} "
@@ -170,6 +170,13 @@ def main() -> int:
               f"{r['admission']['mean_wait_ms']:>7}")
         if r["failed"]:
             print(f"         first errors: {r['errors'][:2]}")
+        # STOP AT THE WALL rather than thrashing past it: once a majority of
+        # actions fail the rung is the ceiling, and further rungs measure the
+        # OOM killer rather than Gyza.
+        if r["failed"] > r["signed"]:
+            print(f"         --> WALL: more failures than successes at "
+                  f"{n} agents; stopping the ladder here")
+            break
     (out / "ladder.json").write_text(json.dumps(rows, indent=2))
     print(f"\nwrote {out/'ladder.json'}")
     return 0

@@ -66,12 +66,33 @@ const (
 // if Resolve falls back to this empty set and the operator hasn't
 // passed --bootstrap explicitly.
 var FallbackPeers = []string{
-	// EU — Frankfurt (Vultr).
-	"/ip4/45.77.55.27/udp/7749/quic-v1/p2p/12D3KooWCfGdkEXZvgPMCfGD3K8xhdxpMHvbWJhUknEs4zRNHAAp",
-	// US — New Jersey (Vultr).
-	"/ip4/155.138.217.81/udp/7749/quic-v1/p2p/12D3KooWSwDNtty5Vgps452oKeVyUyn7tHyFnCks31xTwgYMPq8W",
-	// AP — Singapore (Vultr).
-	"/ip4/45.76.150.156/udp/7749/quic-v1/p2p/12D3KooWM8Jeu6p68dtavDHR7YSZGpBUN8cN26oPmRA8Fb1EYYjG",
+	// EMPTIED 2026-08-25. THE THREE PRODUCTION BOOTSTRAP NODES NO LONGER
+	// EXIST, AND THEIR IPs HAVE BEEN REALLOCATED BY THE PROVIDER.
+	//
+	//   EU Frankfurt  45.77.55.27      destroyed
+	//   US NJ         155.138.217.81   destroyed; SSH now answers with a
+	//                                  DIFFERENT host key, i.e. the address
+	//                                  belongs to someone else
+	//   AP Singapore  45.76.150.156    destroyed
+	//
+	// Leaving them here would make every daemon dial three strangers on
+	// startup. That is not a compromise -- each entry pubkey-pinned the peer
+	// via its trailing /p2p/<peer-id>, so libp2p refuses the handshake on key
+	// mismatch and no one at those addresses can impersonate a bootstrap node
+	// -- but it is unsolicited traffic to third parties, and it is a promise
+	// of a mesh that is not there.
+	//
+	// An empty list is the state this file already documents as the
+	// pre-bootstrap-node phase, and `Resolve` handles it: it logs
+	// "no peers resolved (DNS empty + FallbackPeers empty)". Failing visibly
+	// beats dialing strangers quietly.
+	//
+	// _dnsaddr.gyza.network STILL ADVERTISES THE SAME THREE ADDRESSES and
+	// only the domain owner can change that; until it is updated, DNS
+	// discovery hands out dead addresses even with this list empty.
+	//
+	// Restoring: stand up new nodes, update the TXT records, regenerate this
+	// list from them, and tag a new daemon release -- the update flow above.
 }
 
 // Resolver is the subset of net.Resolver we depend on. Tests inject
