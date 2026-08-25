@@ -255,7 +255,7 @@ NATIVE: list[Verifier] = [
     Verifier("market_capital_fold", _market_capital_fold,
              "gyza/economy/market.py:CapitalEntry fold"),
     Verifier("artifact_content_address", _artifact_content_address,
-             "gyza/network/artifact_store.py:71 store"),
+             "gyza/network/artifact_store.py:72 store"),
     # TEST-carried: tier 1 in isolation, but forces any chain containing it to
     # tier 3. The tier and the carrier disagree here and both are right.
     Verifier("unit_test_execution", _unit_test_execution,

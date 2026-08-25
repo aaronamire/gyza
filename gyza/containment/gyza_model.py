@@ -218,6 +218,23 @@ RETIRED_AS_HARM_CLASS: dict[str, str] = {
 }
 
 MEASURED_NOT_BOUNDED: dict[str, str] = {
+    "H7_irreversible_actions": (
+        "THE LEVEL IS 0 AND ONLY THE OWNER CAN INSTALL IT. The quantity is "
+        "computed and wired: `irreversibility.classify` reads the signed "
+        "enforcement record, `irreversible_actions_since` folds it from the "
+        "same append-only envelope log the count comes from, and `observe_now` "
+        "supplies it. What is absent is a SIGNED level. "
+        "0 is the only level that is a BOUND rather than a timer, because "
+        "benign drift is exactly 0 under a grant with no network and no writes "
+        "outside an append-only store, and strictly positive under any other "
+        "grant (THEOREMS_C.md). "
+        "IT CANNOT BE INSTALLED FROM THIS HOST, AND THAT IS THE MECHANISM "
+        "WORKING. A bound enters only through a signed guard configuration, "
+        "and the authority key was deliberately moved off-machine so the "
+        "constrained system cannot rewrite the policy constraining it. "
+        "`guard_bounds.v4.draft.json` carries the proposed configuration "
+        "unsigned; one command with the key present installs it. See "
+        "research/IRREVERSIBILITY.md."),
     "H3_mesh_exit_rate": (
         "THE SHAPE IS CHOSEN AND THE LEVEL IS NOT. A rate over a trailing "
         "wall-clock window is the only sound shape available -- mesh exit is "
@@ -477,7 +494,7 @@ def build_registries(
         quantity=_storage_growth,
         frame="the local artifact store",
         frame_mutable=False,
-        code_path="gyza/network/artifact_store.py:228 total_size_bytes",
+        code_path="gyza/network/artifact_store.py:247 total_size_bytes",
         drift_class=DriftClass.CAPACITY,
         drift_reason=(
             "SOUND BY CAPACITY since 2026-08-21, and the capacity condition is "
@@ -499,7 +516,7 @@ def build_registries(
             "total_size_bytes DOES decrement when "
             "an artifact is removed (measured: 10,000 -> 9,000 bytes), but "
             "ArtifactStore exposes no reversal at all and the sole unlink() in "
-            "the tree (artifact_store.py:92) is corruption repair on a hash "
+            "the tree (artifact_store.py:113) is corruption repair on a hash "
             "mismatch. So r = 0 < b and Theorem 5(i) applies. Reclassify to "
             "CAPACITY only when a reversal exists AND its rate is measured to "
             "exceed the creation rate -- Theorem 6: a tombstone with r < b is "
@@ -586,6 +603,23 @@ def build_registries(
             "(the attenuation theorem). Once exceeded it cannot be un-exceeded, "
             "and the property is per-action and stateless, so it composes "
             "concurrently in the interior (C6)."),
+    ))
+    inv.register(Invariant(
+        id="INV-H7-irreversibility",
+        harm_class="H7_irreversible_actions",
+        cls=InvariantClass.MONOTONE_NON_CUMULATIVE,
+        description=(
+            "no action executes whose effects cannot be shown to be "
+            "recoverable. MONOTONE_NON_CUMULATIVE: reversibility is a property "
+            "of a SINGLE action's signed enforcement record, decided by "
+            "`irreversibility.classify` from the grant rather than from any "
+            "running total, so the check is per-action and stateless and "
+            "composes concurrently in the interior (C6). "
+            "THE COUNT IS CUMULATIVE AND THE PROPERTY IS NOT, which is why "
+            "the bound of 0 is a real bound rather than a timer: under a grant "
+            "with no network and no writes outside an append-only store the "
+            "benign rate is exactly 0, so a compliant agent cannot increment "
+            "it however it behaves."),
     ))
     inv.register(Invariant(
         id="INV-H5-storage",
