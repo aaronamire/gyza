@@ -220,3 +220,55 @@ The decisive test was none of those. **`go list -deps ./internal/gossip` shows
 zero dependency on `internal/bootstrap`**, the only package changed — so the
 change cannot reach that test at all. A dependency fact settled in one command
 what three timing experiments could not.
+
+---
+
+# Gap 1 closed: `RunnerThreadRoster` (2026-08-25)
+
+`gyza/roster.py` — a FIXED ROSTER of agents as threads in one process, the
+threaded sibling of `RunnerProcessSupervisor`. **Not** an adoption of
+`AgentSupervisor`: that spawns on DEMAND, and `supervisor.py` correctly calls
+demand-driven spawning "an OPTIMISATION over a fixed roster". A fixed roster is
+what a deployment needs first.
+
+## The objection, answered exactly as far as it is true
+
+`supervisor.py` declines a threaded roster because *"threads share a fate — one
+unhandled exception in one runner takes the whole roster."* Half right:
+
+- **A Python exception does NOT cross threads.** `AgentRunner.start()` already
+  runs its loop in its own daemon thread, so an unhandled error kills that
+  thread alone. What was missing was anything to NOTICE — a dead daemon thread
+  leaves no trace. The roster watches liveness and restarts. Tested by killing
+  one agent's loop and asserting the other three keep signing.
+- **A PROCESS-LEVEL fault genuinely is shared.** OOM, a segfault in a C
+  extension, `os._exit` — all 500 die together, and nothing here changes that.
+  **That is the price of the 130x memory saving and it is documented rather
+  than engineered around.**
+
+An unbuildable agent is isolated too: a corrupt state file marks that slot
+`gave_up` and the other three run. One bad agent must not prevent 499 good ones.
+
+The stall rule is copied from the process supervisor rather than reinvented,
+because a negative control caught the distinction there: **idle is healthy, and
+so is declining.** The signal is ATTEMPTING — holding a claim and finishing
+nothing. `test_an_IDLE_roster_is_never_restarted` re-pins it here.
+
+## Measured
+
+**250 agents, 500 items, 500/500 signed, 0 restarts, 0 gave-up.** 614 MB RSS.
+
+**Memory per agent is 2.24 MB running, against 0.27 MB constructed — and the
+8x is SQLite, not a leak.** `PRAGMA cache_size` defaults to 2 MB **per
+connection**, and `Blackboard._conn` is thread-local, so 250 threads carry ~500
+MB of page cache; that is the whole gap. Each agent also opens its own episodic
+and specialization databases. **At 500 agents this is ~1.1 GB of page cache**,
+which an 8 GB node absorbs easily and which `PRAGMA cache_size` can lower if a
+smaller node is ever used.
+
+**A cold fleet pays for the embedder, and threads make it worse before better.**
+The first action per agent measured **18.2 s**, and two agents took 18.2 s
+*each* because both threads hit the cold SentenceTransformer load together;
+warm actions are 43–260 ms. Real, and not what a roster test is about, so the
+tests pin `GYZA_EMBEDDER=stub` in a MODULE-scoped fixture — not `conftest.py`,
+because the suite must still exercise the real embedder somewhere.
