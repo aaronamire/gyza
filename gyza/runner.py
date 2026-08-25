@@ -1134,9 +1134,23 @@ class AgentRunner:
                 "runner holds it; the envelope stands and the board row does "
                 "not. If this recurs, CLAIM_LEASE_NS is too short for this "
                 "workload.", item.id[:16])
-        except Exception:
-            pass  # DB write is best-effort; the signed envelope is the
-                  # source of truth.
+        except (TypeError, AttributeError):
+            # A SIGNATURE MISMATCH IS NOT A STORAGE FAILURE, and treating it as
+            # one is how a networked deployment lost EVERY completion in
+            # silence: `NetworkBlackboard.complete_work_item` dropped
+            # `expected_owner`, the resulting TypeError landed here, and
+            # "best-effort" made a permanent programming error look exactly
+            # like a transient disk hiccup. These two are bugs in this process
+            # and must fail loudly; the outer handler releases the claim so the
+            # item is not stranded.
+            raise
+        except Exception as exc:                                # noqa: BLE001
+            # Still best-effort -- the signed envelope IS the source of truth
+            # for a genuine storage failure -- but NEVER silent. An invisible
+            # best-effort write is indistinguishable from one that worked.
+            LOG.warning("[runner] completion of %s did not reach the board "
+                        "(%s: %s); the signed envelope stands",
+                        item.id[:16], type(exc).__name__, exc)
 
         # Write an episode and drift the specialization vector.
         try:

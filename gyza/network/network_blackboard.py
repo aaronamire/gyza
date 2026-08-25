@@ -187,9 +187,22 @@ class NetworkBlackboard(Blackboard):
         icp_envelope_hash: str,
         success: bool,
         hlc: HLC,
+        expected_owner: "str | None" = None,
     ) -> None:
+        # `expected_owner` PASSED THROUGH. This override dropped it, so every
+        # runner call -- which always passes it by keyword -- raised TypeError
+        # inside `_complete`, where a best-effort `except Exception: pass`
+        # swallowed it. Result: on ANY networked deployment every completion
+        # silently failed to record. Envelopes were signed and stored; the
+        # board never advanced; items stayed claimed-but-incomplete until the
+        # lease expired and the work was done again, forever.
+        #
+        # `try_claim` two methods up carries a comment saying an override that
+        # drops a parameter "would silently reintroduce the gap". It was right,
+        # and this method is the instance it did not cover.
         super().complete_work_item(
-            work_item_id, output_hash, icp_envelope_hash, success, hlc,
+            work_item_id, output_hash, icp_envelope_hash, hlc=hlc,
+            success=success, expected_owner=expected_owner,
         )
         if self._gossip is not None and self._gossip_project_id is not None:
             compositor_pubkey = (

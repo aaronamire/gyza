@@ -210,3 +210,57 @@ verifies offline while trusting none of the machines.
 six vCPUs give ~11.7 actions/sec total, and 500 agents share it. **This is a
 COORDINATION and RESILIENCE experiment, not a throughput one**, and the two
 must not be quoted as one number.
+
+---
+
+# Gap 2 closed (2026-08-25) — and it was hiding a data-loss bug
+
+Two real daemons on loopback, gossip-attached `NetworkBlackboard` on each, a
+`RunnerThreadRoster` on each. Work posted on node A only.
+
+**Result: 12/12 items mirrored A->B in 0.20 s; 11 signed on BOTH nodes; ZERO
+cross-node duplicate executions.**
+
+## The bug this exposed, which nothing else would have
+
+`NetworkBlackboard.complete_work_item` **dropped `expected_owner`**, a
+parameter its base class accepts and the runner always passes by keyword. The
+resulting `TypeError` landed in `_complete`'s best-effort
+`except Exception: pass`.
+
+**So on ANY networked deployment, every completion silently failed to record.**
+Envelopes were signed and stored — 6 of them in the first run — while the board
+showed `completed_at_ns = NULL` for every item. Work stayed
+claimed-but-incomplete until the lease expired, then was redone. Forever.
+
+Two fixes, and the second is the more important:
+
+1. The override now passes `expected_owner` through. An AST-style signature
+   sweep confirmed this was the **only** such override, and
+   `tests/test_override_signatures.py` now enforces it with a negative control
+   proving the detector can fail.
+2. **`_complete` no longer swallows programming errors.** `TypeError` and
+   `AttributeError` re-raise; everything else still degrades best-effort but
+   now **logs**. A signature mismatch is not a storage failure, and treating it
+   as one made a permanent bug look exactly like a transient disk hiccup.
+
+This is the **third dropped-parameter bug in one day** (`get_unclaimed`'s
+`limit`, `try_claim`'s `claimant_tier`, then this) — and `try_claim`, two
+methods above, already carries a comment warning that an override dropping a
+parameter "would silently reintroduce the gap". A correct comment two methods
+away did not prevent it. The mechanised check is what does.
+
+## A prediction of mine, refuted
+
+I expected cross-node **duplicate execution**: `try_claim` wins locally via
+SQLite and only then publishes, so two nodes can both claim the same item with
+HLC last-writer-wins settling it afterwards. **Measured zero on loopback**,
+because the claim gossips in 0.20 s — faster than the other node's poll
+interval.
+
+**That result is a CONTROL, not a conclusion.** Loopback RTT is ~0.05 ms;
+Amsterdam-Sydney is ~280 ms, so the window in which two nodes can both believe
+an item is unclaimed is roughly **5,000x wider** on the real deployment.
+Whether duplicate execution appears there — and at what rate, under which
+partition shapes — is exactly the question Arena 1 exists to answer, and it now
+has a measured zero-latency baseline to be compared against.
