@@ -93,6 +93,9 @@ class NetworkBlackboard(Blackboard):
         # via post_intent_direct which does not record creator —
         # that's a Phase 4 concern (intent provenance gossip).
         self._intent_creator: dict[str, str] = {}
+        # Immutable intents, so a hit never goes stale. Avoids a PK
+        # lookup on every work-item publish.
+        self._lineage_intent_cache: dict[str, IntentRecord] = {}
         if raft_node is not None:
             self.attach_raft(raft_node)
 
@@ -145,11 +148,47 @@ class NetworkBlackboard(Blackboard):
             self._wait_for_lineage(w.lineage_root)
         result = super().post_work_item(w)
         if result and self._gossip is not None and self._gossip_project_id is not None:
+            # SELF-CONTAINED DELTA. Carry the lineage intent alongside the
+            # item. Gossip does not retry, so an intent published into a mesh
+            # that has not finished GRAFTing is lost PERMANENTLY, and every
+            # work item under that lineage then fails its FK on the receiving
+            # board -- silently, because the delta ARRIVES and is rejected at
+            # insert. Measured 2026-08-29 (research/arenas/arena1_contested/
+            # FINDINGS_NETEM_SWEEP.md): at 80 ms RTT delivery never recovered,
+            # 0 of ~60 items over 180 s. The previous code shipped new_items
+            # alone under a comment promising "a subsequent delta carrying the
+            # full state will heal once the intent arrives" -- no such delta
+            # was ever sent. post_intent_direct is INSERT OR IGNORE, so
+            # re-asserting costs one ignored row.
             self._publish_delta_if_attached(BlackboardDelta(
                 project_id=self._gossip_project_id,
+                new_intents=self._lineage_intent_records(w.lineage_root),
                 new_items=[_work_item_to_record(w)],
             ))
         return result
+
+    def _lineage_intent_records(self, lineage_root: str) -> list[IntentRecord]:
+        """The intent row for a lineage as a wire record, cached.
+
+        Intents are immutable -- post_intent_direct is INSERT OR IGNORE and
+        there is no update path -- so a cache hit can never go stale.
+        """
+        hit = self._lineage_intent_cache.get(lineage_root)
+        if hit is not None:
+            return [hit]
+        row = self._conn().execute(
+            "SELECT intent_id, goal_spec_json, created_at_ns "
+            "FROM human_intents WHERE intent_id=?", (lineage_root,),
+        ).fetchone()
+        if row is None:
+            return []
+        rec = IntentRecord(
+            intent_id=row["intent_id"],
+            goal_spec_json=row["goal_spec_json"],
+            created_at_ns=row["created_at_ns"],
+        )
+        self._lineage_intent_cache[lineage_root] = rec
+        return [rec]
 
     def try_claim(self, work_item_id, agent_pubkey, hlc, claimant_tier=None):
         # Bump the gossip-side HLC so cross-cluster total order
@@ -501,10 +540,15 @@ class NetworkBlackboard(Blackboard):
             try:
                 self.post_work_item_direct(_record_to_work_item(record))
             except Exception as e:  # noqa: BLE001
-                # Most likely an FK failure (intent missing): a delta
-                # may carry just the work-item update without re-asserting
-                # the intent. We log; a subsequent delta carrying the
-                # full state will heal once the intent arrives.
+                # Most likely an FK failure: the lineage intent is not on
+                # this board yet. Since 2026-08-29 post_work_item ships the
+                # intent WITH the item, so the next item under this lineage
+                # heals it -- which is what makes the recovery real rather
+                # than assumed. Before that change no delta ever re-carried
+                # the intent and this path was a permanent silent drop:
+                # measured 0 of ~60 items over 180 s at 80 ms RTT. Deltas
+                # from an older peer still lack the intent, so the log line
+                # stays.
                 LOG.warning(
                     "[gossip] post_work_item_direct(%s) failed: %s",
                     record.id, e,

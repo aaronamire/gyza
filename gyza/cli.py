@@ -583,6 +583,139 @@ def _human_bytes(n: int) -> str:
     return f"{n}TB"
 
 
+def cmd_swarm(args: argparse.Namespace) -> int:
+    """Run a gossip-attached agent roster: the AGENT-HOST half of a deployment.
+
+    `gyza serve` is single-node. It opens a local blackboard and supervises one
+    OS PROCESS per agent, which is correct up to a few dozen agents and costs
+    ~138 MB each, so 500 agents would need ~69 GB. It also does no networking
+    at all, so N nodes running it are N islands with nothing for a partition to
+    partition.
+
+    This command is the other half. Agents are THREADS in one process, which
+    measured as the right topology rather than being assumed: subprocess-bound
+    work scales 29.89x at 32 threads where CPU-bound work scales 0.66x, because
+    the GIL is released across the sandbox call. The blackboard is a
+    `NetworkBlackboard` attached to a gossip project, so work posted on any
+    node is claimable on every node.
+
+    THE DAEMON MUST ALREADY BE RUNNING AND MESHED. This attaches to it; it does
+    not start it. Verify `gyza global peers` shows the expected count on every
+    node BEFORE starting agents, because a roster on an unmeshed node is a
+    single-node fleet wearing a distributed name.
+    """
+    import signal as _signal
+    import time as _time
+
+    from gyza.identity import LocalCompositor
+    from gyza.network.netd_client import GossipClient, NetdClient
+    from gyza.network.network_blackboard import NetworkBlackboard
+    from gyza.roster import RunnerThreadRoster
+    from gyza.supervisor import RunnerSpec
+
+    cfg = load_config()
+    key_path = Path(_resolve(cfg.compositor_key_path))
+    if not key_path.exists():
+        print("no compositor key; run `gyza init` first", file=sys.stderr)
+        return 1
+    sock = _resolve(cfg.netd_socket_path)
+    if not Path(sock).exists():
+        print(f"no daemon socket at {sock}. Start gyza-netd and confirm the "
+              f"mesh with `gyza global peers` before running agents.",
+              file=sys.stderr)
+        return 1
+
+    n = int(args.agents)
+    if n < 1:
+        print(f"--agents must be >= 1, got {n}", file=sys.stderr)
+        return 1
+    sandboxed = not args.no_sandbox
+    argv_cmd = list(args.agent_argv or [])
+    if argv_cmd and argv_cmd[0] == "--":
+        argv_cmd = argv_cmd[1:]
+    if argv_cmd:
+        resolved = shutil.which(argv_cmd[0])
+        if resolved is None:
+            print(f"command not found: {argv_cmd[0]}", file=sys.stderr)
+            return 1
+        argv_cmd[0] = resolved
+    kind = "command" if argv_cmd else "mock"
+    if kind != "mock" and not sandboxed:
+        print("refusing to run real work unsandboxed: a signed envelope would "
+              "imply containment that never happened.", file=sys.stderr)
+        return 1
+    if sandboxed and not _built_sandboxed():
+        print("bubblewrap not available; refusing to start. Pass --no-sandbox "
+              "for mock work only.", file=sys.stderr)
+        return 1
+
+    compositor = LocalCompositor(key_path=str(key_path))
+    base = key_path.parent
+    agents_dir = base / "swarm-agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    bb_path = _resolve(cfg.blackboard_db_path)
+    bb = NetworkBlackboard(bb_path)
+
+    gossip = GossipClient(str(sock))
+    try:
+        gossip.join_project(args.project)
+        info = NetdClient(str(sock)).get_node_info()
+        bb.attach_gossip(gossip, args.project, node_id=info.compositor_pubkey)
+    except Exception as exc:                                    # noqa: BLE001
+        print(f"could not attach to the gossip project: {exc}", file=sys.stderr)
+        return 1
+
+    roster = []
+    for i in range(n):
+        state = agents_dir / f"agent-{i:04d}.json"
+        ident = _load_or_issue_local_agent(
+            compositor, state, memory_mb=args.memory_mb, allowed_hosts=[],
+            read_paths=[], write_paths=[],
+            max_children=int(getattr(args, "spawn_children", 0) or 0))
+        roster.append(RunnerSpec(
+            agent_id=ident.agent_id, agent_state_path=str(state),
+            blackboard_path=bb_path,
+            memory_path=str(base / "swarm-memory" / f"agent-{i:04d}"),
+            spec_db_path=str(base / "swarm-spec" / f"agent-{i:04d}.db"),
+            artifact_store_path=_resolve("~/.gyza/artifacts"),
+            poll_interval_s=float(args.poll_interval),
+            min_reward=0.0, min_similarity=-1.0, sandboxed=sandboxed,
+            executor_kind=kind,
+            command_argv=tuple(argv_cmd) if argv_cmd else None,
+            model=args.model))
+
+    sup = RunnerThreadRoster(roster, blackboard=bb,
+                             max_restarts=args.max_restarts,
+                             stall_timeout_s=args.stall_timeout)
+    stopping = {"now": False}
+
+    def _sig(_s, _f):
+        stopping["now"] = True
+
+    _signal.signal(_signal.SIGINT, _sig)
+    _signal.signal(_signal.SIGTERM, _sig)
+    print(f"swarm: {n} agent thread(s), project {args.project!r}, "
+          f"{kind} executor, {'sandboxed' if sandboxed else 'UNSANDBOXED'}")
+    sup.start()
+    try:
+        while not stopping["now"]:
+            _time.sleep(5.0)
+            st = sup.summary()
+            print(f"  alive {st['alive']}/{st['agents']}  "
+                  f"restarts {st['restarts']}  gave_up {st['gave_up']}")
+            if st["gave_up"] == st["agents"]:
+                print("every agent gave up; nothing left to supervise",
+                      file=sys.stderr)
+                break
+    finally:
+        print("stopping...")
+        sup.stop()
+        s2 = sup.summary()
+        print(f"  final: alive {s2['alive']}/{s2['agents']}, "
+              f"restarts {s2['restarts']}, gave_up {s2['gave_up']}")
+    return 0
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     """Run a FIXED ROSTER of agents, one OS process each, restarted on crash.
 
@@ -2966,6 +3099,36 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")
 
+    p_swarm = sub.add_parser(
+        "swarm",
+        help="run a gossip-attached roster of agent THREADS (multi-node)")
+    p_swarm.add_argument("--agents", type=int, default=1)
+    p_swarm.add_argument(
+        "--project", default="gyza-swarm",
+        help="gossip project id. EVERY NODE IN THE DEPLOYMENT MUST USE THE "
+             "SAME VALUE, or the nodes mesh at the transport layer and share "
+             "no work, which looks like a working cluster doing nothing.")
+    p_swarm.add_argument("--poll-interval", type=float, default=1.0)
+    p_swarm.add_argument("--max-restarts", type=int, default=5)
+    p_swarm.add_argument("--stall-timeout", type=float, default=120.0)
+    p_swarm.add_argument("--memory-mb", type=int, default=512,
+                         help="per-agent sandbox grant. BELOW 512 A SANDBOX "
+                              "CANNOT START: the numerical library loaded "
+                              "inside fails to allocate and names itself "
+                              "rather than the grant in the error.")
+    p_swarm.add_argument("--spawn-children", type=int, default=0, metavar="N",
+                         help="grant each agent authority to decompose a task "
+                              "into at most N subtasks. Default 0.")
+    p_swarm.add_argument("--no-sandbox", action="store_true",
+                         help="mock work only, no containment")
+    p_swarm.add_argument("--model", default="none")
+    # NAMED `agent_argv`, NOT `command`: `add_subparsers(dest="command")`
+    # already owns that name and a positional would silently overwrite the
+    # subcommand the dispatcher reads.
+    p_swarm.add_argument(
+        "agent_argv", nargs="*", default=[], metavar="-- COMMAND [ARGS...]",
+        help="run this as each agent's action, inside the sandbox")
+
     p_serve = sub.add_parser(
         "serve", help="run a fixed roster of agents, one process each")
     p_serve.add_argument("--agents", type=int, default=1)
@@ -3311,6 +3474,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_status(args)
     if args.command == "serve":
         return cmd_serve(args)
+    if args.command == "swarm":
+        return cmd_swarm(args)
     if args.command == "review":
         return cmd_review(args)
     if args.command == "audit":

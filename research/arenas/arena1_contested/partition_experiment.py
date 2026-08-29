@@ -39,11 +39,17 @@ def boot(base: Path, i: int, port: int):
     if not k.exists():
         k.write_bytes(secrets.token_bytes(32)); k.chmod(0o600)
     sock = str(d / "netd.sock"); c = NetdClient(socket_path=sock)
-    c.start_daemon(socket_path=sock, binary_path=BIN, listen_port=port,
-                   key_path=str(k), mdns=False, dht_mode="server", isolated=True)
+    # start_daemon RETURNS the Popen; close() shuts only the gRPC channel, so
+    # discarding it orphans a ~36 MB daemon holding this fixed port -- which
+    # makes the NEXT run fail on bind. Harmless to the measurement (orphans are
+    # isolated+no-mdns and never join a later mesh) but a leak, and 24 were
+    # found alive on this host on 2026-08-29.
+    proc = c.start_daemon(socket_path=sock, binary_path=BIN, listen_port=port,
+                          key_path=str(k), mdns=False, dht_mode="server",
+                          isolated=True)
     for _ in range(60):
         try:
-            return c, sock, c.get_node_info(), d
+            return c, sock, c.get_node_info(), d, proc
         except Exception:
             time.sleep(0.5)
     raise RuntimeError(f"node {i} never came up")
@@ -97,8 +103,8 @@ def main() -> int:
     agents = int(sys.argv[2]) if len(sys.argv) > 2 else 4
     items = int(sys.argv[3]) if len(sys.argv) > 3 else 20
 
-    ca, sa, ia, da = boot(base, 1, 7870)
-    cb, sb, ib, db = boot(base, 2, 7871)
+    ca, sa, ia, da, pa = boot(base, 1, 7870)
+    cb, sb, ib, db, pb = boot(base, 2, 7871)
     bbA = NetworkBlackboard(str(da / "bb.db"))
     bbB = NetworkBlackboard(str(db / "bb.db"))
     ga, gb = GossipClient(sa), GossipClient(sb)
@@ -206,6 +212,12 @@ def main() -> int:
     for c in (ca, cb):
         try: c.close()
         except Exception: pass
+    for pr in (pa, pb):                  # the channel is not the process
+        try:
+            pr.terminate(); pr.wait(timeout=10)
+        except Exception:
+            try: pr.kill()
+            except Exception: pass
     return 0
 
 

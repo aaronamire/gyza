@@ -8,13 +8,11 @@ reasoning tasks — MBPP, MATH, the NoOp fixtures — which is where all six
 mechanism families measured the competence bound. Nothing here touches that
 result or its scope.
 
-**Source of the prior text.** `ATTACK_ON_CORRECTNESS_3.md` lives at
-`~/Downloads/`, **outside this repository**. An in-place CORRECTION block was
-therefore not possible, so this is a **new document** that quotes the passages
-it corrects verbatim, per standing discipline. *If the original is added to
-`research/`, this file should be linked from it* — and note that `research/` is
-public, so publishing the three Attack documents is a call for their author, not
-for me.
+**Source of the prior text.** The document this corrects is held privately by
+its author and is not part of this repository. An in-place CORRECTION block was
+therefore not possible, so this is a **new document** that states the claims it
+corrects and the reasons they do not hold. Publishing the source documents is
+their author's decision, not this project's.
 
 ---
 
