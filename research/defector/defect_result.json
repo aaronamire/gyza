@@ -1,0 +1,249 @@
+{
+  "kappa": "3/5",
+  "eps": 1,
+  "seeds": 5,
+  "rounds": 40,
+  "delta_star": {
+    "8": 0.13,
+    "64": 0.28,
+    "512": 0.295
+  },
+  "cells": [
+    {
+      "mode": "D-SHED",
+      "M": 8,
+      "k_star": 1,
+      "phi_star": 0.14285714285714285,
+      "delta_star": 0.13,
+      "defector_advantage": 0.0,
+      "pool_remaining": 0.063454797,
+      "curve": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          195
+        ]
+      ]
+    },
+    {
+      "mode": "D-SHED",
+      "M": 64,
+      "k_star": 1,
+      "phi_star": 0.015873015873015872,
+      "delta_star": 0.28,
+      "defector_advantage": 0.0,
+      "pool_remaining": 5.817913663,
+      "curve": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          160
+        ]
+      ]
+    },
+    {
+      "mode": "D-SHED",
+      "M": 512,
+      "k_star": 2,
+      "phi_star": 0.003913894324853229,
+      "delta_star": 0.295,
+      "defector_advantage": 0.0,
+      "pool_remaining": 8.800362913,
+      "curve": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          80
+        ]
+      ]
+    },
+    {
+      "mode": "D-SKEW",
+      "M": 8,
+      "k_star": 1,
+      "phi_star": 0.14285714285714285,
+      "delta_star": 0.13,
+      "defector_advantage": 0.0,
+      "pool_remaining": 10.045599451,
+      "curve": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          195
+        ]
+      ]
+    },
+    {
+      "mode": "D-SKEW",
+      "M": 64,
+      "k_star": 4,
+      "phi_star": 0.06349206349206349,
+      "delta_star": 0.28,
+      "defector_advantage": 0.0,
+      "pool_remaining": 9.526843272,
+      "curve": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          180
+        ]
+      ]
+    },
+    {
+      "mode": "D-SKEW",
+      "M": 512,
+      "k_star": 23,
+      "phi_star": 0.04500978473581213,
+      "delta_star": 0.295,
+      "defector_advantage": 0.0,
+      "pool_remaining": 9.359789731,
+      "curve": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          5,
+          0
+        ]
+      ]
+    },
+    {
+      "mode": "D-BOTH",
+      "M": 8,
+      "k_star": 0,
+      "phi_star": 0.0,
+      "delta_star": 0.13,
+      "defector_advantage": 62.0,
+      "pool_remaining": 0.0,
+      "curve": [
+        [
+          0,
+          200
+        ]
+      ]
+    },
+    {
+      "mode": "D-BOTH",
+      "M": 64,
+      "k_star": 0,
+      "phi_star": 0.0,
+      "delta_star": 0.28,
+      "defector_advantage": 398.0,
+      "pool_remaining": 0.0,
+      "curve": [
+        [
+          0,
+          200
+        ]
+      ]
+    },
+    {
+      "mode": "D-BOTH",
+      "M": 512,
+      "k_star": 0,
+      "phi_star": 0.0,
+      "delta_star": 0.295,
+      "defector_advantage": 3086.0,
+      "pool_remaining": 0.0,
+      "curve": [
+        [
+          0,
+          200
+        ]
+      ]
+    },
+    {
+      "mode": "D-HOARD",
+      "M": 8,
+      "k_star": 0,
+      "phi_star": 0.0,
+      "delta_star": 0.13,
+      "defector_advantage": 62.0,
+      "pool_remaining": 0.0,
+      "curve": [
+        [
+          0,
+          200
+        ]
+      ]
+    },
+    {
+      "mode": "D-HOARD",
+      "M": 64,
+      "k_star": 0,
+      "phi_star": 0.0,
+      "delta_star": 0.28,
+      "defector_advantage": 398.0,
+      "pool_remaining": 0.0,
+      "curve": [
+        [
+          0,
+          200
+        ]
+      ]
+    },
+    {
+      "mode": "D-HOARD",
+      "M": 512,
+      "k_star": 0,
+      "phi_star": 0.0,
+      "delta_star": 0.295,
+      "defector_advantage": 3086.0,
+      "pool_remaining": 0.0,
+      "curve": [
+        [
+          0,
+          200
+        ]
+      ]
+    }
+  ]
+}

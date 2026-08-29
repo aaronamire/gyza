@@ -1,0 +1,165 @@
+[
+ {
+  "claim_id": "pandas#66509-2",
+  "text": "So the trigger is self_destruct, and there is nothing wrong with the passthrough itself. I get the same results on macOS/arm64 and Linux/x86-64.",
+  "why_a_claim": "reporter asserts the isolated trigger and its portability",
+  "repo": "pandas-dev/pandas",
+  "issue": 66509,
+  "url": "https://github.com/pandas-dev/pandas/issues/66509",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "IO Parquet",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34278-1",
+  "text": "This follows on from the RFC for Pyodide being regarded as a somewhat officially supported platform, and resolved as of June 2025.",
+  "why_a_claim": "reporter asserts a historical fact about the project",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34278,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34278",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#66281-0",
+  "text": "Invoking .apply() with custom Python functions is notoriously slow in Pandas because it loops over rows in pure Python.",
+  "why_a_claim": "reporter asserts a performance property -- \"notoriously slow\" VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66281,
+  "url": "https://github.com/pandas-dev/pandas/issues/66281",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34087-0",
+  "text": "Torch offers sparse arrays which, unlike SciPy's objects, are sub-classed from regular dense arrays.",
+  "why_a_claim": "reporter asserts an external library fact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34087,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34087",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Decision"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34356-1",
+  "text": "Same with Cython-lint v0.16.",
+  "why_a_claim": "reporter asserts the same for another tool",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34356,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34356",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34075-0",
+  "text": "In nilearn we have started using the HTML representation of estimators in the report we generate.",
+  "why_a_claim": "reporter asserts a downstream usage",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34075,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34075",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33963-1",
+  "text": "While aggregate metrics like the F1-score or Area Under the ROC Curve provide a high-level view of model performance, they often mask the specific regions where a model's prediction is statistically equivalent to guessing.",
+  "why_a_claim": "reporter asserts a limitation of existing metrics",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33963,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33963",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34175-0",
+  "text": "Since a tree can be simultaneously used from multiple threads, the statistics will be garbage, as the numbers will get overwritten by different threads.",
+  "why_a_claim": "reporter asserts a concurrency defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34175,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34175",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65871-0",
+  "text": "With matplotlib 3.11.0, the default property cycle now returns colors as RGB tuples rather than hex strings.",
+  "why_a_claim": "reporter asserts an upstream behaviour change",
+  "repo": "pandas-dev/pandas",
+  "issue": 65871,
+  "url": "https://github.com/pandas-dev/pandas/issues/65871",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34278-0",
+  "text": "scikit-learn should start publishing Pyodide/WASM wheels, i.e., with the pyemscripten platform tag as per the accepted and implemented PEP 783, to PyPI, for both ABIs that we currently support.",
+  "why_a_claim": "reporter proposes a required action",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34278,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34278",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#65737-0",
+  "text": "In doc/source/user_guide/visualization.rst, under the \"Automatic date tick adjustment\" section, there is a link pinned to matplotlib v2.0.2.",
+  "why_a_claim": "reporter asserts a fact about the documentation",
+  "repo": "pandas-dev/pandas",
+  "issue": 65737,
+  "url": "https://github.com/pandas-dev/pandas/issues/65737",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33800-1",
+  "text": "This pattern has no built-in support in sklearn and becomes error-prone when normalization is involved - normalizing before vs after subtraction gives different results.",
+  "why_a_claim": "reporter asserts a gap and a hazard",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33800,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33800",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Info",
+   "Closing candidate"
+  ]
+ }
+]

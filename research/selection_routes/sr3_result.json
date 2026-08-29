@@ -1,0 +1,644 @@
+{
+ "seed": 1,
+ "feasibility": {
+  "total_mutations": 36,
+  "e2e_violations": 27,
+  "all_caught_by_every_operator": false,
+  "none_caught": false
+ },
+ "overall": {
+  "verified_fold": 0.8518518518518519,
+  "spec_merge": 0.37037037037037035,
+  "contained": 0.0
+ },
+ "by_carrier": {
+  "PROOF": {
+   "n": 21,
+   "verified_fold": 1.0,
+   "spec_merge": 0.38095238095238093,
+   "contained": 0.0
+  },
+  "TEST": {
+   "n": 4,
+   "verified_fold": 0.0,
+   "spec_merge": 0.0,
+   "contained": 0.0
+  },
+  "SPEC": {
+   "n": 2,
+   "verified_fold": 1.0,
+   "spec_merge": 1.0,
+   "contained": 0.0
+  },
+  "NONE": {
+   "n": 0,
+   "verified_fold": null,
+   "spec_merge": null,
+   "contained": null
+  }
+ },
+ "by_class": {
+  "CONSERVATION": {
+   "n": 12,
+   "verified_fold": 0.6666666666666666,
+   "spec_merge": 0.6666666666666666,
+   "contained": 0.0
+  },
+  "MONOTONE": {
+   "n": 15,
+   "verified_fold": 1.0,
+   "spec_merge": 0.13333333333333333,
+   "contained": 0.0
+  },
+  "CUMULATIVE": {
+   "n": 0,
+   "verified_fold": null,
+   "spec_merge": null,
+   "contained": null
+  },
+  "NONE": {
+   "n": 0,
+   "verified_fold": null,
+   "spec_merge": null,
+   "contained": null
+  }
+ },
+ "rows": [
+  {
+   "pipeline": "sign_envelope+store_artifact+sign_envelope",
+   "mutated_stage": "sign_envelope",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+store_artifact+sign_envelope",
+   "mutated_stage": "store_artifact",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+store_artifact+sign_envelope",
+   "mutated_stage": "sign_envelope",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "store_artifact+sign_envelope+store_artifact",
+   "mutated_stage": "store_artifact",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "store_artifact+sign_envelope+store_artifact",
+   "mutated_stage": "sign_envelope",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "store_artifact+sign_envelope+store_artifact",
+   "mutated_stage": "store_artifact",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+sign_envelope+sign_envelope",
+   "mutated_stage": "sign_envelope",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+sign_envelope+sign_envelope",
+   "mutated_stage": "sign_envelope",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+sign_envelope+sign_envelope",
+   "mutated_stage": "sign_envelope",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "settle_credits+settle_credits+settle_credits",
+   "mutated_stage": "settle_credits",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "CUMULATIVE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "settle_credits+settle_credits+settle_credits",
+   "mutated_stage": "settle_credits",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "CUMULATIVE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "settle_credits+settle_credits+settle_credits",
+   "mutated_stage": "settle_credits",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CUMULATIVE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+settle_credits+store_artifact",
+   "mutated_stage": "sign_envelope",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+settle_credits+store_artifact",
+   "mutated_stage": "settle_credits",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "CUMULATIVE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+settle_credits+store_artifact",
+   "mutated_stage": "store_artifact",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "settle_credits+store_artifact+settle_credits",
+   "mutated_stage": "settle_credits",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "CUMULATIVE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "settle_credits+store_artifact+settle_credits",
+   "mutated_stage": "store_artifact",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "settle_credits+store_artifact+settle_credits",
+   "mutated_stage": "settle_credits",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CUMULATIVE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "tested_transform+sign_envelope+store_artifact",
+   "mutated_stage": "tested_transform",
+   "at": 0,
+   "carrier": "TEST",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "tested_transform+sign_envelope+store_artifact",
+   "mutated_stage": "sign_envelope",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "tested_transform+sign_envelope+store_artifact",
+   "mutated_stage": "store_artifact",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+tested_transform+store_artifact",
+   "mutated_stage": "sign_envelope",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+tested_transform+store_artifact",
+   "mutated_stage": "tested_transform",
+   "at": 1,
+   "carrier": "TEST",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+tested_transform+store_artifact",
+   "mutated_stage": "store_artifact",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "tested_transform+tested_transform+sign_envelope",
+   "mutated_stage": "tested_transform",
+   "at": 0,
+   "carrier": "TEST",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "tested_transform+tested_transform+sign_envelope",
+   "mutated_stage": "tested_transform",
+   "at": 1,
+   "carrier": "TEST",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "tested_transform+tested_transform+sign_envelope",
+   "mutated_stage": "sign_envelope",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "hlc_stamp+sign_envelope+store_artifact",
+   "mutated_stage": "hlc_stamp",
+   "at": 0,
+   "carrier": "SPEC",
+   "cls": "MONOTONE",
+   "tiers": [
+    2,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "hlc_stamp+sign_envelope+store_artifact",
+   "mutated_stage": "sign_envelope",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    2,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "hlc_stamp+sign_envelope+store_artifact",
+   "mutated_stage": "store_artifact",
+   "at": 2,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    2,
+    1,
+    1
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+hlc_stamp+produce_output",
+   "mutated_stage": "sign_envelope",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+hlc_stamp+produce_output",
+   "mutated_stage": "hlc_stamp",
+   "at": 1,
+   "carrier": "SPEC",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+hlc_stamp+produce_output",
+   "mutated_stage": "produce_output",
+   "at": 2,
+   "carrier": "NONE",
+   "cls": "NONE",
+   "tiers": [
+    1,
+    2,
+    3
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+store_artifact+produce_output",
+   "mutated_stage": "sign_envelope",
+   "at": 0,
+   "carrier": "PROOF",
+   "cls": "MONOTONE",
+   "tiers": [
+    1,
+    1,
+    3
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+store_artifact+produce_output",
+   "mutated_stage": "store_artifact",
+   "at": 1,
+   "carrier": "PROOF",
+   "cls": "CONSERVATION",
+   "tiers": [
+    1,
+    1,
+    3
+   ],
+   "e2e_violated": true,
+   "verified_fold_rejects": true,
+   "spec_merge_rejects": true,
+   "contained_rejects": false
+  },
+  {
+   "pipeline": "sign_envelope+store_artifact+produce_output",
+   "mutated_stage": "produce_output",
+   "at": 2,
+   "carrier": "NONE",
+   "cls": "NONE",
+   "tiers": [
+    1,
+    1,
+    3
+   ],
+   "e2e_violated": false,
+   "verified_fold_rejects": false,
+   "spec_merge_rejects": false,
+   "contained_rejects": false
+  }
+ ]
+}

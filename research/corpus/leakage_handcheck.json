@@ -1,0 +1,39 @@
+{
+ "what_this_is": "B2 hand-verification. For each sampled record I was shown ONLY goal (title+body) and context (alphabetical file union, counts, modules) and judged whether a reader could reconstruct the reference_decomposition -- its number of subtasks and their grouping. Recorded per-record so the rate is auditable rather than asserted.",
+ "sample": "random.Random(3).sample(records, 22) over the 121-record scikit-learn extraction",
+ "standard_applied": "RECONSTRUCTIBLE = a reader following project convention could produce the same number of subtasks AND substantially the same grouping. Getting the topic right is not reconstruction; getting the SPLIT right is.",
+ "n": 22,
+ "n_not_reconstructible": 19,
+ "rate_not_reconstructible": 0.8636,
+ "judgements": [
+  {"record_id": "scikit-learn#34423", "n_sub": 5, "verdict": "NOT", "why": "5 subtasks include a changelog rename and a doc explanation added only after review; nothing in goal+context implies either."},
+  {"record_id": "scikit-learn#34246", "n_sub": 12, "verdict": "NOT", "why": "12 subtasks over 9 files, of which 'nits', 'nit', 'fix', 'empty commit' are pure review residue."},
+  {"record_id": "scikit-learn#34263", "n_sub": 6, "verdict": "NOT", "why": "'iter', 'cln', 'no list as default' are reactions to review, unpredictable from the goal."},
+  {"record_id": "scikit-learn#34509", "n_sub": 8, "verdict": "NOT", "why": "8 subtasks on 1 file, two of them merge-from-main commits -- workflow noise, not decomposition."},
+  {"record_id": "scikit-learn#34355", "n_sub": 8, "verdict": "NOT", "why": "8 subtasks on 1 doc file. Body has 4 numbered items but they do not map to the commits."},
+  {"record_id": "scikit-learn#34239", "n_sub": 31, "verdict": "NOT", "why": "31 subtasks over 2 files. No reader predicts 31 from a doc-cleanup goal."},
+  {"record_id": "scikit-learn#34317", "n_sub": 5, "verdict": "NOT", "why": "two of five are merge commits from upstream."},
+  {"record_id": "scikit-learn#34224", "n_sub": 5, "verdict": "NOT", "why": "first subtask adds an unrelated core-dev entry; an accidental-file removal follows. Neither is derivable."},
+  {"record_id": "scikit-learn#34248", "n_sub": 24, "verdict": "NOT", "why": "24 subtasks of incremental optimisation ('sort first', 'style', 'fix')."},
+  {"record_id": "scikit-learn#34551", "n_sub": 6, "verdict": "NOT", "why": "WIP PR; subtasks are exploratory ('wip', 'Build one example')."},
+  {"record_id": "scikit-learn#34077", "n_sub": 4, "verdict": "NOT", "why": "includes a named reviewer's-review commit and a merge; 25 files but only 4 commits -- the ratio itself is unpredictable."},
+  {"record_id": "scikit-learn#34611", "n_sub": 4, "verdict": "NOT", "why": "4 subtasks on 1 file, three of them successive doc wording fixes."},
+  {"record_id": "scikit-learn#34107", "n_sub": 4, "verdict": "NOT", "why": "includes a merge and a changelog REMOVAL -- a reversal of an earlier step."},
+  {"record_id": "scikit-learn#34083", "n_sub": 5, "verdict": "NOT", "why": "'add to multiclass undefined list' is an implementation discovery, not a plan."},
+  {"record_id": "scikit-learn#34413", "n_sub": 15, "verdict": "NOT", "why": "15 subtasks including 'restoring deleted css' -- an undo of an earlier subtask."},
+  {"record_id": "scikit-learn#34262", "n_sub": 3, "verdict": "RECONSTRUCTIBLE", "why": "RISK CASE. 3 subtasks are exactly the scikit-learn convention fix -> changelog -> test. A reader who knows the convention and sees n_sub is small could produce this split."},
+  {"record_id": "scikit-learn#34426", "n_sub": 3, "verdict": "RECONSTRUCTIBLE", "why": "RISK CASE. Same convention shape: fix -> non-regression test -> changelog fragment."},
+  {"record_id": "scikit-learn#34442", "n_sub": 62, "verdict": "NOT", "why": "62 subtasks over 5 files."},
+  {"record_id": "scikit-learn#34173", "n_sub": 44, "verdict": "RECONSTRUCTIBLE", "why": "PARTIAL/FLAGGED. A release PR whose body is a 16-checkbox release checklist. The checkboxes are process steps, not the 44 commits, so full reconstruction fails -- but the body is the one place in this sample where the goal text enumerates steps at all, and it is counted against us conservatively."},
+  {"record_id": "scikit-learn#34106", "n_sub": 4, "verdict": "NOT", "why": "'fix', 'more typos' -- successive unplanned corrections."},
+  {"record_id": "scikit-learn#34064", "n_sub": 10, "verdict": "NOT", "why": "10 subtasks, two merges from main, tense-correction commits driven by review."},
+  {"record_id": "scikit-learn#34122", "n_sub": 12, "verdict": "NOT", "why": "12 subtasks including a fix to a CI check that failed only after the work began."}
+ ],
+ "mechanism_found": {
+  "claim": "Reconstruction risk is a function of DECOMPOSITION LENGTH, not of context content.",
+  "evidence": "All 3 flagged records are either the minimum length (n_sub=3, two cases) or the one record whose body is literally a checklist. Every record with n_sub>=4 was judged NOT reconstructible.",
+  "why": "Long decompositions are dominated by review-cycle residue that did not exist when the goal was written. Measured mechanically over all 121 records: 445/1101 = 0.404 of subtasks match review-noise patterns (nit/fix/wip/cln/style/typo/empty commit or a merge-from-main). A reader cannot predict a reviewer's future comments.",
+  "population_at_risk": "29/121 = 0.240 of records have exactly 3 subtasks.",
+  "recommended_use": "Routes measuring decomposition strategy against this corpus should either exclude n_sub==3 records or report results split by that boundary. The flag is carried on each record so the choice is explicit."
+ }
+}

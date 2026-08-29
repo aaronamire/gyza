@@ -1,0 +1,2404 @@
+{
+  "kappa": "3/5",
+  "seeds": 5,
+  "rounds": 40,
+  "grid": "1/200",
+  "cells": [
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 2,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": 0.0,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 2,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": null,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 2,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": 0.0,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 2,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": null,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 2,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": 0.0,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 2,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": null,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 8,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.475,
+      "delta_star": 0.13,
+      "Delta": 4.379394166,
+      "closed_form": 0.28744673162135276,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 3.221884499,
+      "floor_inflation": 1.691489361763564,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          195
+        ],
+        [
+          0.025,
+          195
+        ],
+        [
+          0.05,
+          195
+        ],
+        [
+          0.075,
+          195
+        ],
+        [
+          0.1,
+          195
+        ],
+        [
+          0.125,
+          190
+        ],
+        [
+          0.15,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 8,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.475,
+      "delta_star": 0.24,
+      "Delta": 5.859944419,
+      "closed_form": null,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 5.07936508,
+      "floor_inflation": 2.6666666666666665,
+      "honest_refusal": 0.5,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          200
+        ],
+        [
+          0.025,
+          200
+        ],
+        [
+          0.05,
+          200
+        ],
+        [
+          0.075,
+          200
+        ],
+        [
+          0.1,
+          200
+        ],
+        [
+          0.125,
+          200
+        ],
+        [
+          0.15,
+          200
+        ],
+        [
+          0.175,
+          200
+        ],
+        [
+          0.2,
+          200
+        ],
+        [
+          0.225,
+          195
+        ],
+        [
+          0.25,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 8,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.475,
+      "delta_star": 0.19,
+      "Delta": 4.93130306,
+      "closed_form": 0.30524279375437813,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 4.111498258,
+      "floor_inflation": 2.158536585180183,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          195
+        ],
+        [
+          0.025,
+          195
+        ],
+        [
+          0.05,
+          195
+        ],
+        [
+          0.075,
+          195
+        ],
+        [
+          0.1,
+          195
+        ],
+        [
+          0.125,
+          190
+        ],
+        [
+          0.15,
+          190
+        ],
+        [
+          0.175,
+          190
+        ],
+        [
+          0.2,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 8,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.475,
+      "delta_star": 0.245,
+      "Delta": 5.866767053,
+      "closed_form": null,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 5.191146882,
+      "floor_inflation": 2.725352112709331,
+      "honest_refusal": 0.48125,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          200
+        ],
+        [
+          0.025,
+          200
+        ],
+        [
+          0.05,
+          200
+        ],
+        [
+          0.075,
+          200
+        ],
+        [
+          0.1,
+          200
+        ],
+        [
+          0.125,
+          200
+        ],
+        [
+          0.15,
+          200
+        ],
+        [
+          0.175,
+          200
+        ],
+        [
+          0.2,
+          200
+        ],
+        [
+          0.225,
+          195
+        ],
+        [
+          0.25,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 8,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.475,
+      "delta_star": 0.225,
+      "Delta": 5.245474459,
+      "closed_form": 0.3144963937037109,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 4.761904762,
+      "floor_inflation": 2.4999999997375,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          195
+        ],
+        [
+          0.025,
+          195
+        ],
+        [
+          0.05,
+          195
+        ],
+        [
+          0.075,
+          195
+        ],
+        [
+          0.1,
+          195
+        ],
+        [
+          0.125,
+          190
+        ],
+        [
+          0.15,
+          190
+        ],
+        [
+          0.175,
+          190
+        ],
+        [
+          0.2,
+          185
+        ],
+        [
+          0.225,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 8,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.475,
+      "delta_star": 0.25,
+      "Delta": 5.867062215,
+      "closed_form": null,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 5.306122449,
+      "floor_inflation": 2.785714285376786,
+      "honest_refusal": 0.45,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          200
+        ],
+        [
+          0.025,
+          200
+        ],
+        [
+          0.05,
+          200
+        ],
+        [
+          0.075,
+          200
+        ],
+        [
+          0.1,
+          200
+        ],
+        [
+          0.125,
+          200
+        ],
+        [
+          0.15,
+          200
+        ],
+        [
+          0.175,
+          200
+        ],
+        [
+          0.2,
+          200
+        ],
+        [
+          0.225,
+          195
+        ],
+        [
+          0.25,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 64,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.584375,
+      "delta_star": 0.28,
+      "Delta": 5.125320063,
+      "closed_form": 0.5438562603737289,
+      "floor_L0": 0.211640212,
+      "floor_L_star": 0.674603175,
+      "floor_inflation": 3.1874999964562503,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          185
+        ],
+        [
+          0.025,
+          185
+        ],
+        [
+          0.05,
+          185
+        ],
+        [
+          0.075,
+          185
+        ],
+        [
+          0.1,
+          185
+        ],
+        [
+          0.125,
+          185
+        ],
+        [
+          0.15,
+          185
+        ],
+        [
+          0.175,
+          185
+        ],
+        [
+          0.2,
+          185
+        ],
+        [
+          0.225,
+          185
+        ],
+        [
+          0.25,
+          185
+        ],
+        [
+          0.275,
+          185
+        ],
+        [
+          0.3,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 64,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.584375,
+      "delta_star": 0.545,
+      "Delta": 5.989841391,
+      "closed_form": null,
+      "floor_L0": 0.211640212,
+      "floor_L_star": 5.454545455,
+      "floor_inflation": 25.772727231061364,
+      "honest_refusal": 0.525,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          200
+        ],
+        [
+          0.025,
+          200
+        ],
+        [
+          0.05,
+          200
+        ],
+        [
+          0.075,
+          200
+        ],
+        [
+          0.1,
+          200
+        ],
+        [
+          0.125,
+          200
+        ],
+        [
+          0.15,
+          200
+        ],
+        [
+          0.175,
+          200
+        ],
+        [
+          0.2,
+          200
+        ],
+        [
+          0.225,
+          200
+        ],
+        [
+          0.25,
+          200
+        ],
+        [
+          0.275,
+          200
+        ],
+        [
+          0.3,
+          200
+        ],
+        [
+          0.325,
+          200
+        ],
+        [
+          0.35,
+          200
+        ],
+        [
+          0.375,
+          200
+        ],
+        [
+          0.4,
+          200
+        ],
+        [
+          0.425,
+          200
+        ],
+        [
+          0.45,
+          200
+        ],
+        [
+          0.475,
+          200
+        ],
+        [
+          0.5,
+          195
+        ],
+        [
+          0.525,
+          195
+        ],
+        [
+          0.55,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 64,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.584375,
+      "delta_star": 0.48,
+      "Delta": 5.63356638,
+      "closed_form": 0.5484865364065811,
+      "floor_L0": 0.211640212,
+      "floor_L_star": 2.328042329,
+      "floor_inflation": 10.999999985825001,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          185
+        ],
+        [
+          0.025,
+          185
+        ],
+        [
+          0.05,
+          185
+        ],
+        [
+          0.075,
+          185
+        ],
+        [
+          0.1,
+          185
+        ],
+        [
+          0.125,
+          185
+        ],
+        [
+          0.15,
+          185
+        ],
+        [
+          0.175,
+          185
+        ],
+        [
+          0.2,
+          185
+        ],
+        [
+          0.225,
+          185
+        ],
+        [
+          0.25,
+          185
+        ],
+        [
+          0.275,
+          185
+        ],
+        [
+          0.3,
+          185
+        ],
+        [
+          0.325,
+          185
+        ],
+        [
+          0.35,
+          185
+        ],
+        [
+          0.375,
+          185
+        ],
+        [
+          0.4,
+          185
+        ],
+        [
+          0.425,
+          185
+        ],
+        [
+          0.45,
+          185
+        ],
+        [
+          0.475,
+          185
+        ],
+        [
+          0.5,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 64,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.584375,
+      "delta_star": 0.545,
+      "Delta": 5.991861318,
+      "closed_form": null,
+      "floor_L0": 0.211640212,
+      "floor_L_star": 5.454545455,
+      "floor_inflation": 25.772727231061364,
+      "honest_refusal": 0.5,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          200
+        ],
+        [
+          0.025,
+          200
+        ],
+        [
+          0.05,
+          200
+        ],
+        [
+          0.075,
+          200
+        ],
+        [
+          0.1,
+          200
+        ],
+        [
+          0.125,
+          200
+        ],
+        [
+          0.15,
+          200
+        ],
+        [
+          0.175,
+          200
+        ],
+        [
+          0.2,
+          200
+        ],
+        [
+          0.225,
+          200
+        ],
+        [
+          0.25,
+          200
+        ],
+        [
+          0.275,
+          200
+        ],
+        [
+          0.3,
+          200
+        ],
+        [
+          0.325,
+          200
+        ],
+        [
+          0.35,
+          200
+        ],
+        [
+          0.375,
+          200
+        ],
+        [
+          0.4,
+          200
+        ],
+        [
+          0.425,
+          200
+        ],
+        [
+          0.45,
+          200
+        ],
+        [
+          0.475,
+          200
+        ],
+        [
+          0.5,
+          195
+        ],
+        [
+          0.525,
+          195
+        ],
+        [
+          0.55,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 64,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.584375,
+      "delta_star": 0.535,
+      "Delta": 5.888687127,
+      "closed_form": 0.5505343064508296,
+      "floor_L0": 0.211640212,
+      "floor_L_star": 4.566544567,
+      "floor_inflation": 21.57692304239423,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          185
+        ],
+        [
+          0.025,
+          185
+        ],
+        [
+          0.05,
+          185
+        ],
+        [
+          0.075,
+          185
+        ],
+        [
+          0.1,
+          185
+        ],
+        [
+          0.125,
+          185
+        ],
+        [
+          0.15,
+          185
+        ],
+        [
+          0.175,
+          185
+        ],
+        [
+          0.2,
+          185
+        ],
+        [
+          0.225,
+          185
+        ],
+        [
+          0.25,
+          185
+        ],
+        [
+          0.275,
+          185
+        ],
+        [
+          0.3,
+          185
+        ],
+        [
+          0.325,
+          185
+        ],
+        [
+          0.35,
+          185
+        ],
+        [
+          0.375,
+          185
+        ],
+        [
+          0.4,
+          185
+        ],
+        [
+          0.425,
+          185
+        ],
+        [
+          0.45,
+          185
+        ],
+        [
+          0.475,
+          185
+        ],
+        [
+          0.5,
+          185
+        ],
+        [
+          0.525,
+          180
+        ],
+        [
+          0.55,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 64,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.584375,
+      "delta_star": 0.55,
+      "Delta": 5.992129724,
+      "closed_form": null,
+      "floor_L0": 0.211640212,
+      "floor_L_star": 6.031746032,
+      "floor_inflation": 28.499999952750002,
+      "honest_refusal": 0.56875,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          200
+        ],
+        [
+          0.025,
+          200
+        ],
+        [
+          0.05,
+          200
+        ],
+        [
+          0.075,
+          200
+        ],
+        [
+          0.1,
+          200
+        ],
+        [
+          0.125,
+          200
+        ],
+        [
+          0.15,
+          200
+        ],
+        [
+          0.175,
+          200
+        ],
+        [
+          0.2,
+          200
+        ],
+        [
+          0.225,
+          200
+        ],
+        [
+          0.25,
+          200
+        ],
+        [
+          0.275,
+          200
+        ],
+        [
+          0.3,
+          200
+        ],
+        [
+          0.325,
+          200
+        ],
+        [
+          0.35,
+          200
+        ],
+        [
+          0.375,
+          200
+        ],
+        [
+          0.4,
+          200
+        ],
+        [
+          0.425,
+          200
+        ],
+        [
+          0.45,
+          200
+        ],
+        [
+          0.475,
+          200
+        ],
+        [
+          0.5,
+          195
+        ],
+        [
+          0.525,
+          195
+        ],
+        [
+          0.55,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 512,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.598046875,
+      "delta_star": 0.295,
+      "Delta": 5.179497373,
+      "closed_form": 0.5925374707333081,
+      "floor_L0": 0.026092629,
+      "floor_L_star": 0.089185461,
+      "floor_inflation": 3.4180327708641394,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          175
+        ],
+        [
+          0.025,
+          175
+        ],
+        [
+          0.05,
+          175
+        ],
+        [
+          0.075,
+          175
+        ],
+        [
+          0.1,
+          175
+        ],
+        [
+          0.125,
+          175
+        ],
+        [
+          0.15,
+          175
+        ],
+        [
+          0.175,
+          175
+        ],
+        [
+          0.2,
+          175
+        ],
+        [
+          0.225,
+          175
+        ],
+        [
+          0.25,
+          175
+        ],
+        [
+          0.275,
+          175
+        ],
+        [
+          0.3,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 512,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 5.996955517,
+      "closed_form": null,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": true,
+      "note": "INFEASIBLE: no delta below the ceiling was safe",
+      "curve": [
+        [
+          0.0,
+          195
+        ],
+        [
+          0.025,
+          195
+        ],
+        [
+          0.05,
+          195
+        ],
+        [
+          0.075,
+          195
+        ],
+        [
+          0.1,
+          195
+        ],
+        [
+          0.125,
+          195
+        ],
+        [
+          0.15,
+          195
+        ],
+        [
+          0.175,
+          195
+        ],
+        [
+          0.2,
+          195
+        ],
+        [
+          0.225,
+          195
+        ],
+        [
+          0.25,
+          195
+        ],
+        [
+          0.275,
+          195
+        ],
+        [
+          0.3,
+          195
+        ],
+        [
+          0.325,
+          195
+        ],
+        [
+          0.35,
+          195
+        ],
+        [
+          0.375,
+          195
+        ],
+        [
+          0.4,
+          195
+        ],
+        [
+          0.425,
+          195
+        ],
+        [
+          0.45,
+          195
+        ],
+        [
+          0.475,
+          195
+        ],
+        [
+          0.5,
+          195
+        ],
+        [
+          0.525,
+          195
+        ],
+        [
+          0.55,
+          195
+        ],
+        [
+          0.575,
+          195
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 512,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.598046875,
+      "delta_star": 0.48,
+      "Delta": 5.691472258,
+      "closed_form": 0.5932011539235322,
+      "floor_L0": 0.026092629,
+      "floor_L_star": 0.287018918,
+      "floor_inflation": 10.999999961675002,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          175
+        ],
+        [
+          0.025,
+          175
+        ],
+        [
+          0.05,
+          175
+        ],
+        [
+          0.075,
+          175
+        ],
+        [
+          0.1,
+          175
+        ],
+        [
+          0.125,
+          175
+        ],
+        [
+          0.15,
+          175
+        ],
+        [
+          0.175,
+          175
+        ],
+        [
+          0.2,
+          175
+        ],
+        [
+          0.225,
+          175
+        ],
+        [
+          0.25,
+          175
+        ],
+        [
+          0.275,
+          175
+        ],
+        [
+          0.3,
+          175
+        ],
+        [
+          0.325,
+          175
+        ],
+        [
+          0.35,
+          175
+        ],
+        [
+          0.375,
+          175
+        ],
+        [
+          0.4,
+          175
+        ],
+        [
+          0.425,
+          175
+        ],
+        [
+          0.45,
+          175
+        ],
+        [
+          0.475,
+          175
+        ],
+        [
+          0.5,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 512,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 5.998986961,
+      "closed_form": null,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": true,
+      "note": "INFEASIBLE: no delta below the ceiling was safe",
+      "curve": [
+        [
+          0.0,
+          195
+        ],
+        [
+          0.025,
+          195
+        ],
+        [
+          0.05,
+          195
+        ],
+        [
+          0.075,
+          195
+        ],
+        [
+          0.1,
+          195
+        ],
+        [
+          0.125,
+          195
+        ],
+        [
+          0.15,
+          195
+        ],
+        [
+          0.175,
+          195
+        ],
+        [
+          0.2,
+          195
+        ],
+        [
+          0.225,
+          195
+        ],
+        [
+          0.25,
+          195
+        ],
+        [
+          0.275,
+          195
+        ],
+        [
+          0.3,
+          195
+        ],
+        [
+          0.325,
+          195
+        ],
+        [
+          0.35,
+          195
+        ],
+        [
+          0.375,
+          195
+        ],
+        [
+          0.4,
+          195
+        ],
+        [
+          0.425,
+          195
+        ],
+        [
+          0.45,
+          195
+        ],
+        [
+          0.475,
+          195
+        ],
+        [
+          0.5,
+          195
+        ],
+        [
+          0.525,
+          195
+        ],
+        [
+          0.55,
+          195
+        ],
+        [
+          0.575,
+          195
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 512,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 5.951575161,
+      "closed_form": 0.5934950639126659,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": true,
+      "note": "INFEASIBLE: no delta below the ceiling was safe",
+      "curve": [
+        [
+          0.0,
+          175
+        ],
+        [
+          0.025,
+          175
+        ],
+        [
+          0.05,
+          175
+        ],
+        [
+          0.075,
+          175
+        ],
+        [
+          0.1,
+          175
+        ],
+        [
+          0.125,
+          175
+        ],
+        [
+          0.15,
+          175
+        ],
+        [
+          0.175,
+          175
+        ],
+        [
+          0.2,
+          175
+        ],
+        [
+          0.225,
+          175
+        ],
+        [
+          0.25,
+          175
+        ],
+        [
+          0.275,
+          175
+        ],
+        [
+          0.3,
+          175
+        ],
+        [
+          0.325,
+          175
+        ],
+        [
+          0.35,
+          175
+        ],
+        [
+          0.375,
+          175
+        ],
+        [
+          0.4,
+          175
+        ],
+        [
+          0.425,
+          175
+        ],
+        [
+          0.45,
+          175
+        ],
+        [
+          0.475,
+          175
+        ],
+        [
+          0.5,
+          175
+        ],
+        [
+          0.525,
+          175
+        ],
+        [
+          0.55,
+          175
+        ],
+        [
+          0.575,
+          175
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_FRACTION",
+      "M": 512,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 5.99911008,
+      "closed_form": null,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": true,
+      "note": "INFEASIBLE: no delta below the ceiling was safe",
+      "curve": [
+        [
+          0.0,
+          195
+        ],
+        [
+          0.025,
+          195
+        ],
+        [
+          0.05,
+          195
+        ],
+        [
+          0.075,
+          195
+        ],
+        [
+          0.1,
+          195
+        ],
+        [
+          0.125,
+          195
+        ],
+        [
+          0.15,
+          195
+        ],
+        [
+          0.175,
+          195
+        ],
+        [
+          0.2,
+          195
+        ],
+        [
+          0.225,
+          195
+        ],
+        [
+          0.25,
+          195
+        ],
+        [
+          0.275,
+          195
+        ],
+        [
+          0.3,
+          195
+        ],
+        [
+          0.325,
+          195
+        ],
+        [
+          0.35,
+          195
+        ],
+        [
+          0.375,
+          195
+        ],
+        [
+          0.4,
+          195
+        ],
+        [
+          0.425,
+          195
+        ],
+        [
+          0.45,
+          195
+        ],
+        [
+          0.475,
+          195
+        ],
+        [
+          0.5,
+          195
+        ],
+        [
+          0.525,
+          195
+        ],
+        [
+          0.55,
+          195
+        ],
+        [
+          0.575,
+          195
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 2,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": 0.0,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 2,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": null,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 2,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": 0.0,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 2,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": null,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 2,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": 0.0,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 2,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.1,
+      "delta_star": null,
+      "Delta": 0.0,
+      "closed_form": null,
+      "floor_L0": 13.333333334,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 8,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.475,
+      "delta_star": null,
+      "Delta": 2.541666667,
+      "closed_form": 0.20880195600807425,
+      "floor_L0": 1.904761905,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 8,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.475,
+      "delta_star": 0.185,
+      "Delta": 5.474173999,
+      "closed_form": null,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 4.027538727,
+      "floor_inflation": 2.1144578314106925,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          183
+        ],
+        [
+          0.025,
+          183
+        ],
+        [
+          0.05,
+          183
+        ],
+        [
+          0.075,
+          183
+        ],
+        [
+          0.1,
+          183
+        ],
+        [
+          0.125,
+          146
+        ],
+        [
+          0.15,
+          111
+        ],
+        [
+          0.175,
+          111
+        ],
+        [
+          0.2,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 8,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.475,
+      "delta_star": 0.08,
+      "Delta": 3.652282715,
+      "closed_form": 0.2604374617293548,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 2.637362638,
+      "floor_inflation": 1.3846153847769231,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          182
+        ],
+        [
+          0.025,
+          182
+        ],
+        [
+          0.05,
+          179
+        ],
+        [
+          0.075,
+          36
+        ],
+        [
+          0.1,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 8,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.475,
+      "delta_star": 0.22,
+      "Delta": 5.894089579,
+      "closed_form": null,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 4.661654136,
+      "floor_inflation": 2.447368421094079,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          183
+        ],
+        [
+          0.025,
+          183
+        ],
+        [
+          0.05,
+          183
+        ],
+        [
+          0.075,
+          183
+        ],
+        [
+          0.1,
+          183
+        ],
+        [
+          0.125,
+          183
+        ],
+        [
+          0.15,
+          183
+        ],
+        [
+          0.175,
+          183
+        ],
+        [
+          0.2,
+          183
+        ],
+        [
+          0.225,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 8,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.475,
+      "delta_star": 0.165,
+      "Delta": 4.641926666,
+      "closed_form": 0.2961724719283438,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 3.711001643,
+      "floor_inflation": 1.9482758623314655,
+      "honest_refusal": 0.0,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          182
+        ],
+        [
+          0.025,
+          182
+        ],
+        [
+          0.05,
+          180
+        ],
+        [
+          0.075,
+          179
+        ],
+        [
+          0.1,
+          179
+        ],
+        [
+          0.125,
+          179
+        ],
+        [
+          0.15,
+          175
+        ],
+        [
+          0.175,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 8,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.475,
+      "delta_star": 0.24,
+      "Delta": 5.987495465,
+      "closed_form": null,
+      "floor_L0": 1.904761905,
+      "floor_L_star": 5.07936508,
+      "floor_inflation": 2.6666666666666665,
+      "honest_refusal": 0.0016666666666666668,
+      "reachable": true,
+      "note": null,
+      "curve": [
+        [
+          0.0,
+          183
+        ],
+        [
+          0.025,
+          183
+        ],
+        [
+          0.05,
+          183
+        ],
+        [
+          0.075,
+          183
+        ],
+        [
+          0.1,
+          183
+        ],
+        [
+          0.125,
+          183
+        ],
+        [
+          0.15,
+          183
+        ],
+        [
+          0.175,
+          183
+        ],
+        [
+          0.2,
+          183
+        ],
+        [
+          0.225,
+          182
+        ],
+        [
+          0.25,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 64,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.584375,
+      "delta_star": null,
+      "Delta": 0.448951722,
+      "closed_form": 0.2754157897974233,
+      "floor_L0": 0.211640212,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 64,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.584375,
+      "delta_star": null,
+      "Delta": 1.611080046,
+      "closed_form": null,
+      "floor_L0": 0.211640212,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 64,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.584375,
+      "delta_star": null,
+      "Delta": 0.705112576,
+      "closed_form": 0.34278322264738903,
+      "floor_L0": 0.211640212,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 64,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.584375,
+      "delta_star": null,
+      "Delta": 2.366839651,
+      "closed_form": null,
+      "floor_L0": 0.211640212,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 64,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.584375,
+      "delta_star": null,
+      "Delta": 1.182517079,
+      "closed_form": 0.414526144182041,
+      "floor_L0": 0.211640212,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 64,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.584375,
+      "delta_star": null,
+      "Delta": 3.510349543,
+      "closed_form": null,
+      "floor_L0": 0.211640212,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 512,
+      "eps": 1,
+      "n": 1,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 0.058281377,
+      "closed_form": 0.2831187050444349,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 512,
+      "eps": 1,
+      "n": 4,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 0.229879794,
+      "closed_form": null,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 512,
+      "eps": 2,
+      "n": 1,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 0.093028182,
+      "closed_form": 0.35269174733755604,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 512,
+      "eps": 2,
+      "n": 4,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 0.36367366,
+      "closed_form": null,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 512,
+      "eps": 4,
+      "n": 1,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 0.161913387,
+      "closed_form": 0.4276917814645635,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    },
+    {
+      "activity": "FIXED_COUNT",
+      "M": 512,
+      "eps": 4,
+      "n": 4,
+      "ceiling": 0.598046875,
+      "delta_star": null,
+      "Delta": 0.622026346,
+      "closed_form": null,
+      "floor_L0": 0.026092629,
+      "floor_L_star": null,
+      "floor_inflation": null,
+      "honest_refusal": null,
+      "reachable": false,
+      "note": "attack unreachable at delta=0; delta* undefined",
+      "curve": [
+        [
+          0.0,
+          0
+        ]
+      ]
+    }
+  ]
+}

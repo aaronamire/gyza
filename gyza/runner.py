@@ -31,6 +31,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import random
 import threading
 import time
 import traceback
@@ -42,7 +43,7 @@ from typing import Any, Callable
 import blake3
 import numpy as np
 
-from gyza.blackboard import Blackboard
+from gyza.blackboard import Blackboard, ClaimLostError
 from gyza.containment.projection import AuthorityViolation
 from gyza.demand import LSHIndex
 from gyza.drift import SpecializationTracker
@@ -55,6 +56,26 @@ from gyza.schema import Artifact, HLC, WorkItem
 # Production entry points set this True (or pass require_enforcement=True);
 # unit tests with mock executors leave it False. Moves into the signed guard
 # configuration (C-8) once that trust domain exists.
+#: The window `action_rate_cap` is measured over. A RATE needs two numbers and
+#: the manifest declares one, so the second lives here as a constant.
+#:
+#: DELIBERATELY NOT READ FROM THE MANIFEST. A principal that could widen its own
+#: window could restore the lifetime-quota semantics this replaced, or erase the
+#: cap entirely by declaring a window longer than the deployment. The window is
+#: a property of the enforcement, not of the grant.
+#: Hard ceiling on task-decomposition depth. Distinct from
+#: MAX_DELEGATION_DEPTH (which bounds AUTHORITY hops) because this bounds
+#: WORK hops -- an agent may decompose without delegating any authority --
+#: but it is the same hazard, unbounded recursion, so it gets its own
+#: explicit constant rather than silently reusing the other one.
+MAX_TASK_DEPTH = 3
+
+SELECTION_TIE_EPSILON = 1e-3
+#: Candidates fetched per poll. Bounds O(backlog) work per agent per poll.
+POLL_CANDIDATES = 128
+
+RATE_WINDOW_NS = 3600 * 1_000_000_000   # one hour
+
 REQUIRE_ENFORCEMENT_DEFAULT = False
 
 
@@ -110,6 +131,7 @@ class AgentRunner:
         review_queue=None,
         harm_registry=None,
         cadence_origin_ns: int = 0,
+        rate_window_ns: int = RATE_WINDOW_NS,
     ):
         # BUILD_PLAN E2 — the fail-open gate.
         #
@@ -126,10 +148,27 @@ class AgentRunner:
         #
         # The default is deliberately NOT flipped here: 18 test files drive the
         # runner with non-sandboxing executors, and flipping it silently would
-        # convert a security decision into test churn. Production entry points
-        # set it True explicitly. When C-8 (guard configuration in a separate
-        # trust domain) lands, this policy moves there and stops being a
-        # constructor argument at all.
+        # convert a security decision into test churn.
+        #
+        # "Production entry points set it True explicitly" WAS FALSE FROM THE
+        # DAY THIS COMMENT WAS WRITTEN UNTIL 2026-08-21. `require_enforcement`
+        # appeared nowhere in gyza/ outside this file, so the bounds-proof
+        # requirement rested entirely on every executor branch in `cli.py`
+        # happening to sandbox -- true, and enforced by nothing. A fourth branch
+        # added without a sandbox would have signed envelopes carrying no
+        # bounds-proof, silently.
+        #
+        # It is now supplied by `run_local_task` as `_built_sandboxed`, tied to
+        # the branch that already refuses to run without bubblewrap, so the
+        # guarantee is structural there. It is NOT unconditional: an injected
+        # executor stamps no record, and refusing those is what would have made
+        # this test churn.
+        #
+        # `tests/test_declared_is_wired.py` now DERIVES the guard-consumer list
+        # from constructor signatures instead of holding three literals, which
+        # is how this parameter walked past the check that exists to catch
+        # exactly it. When C-8 (guard configuration in a separate trust domain)
+        # lands, this policy moves there and stops being a constructor argument.
         self._require_enforcement = (
             REQUIRE_ENFORCEMENT_DEFAULT if require_enforcement is None
             else bool(require_enforcement)
@@ -146,6 +185,14 @@ class AgentRunner:
         self._review_queue = review_queue
         self._harm_registry = harm_registry
         self._cadence_origin_ns = int(cadence_origin_ns)
+        # Injectable so tests can exercise the window without sleeping an hour.
+        # A non-positive window would make the rate cap unenforceable by making
+        # the lookback empty, so it is rejected rather than silently ignored.
+        if int(rate_window_ns) <= 0:
+            raise ValueError(
+                f"rate_window_ns must be positive, got {rate_window_ns}; a "
+                f"non-positive window disables the rate cap silently")
+        self._rate_window_ns = int(rate_window_ns)
         self._bb = blackboard
         self._mem = memory
         self._spec = specialization
@@ -257,8 +304,23 @@ class AgentRunner:
         tier = int(self._identity.manifest.get("attestation_tier", 0))
         while not self._stop.is_set():
             try:
+                # REAP BEFORE POLLING. A claim is a lease, and a runner that
+                # died holding one leaked its item permanently -- there is
+                # exactly one caller of `release_claim` (the in-process failure
+                # path below), and `get_unclaimed`'s TTL filter only applies to
+                # rows that are already unclaimed.
+                #
+                # WIRED HERE RATHER THAN IN A SWEEPER because a sweeper is one
+                # more thing that must be constructed, and this file's own
+                # history is a list of mechanisms that existed and were never
+                # called. Every live runner reaps for every dead one, so the
+                # recovery path cannot be left unwired without also leaving the
+                # work loop unwired. The write is cheap and happens once per
+                # poll, against a 305 ms action.
+                self._bb.reclaim_expired_claims()
                 items = self._bb.get_unclaimed(
                     min_reward=self._min_reward, tier=tier,
+                    limit=POLL_CANDIDATES,
                 )
             except Exception:
                 time.sleep(self._poll_s)
@@ -296,6 +358,8 @@ class AgentRunner:
             try:
                 claimed = self._bb.try_claim(
                     best_item.id, self._identity.agent_id, self._hlc,
+                    claimant_tier=int(
+                        self._identity.manifest.get("attestation_tier", 0)),
                 )
             except Exception:
                 # Transient DB failure — back off briefly.
@@ -397,16 +461,146 @@ class AgentRunner:
             return False
         return True
 
+    # ------------------------------------------------------------------
+    # Decomposition — the producer side of the work DAG
+    # ------------------------------------------------------------------
+    def _spawn_subtasks(self, parent: WorkItem,
+                        specs: list[dict]) -> list[str]:
+        """Post child work items for `parent`, bounded by the SIGNED manifest.
+
+        Until now nothing in `gyza/` ever wrote a non-None `parent_id`: the
+        work-DAG edge was schema'd, indexed, gossiped and deserialized, and no
+        producer existed. This is that producer.
+
+        THE BOUNDS COME FROM THE MANIFEST, NOT FROM THIS FILE.
+        `spawn.permitted` and `spawn.resource_budget.max_children` have been in
+        the compositor-signed manifest since identity.py and had NO consumer
+        anywhere -- declared authority that bound nothing. They are the
+        fork-bomb bound, and this is the first code to read them, so a
+        decomposition is now attenuated by the same signed authority that
+        bounds every other capability.
+
+        Refusals are RuntimeErrors and therefore reach the same place a bounds
+        violation does: no envelope is produced, so a signed envelope continues
+        to imply the action stayed inside its grant.
+        """
+        if not specs:
+            return []
+        cap = self._manifest_max_children()
+        if cap <= 0:
+            raise RuntimeError(
+                f"refusing to decompose {parent.id}: this agent's manifest "
+                f"grants no spawn authority (max_children={cap})")
+        if len(specs) > cap:
+            raise RuntimeError(
+                f"refusing to decompose {parent.id} into {len(specs)} "
+                f"subtasks: the manifest caps children at {cap}")
+
+        depth = self._bb.lineage_depth(parent.id)
+        if depth + 1 > MAX_TASK_DEPTH:
+            # Termination.DEPTH_CAP_REACHED -- an explicit reason, not a
+            # timeout. A task that ends without a recorded reason cannot be
+            # audited (gyza/coordination/task.py).
+            raise RuntimeError(
+                f"refusing to decompose {parent.id}: depth {depth + 1} "
+                f"exceeds MAX_TASK_DEPTH={MAX_TASK_DEPTH} "
+                f"(DEPTH_CAP_REACHED)")
+
+        made: list[str] = []
+        combine_id: str | None = None
+        for sp in specs:
+            emb = sp.get("embedding")
+            if emb is None:
+                emb = np.array(parent.desc_embedding, dtype=np.float32)
+            child = WorkItem(
+                id=str(uuid.uuid7()),
+                lineage_root=parent.lineage_root,
+                parent_id=parent.id,
+                description=str(sp.get("description", "subtask")),
+                desc_embedding=np.asarray(emb, dtype=np.float32),
+                reward=float(sp.get("reward", parent.reward)),
+                reward_updated_ns=time.time_ns(),
+                # A child may never require a HIGHER tier than its parent:
+                # that would let a low-tier decomposer mint work only
+                # better-attested agents may take, manufacturing demand for
+                # authority it does not hold.
+                required_tier=min(int(sp.get("required_tier",
+                                             parent.required_tier)),
+                                  parent.required_tier),
+                input_hashes=list(sp.get("input_hashes", [])),
+                output_spec=self._child_output_spec(sp, parent),
+                streaming_ok=False, claimed_by=None, claimed_at_ns=None,
+                claim_hlc_l=0, claim_hlc_c=0, claim_hlc_node="",
+                completed_at_ns=None, output_hash=None,
+                icp_envelope_hash=None, success=None,
+                created_at_ns=time.time_ns(), ttl_ns=parent.ttl_ns)
+            self._bb.post_work_item(child)
+            made.append(child.id)
+            if child.output_spec.get("kind") == Blackboard.COMBINE_KIND:
+                combine_id = child.id
+        LOG.info("[runner] %s decomposed %s into %d subtask(s)",
+                 self._identity.agent_id[:8], parent.id[:14], len(made))
+        return made, combine_id
+
+    @staticmethod
+    def _child_output_spec(sp: dict, parent: WorkItem) -> dict:
+        """A combiner's `of` pointer is set by the RUNNER, never by the caller.
+
+        The dependency gate resolves siblings through `of`/`parent_id`; letting
+        an executor name a different parent would let it gate a combine on
+        someone else's children, or on none at all. It is the same rule as the
+        tier: the value a check depends on is not self-declared.
+        """
+        spec = dict(sp.get("output_spec", {"kind": "subtask"}))
+        if spec.get("kind") == Blackboard.COMBINE_KIND:
+            spec["of"] = parent.id
+        return spec
+
+    def _manifest_max_children(self) -> int:
+        spawn = (self._identity.manifest.get("capabilities", {})
+                 .get("spawn", {}) or {})
+        if not spawn.get("permitted"):
+            return 0
+        return int((spawn.get("resource_budget", {}) or {})
+                   .get("max_children", 0) or 0)
+
     def _score_items(self, items: list[WorkItem]) -> tuple[WorkItem, float]:
+        """Best-matching item for this agent, WITH TIES BROKEN AT RANDOM.
+
+        A strict argmax is the wrong rule for a shared queue. `get_unclaimed`
+        is deterministically ordered, so when several items score equally --
+        which is the normal case for homogeneous work, and the eventual case
+        for agents whose specializations have converged -- every agent's argmax
+        is the SAME row. Measured 2026-08-23: the claim win rate then falls as
+        1/N almost exactly (100%, 50.4%, 27.9%, 19.9%, 11.4% for 1..16 agents),
+        which is the algebraic signature of N agents contending for one row.
+
+        Randomising only among TIES, rather than sampling among the top-K, is
+        deliberate: where a genuine best exists this returns it and match
+        quality is unchanged, so the fix costs nothing in the case it is not
+        needed. It is a decorrelation of agents, not a weakening of selection.
+        """
         spec = self._spec.current
-        best = items[0]
-        best_score = _cosine(spec, best.desc_embedding)
-        for it in items[1:]:
-            s = _cosine(spec, it.desc_embedding)
-            if s > best_score:
-                best_score = s
-                best = it
-        return best, best_score
+        scored = [(_cosine(spec, it.desc_embedding), it) for it in items]
+        best_score = max(s for s, _ in scored)
+        tied = [it for s, it in scored
+                if s >= best_score - SELECTION_TIE_EPSILON]
+        if len(tied) == 1:
+            return tied[0], best_score
+        chosen = random.choice(tied)
+        # The CHOSEN item's own score, not the band's maximum: the caller
+        # compares it against `min_similarity_threshold`, and reporting the
+        # best score for a different item would admit work below the bar.
+        return chosen, _cosine(spec, chosen.desc_embedding)
+
+    @property
+    def authority_violations(self) -> list[AuthorityViolation]:
+        """H4's measurand, for a guard to project into `GyzaState`.
+
+        A copy: the list is append-only and the caller must not be able to
+        shorten the thing a bound is measured over.
+        """
+        return list(self._authority_violations)
 
     @property
     def authority_violations(self) -> list[AuthorityViolation]:
@@ -418,6 +612,37 @@ class AgentRunner:
         return list(self._authority_violations)
 
     def _gather_inputs(self, item: WorkItem) -> list[Artifact]:
+        # A COMBINER RESOLVES ITS SIBLINGS' OUTPUTS AT EXECUTE TIME.
+        #
+        # Its inputs cannot be declared when it is spawned -- the children have
+        # not run, so their output hashes do not exist yet. They are resolved
+        # here and written onto `item.input_hashes`, which is what `_complete`
+        # signs into the envelope. That is the point: the combine action's
+        # envelope then COMMITS to precisely which child outputs it consumed,
+        # so a verifier can check that a combination really used the children
+        # it claims to have used, rather than taking the combiner's word.
+        #
+        # The dependency gate in `get_unclaimed` guarantees every sibling has
+        # completed before this item is servable, so this cannot silently
+        # combine a partial result. It is re-checked here anyway, because the
+        # gate protects the POLLING path and an item reached any other way --
+        # gossip, a direct id, a reclaim -- has not passed through it.
+        spec = item.output_spec if isinstance(item.output_spec, dict) else {}
+        if spec.get("kind") == Blackboard.COMBINE_KIND and item.parent_id:
+            pending = self._bb.pending_siblings(item)
+            if pending:
+                raise RuntimeError(
+                    f"refusing to combine {item.id}: {len(pending)} sibling(s) "
+                    f"have not completed. Combining a partial result and "
+                    f"signing it would attest to a whole that does not exist."
+                )
+            resolved = [c.output_hash
+                        for c in self._bb.children_of(item.parent_id)
+                        if c.id != item.id and c.output_hash]
+            merged = list(item.input_hashes)
+            merged += [h for h in resolved if h not in merged]
+            item.input_hashes = merged
+
         out: list[Artifact] = []
         for h in item.input_hashes:
             a = self._bb.get_artifact(h)
@@ -425,7 +650,67 @@ class AgentRunner:
                 out.append(a)
         return out
 
+    def _attest_context(self, prompt: str) -> "str | None":
+        """Store the assembled context content-addressed; return its hash.
+
+        Returns None when no content-addressed store is attached, which is the
+        honest state for a runner with no CAS rather than a silent skip: the
+        caller then adds nothing to `input_hashes` and the envelope makes no
+        claim about context it cannot produce.
+        """
+        cas = getattr(self._bb, "_artifact_store", None)
+        if cas is None:
+            return None
+        try:
+            return cas.store(prompt.encode("utf-8"))
+        except Exception:                                    # noqa: BLE001
+            LOG.warning("context not attested", exc_info=True)
+            return None
+
+    def _require_attested_tier(self, item: WorkItem) -> None:
+        """Refuse work whose `required_tier` exceeds this agent's ATTESTED tier.
+
+        THE TIER IS A PRECONDITION, NOT A CAPABILITY. It was tempting to add it
+        to `CapabilitySpec` as a sixth attenuated dimension; that is a category
+        error and Arena 2's write-up records why. Attenuation is a CEILING on a
+        delegate (`child <= parent`), and the hazard here is a FLOOR on the
+        executor (`granted >= required`). The two constrain different things at
+        different moments, and the attenuated form would have refused the SAFE
+        direction -- a tier-1 agent subcontracting to a better-attested tier-3
+        agent -- while permitting the actual hazard, a tier-3 agent handing
+        tier-3 work to a tier-0 one. `CapabilitySpec` also projects from a
+        bubblewrap enforcement record, which has no notion of attestation at
+        all, so the sixth dimension would be undefined for one of its three
+        sources.
+
+        REFUSED BEFORE THE WORK RUNS, which is strictly better than the bounds
+        gate below can manage. That gate can only withhold the signature after
+        the fact -- "the work ALREADY RAN outside its declared bounds" -- but a
+        tier is knowable from the manifest and the item alone, so high-tier work
+        is never executed, and its inputs are never even read.
+
+        NOT recorded as an H4 authority violation. H4 counts executed actions
+        whose enforcement exceeded the manifest; nothing ran here, and widening
+        H4 to cover refusals would break the property that makes it the one real
+        harm class -- a benign rate of exactly 0.000.
+
+        The absent-tier default is 0, so a manifest that does not declare a tier
+        can only take tier-0 work. "I did not say" fails closed, as it does for
+        the enforcement record.
+        """
+        granted = int(self._identity.manifest.get("attestation_tier", 0))
+        required = int(getattr(item, "required_tier", 0) or 0)
+        if required > granted:
+            raise RuntimeError(
+                f"refusing to execute {item.id}: it requires attestation tier "
+                f"{required} and this agent is attested at tier {granted}. The "
+                f"tier is a precondition on the executor, not an attenuated "
+                f"capability."
+            )
+
     def _execute(self, item: WorkItem) -> dict[str, Any]:
+        # BEFORE anything else, including reading the inputs.
+        self._require_attested_tier(item)
         t0 = time.monotonic_ns()
         inputs = self._gather_inputs(item)
 
@@ -435,6 +720,27 @@ class AgentRunner:
             current_task=item.description,
             max_episodes=5,
         )
+        # ATTESTED CONTEXT. `build_enriched_prompt` injects up to five
+        # RETRIEVED EPISODES into this prompt, and until now nothing signed
+        # covered them: the envelope's `input_hashes` commits to the work
+        # item's DECLARED inputs only, so the system could not prove what
+        # context produced an output. An inference-time control action that
+        # cannot be shown to the verifier is applied, not auditable.
+        #
+        # The assembled prompt is stored content-addressed and its hash joins
+        # `input_hashes`, which is DELIBERATELY ADDITIVE (icp.py's DAG note):
+        # no schema change, no re-signing, and the Rust byte-parity fixtures
+        # are untouched. It creates no spurious DAG edge either -- a data
+        # dependency edge forms only when an input hash matches another
+        # envelope's `output_hash`, and an artifact hash never does.
+        #
+        # SCOPE, stated rather than implied: this attests what the RUNNER
+        # assembled and handed to the executor. An executor that further
+        # transforms the prompt -- `make_anthropic_executor` inlines artifact
+        # contents -- is not covered by this hash. Closing that requires the
+        # executor to report its final payload and is the next step, not this
+        # one.
+        context_hash = self._attest_context(prompt)
         context = {"item": item, "inputs": inputs}
         raw = self._executor(prompt, context)
 
@@ -492,6 +798,69 @@ class AgentRunner:
                     f"consistent with the agent manifest: {why}"
                 )
 
+        # THE RATE CAP, ENFORCED AT THE SERIALIZATION POINT C7 REQUIRES.
+        #
+        # R-M1 measured that a cross-principal aggregate is boundable by local
+        # checks exactly when concurrent activity per principal is bounded. A2
+        # then measured that the bound is a COMPLIANCE ASSUMPTION unless that
+        # limit is ENFORCED: one principal ignoring it breaks the aggregate at
+        # every scale. R-B measured the tolerable non-compliance at ~1.6 per
+        # cluster, so the quantity to bound is PER-PRINCIPAL rate.
+        #
+        # IT IS A RATE, AND UNTIL 2026-08-21 IT WAS A LIFETIME QUOTA.
+        #
+        # This block counted envelopes since `_cadence_origin_ns`, which
+        # `default_cadence_wiring` pins at GENESIS and documents as immovable.
+        # So `used` was every envelope the agent had ever signed, compared
+        # against a number called a rate: an agent granted `action_rate_cap:
+        # 1000` was PERMANENTLY REFUSED at its 1000th action, for the rest of
+        # its life, with no way back.
+        #
+        # The justification three paragraphs up is what makes that wrong rather
+        # than merely misnamed. R-M1/A2/R-B establish that a cross-principal
+        # aggregate is boundable when PER-PRINCIPAL RATE is bounded. A lifetime
+        # quota does not bound rate at all -- an agent may spend the whole
+        # budget in one second and then stop -- so the aggregate argument the
+        # dimension exists to serve did not go through.
+        #
+        # Found by R-EVID's drift criterion (research/evidence/THEOREMS_C.md):
+        # benign rate is 1 envelope per action, so the fold had positive drift
+        # with no compensation and was a TIMER with false-alarm probability 1.
+        #
+        # THE WINDOW ORIGIN ADVANCES WITH THE WALL CLOCK AND NOTHING ELSE.
+        # That is what separates it from ledger artifact #13, where a gate
+        # measured from a checkpoint the AGENT could advance by acting and so
+        # bought unlimited drain. Here no action moves the origin: an agent
+        # cannot buy budget by working, only by waiting. `_rate_window_ns` is
+        # not read from the manifest for the same reason -- a principal that
+        # could widen its own window could restore the quota semantics.
+        #
+        # A cumulative bound needs a serialization point (C7), and signing is
+        # this agent's: it is inside its own loop and every action passes it.
+        # The count is folded from the append-only envelope log, per agent --
+        # a node-wide count would let one busy agent exhaust everyone's budget.
+        #
+        # REFUSING TO SIGN DOES NOT UN-RUN THE WORK, exactly as with the
+        # authority gate above. What it withholds is the attestation.
+        from gyza.economy.delegation import spec_from_manifest
+        rate_cap = spec_from_manifest(self._identity.manifest).rate_cap
+        if rate_cap is not None:
+            window_start = max(0, time.time_ns() - self._rate_window_ns)
+            used = self._bb.count_agent_envelopes_since(
+                self._identity.agent_id, window_start)
+            if used >= rate_cap:
+                self._authority_violations.append(AuthorityViolation(
+                    action_id=item.id, agent_pubkey=self._identity.agent_id,
+                    reason=(f"action rate cap {rate_cap} reached "
+                            f"({used} signed in the last "
+                            f"{self._rate_window_ns // 1_000_000_000}s)"),
+                    at_ns=time.time_ns(),
+                ))
+                raise RuntimeError(
+                    f"refusing to sign — this agent has signed {used} actions "
+                    f"in the last {self._rate_window_ns // 1_000_000_000}s "
+                    f"against a declared rate cap of {rate_cap}")
+
         # Canonical JSON for the output so the BLAKE3 hash is stable
         # across runs / processes. When an enforcement record is
         # present we fold it into the artifact so the envelope's
@@ -501,8 +870,32 @@ class AgentRunner:
         artifact_obj: dict = {"text": raw.get("text", "")}
         if enforcement is not None:
             artifact_obj["__enforcement__"] = enforcement
+
+        # DECOMPOSITION IS AN ORDINARY SIGNED ACTION. An executor asks for one
+        # by returning `__subtasks__`, exactly as the sandbox wrapper stamps
+        # `__enforcement__`. The child ids are folded into the artifact, so the
+        # envelope's output_hash COMMITS to the decomposition: who split this
+        # task, under which manifest, into precisely which children, is
+        # signed and offline-verifiable. No new envelope type, no schema
+        # change, and the DAG's shape becomes as accountable as its actions.
+        #
+        # Spawned BEFORE the artifact is hashed, and a refusal raises, so an
+        # over-wide decomposition produces no envelope at all.
+        subtasks = raw.get("__subtasks__")
+        if subtasks:
+            made, combine_id = self._spawn_subtasks(item, list(subtasks))
+            artifact_obj["__subtasks__"] = made
+            # WHICH child combines is recorded IN THE SIGNED BYTES. It lives on
+            # the work item's `output_spec`, which no envelope carries, so a
+            # third party holding only a bundle could not otherwise tell which
+            # action was supposed to gather the others -- and therefore could
+            # not check that a combination used ALL of its siblings. Putting
+            # the identity of the combiner under the signature is what makes
+            # that property verifiable at all.
+            if combine_id:
+                artifact_obj["__combine__"] = combine_id
         canonical = json.dumps(
-            artifact_obj, sort_keys=True, separators=(",", ":"),
+            artifact_obj, sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")
         output_hash = blake3.blake3(canonical).hexdigest()
 
@@ -541,6 +934,7 @@ class AgentRunner:
 
         duration_ms = max(1, (time.monotonic_ns() - t0) // 1_000_000)
         return {
+            "context_hash": context_hash,
             "output": raw.get("text", ""),
             "output_hash": output_hash,
             "duration_ms": int(duration_ms),
@@ -619,7 +1013,7 @@ class AgentRunner:
         # zero-hash placeholder if the item carried none.
         if result is None:
             err_payload = json.dumps(
-                {"error": error}, sort_keys=True, separators=(",", ":"),
+                {"error": error}, sort_keys=True, separators=(",", ":"), allow_nan=False,
             ).encode("utf-8")
             output_hash = blake3.blake3(err_payload).hexdigest()
             duration_ms = 0
@@ -638,9 +1032,15 @@ class AgentRunner:
         # ICP envelope. parent_envelope is this agent's previous envelope
         # — the per-agent local chain. (Cross-agent chains are stitched
         # by a future indexer that walks parent_envelope_hash links.)
-        input_hashes = item.input_hashes if item.input_hashes else [
+        input_hashes = list(item.input_hashes) if item.input_hashes else [
             "00" * 32  # placeholder for "read nothing", keeps verify_chain happy
         ]
+        # The attested context joins the declared inputs. It is appended, never
+        # substituted: a verifier must still see everything the work item
+        # declared, and the context is an ADDITIONAL input to the inference.
+        _ctx = result.get("context_hash")
+        if _ctx and _ctx not in input_hashes:
+            input_hashes.append(_ctx)
         envelope = self._signer.sign_action(
             intent_id=item.lineage_root,
             action_id=item.id,
@@ -685,6 +1085,10 @@ class AgentRunner:
         if self._review_queue is not None:
             try:
                 from gyza.containment.review import check_cadence
+                # `_harm_registry` here is the CADENCE INTERVAL since H6's
+                # retirement; check_cadence accepts an int or a legacy registry
+                # and resolves either, so a stale caller degrades to the old
+                # lookup rather than silently disabling the cadence.
                 check_cadence(self._review_queue, self._harm_registry,
                               self._bb.count_envelopes_since(
                                   self._cadence_origin_ns))
@@ -716,14 +1120,46 @@ class AgentRunner:
             except Exception:
                 pass
 
-        # Mark the work item complete on the blackboard.
+        # Mark the work item complete on the blackboard, AS ITS OWNER.
+        #
+        # `expected_owner` refuses a completion by anyone who does not hold the
+        # claim. It matters now that claims are LEASES: a runner slower than
+        # the lease could otherwise overwrite the result of whoever
+        # legitimately reclaimed its item, silently and last-write-wins.
         try:
             self._bb.complete_work_item(
                 item.id, output_hash, envelope_hash, success, self._hlc,
+                expected_owner=self._identity.agent_id,
             )
-        except Exception:
-            pass  # DB write is best-effort; the signed envelope is the
-                  # source of truth.
+        except ClaimLostError:
+            # NOT SWALLOWED WITH THE REST. Every other failure here is a
+            # storage problem and the signed envelope remains the source of
+            # truth. THIS one says another runner now owns the item, which
+            # means the work was done twice -- an operational fact, and the
+            # only signal that the lease is mis-sized for this workload.
+            # Logging it costs nothing when it never happens.
+            LOG.warning(
+                "[runner] completed %s but its lease had expired and another "
+                "runner holds it; the envelope stands and the board row does "
+                "not. If this recurs, CLAIM_LEASE_NS is too short for this "
+                "workload.", item.id[:16])
+        except (TypeError, AttributeError):
+            # A SIGNATURE MISMATCH IS NOT A STORAGE FAILURE, and treating it as
+            # one is how a networked deployment lost EVERY completion in
+            # silence: `NetworkBlackboard.complete_work_item` dropped
+            # `expected_owner`, the resulting TypeError landed here, and
+            # "best-effort" made a permanent programming error look exactly
+            # like a transient disk hiccup. These two are bugs in this process
+            # and must fail loudly; the outer handler releases the claim so the
+            # item is not stranded.
+            raise
+        except Exception as exc:                                # noqa: BLE001
+            # Still best-effort -- the signed envelope IS the source of truth
+            # for a genuine storage failure -- but NEVER silent. An invisible
+            # best-effort write is indistinguishable from one that worked.
+            LOG.warning("[runner] completion of %s did not reach the board "
+                        "(%s: %s); the signed envelope stands",
+                        item.id[:16], type(exc).__name__, exc)
 
         # Write an episode and drift the specialization vector.
         try:
@@ -766,82 +1202,22 @@ class AgentRunner:
 # Executors
 # ---------------------------------------------------------------------------
 
-def make_mock_executor(response: str = "mock output") -> Callable[[str, dict], dict]:
-    def _executor(_prompt: str, _context: dict) -> dict:
-        return {
-            "text": response,
-            "tokens_in": 10,
-            "tokens_out": 5,
-            "model_identifier": "mock",
-            "inference_backend": "mock",
-        }
-    return _executor
-
-
-def make_command_executor(
-    argv: list[str],
-    max_output_bytes: int = 1_000_000,
-    cwd: str | None = None,
-) -> Callable[[str, dict], dict]:
-    """
-    Run one arbitrary command as the agent's action — the `gyza exec`
-    executor. Designed to be instantiated INSIDE the sandbox (via
-    ``make_sandboxed_executor``), so the child process inherits the
-    sandbox's namespaces and rlimits: bwrap's mount/net isolation and
-    RLIMIT_AS/RLIMIT_CPU apply to the command, not just to this wrapper.
-
-    The command line itself is folded into the artifact text (the
-    ``$ ...`` header), so the signed ``output_hash`` commits to WHAT ran,
-    not just what it printed. A non-zero exit raises — surfacing as an
-    execution failure so no envelope is signed: a valid signed envelope
-    keeps implying completed, bounded work.
-
-    ``argv[0]`` should be an absolute path (the sandbox has a fresh
-    environment; the CLI resolves it host-side before entering).
-
-    ``cwd`` is the directory to run the command in. It must be a path
-    that is visible (bound) inside the sandbox — the CLI passes the host
-    working directory only when that directory is among the granted
-    paths, so a relative-path command (``cat notes.txt``) works exactly
-    where the user launched it. ``None`` runs in the fresh /workspace
-    tmpfs.
-    """
-    def _executor(_prompt: str, _context: dict) -> dict:
-        import shlex
-        import subprocess
-
-        run_cwd = cwd if cwd and os.path.isdir(cwd) else None
-        env = {
-            "PATH": "/usr/local/bin:/usr/bin:/bin",
-            "HOME": run_cwd or os.getcwd(),
-            "LANG": os.environ.get("LANG", "C.UTF-8"),
-        }
-        proc = subprocess.run(
-            argv, capture_output=True, env=env, check=False, cwd=run_cwd,
-        )
-        out = proc.stdout[:max_output_bytes]
-        truncated = len(proc.stdout) > max_output_bytes
-        if proc.returncode != 0:
-            tail = proc.stderr[-2000:].decode("utf-8", "replace")
-            raise RuntimeError(
-                f"command exited {proc.returncode}: {tail.strip()}"
-            )
-        text = f"$ {shlex.join(argv)}\n[exit 0]\n" + out.decode("utf-8", "replace")
-        if truncated:
-            text += f"\n[output truncated at {max_output_bytes} bytes]"
-        return {
-            "text": text,
-            "tokens_in": 0,
-            "tokens_out": 0,
-            "model_identifier": f"exec:{os.path.basename(argv[0])}",
-            "inference_backend": "subprocess",
-        }
-    return _executor
+# The light executor factories now live in `gyza.executors` so a sandboxed
+# action can import them WITHOUT paying for numpy/blake3/cryptography. Re-
+# exported here because every existing caller imports them from this module,
+# and the qualname passed to `make_sandboxed_executor` is what must change --
+# not the Python import path.
+from gyza.executors import (  # noqa: E402
+    make_command_executor,
+    make_mock_executor,
+    make_planning_executor,
+)
 
 
 def make_anthropic_executor(
     api_key: str | None = None,
     model: str = "claude-sonnet-4-5",
+    egress_recorder: "Any | None" = None,
 ) -> Callable[[str, dict], dict]:
     """
     Pluggable Anthropic executor. The runner stays unaware of the
@@ -849,6 +1225,23 @@ def make_anthropic_executor(
 
     Imports `anthropic` lazily so the module loads cleanly on machines
     that don't have the SDK installed (everyone using the mock executor).
+
+    THE ONE GENUINELY EXTERNAL SEND IN THIS PROCESS, and until 2026-08-19
+    nothing measured it. `_executor` inlines up to 4000 bytes of EVERY input
+    artifact into the prompt and posts it to a third-party provider. That is an
+    `OUTSIDE_PROTOCOL` egress in H3's vocabulary -- it leaves modelled state
+    entirely -- and `outside_send` had no caller anywhere.
+
+    IN PRODUCTION THIS RUNS SANDBOXED (`cli.py` wraps it via
+    `make_sandboxed_executor`), where the parent cannot observe per-send bytes
+    and the honest record is the `UNBOUNDED_GRANT` instead. This recorder is
+    for the IN-PROCESS path -- an injected executor, or any caller importing
+    this factory directly -- which bypasses the sandbox and was therefore
+    invisible to both classes at once.
+
+    The byte count is a LOWER BOUND: it measures the prompt handed to the SDK,
+    not the SDK's framing, headers or system prompt. Stated rather than implied,
+    because a measurand that silently understates is the reassuring direction.
     """
     key = api_key or os.environ.get("ANTHROPIC_API_KEY")
     if not key:
@@ -876,11 +1269,26 @@ def make_anthropic_executor(
         if input_blocks:
             full_prompt = "\n\n".join(input_blocks) + "\n\n" + prompt
 
-        msg = client.messages.create(
-            model=model,
-            max_tokens=2048,
-            messages=[{"role": "user", "content": full_prompt}],
-        )
+        # RECORD AROUND THE CALL, NOT AFTER SUCCESS. Once the request is
+        # handed to the transport the bytes have left, whether or not a
+        # response comes back -- so a `finally` is the honest placement. The
+        # peer-send paths record only on success because a refused RPC never
+        # left the host; an HTTPS request that errors mid-flight did.
+        _n_bytes = len(full_prompt.encode("utf-8"))
+        try:
+            msg = client.messages.create(
+                model=model,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": full_prompt}],
+            )
+        finally:
+            if egress_recorder is not None:
+                try:
+                    egress_recorder.outside_send(
+                        f"inference:{model}", "api.anthropic.com", _n_bytes)
+                except Exception:                            # noqa: BLE001
+                    LOG.warning("[runner] inference egress not recorded",
+                                exc_info=True)
         text = "".join(
             block.text for block in msg.content if getattr(block, "type", "") == "text"
         )

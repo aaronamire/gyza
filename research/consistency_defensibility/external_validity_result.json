@@ -1,0 +1,100 @@
+{
+  "program": "Channel A Phase 5 external validity (A2 inversion on natural MATH errors). NOT a Route 2 rescue.",
+  "excluded_metamorphic": "{T2,T3,T4} metamorphic NOT run on MATH: competition-math transforms cannot have their declared relation verified with certainty (not templated). Excluded per the strict rule, not guessed.",
+  "n_records": 226,
+  "n_evaluable": 215,
+  "parse_fail_verdict": 11,
+  "A2_inversion_MATH_pooled": {
+    "n": 215,
+    "n_wrong": 41,
+    "base_rate_wrong": 0.1907,
+    "TPR": 0.4146,
+    "FPR": 0.0402,
+    "firing_rate": 0.1116,
+    "precision": 0.7083,
+    "J": 0.3744,
+    "J_ci": [
+      0.3771,
+      0.2309,
+      0.5349
+    ],
+    "perm_p": 0.0,
+    "LR": 10.307
+  },
+  "A2_inversion_MATH_by_model": {
+    "meta-llama/llama-3.1-70b-instruct": {
+      "n": 55,
+      "n_wrong": 7,
+      "base_rate_wrong": 0.1273,
+      "TPR": 0.4286,
+      "FPR": 0.0208,
+      "firing_rate": 0.0727,
+      "precision": 0.75,
+      "J": 0.4077,
+      "J_ci": [
+        0.4043,
+        -0.0189,
+        0.8129
+      ],
+      "perm_p": 0.004,
+      "LR": 20.571
+    },
+    "google/gemma-2-27b-it": {
+      "n": 64,
+      "n_wrong": 24,
+      "base_rate_wrong": 0.375,
+      "TPR": 0.5833,
+      "FPR": 0.15,
+      "firing_rate": 0.3125,
+      "precision": 0.7,
+      "J": 0.4333,
+      "J_ci": [
+        0.4366,
+        0.1984,
+        0.6644
+      ],
+      "perm_p": 0.0,
+      "LR": 3.889
+    },
+    "mistralai/mistral-small-3.2-24b-instruct": {
+      "n": 40,
+      "n_wrong": 4,
+      "base_rate_wrong": 0.1,
+      "TPR": 0.0,
+      "FPR": 0.0,
+      "firing_rate": 0.0,
+      "precision": null,
+      "J": 0.0,
+      "J_ci": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "perm_p": 1.0,
+      "LR": null
+    },
+    "microsoft/phi-4": {
+      "n": 56,
+      "n_wrong": 6,
+      "base_rate_wrong": 0.1071,
+      "TPR": 0.0,
+      "FPR": 0.0,
+      "firing_rate": 0.0,
+      "precision": null,
+      "J": 0.0,
+      "J_ci": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "perm_p": 1.0,
+      "LR": null
+    }
+  },
+  "fixture_family_comparison": {
+    "A2_surface_J": 0.531,
+    "A2_surface_FPR": 0.0148,
+    "A2_surface_LR": 36.8,
+    "A2_surface_precision": 0.857
+  }
+}

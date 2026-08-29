@@ -20,6 +20,15 @@ effects that leave modelled state SHRINKS as the mesh grows, because more
 destinations come to have a model. That makes H3 the only declared quantity in
 this harm model that gets *better* with scale -- every other one worsens.
 
+**THAT CLAIM IS BOUNDED, AND THE BOUND WAS MEASURED 2026-08-19.** It holds only
+for sends with a SINGLE PEER DESTINATION, which is `send_message` alone. The
+other three cited sites are DHT puts and gossip fan-out whose destination set is
+unknown at send time, so no attestation coverage can ever reclassify them --
+see `PEER_ADDRESSED_CHANNEL_PREFIX` below. Under a delta-dominated workload the
+attestable share came out near a sixth of all egress. **H3 improves with scale
+on a MINORITY of its own traffic**, and any claim made from this module must say
+so.
+
 THE CLASSIFICATION IS THREE-WAY, NOT TWO, and the middle class is the point:
 
   ATTESTED_PEER      the destination presented a verifiable attestation. Its own
@@ -77,6 +86,30 @@ class EgressClass:
     MESH_EXIT = (UNATTESTED_PEER, OUTSIDE_PROTOCOL)
 
 
+#: Channels whose destination is a SINGLE PEER, and therefore the only ones an
+#: attestation source could ever reclassify out of the exit count.
+#:
+#: MEASURED CEILING ON H3'S HEADLINE PROPERTY. `publish_agent` and
+#: `publish_attestation` are DHT puts landing on the k closest nodes;
+#: `publish_delta` fans out to a gossip topic; the inference boundary leaves the
+#: protocol entirely. For all four, "is the destination attested?" is not a
+#: well-formed question AT SEND TIME, so no attestation coverage can ever move
+#: them. Only `send_message` qualifies.
+#:
+#: So "the only declared quantity that SHRINKS as the mesh grows" is true of ONE
+#: channel out of five, not of H3 as a whole. Under a delta-dominated workload
+#: the attestable share measured ~16%; that ratio depends on the traffic mix and
+#: is illustrative, but the STRUCTURAL limit -- one channel -- does not.
+#: `Blackboard.egress_by_channel_since` reports the live split so the ceiling is
+#: visible rather than recomputed by hand.
+PEER_ADDRESSED_CHANNEL_PREFIX = "send_message"
+
+
+def is_attestable_channel(channel: str) -> bool:
+    """True iff an attestation source could ever reclassify this channel."""
+    return channel.startswith(PEER_ADDRESSED_CHANNEL_PREFIX)
+
+
 def classify_peer(peer_id: str, attested_peers: "frozenset[str] | None") -> str:
     """Classify a send to a protocol peer.
 
@@ -130,4 +163,46 @@ class EgressRecorder:
         return EgressClass.UNBOUNDED_GRANT
 
 
-__all__ = ["EgressClass", "EgressRecorder", "classify_peer"]
+def default_egress_recorder(blackboard_path: "str | None" = None,
+                            attested_peers: "frozenset[str] | None" = None
+                            ) -> "EgressRecorder | None":
+    """Build the recorder production send paths inject.
+
+    THIS FUNCTION EXISTS BECAUSE NOTHING BUILT ONE. `EgressRecorder` had zero
+    production constructors: the parameter was threaded through `NetdClient`,
+    `GossipClient`, `CapabilityClient`, `ArtifactClient` and the sandbox runner,
+    and was supplied at none of the 12+ construction sites -- so every call site
+    short-circuited on `if recorder is None: return` and H3 measured 0 in every
+    production evaluation while being registered as a measured class. That is
+    the exact condition H2_market_capital was RETIRED for, found by reading
+    rather than by a failing test (research/H3_WIRING_GAP.md).
+
+    Returns None -- meaning "unwired", the pre-existing behaviour -- when the
+    blackboard cannot be opened. A measurement surface must never be the reason
+    a node fails to start.
+
+    `attested_peers` STAYS A PARAMETER AND HAS NO PRODUCTION SOURCE YET. Passing
+    None makes `classify_peer` fail toward UNATTESTED_PEER, so every peer send
+    counts toward H3 and the "H3 shrinks as the mesh grows" property in this
+    module's header is UNREALISED until an attestation source is wired. That is
+    a deliberate, documented over-count: it errs toward reporting more exit than
+    there is, which is the safe direction for a bound.
+    """
+    try:
+        from gyza.blackboard import Blackboard
+        from gyza.config import load_config
+
+        if blackboard_path is None:
+            rp = load_config().resolved_paths()
+            blackboard_path = rp["blackboard_db_path"]
+        return EgressRecorder(Blackboard(blackboard_path), attested_peers)
+    except Exception:                                        # noqa: BLE001
+        import logging
+        logging.getLogger("gyza.containment.egress").warning(
+            "[egress] recorder not wired; H3 will measure 0", exc_info=True)
+        return None
+
+
+__all__ = ["EgressClass", "EgressRecorder", "classify_peer",
+           "default_egress_recorder", "is_attestable_channel",
+           "PEER_ADDRESSED_CHANNEL_PREFIX"]

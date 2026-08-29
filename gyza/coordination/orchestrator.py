@@ -334,6 +334,18 @@ class Scheduler:
     """Enforces per-carrier depth caps (SR-6), serialization at cumulative
     checks (C7), and per-action promotion (SR-5's decision)."""
 
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = (
+        "IT SCHEDULES OVER A STAGED EXECUTION MODEL THAT IS ITSELF NOT "
+        "ADOPTED. Its constructor requires a `StagingArea` and a "
+        "`PromotionGate`, and both carry their own NON_ADOPTED markers -- "
+        "gyza's production path executes an action and signs it, with no "
+        "staging/promotion step for this to serialize. Wiring it would mean "
+        "adopting that whole model, which is a design decision and not a "
+        "wiring one. The research it encodes (SR-5, SR-6, C7) stands "
+        "independently of whether this class runs."
+    )
+
     def __init__(self, engine: GuardEngine, staging: StagingArea,
                  gate: PromotionGate, queue: EscalationQueue | None = None):
         self._engine = engine

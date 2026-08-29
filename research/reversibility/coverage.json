@@ -1,0 +1,324 @@
+{
+ "n_action_types": 19,
+ "by_type": {
+  "REVERSIBLE_INTERIOR": 7,
+  "IRREVERSIBLE": 6,
+  "EGRESS": 6
+ },
+ "by_type_fraction": {
+  "REVERSIBLE_INTERIOR": 0.3684,
+  "IRREVERSIBLE": 0.3158,
+  "EGRESS": 0.3158
+ },
+ "total_production_sites": 2,
+ "by_production_sites": {
+  "REVERSIBLE_INTERIOR": 2,
+  "IRREVERSIBLE": 0,
+  "EGRESS": 0
+ },
+ "append_only_rollback_reachable": [
+  "claim_work_item",
+  "reserve_credits",
+  "stage_artifact",
+  "stage_envelope"
+ ],
+ "append_only_not_reachable": [
+  "grant_delegation",
+  "settle_credits",
+  "sign_envelope"
+ ],
+ "mutable": [
+  "delete_artifact",
+  "rotate_key",
+  "update_guard_config"
+ ],
+ "external": [
+  "external_send",
+  "publish_agent",
+  "publish_attestation",
+  "publish_delta",
+  "send_message",
+  "write_outside_sandbox"
+ ],
+ "no_write": [
+  "compute",
+  "read",
+  "retrieve_memory"
+ ],
+ "rows": [
+  {
+   "action": "claim_work_item",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "append-only",
+   "storage_basis": "staged; blackboard claim log",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "compute",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "none",
+   "storage_basis": "no write at all",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "delete_artifact",
+   "class": "IRREVERSIBLE",
+   "storage": "mutable",
+   "storage_basis": "removes content with no retained copy",
+   "n_production": 0,
+   "n_test": 1,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "external_send",
+   "class": "EGRESS",
+   "storage": "external",
+   "storage_basis": "leaves modelled state (C15)",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 48,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "grant_delegation",
+   "class": "IRREVERSIBLE",
+   "storage": "append-only",
+   "storage_basis": "delegation chain hop",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "publish_agent",
+   "class": "EGRESS",
+   "storage": "external",
+   "storage_basis": "leaves modelled state (C15)",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "publish_attestation",
+   "class": "EGRESS",
+   "storage": "external",
+   "storage_basis": "leaves modelled state (C15)",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "publish_delta",
+   "class": "EGRESS",
+   "storage": "external",
+   "storage_basis": "leaves modelled state (C15)",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "read",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "none",
+   "storage_basis": "a pure read; no write at all",
+   "n_production": 0,
+   "n_test": 19,
+   "n_research": 23,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/cli.py",
+    "gyza/containment/reversibility.py",
+    "gyza/economy/delegation.py",
+    "gyza/identity.py",
+    "gyza/sandbox/config.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "reserve_credits",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "append-only",
+   "storage_basis": "a hold, released; ReservationBook",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "retrieve_memory",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "none",
+   "storage_basis": "a query over the memory store",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "rotate_key",
+   "class": "IRREVERSIBLE",
+   "storage": "mutable",
+   "storage_basis": "supersedes the prior key",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "send_message",
+   "class": "EGRESS",
+   "storage": "external",
+   "storage_basis": "leaves modelled state (C15)",
+   "n_production": 0,
+   "n_test": 3,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "settle_credits",
+   "class": "IRREVERSIBLE",
+   "storage": "append-only",
+   "storage_basis": "LedgerEntry \u2014 ledger.py:30 'no update_entry'",
+   "n_production": 0,
+   "n_test": 4,
+   "n_research": 7,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "sign_envelope",
+   "class": "IRREVERSIBLE",
+   "storage": "append-only",
+   "storage_basis": "envelope log; non-repudiable once made",
+   "n_production": 0,
+   "n_test": 3,
+   "n_research": 17,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py",
+    "gyza/icp.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "stage_artifact",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "append-only",
+   "storage_basis": "StagingArea.stage -> AppendOnlyLog.append (staging.py:89)",
+   "n_production": 2,
+   "n_test": 17,
+   "n_research": 3,
+   "production_sites": [
+    "gyza/containment/staging.py",
+    "gyza/coordination/orchestrator.py"
+   ],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "stage_envelope",
+   "class": "REVERSIBLE_INTERIOR",
+   "storage": "append-only",
+   "storage_basis": "StagingArea.stage -> AppendOnlyLog.append (staging.py:89)",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": true
+  },
+  {
+   "action": "update_guard_config",
+   "class": "IRREVERSIBLE",
+   "storage": "mutable",
+   "storage_basis": "replaces the guard configuration",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  },
+  {
+   "action": "write_outside_sandbox",
+   "class": "EGRESS",
+   "storage": "external",
+   "storage_basis": "leaves modelled state (C15)",
+   "n_production": 0,
+   "n_test": 0,
+   "n_research": 2,
+   "production_sites": [],
+   "excluded_sites": [
+    "gyza/containment/reversibility.py"
+   ],
+   "rollback_reachable": false
+  }
+ ]
+}

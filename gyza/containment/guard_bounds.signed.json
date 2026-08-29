@@ -1,12 +1,15 @@
 {
   "config": {
     "bounds": {
+      "H3_mesh_exit_rate": 300000000,
       "H4_authority": 0.0,
-      "H5_storage_growth": 10000000000.0,
-      "H6_unsupervised_actions": 10000
+      "H5_storage_growth": 10000000000.0
+    },
+    "policy": {
+      "review_cadence_actions": 10000
     },
     "tier_assignments": {},
-    "version": 1
+    "version": 3
   },
-  "signature": "e7e51725125ceff7c1606ac16fce0f54b8abad22ad430f1c52a4067a923e1d9cd983a6d6bcee877cc18c74f1bebf924f1e07c0c502341925d46500f99a467003"
+  "signature": "fce331919cbb8b25e7423047cf54c950ab67f323c7302ffe4de9f65e00ef4a0aa22106f0b5f4a7413e5d8c0aa0754c9b59ecf30d862260f7e4cddfc478f33a0b"
 }

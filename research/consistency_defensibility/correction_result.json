@@ -1,0 +1,264 @@
+{
+  "program": "Phase 8 canonicalization correction (cache-only). NOT a Route 2 rescue / not a new experiment.",
+  "validation_8b": {
+    "n_hand": 27,
+    "agreement": 1.0,
+    "confusion": {
+      "hand_C": {
+        "C": 10,
+        "W": 0,
+        "U": 0
+      },
+      "hand_W": {
+        "C": 0,
+        "W": 16,
+        "U": 1
+      }
+    },
+    "disagreements": [],
+    "note": "agreement = new matches hand, counting UNRESOLVED-on-hand-wrong as agreement (conservative exclusion, not a false merge). A false MERGE (hand=W, new=C) is the fatal error and is counted as disagreement."
+  },
+  "labels_8b": {
+    "flip_by_model": {
+      "meta-llama/llama-3.1-70b-instruct": 3,
+      "google/gemma-2-27b-it": 3,
+      "mistralai/mistral-small-3.2-24b-instruct": 4,
+      "microsoft/phi-4": 3
+    },
+    "old_wrong_by_model": {
+      "meta-llama/llama-3.1-70b-instruct": 11,
+      "google/gemma-2-27b-it": 24,
+      "mistralai/mistral-small-3.2-24b-instruct": 4,
+      "microsoft/phi-4": 7
+    },
+    "unresolved_by_model": {
+      "meta-llama/llama-3.1-70b-instruct": 3,
+      "google/gemma-2-27b-it": 3,
+      "mistralai/mistral-small-3.2-24b-instruct": 1,
+      "microsoft/phi-4": 1
+    },
+    "old_base_rate_wrong": 0.2035,
+    "new_base_rate_wrong": 0.1284,
+    "n_total": 226,
+    "n_flips": 13,
+    "n_unresolved": 8
+  },
+  "phase5_A2_selfinversion": {
+    "old": {
+      "n": 215,
+      "n_wrong": 41,
+      "TPR": 0.4146,
+      "FPR": 0.0402,
+      "firing_rate": 0.1116,
+      "precision": 0.7083,
+      "J": 0.3744,
+      "J_ci": [
+        0.3771,
+        0.2309,
+        0.5349
+      ],
+      "perm_p": 0.0,
+      "LR": 10.307
+    },
+    "new": {
+      "n": 208,
+      "n_wrong": 24,
+      "TPR": 0.5,
+      "FPR": 0.0489,
+      "firing_rate": 0.101,
+      "precision": 0.5714,
+      "J": 0.4511,
+      "J_ci": [
+        0.4513,
+        0.241,
+        0.6594
+      ],
+      "perm_p": 0.0,
+      "LR": 10.222
+    }
+  },
+  "phase6b_crossverify": {
+    "old": {
+      "cell_a": {
+        "n": 413,
+        "n_wrong": 29,
+        "TPR": 0.7586,
+        "FPR": 0.0391,
+        "firing_rate": 0.0896,
+        "precision": 0.5946,
+        "J": 0.7196,
+        "J_ci": [
+          0.7207,
+          0.5539,
+          0.8669
+        ],
+        "perm_p": 0.0,
+        "LR": 19.421
+      },
+      "cell_b": {
+        "n": 71,
+        "n_wrong": 35,
+        "TPR": 0.2,
+        "FPR": 0.3333,
+        "firing_rate": 0.2676,
+        "precision": 0.3684,
+        "J": -0.1333,
+        "J_ci": [
+          -0.1324,
+          -0.3427,
+          0.0682
+        ],
+        "perm_p": 0.938,
+        "LR": 0.6
+      }
+    },
+    "new": {
+      "cell_a": {
+        "n": 433,
+        "n_wrong": 22,
+        "TPR": 0.8182,
+        "FPR": 0.0414,
+        "firing_rate": 0.0808,
+        "precision": 0.5143,
+        "J": 0.7768,
+        "J_ci": [
+          0.7761,
+          0.605,
+          0.923
+        ],
+        "perm_p": 0.0,
+        "LR": 19.781
+      },
+      "cell_b": {
+        "n": 36,
+        "n_wrong": 9,
+        "TPR": 0.5556,
+        "FPR": 0.4444,
+        "firing_rate": 0.4722,
+        "precision": 0.2941,
+        "J": 0.1111,
+        "J_ci": [
+          0.1114,
+          -0.2918,
+          0.4774
+        ],
+        "perm_p": 0.435,
+        "LR": 1.25
+      }
+    }
+  },
+  "phase7_witness": {
+    "old": {
+      "C0_b": {
+        "n": 71,
+        "n_wrong": 35,
+        "TPR": 0.2,
+        "FPR": 0.3333,
+        "firing_rate": 0.2676,
+        "precision": 0.3684,
+        "J": -0.1333,
+        "J_ci": [
+          -0.1336,
+          -0.3294,
+          0.0692
+        ],
+        "perm_p": 0.9423,
+        "LR": 0.6
+      },
+      "C1_b": {
+        "n": 62,
+        "n_wrong": 31,
+        "TPR": 0.6129,
+        "FPR": 0.4194,
+        "firing_rate": 0.5161,
+        "precision": 0.5938,
+        "J": 0.1935,
+        "J_ci": [
+          0.1928,
+          -0.0646,
+          0.4342
+        ],
+        "perm_p": 0.0977,
+        "LR": 1.462
+      },
+      "C2le3_b": {
+        "n": 73,
+        "n_wrong": 36,
+        "TPR": 0.1111,
+        "FPR": 0.0541,
+        "firing_rate": 0.0822,
+        "precision": 0.6667,
+        "J": 0.0571,
+        "J_ci": [
+          0.0586,
+          -0.0698,
+          0.1852
+        ],
+        "perm_p": 0.321,
+        "LR": 2.056
+      },
+      "witness_effect_C1_minus_C0": [
+        0.2262,
+        -0.0824,
+        0.5286
+      ],
+      "n_paired": 59
+    },
+    "new": {
+      "C0_b": {
+        "n": 36,
+        "n_wrong": 9,
+        "TPR": 0.5556,
+        "FPR": 0.4444,
+        "firing_rate": 0.4722,
+        "precision": 0.2941,
+        "J": 0.1111,
+        "J_ci": [
+          0.1145,
+          -0.2709,
+          0.4923
+        ],
+        "perm_p": 0.4033,
+        "LR": 1.25
+      },
+      "C1_b": {
+        "n": 32,
+        "n_wrong": 10,
+        "TPR": 0.8,
+        "FPR": 0.6364,
+        "firing_rate": 0.6875,
+        "precision": 0.3636,
+        "J": 0.1636,
+        "J_ci": [
+          0.1658,
+          -0.1778,
+          0.4617
+        ],
+        "perm_p": 0.3123,
+        "LR": 1.257
+      },
+      "C2le3_b": {
+        "n": 40,
+        "n_wrong": 12,
+        "TPR": 0.0833,
+        "FPR": 0.0714,
+        "firing_rate": 0.075,
+        "precision": 0.3333,
+        "J": 0.0119,
+        "J_ci": [
+          0.0129,
+          -0.1459,
+          0.2143
+        ],
+        "perm_p": 0.6623,
+        "LR": 1.167
+      },
+      "witness_effect_C1_minus_C0": [
+        -0.0774,
+        -0.6494,
+        0.4928
+      ],
+      "n_paired": 29
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Captured hidden states: ~84 KB per problem, ~42 MB over the 500 problems.
+# Derived artifacts, regenerable byte-for-byte from generate.py under greedy
+# decoding, and too large for a public repository. meta.jsonl (completions and
+# output-distribution features) and labels.json ARE committed -- those are the
+# measurement, and every number in FINDINGS_1E.md is reproducible from them
+# plus the layer curve in the result JSON.
+act_*.npz

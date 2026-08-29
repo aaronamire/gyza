@@ -142,6 +142,11 @@ def audit_provenance(
                     else "envelope_dag_open",
                     envs, note=f"{len(envs)} envelopes")
 
+    # Action-id index for DAG-level claims. `action_id` IS the work-item id
+    # (runner.py sets it), which is what lets a bundle-only verifier connect a
+    # parent's signed child list to those children's envelopes.
+    by_action = {e.action_id: e for e in envs}
+
     rows: list[ActionAudit] = []
     for env in envs:
         eh = compute_envelope_hash(env)
@@ -162,6 +167,26 @@ def audit_provenance(
             # which is exactly the distinction `reason` draws below.
             ledger.emit("artifact_content_address", art, env.output_hash,
                         note=env.action_id)
+
+            # COORDINATION CLAIMS, emitted only where the evidence exists.
+            # A decomposition announces itself in its own signed artifact, so
+            # an action that did not decompose emits nothing rather than
+            # emitting a vacuous pass -- a claim that is trivially true on
+            # every input measures nothing and would inflate the governed
+            # count with checks that never had a chance to fail.
+            obj = None
+            if art is not None:
+                try:
+                    obj = json.loads(art)
+                except (ValueError, TypeError):
+                    obj = None
+            if isinstance(obj, dict) and obj.get("__subtasks__"):
+                ledger.emit("decomposition_within_manifest", obj,
+                            resolve_manifest(env.capability_manifest_hash),
+                            note=env.action_id)
+                if obj.get("__combine__"):
+                    ledger.emit("combine_covers_siblings", obj, by_action,
+                                note=env.action_id)
 
         binding_ok = (
             art is not None
@@ -208,6 +233,50 @@ def audit_provenance(
                                 env.capability_manifest_hash, note=env.action_id)
                     ledger.emit("enforcement_within_manifest", enf, manifest,
                                 note=env.action_id)
+
+            # A DECOMPOSITION IS BOUNDED BY THE SAME MANIFEST, AND THE CHECK
+            # BELONGS HERE RATHER THAN ONLY IN THE LEDGER.
+            #
+            # Written first as a governance claim alone, it left a real hole: a
+            # constructed COMPROMISED RUNNER -- one that skips its own spawn
+            # gate and signs the result with a real key, so every hash and
+            # signature verifies -- produced a bundle whose coordination claims
+            # were REFUTED while the headline still read VERDICT: VALID.
+            #
+            # THE FIX IS NOT TO LET GOVERNANCE MOVE THE VERDICT.
+            # `test_governed_TRUE_changes_NOTHING_about_the_verdict` defends
+            # that across six scenarios and is right to: if enabling governance
+            # could change a verdict, VALID would be a property of WHICH
+            # REGISTRY VERSION A VERIFIER HOLDS rather than of the bundle, and
+            # two honest third parties could disagree. The Rust implementation
+            # carries none of these verifiers at all.
+            #
+            # So the bound is a ROW CHECK, exactly as
+            # `enforcement_satisfies_manifest` already is. Outside the
+            # enforcement branch because a decomposition is bounded whether or
+            # not the action also carried a sandbox record.
+            subs = obj.get("__subtasks__") if isinstance(obj, dict) else None
+            if subs:
+                dman = resolve_manifest(env.capability_manifest_hash)
+                if dman is None:
+                    within_bounds = False
+                    reason = reason or (
+                        "manifest not resolvable for a decomposition")
+                else:
+                    spawn = ((dman.get("capabilities", {}) or {})
+                             .get("spawn", {}) or {})
+                    cap = int((spawn.get("resource_budget", {}) or {})
+                              .get("max_children", 0) or 0)
+                    if not spawn.get("permitted"):
+                        within_bounds = False
+                        reason = reason or (
+                            f"decomposed into {len(subs)} subtask(s) with no "
+                            f"spawn authority")
+                    elif len(subs) > cap:
+                        within_bounds = False
+                        reason = reason or (
+                            f"decomposed into {len(subs)} subtask(s) against a "
+                            f"manifest cap of {cap}")
 
         # A missing artifact fails closed under require_all_artifacts (a
         # withheld artifact could conceal an over-bound execution); with the

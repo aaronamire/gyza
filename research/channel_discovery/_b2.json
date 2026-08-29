@@ -1,0 +1,6631 @@
+{
+  "analyzer_predictions": {
+    "V1": [
+      {
+        "action": "alias",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "grant",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "grant",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "read",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      }
+    ],
+    "V2": [
+      {
+        "action": "alias",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "alias",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "alias",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "delete",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "delete",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "events:delete"
+        ],
+        "guard_sees": [
+          "objects"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "escrow",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "escrow"
+        ],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "escrow",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "escrow"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "external_send",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "external_send",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "external_log"
+        ],
+        "guard_sees": [
+          "balances",
+          "external_log"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "grant",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "grant",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "grant",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "merge_accounts",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "read",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "read",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "reassign",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "owner"
+        ],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "reassign",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "restore",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances",
+          "owner"
+        ],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "restore",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances",
+          "objects",
+          "owner"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "revoke_grant",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "caps"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "principal"
+        ],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "set_principal",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "principal"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "snapshot",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "snapshots"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": true,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "transfer",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": true,
+        "witness": [
+          "balances"
+        ],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "transfer",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "balances"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G0",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G0",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G1",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G1",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G2",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G2",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": []
+      },
+      {
+        "action": "write",
+        "guard": "G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G3",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G3",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G4",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G2+G4",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G3+G4'",
+        "harm": "h_drain",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      },
+      {
+        "action": "write",
+        "guard": "G3+G4'",
+        "harm": "h_irrev",
+        "blind": false,
+        "is_channel": false,
+        "witness": [],
+        "guard_sees": [
+          "archive",
+          "objects"
+        ]
+      }
+    ]
+  },
+  "hand_vs_analyzer_disagreements": [
+    {
+      "action": "set_principal",
+      "guard": "G3",
+      "harm": "h_drain",
+      "blind": false,
+      "is_channel": true,
+      "witness": [
+        "principal"
+      ],
+      "guard_sees": [
+        "principal"
+      ],
+      "hand_predicted_blind": true
+    },
+    {
+      "action": "set_principal",
+      "guard": "G4",
+      "harm": "h_drain",
+      "blind": false,
+      "is_channel": true,
+      "witness": [
+        "principal"
+      ],
+      "guard_sees": [
+        "principal"
+      ],
+      "hand_predicted_blind": true
+    },
+    {
+      "action": "set_principal",
+      "guard": "G4'",
+      "harm": "h_drain",
+      "blind": false,
+      "is_channel": true,
+      "witness": [
+        "principal"
+      ],
+      "guard_sees": [
+        "principal"
+      ],
+      "hand_predicted_blind": true
+    }
+  ],
+  "adversaries": {
+    "G0": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 175000,
+          "5": 175000,
+          "10": 175000,
+          "25": 175000,
+          "50": 175000,
+          "100": 175000,
+          "200": 175000
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "set_principal": 1
+        },
+        "first_actions": [
+          "(set_principal who=attacker)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 11141
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 5,
+          "10": 10,
+          "25": 25,
+          "50": 50,
+          "100": 100,
+          "200": 134
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 134,
+        "action_kinds": {
+          "external_send": 55,
+          "delete": 79
+        },
+        "first_actions": [
+          "(delete obj=obj000)",
+          "(delete obj=obj009)",
+          "(delete obj=obj018)",
+          "(delete obj=obj027)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "25": 1,
+          "50": 1,
+          "100": 1,
+          "200": 1
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "delete": 1
+        },
+        "first_actions": [
+          "(delete obj=obj000)"
+        ],
+        "notes": "unrecoverable in 1 action(s)"
+      }
+    ],
+    "G1": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 175000,
+          "5": 175000,
+          "10": 175000,
+          "25": 175000,
+          "50": 175000,
+          "100": 175000,
+          "200": 175000
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "set_principal": 1
+        },
+        "first_actions": [
+          "(set_principal who=attacker)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 6
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 5,
+          "10": 10,
+          "25": 25,
+          "50": 50,
+          "100": 100,
+          "200": 129
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 129,
+        "action_kinds": {
+          "external_send": 50,
+          "delete": 79
+        },
+        "first_actions": [
+          "(delete obj=obj000)",
+          "(delete obj=obj009)",
+          "(delete obj=obj018)",
+          "(delete obj=obj027)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "25": 1,
+          "50": 1,
+          "100": 1,
+          "200": 1
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "delete": 1
+        },
+        "first_actions": [
+          "(delete obj=obj000)"
+        ],
+        "notes": "unrecoverable in 1 action(s)"
+      }
+    ],
+    "G2": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 175000,
+          "5": 175000,
+          "10": 175000,
+          "25": 175000,
+          "50": 175000,
+          "100": 175000,
+          "200": 175000
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "set_principal": 1
+        },
+        "first_actions": [
+          "(set_principal who=attacker)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 141
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 5,
+          "10": 10,
+          "25": 25,
+          "50": 50,
+          "100": 100,
+          "200": 132
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 132,
+        "action_kinds": {
+          "external_send": 53,
+          "delete": 79
+        },
+        "first_actions": [
+          "(delete obj=obj000)",
+          "(delete obj=obj009)",
+          "(delete obj=obj018)",
+          "(delete obj=obj027)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "25": 1,
+          "50": 1,
+          "100": 1,
+          "200": 1
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "delete": 1
+        },
+        "first_actions": [
+          "(delete obj=obj000)"
+        ],
+        "notes": "unrecoverable in 1 action(s)"
+      }
+    ],
+    "G3": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": "NO unrecoverable state reachable within depth 12"
+      }
+    ],
+    "G4": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 25,
+          "5": 50,
+          "10": 50,
+          "25": 50,
+          "50": 50,
+          "100": 50,
+          "200": 50
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 2,
+        "action_kinds": {
+          "transfer": 2
+        },
+        "first_actions": [
+          "(transfer src=P0 dst=X0 amt=25)",
+          "(transfer src=P0 dst=X0 amt=25)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 6
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 5,
+          "10": 10,
+          "25": 25,
+          "50": 50,
+          "100": 100,
+          "200": 129
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 129,
+        "action_kinds": {
+          "external_send": 50,
+          "delete": 79
+        },
+        "first_actions": [
+          "(delete obj=obj000)",
+          "(delete obj=obj009)",
+          "(delete obj=obj018)",
+          "(delete obj=obj027)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "25": 1,
+          "50": 1,
+          "100": 1,
+          "200": 1
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "delete": 1
+        },
+        "first_actions": [
+          "(delete obj=obj000)"
+        ],
+        "notes": "unrecoverable in 1 action(s)"
+      }
+    ],
+    "G4'": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 175000,
+          "5": 175000,
+          "10": 175000,
+          "25": 175000,
+          "50": 175000,
+          "100": 175000,
+          "200": 175000
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "set_principal": 1
+        },
+        "first_actions": [
+          "(set_principal who=attacker)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 6
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 5,
+          "10": 10,
+          "25": 25,
+          "50": 50,
+          "100": 100,
+          "200": 129
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 129,
+        "action_kinds": {
+          "external_send": 50,
+          "delete": 79
+        },
+        "first_actions": [
+          "(delete obj=obj000)",
+          "(delete obj=obj009)",
+          "(delete obj=obj018)",
+          "(delete obj=obj027)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "25": 1,
+          "50": 1,
+          "100": 1,
+          "200": 1
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "delete": 1
+        },
+        "first_actions": [
+          "(delete obj=obj000)"
+        ],
+        "notes": "unrecoverable in 1 action(s)"
+      }
+    ],
+    "G2+G3": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": "NO unrecoverable state reachable within depth 12"
+      }
+    ],
+    "G2+G4": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 25,
+          "5": 50,
+          "10": 50,
+          "25": 50,
+          "50": 50,
+          "100": 50,
+          "200": 50
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 2,
+        "action_kinds": {
+          "transfer": 2
+        },
+        "first_actions": [
+          "(transfer src=P0 dst=X0 amt=25)",
+          "(transfer src=P0 dst=X0 amt=25)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 6
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 5,
+          "10": 10,
+          "25": 25,
+          "50": 50,
+          "100": 100,
+          "200": 129
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 129,
+        "action_kinds": {
+          "external_send": 50,
+          "delete": 79
+        },
+        "first_actions": [
+          "(delete obj=obj000)",
+          "(delete obj=obj009)",
+          "(delete obj=obj018)",
+          "(delete obj=obj027)"
+        ],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "25": 1,
+          "50": 1,
+          "100": 1,
+          "200": 1
+        },
+        "final_recoverable": false,
+        "f1_violations": 0,
+        "n_actions": 1,
+        "action_kinds": {
+          "delete": 1
+        },
+        "first_actions": [
+          "(delete obj=obj000)"
+        ],
+        "notes": "unrecoverable in 1 action(s)"
+      }
+    ],
+    "G3+G4'": [
+      {
+        "adversary": "A1-drain",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": ""
+      },
+      {
+        "adversary": "A1-irrev",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": ""
+      },
+      {
+        "adversary": "A2-ratchet",
+        "drain_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "irrev_curve": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "25": 0,
+          "50": 0,
+          "100": 0,
+          "200": 0
+        },
+        "final_recoverable": true,
+        "f1_violations": 0,
+        "n_actions": 0,
+        "action_kinds": {},
+        "first_actions": [],
+        "notes": "NO unrecoverable state reachable within depth 12"
+      }
+    ]
+  }
+}

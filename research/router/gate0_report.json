@@ -1,0 +1,81 @@
+{
+  "gate": "0b/0c",
+  "mbpp": {
+    "n_problems": 50,
+    "models": {
+      "meta-llama/llama-3.1-70b-instruct": {
+        "n": 50,
+        "solved": 20,
+        "rate": 0.4
+      },
+      "google/gemma-2-27b-it": {
+        "n": 50,
+        "solved": 19,
+        "rate": 0.38
+      },
+      "google/gemma-3-27b-it": {
+        "n": 50,
+        "solved": 20,
+        "rate": 0.4
+      },
+      "mistralai/mistral-small-24b-instruct-2501": {
+        "n": 50,
+        "solved": 16,
+        "rate": 0.32
+      },
+      "mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 50,
+        "solved": 18,
+        "rate": 0.36
+      },
+      "microsoft/phi-4": {
+        "n": 50,
+        "solved": 19,
+        "rate": 0.38
+      }
+    }
+  },
+  "math": {
+    "n_problems": 80,
+    "models": {
+      "google/gemma-2-27b-it": {
+        "n": 80,
+        "unresolved": 3,
+        "used": 77,
+        "solved": 43,
+        "rate": 0.5584
+      },
+      "meta-llama/llama-3.1-70b-instruct": {
+        "n": 80,
+        "unresolved": 3,
+        "used": 77,
+        "solved": 52,
+        "rate": 0.6753
+      },
+      "microsoft/phi-4": {
+        "n": 80,
+        "unresolved": 1,
+        "used": 79,
+        "solved": 55,
+        "rate": 0.6962
+      },
+      "mistralai/mistral-small-3.2-24b-instruct": {
+        "n": 80,
+        "unresolved": 1,
+        "used": 79,
+        "solved": 40,
+        "rate": 0.5063
+      }
+    }
+  },
+  "math_strata": {
+    "EASY": 40,
+    "HARD": 40
+  },
+  "credits": {
+    "balance": 3.3449,
+    "est_calls": 3080,
+    "est_cost_usd": 0.2,
+    "pass": true
+  }
+}

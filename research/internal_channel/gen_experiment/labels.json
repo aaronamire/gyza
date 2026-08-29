@@ -1,0 +1,7500 @@
+[
+ {
+  "task_id": 61,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 62,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 63,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 64,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 65,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 66,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 67,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 68,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 69,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 70,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 71,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 72,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 73,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 74,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 75,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 76,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 77,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 78,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 79,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 80,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 81,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 82,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 83,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 84,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 85,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 86,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 87,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 88,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 89,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 90,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 91,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 92,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 93,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 94,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 95,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 96,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 97,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 98,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 99,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 100,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 101,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 102,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 103,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 104,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 105,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 106,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 107,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 108,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 109,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 110,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 111,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 112,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 113,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 114,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 115,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 116,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 117,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 118,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 119,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 120,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 121,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 122,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 123,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 124,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 125,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 126,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 127,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 128,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 129,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 130,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 131,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 132,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 133,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 134,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 135,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 136,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 137,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 138,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 139,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 140,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 141,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 142,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 143,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 144,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 145,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 146,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 147,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "TypeError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 148,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 149,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 150,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 151,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 152,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 153,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 154,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 155,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 156,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 157,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 158,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 159,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 160,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 161,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 162,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 163,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 164,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 165,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 166,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 167,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 168,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 169,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 170,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 171,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 172,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 173,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 174,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 175,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 176,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 177,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 178,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 179,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 180,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 181,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 182,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 183,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 184,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 185,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 186,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 187,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 188,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 189,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 190,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 191,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 192,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 193,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 194,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 195,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "AssertionError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 196,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 197,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 198,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 199,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 200,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 201,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 202,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 203,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 204,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 205,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 206,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 207,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 208,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 209,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 210,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 211,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 212,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 213,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 214,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 215,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 216,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 217,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 218,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 219,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 220,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 221,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 222,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 223,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "AssertionError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 224,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 225,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "IndexError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 226,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 227,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 228,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 229,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 230,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 231,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 232,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 233,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 234,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 235,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 236,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 237,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 238,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 239,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 240,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 241,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 242,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 243,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 244,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 245,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 246,
+  "label": "FAIL",
+  "mode": "TIMEOUT",
+  "n_pass": 0,
+  "assert_modes": [
+   "TIMEOUT",
+   "TIMEOUT",
+   "TIMEOUT"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 247,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 248,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 249,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 250,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 251,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "AssertionError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 252,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 253,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 254,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 255,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 256,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 257,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 258,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 259,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 260,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "CRASH",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "ERR",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 261,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 262,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 263,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 264,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 265,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 266,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 267,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 268,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 269,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 270,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 271,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 272,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 273,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 274,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 275,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 276,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 277,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 278,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 279,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 280,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 281,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 282,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 283,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 284,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 285,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 286,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 287,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 288,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "WRONG",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "WRONG",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 289,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 290,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 291,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 292,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 293,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 294,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 295,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 296,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 297,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 298,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "CRASH",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "ERR",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 299,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 300,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 301,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 302,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 303,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 304,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 305,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 306,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 307,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 308,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 309,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 310,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 311,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 312,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 313,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 314,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 315,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 316,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "AssertionError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 317,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 318,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 319,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 320,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 321,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 322,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 323,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 324,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 325,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 326,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 327,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 328,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 329,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 330,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 331,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 332,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 333,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 334,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 335,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 336,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 337,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 338,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 339,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 340,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 341,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 342,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 343,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 344,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 345,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 346,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 347,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 348,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 349,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 350,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 351,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 352,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 353,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 354,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 355,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 356,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 357,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 358,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 359,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 360,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 361,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 362,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 363,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 364,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "AssertionError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 365,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 366,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 367,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "NameError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 368,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 369,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 370,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 371,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 372,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 373,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 374,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 375,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 376,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 377,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 378,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 379,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 380,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 381,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 382,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 383,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 384,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 385,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 386,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 387,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 388,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 389,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 390,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "WRONG",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "WRONG",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 391,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 392,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 393,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 394,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 395,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 396,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 397,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 398,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 399,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 400,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 401,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 402,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 403,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 404,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 405,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 406,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 407,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 408,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 409,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 410,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 411,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 412,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 413,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 414,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 415,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 416,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 417,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 418,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 419,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 420,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 421,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 422,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 423,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 424,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 425,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 426,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 427,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "PatternError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 428,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 429,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 430,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 431,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 432,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 433,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 434,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 435,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 436,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 437,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 438,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 439,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 440,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 441,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 442,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 443,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 444,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 445,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 446,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 447,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 448,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 449,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 450,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 451,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 452,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 453,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 454,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 455,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 456,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 457,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 458,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 459,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 460,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 461,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 462,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 463,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 464,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 465,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 466,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 467,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 468,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 469,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 470,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 471,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 472,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 2,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 473,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 474,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 475,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 476,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 477,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 478,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 479,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 480,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 481,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 482,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 483,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 484,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 485,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 486,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 487,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 488,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 489,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 490,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 491,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 492,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 499,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 502,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 498,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 509,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 504,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 501,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [
+   "CRASH",
+   "CRASH",
+   "CRASH"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "ERR",
+   "ERR",
+   "ERR"
+  ]
+ },
+ {
+  "task_id": 506,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 510,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 508,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 1,
+  "assert_modes": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "PASS",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 497,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 494,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 500,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 495,
+  "label": "FAIL",
+  "mode": "CRASH",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "AssertionError",
+  "canon_asserts": []
+ },
+ {
+  "task_id": 507,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 503,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 496,
+  "label": "PASS",
+  "mode": "-",
+  "n_pass": 3,
+  "assert_modes": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ]
+ },
+ {
+  "task_id": 505,
+  "label": "FAIL",
+  "mode": "WRONG",
+  "n_pass": 0,
+  "assert_modes": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "exec_detail": null,
+  "canon_asserts": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ]
+ },
+ {
+  "task_id": 493,
+  "label": "FAIL",
+  "mode": "SYNTAX",
+  "n_pass": 0,
+  "assert_modes": [],
+  "exec_detail": "SyntaxError",
+  "canon_asserts": []
+ }
+]

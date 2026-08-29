@@ -1,0 +1,1093 @@
+{
+  "config": {
+    "seed": 1,
+    "models": [
+      "meta-llama/llama-3.1-70b-instruct",
+      "google/gemma-2-27b-it",
+      "mistralai/mistral-small-3.2-24b-instruct",
+      "microsoft/phi-4"
+    ],
+    "methods": [
+      "COT",
+      "DECOMP",
+      "CODE"
+    ],
+    "k_samples": 4,
+    "n_items": 80
+  },
+  "data_integrity": {
+    "total": 1600,
+    "failed_402": 0,
+    "failed_fraction": 0.0,
+    "per_group": {
+      "meta-llama/llama-3.1-70b-instruct|COT": {
+        "failed": 0,
+        "n": 80
+      },
+      "meta-llama/llama-3.1-70b-instruct|DECOMP": {
+        "failed": 0,
+        "n": 80
+      },
+      "meta-llama/llama-3.1-70b-instruct|CODE": {
+        "failed": 0,
+        "n": 80
+      },
+      "google/gemma-2-27b-it|COT": {
+        "failed": 0,
+        "n": 80
+      },
+      "google/gemma-2-27b-it|DECOMP": {
+        "failed": 0,
+        "n": 80
+      },
+      "google/gemma-2-27b-it|CODE": {
+        "failed": 0,
+        "n": 80
+      },
+      "mistralai/mistral-small-3.2-24b-instruct|COT": {
+        "failed": 0,
+        "n": 80
+      },
+      "mistralai/mistral-small-3.2-24b-instruct|DECOMP": {
+        "failed": 0,
+        "n": 80
+      },
+      "mistralai/mistral-small-3.2-24b-instruct|CODE": {
+        "failed": 0,
+        "n": 80
+      },
+      "microsoft/phi-4|COT": {
+        "failed": 0,
+        "n": 80
+      },
+      "microsoft/phi-4|DECOMP": {
+        "failed": 0,
+        "n": 80
+      },
+      "microsoft/phi-4|CODE": {
+        "failed": 0,
+        "n": 80
+      },
+      "meta-llama/llama-3.1-70b-instruct|CONTROL": {
+        "failed": 0,
+        "n": 80
+      },
+      "google/gemma-2-27b-it|CONTROL": {
+        "failed": 0,
+        "n": 80
+      },
+      "mistralai/mistral-small-3.2-24b-instruct|CONTROL": {
+        "failed": 0,
+        "n": 80
+      },
+      "microsoft/phi-4|CONTROL": {
+        "failed": 0,
+        "n": 80
+      },
+      "meta-llama/llama-3.1-70b-instruct|M1COT": {
+        "failed": 0,
+        "n": 320
+      }
+    }
+  },
+  "GATE_B": {
+    "n_items": 80,
+    "n_control_valid": 72,
+    "attractor_hit_rate_per_agent": {
+      "llama-3.1-70b-instruct|COT": 0.0278,
+      "llama-3.1-70b-instruct|DECOMP": 0.0972,
+      "llama-3.1-70b-instruct|CODE": 0.2222,
+      "gemma-2-27b-it|COT": 0.3056,
+      "gemma-2-27b-it|DECOMP": 0.3611,
+      "gemma-2-27b-it|CODE": 0.3333,
+      "mistral-small-3.2-24b-instruct|COT": 0.0556,
+      "mistral-small-3.2-24b-instruct|DECOMP": 0.0556,
+      "mistral-small-3.2-24b-instruct|CODE": 0.125,
+      "phi-4|COT": 0.0,
+      "phi-4|DECOMP": 0.0,
+      "phi-4|CODE": 0.0694
+    },
+    "mean_wrong_per_item_density": 2.097,
+    "median_attractor_concentration": 1.0,
+    "n_attractor_items_ge3_hits": 22,
+    "space_bins_valid_items": {
+      "MID": 1,
+      "CONSTRAINED": 70,
+      "LARGE": 1
+    },
+    "median_distinct_wrong": 1.0,
+    "thresholds": {
+      "min_attractor_items": 25,
+      "min_concentration": 0.5,
+      "min_density": 3.0,
+      "min_hits": 3
+    },
+    "REGIME_VALID": false
+  },
+  "space_cardinality_full": [
+    {
+      "q": 0,
+      "id": "i_classic_00",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "m_wrong": 6,
+      "distinct_wrong": 4,
+      "simpson": 0.2,
+      "attractor_hits": 3,
+      "attractor_concentration": 0.5,
+      "space": "MID"
+    },
+    {
+      "q": 1,
+      "id": "i_classic_01",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 2,
+      "id": "i_classic_02",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "m_wrong": 6,
+      "distinct_wrong": 6,
+      "simpson": 0.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "LARGE"
+    },
+    {
+      "q": 3,
+      "id": "i_classic_03",
+      "category": "i_classic",
+      "control_mode": "memorized",
+      "m_wrong": 7,
+      "distinct_wrong": 3,
+      "simpson": 0.3333,
+      "attractor_hits": 2,
+      "attractor_concentration": 0.2857,
+      "space": "MID"
+    },
+    {
+      "q": 4,
+      "id": "i_classic_04",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 2,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 5,
+      "id": "i_classic_05",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 6,
+      "id": "i_classic_06",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 1,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 7,
+      "id": "i_classic_07",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 1,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 8,
+      "id": "i_classic_08",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 9,
+      "id": "i_classic_09",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 10,
+      "id": "i_classic_10",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 11,
+      "id": "i_classic_11",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 12,
+      "id": "i_classic_12",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 13,
+      "id": "i_classic_13",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 14,
+      "id": "i_classic_14",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 15,
+      "id": "i_classic_15",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 16,
+      "id": "i_classic_16",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 17,
+      "id": "i_classic_17",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 18,
+      "id": "i_classic_18",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 19,
+      "id": "i_classic_19",
+      "category": "i_classic",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 20,
+      "id": "iii_substitution_00",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 21,
+      "id": "iii_substitution_01",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 22,
+      "id": "iii_substitution_02",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 23,
+      "id": "iii_substitution_03",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 24,
+      "id": "iii_substitution_04",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 25,
+      "id": "iii_substitution_05",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 26,
+      "id": "iii_substitution_06",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 27,
+      "id": "iii_substitution_07",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 28,
+      "id": "iii_substitution_08",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 29,
+      "id": "iii_substitution_09",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 30,
+      "id": "iii_substitution_10",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 31,
+      "id": "iii_substitution_11",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 32,
+      "id": "iii_substitution_12",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 33,
+      "id": "iii_substitution_13",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 34,
+      "id": "iii_substitution_14",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 35,
+      "id": "iii_substitution_15",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 36,
+      "id": "iii_substitution_16",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 37,
+      "id": "iii_substitution_17",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 38,
+      "id": "iii_substitution_18",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 39,
+      "id": "iii_substitution_19",
+      "category": "iii_substitution",
+      "control_mode": "memorized",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 40,
+      "id": "ii_noop_00",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 5,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 5,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 41,
+      "id": "ii_noop_01",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 7,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 7,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 42,
+      "id": "ii_noop_02",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 1,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 43,
+      "id": "ii_noop_03",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 2,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 44,
+      "id": "ii_noop_04",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 2,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 45,
+      "id": "ii_noop_05",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 7,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 7,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 46,
+      "id": "ii_noop_06",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 5,
+      "distinct_wrong": 2,
+      "simpson": 0.6,
+      "attractor_hits": 4,
+      "attractor_concentration": 0.8,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 47,
+      "id": "ii_noop_07",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 4,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 4,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 48,
+      "id": "ii_noop_08",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 9,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 9,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 49,
+      "id": "ii_noop_09",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": 0.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 50,
+      "id": "ii_noop_10",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 3,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 51,
+      "id": "ii_noop_11",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 2,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 2,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 52,
+      "id": "ii_noop_12",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 5,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 5,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 53,
+      "id": "ii_noop_13",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 4,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 4,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 54,
+      "id": "ii_noop_14",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 3,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 55,
+      "id": "ii_noop_15",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 6,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 6,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 56,
+      "id": "ii_noop_16",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 1,
+      "distinct_wrong": 1,
+      "simpson": null,
+      "attractor_hits": 1,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 57,
+      "id": "ii_noop_17",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 3,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 58,
+      "id": "ii_noop_18",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 6,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 6,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 59,
+      "id": "ii_noop_19",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 6,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 6,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 60,
+      "id": "ii_noop_20",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 4,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 4,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 61,
+      "id": "ii_noop_21",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 4,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 4,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 62,
+      "id": "ii_noop_22",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 7,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 7,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 63,
+      "id": "ii_noop_23",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 64,
+      "id": "ii_noop_24",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 3,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 65,
+      "id": "ii_noop_25",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 3,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 3,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 66,
+      "id": "ii_noop_26",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 6,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 6,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 67,
+      "id": "ii_noop_27",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 5,
+      "distinct_wrong": 1,
+      "simpson": 1.0,
+      "attractor_hits": 5,
+      "attractor_concentration": 1.0,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 68,
+      "id": "ii_noop_28",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 69,
+      "id": "ii_noop_29",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 70,
+      "id": "ii_noop_30",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 71,
+      "id": "ii_noop_31",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 72,
+      "id": "ii_noop_32",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 73,
+      "id": "ii_noop_33",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 74,
+      "id": "ii_noop_34",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 75,
+      "id": "ii_noop_35",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 76,
+      "id": "ii_noop_36",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 77,
+      "id": "ii_noop_37",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 78,
+      "id": "ii_noop_38",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    },
+    {
+      "q": 79,
+      "id": "ii_noop_39",
+      "category": "ii_noop",
+      "control_mode": "competence",
+      "m_wrong": 0,
+      "distinct_wrong": 0,
+      "simpson": null,
+      "attractor_hits": 0,
+      "attractor_concentration": null,
+      "space": "CONSTRAINED"
+    }
+  ],
+  "DECISION": {
+    "case": "ROUTE_2_UNFALSIFIABLE_IN_PRACTICE",
+    "reason": "Three successive designs (MBPP constrained, MATH open, and this adversarial attractor induction) failed to produce a testable dense-open-error regime. GATE B not met: see counts. Terminal \u2014 commit to Route 1."
+  }
+}

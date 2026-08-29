@@ -1,0 +1,45 @@
+{
+  "config": {
+    "seed": 0,
+    "n_problems": 40,
+    "task": "2-digit x 2-digit multiplication",
+    "models": [
+      "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "HuggingFaceTB/SmolLM2-360M-Instruct",
+      "Qwen/Qwen2.5-0.5B-Instruct"
+    ],
+    "families": [
+      "smollm",
+      "smollm",
+      "qwen"
+    ]
+  },
+  "per_model_acc": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "abs_convergence_mean": 0.3333,
+  "permutation_null_mean": 0.3333,
+  "convergence_minus_null": 0.0,
+  "within_family_convergence": 1.0,
+  "cross_family_convergence": 0.0,
+  "obs_matrix": [
+    [
+      null,
+      1.0,
+      0.0
+    ],
+    [
+      1.0,
+      null,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      null
+    ]
+  ],
+  "wall_seconds": 275.8
+}

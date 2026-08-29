@@ -60,7 +60,7 @@ HALT = "HALT"
 def _hash(seq: int, kind: str, payload: dict, at_ns: int, prev: str) -> str:
     body = json.dumps({"seq": seq, "kind": kind, "payload": payload,
                        "at_ns": at_ns, "prev": prev},
-                      sort_keys=True, separators=(",", ":")).encode()
+                      sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return blake3.blake3(body).hexdigest()
 
 
@@ -126,7 +126,7 @@ class ReviewQueue:
                 "INSERT INTO review_log (seq, record_id, kind, payload, at_ns,"
                 " prev_hash, hash) VALUES (?,?,?,?,?,?,?)",
                 (seq, record_id, kind,
-                 json.dumps(payload, sort_keys=True, separators=(",", ":")),
+                 json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False),
                  at, prev, h))
             conn.commit()
             return h
@@ -223,23 +223,43 @@ class ReviewQueue:
         }
 
 
-def check_cadence(queue: "ReviewQueue", harm_registry, actions_since_origin: int,
+def check_cadence(queue: "ReviewQueue", cadence_actions, actions_since_origin: int,
                   harm_class: str = "H6_unsupervised_actions") -> Escalation | None:
     """Open an escalation if the review cadence has been reached.
+
+    THE INTERVAL IS A SIGNED POLICY VALUE, NOT A HARM BOUND. Until 2026-08-21
+    this read `harm_registry.bound("H6_unsupervised_actions")`, which made the
+    cadence a harm class whose "bound" of 10,000 asserted only that the agent
+    had not yet run 10,000 actions -- a timer, and R-EVID Part B measured its
+    evidence at exactly 0. A timer is precisely what a cadence SHOULD be, so
+    the mechanism was always right and only the classification was wrong. The
+    interval now comes from the guard configuration's signed `policy` as
+    `review_cadence_actions`, still signed by the same authority.
+
+    `cadence_actions` accepts an int, or a registry-like object for
+    compatibility with callers that still pass one -- resolved below rather
+    than at the call sites, so a stale caller degrades to the old lookup
+    instead of silently disabling the cadence.
 
     IDEMPOTENT BY CONSTRUCTION. If an escalation for this class is already
     pending, none is opened: a check that fired once per call would flood the
     queue and make `oldest_pending` meaningless, and a reviewer facing ten
     thousand identical rows reviews none of them.
 
-    Returns the escalation if one was opened, else None. Never raises on an
-    unbounded class -- an undeclared bound is a separate condition, already
-    reported by `readiness()`, and conflating them would hide one behind the
-    other.
+    Returns the escalation if one was opened, else None. A missing interval
+    returns None -- "no cadence configured" is a separate condition, already
+    reported by `readiness()`, and conflating it with "not yet due" would hide
+    one behind the other.
     """
-    try:
-        bound = harm_registry.bound(harm_class)
-    except Exception:  # noqa: BLE001 - unbounded is reported elsewhere
+    if isinstance(cadence_actions, (int, float)) and not isinstance(
+            cadence_actions, bool):
+        bound = float(cadence_actions)
+    else:
+        try:                     # legacy: a harm registry was passed
+            bound = float(cadence_actions.bound(harm_class))
+        except Exception:        # noqa: BLE001 - unconfigured is reported elsewhere
+            return None
+    if bound <= 0:
         return None
     if actions_since_origin < bound:
         return None
@@ -251,5 +271,77 @@ def check_cadence(queue: "ReviewQueue", harm_registry, actions_since_origin: int
                f"since the accounting origin, declared cadence {bound:,.0f}")
 
 
+def _signed_cadence_actions(bounds_file: "str | None" = None) -> "int | None":
+    """Read `review_cadence_actions` from the guard configuration's policy.
+
+    Returns None when absent, and the caller treats that as a wiring failure
+    rather than a zero -- an absent cadence is "nobody reviews", which must not
+    read as "reviewed continuously".
+    """
+    import json
+    from pathlib import Path as _P
+
+    from gyza.config import load_config
+    path = bounds_file or load_config().guard_bounds_path
+    try:
+        doc = json.loads(_P(path).read_text())
+    except Exception:                                        # noqa: BLE001
+        return None
+    cfg = doc.get("config", doc)
+    v = (cfg.get("policy") or {}).get("review_cadence_actions")
+    return int(v) if isinstance(v, (int, float)) and v > 0 else None
+
+
+def default_cadence_wiring(review_db_path: "str | None" = None,
+                           bounds_file: "str | None" = None):
+    """Build H6's consumer for `AgentRunner`, or `(None, None, 0)` if it cannot.
+
+    THIS EXISTS BECAUSE THE CADENCE NEVER RAN. `AgentRunner` accepts
+    `review_queue` / `harm_registry` / `cadence_origin_ns`, and **no production
+    construction supplied any of them**, so `self._review_queue` was always
+    None and `check_cadence` was never called. Meanwhile
+    `network/global_cluster.py` records the design decision that followed H1's
+    retirement -- *"Autonomy is bounded instead by H6 (actions), checked in the
+    runner"* -- which was FALSE IN PRODUCTION for exactly that reason. H1 was
+    retired and its stated replacement was never wired, so nothing bounded
+    autonomy at all.
+
+    The comment directly above the runner's own cadence check says "the queue
+    is the same unconsumed-surface defect one layer up". It anticipated this
+    defect and was an instance of it.
+
+    THE ORIGIN IS GENESIS (0) AND MUST STAY THERE. H6 is cumulative, and a
+    cumulative bound whose origin can move is not a bound -- an origin at
+    process start refills the budget on restart (ledger artifact #13). This
+    matches what `gyza status` reports, so the operator's displayed position
+    and the runner's enforced position are the SAME number.
+
+    Returns `(None, None, 0)` on any failure: a review path that cannot open
+    must not be the reason an agent refuses to run, and the honest state is
+    then "cadence not watched", which `readiness()` already reports.
+    """
+    try:
+        from gyza.config import load_config
+        from gyza.containment.gyza_model import build_registries
+
+        if review_db_path is None:
+            review_db_path = load_config().review_db_path
+        # THE INTERVAL COMES FROM THE SIGNED `policy`, not from a harm class.
+        # H6 was retired as a harm class on 2026-08-21 (evidence 0); the
+        # cadence it drives is unchanged at 10,000 and is still signed.
+        cadence = _signed_cadence_actions(bounds_file)
+        if cadence is None:
+            raise RuntimeError(
+                "no review_cadence_actions in the guard configuration's "
+                "policy; the cadence would silently never fire")
+        return ReviewQueue(review_db_path), cadence, 0
+    except Exception:  # noqa: BLE001
+        import logging
+        logging.getLogger("gyza.containment.review").warning(
+            "[review] cadence not wired; H6 will not escalate", exc_info=True)
+        return None, None, 0
+
+
 __all__ = ["ReviewQueue", "Escalation", "Review", "RESUME", "HALT",
+           "default_cadence_wiring",
            "check_cadence"]

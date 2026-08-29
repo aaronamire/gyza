@@ -269,7 +269,7 @@ if [[ "${GYZA_DEPLOY_DEMO_AGENT:-0}" != "1" ]]; then
 else
 echo "    installing gyza Python package for demo agent"
 # bubblewrap is required so the demo agent can execute its inner
-# LLM call inside a kernel-enforced sandbox (the bounds-proof base
+# LLM call inside an OS-enforced sandbox (the bounds-proof base
 # layer — see sandbox_config_from_manifest). Without it the
 # sandbox falls back to NONE and the bounds-proof is invalid.
 apt-get install -y -qq python3-venv python3-pip build-essential python3-dev bubblewrap >/dev/null

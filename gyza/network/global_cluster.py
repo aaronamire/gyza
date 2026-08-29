@@ -238,6 +238,16 @@ class GlobalCluster:
             self._supervisor.start()
             self._netd = self._supervisor.client
 
+        # H3's measurand, built ONCE and shared by every client this node
+        # constructs. Before this existed, `EgressRecorder` had zero production
+        # constructors and every send path short-circuited on `recorder is
+        # None`, so H3 measured 0 in every production evaluation while being
+        # registered as a measured harm class -- the condition H2 was retired
+        # for. `None` here preserves the old behaviour rather than failing.
+        from gyza.containment.egress import default_egress_recorder
+        self._egress_recorder = default_egress_recorder(
+            self._config.resolved_paths()["blackboard_db_path"])
+
         # If clients weren't injected, spawn the daemon and connect.
         if self._netd is None:
             socket_path = self._config.resolved_paths()["netd_socket_path"]
@@ -245,7 +255,8 @@ class GlobalCluster:
             # user already has gyza-netd running, we attach to it
             # rather than spawning a competitor (which would trip the
             # "address already in use" failure on listen-port bind).
-            probe = NetdClient(socket_path)
+            probe = NetdClient(socket_path,
+                               egress_recorder=self._egress_recorder)
             if probe.is_running():
                 LOG.info("[global] attaching to existing netd at %s", socket_path)
                 self._netd = probe
@@ -262,11 +273,13 @@ class GlobalCluster:
                     log_level="info",
                     startup_timeout_s=10.0,
                 )
-                self._netd = NetdClient(socket_path)
+                self._netd = NetdClient(
+                    socket_path, egress_recorder=self._egress_recorder)
 
         if self._gossip is None:
             socket_path = self._config.resolved_paths()["netd_socket_path"]
-            self._gossip = GossipClient(socket_path)
+            self._gossip = GossipClient(
+                socket_path, egress_recorder=self._egress_recorder)
 
         self._registry = PeerRegistry(self._netd)
         # Audit-before-cosign: active only when the blackboard has a
@@ -304,6 +317,18 @@ class GlobalCluster:
         # does not exist so it cannot be revived silently.
         #
         # Autonomy is bounded instead by H6 (actions), checked in the runner.
+        #
+        # THAT SENTENCE WAS FALSE IN PRODUCTION UNTIL 2026-08-19, and it is the
+        # reason to distrust a design note that names a bound without naming
+        # its wiring. `AgentRunner` accepts `review_queue` / `harm_registry` /
+        # `cadence_origin_ns` and NO production construction supplied any of
+        # them, so `self._review_queue` was always None, `check_cadence` never
+        # ran, and H6 -- the stated REPLACEMENT for the retired H1 -- bounded
+        # nothing. Nothing bounded autonomy at all.
+        #
+        # `run_local_task` now supplies them via `default_cadence_wiring()`.
+        # This cluster path does not construct an `AgentRunner`; when it does,
+        # it must supply them too.
         harm_guard = None
 
         self._settlement = LedgerSettlementService(
@@ -738,6 +763,7 @@ class GlobalCluster:
             from gyza.network.netd_client import CapabilityClient
             cap = CapabilityClient(
                 self._config.resolved_paths()["netd_socket_path"],
+                egress_recorder=getattr(self, "_egress_recorder", None),
             )
         try:
             cert = cap.fetch_attestation(compositor_pubkey)

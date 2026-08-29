@@ -1,0 +1,27 @@
+{
+ "n": 215,
+ "joint": {
+  "DECLARATIVE": {},
+  "COMMISSIVE": {},
+  "DIRECTIVE": {
+   "INTERNAL": 30,
+   "EXOGENOUS": 3,
+   "UNDERDETERMINED": 13
+  },
+  "ASSERTIVE": {
+   "INTERNAL": 99,
+   "EXOGENOUS": 23,
+   "CONTESTED": 12,
+   "UNDERDETERMINED": 35
+  }
+ },
+ "f": 0.20710059171597633,
+ "verdict": "CENSUS-FAVOURABLE",
+ "underdetermined_total": 48,
+ "vague_terms": 51,
+ "vague_and_underdetermined": 21,
+ "basis": {
+  "i": 117,
+  "j": 98
+ }
+}

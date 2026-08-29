@@ -1,0 +1,1079 @@
+{
+  "V1": {
+    "witness_level": {
+      "tp": 4,
+      "fn": 4,
+      "fp": 0,
+      "tn": 8,
+      "recall": 0.5,
+      "precision": 1.0,
+      "flagged_fraction": 0.05357142857142857,
+      "n_triples": 224,
+      "n_flagged": 12,
+      "detail": [
+        {
+          "guard": "G1",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "set_principal"
+          ],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G1",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "set_principal"
+          ],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "transfer"
+          ],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "transfer"
+          ],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "set_principal"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        }
+      ]
+    },
+    "pair_level": {
+      "tp": 4,
+      "fn": 4,
+      "fp": 0,
+      "tn": 8,
+      "recall": 0.5,
+      "precision": 1.0,
+      "flagged_fraction": 0.05357142857142857,
+      "n_triples": 224,
+      "n_flagged": 12,
+      "detail": [
+        {
+          "guard": "G1",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G1",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        }
+      ]
+    }
+  },
+  "V2": {
+    "witness_level": {
+      "tp": 4,
+      "fn": 4,
+      "fp": 0,
+      "tn": 8,
+      "recall": 0.5,
+      "precision": 1.0,
+      "flagged_fraction": 0.08035714285714286,
+      "n_triples": 224,
+      "n_flagged": 18,
+      "detail": [
+        {
+          "guard": "G1",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "set_principal"
+          ],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "merge_accounts",
+            "reassign",
+            "restore",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G1",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "set_principal"
+          ],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "merge_accounts",
+            "reassign",
+            "restore",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": true,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "transfer"
+          ],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "transfer"
+          ],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "set_principal"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [
+            "delete",
+            "external_send"
+          ],
+          "flagging_actions": [],
+          "outcome": "FN"
+        }
+      ]
+    },
+    "pair_level": {
+      "tp": 4,
+      "fn": 4,
+      "fp": 0,
+      "tn": 8,
+      "recall": 0.5,
+      "precision": 1.0,
+      "flagged_fraction": 0.08035714285714286,
+      "n_triples": 224,
+      "n_flagged": 18,
+      "detail": [
+        {
+          "guard": "G1",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "merge_accounts",
+            "reassign",
+            "restore",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G1",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "escrow",
+            "external_send",
+            "merge_accounts",
+            "reassign",
+            "restore",
+            "set_principal",
+            "transfer"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": true,
+          "flagged_pair_level": true,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [
+            "delete",
+            "external_send"
+          ],
+          "outcome": "TP"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G2+G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G3+G4'",
+          "harm": "h_irrev",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_drain",
+          "r9_leaked": false,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "TN"
+        },
+        {
+          "guard": "G4",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_drain",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        },
+        {
+          "guard": "G4'",
+          "harm": "h_irrev",
+          "r9_leaked": true,
+          "analyzer_flagged": false,
+          "flagged_pair_level": false,
+          "flagged_via_witness": false,
+          "r9_witness_actions": [],
+          "flagging_actions": [],
+          "outcome": "FN"
+        }
+      ]
+    }
+  },
+  "extended_curves": {
+    "G0": {
+      "drain": {
+        "1": 175000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "irrev": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 134
+      },
+      "recoverable": false
+    },
+    "G1": {
+      "drain": {
+        "1": 175000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "irrev": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "recoverable": false
+    },
+    "G2": {
+      "drain": {
+        "1": 175000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "irrev": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 132
+      },
+      "recoverable": false
+    },
+    "G3": {
+      "drain": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "irrev": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "recoverable": true
+    },
+    "G4": {
+      "drain": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      },
+      "irrev": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "recoverable": false
+    },
+    "G4'": {
+      "drain": {
+        "1": 175000,
+        "5": 175000,
+        "10": 175000,
+        "25": 175000,
+        "50": 175000,
+        "100": 175000,
+        "200": 175000
+      },
+      "irrev": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "recoverable": false
+    },
+    "G2+G3": {
+      "drain": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "irrev": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "recoverable": true
+    },
+    "G2+G4": {
+      "drain": {
+        "1": 25,
+        "5": 50,
+        "10": 50,
+        "25": 50,
+        "50": 50,
+        "100": 50,
+        "200": 50
+      },
+      "irrev": {
+        "1": 1,
+        "5": 5,
+        "10": 10,
+        "25": 25,
+        "50": 50,
+        "100": 100,
+        "200": 129
+      },
+      "recoverable": false
+    },
+    "G3+G4'": {
+      "drain": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "irrev": {
+        "1": 0,
+        "5": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "100": 0,
+        "200": 0
+      },
+      "recoverable": true
+    }
+  }
+}

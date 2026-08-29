@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -370,4 +371,142 @@ func mustPID(t *testing.T, s string) peer.ID {
 		t.Fatalf("peer.Decode %q: %v", s, err)
 	}
 	return pid
+}
+
+// THE RELAY FREE-RIDER WATCH MUST NOT FIRE ON A NODE THAT CANNOT SERVE.
+//
+// --autorelay defaults true (this node USES relays) and
+// --enable-relay-service defaults false (this node PROVIDES none), so by
+// default every node consumes relay capacity and none supplies it. That
+// default is CORRECT behind NAT -- such a node genuinely cannot relay -- and
+// the only case worth reporting is a node that is confirmed reachable and
+// still declines. A warning that fires on correct configurations is one
+// operators mute, and then it is absent for the case it was written for.
+//
+// On a loopback-only test host there is no AutoNAT-confirmed public address,
+// so this asserts silence. That is the common deployment shape, not an edge.
+func TestRelayWatchIsSilentWithoutConfirmedReachability(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	id := makeIdentity(t)
+
+	mgr := nat.NewManager(nat.Config{
+		EnableHolePunching: true,
+		EnableAutoRelay:    true,
+		EnableRelayService: false, // the free-rider default
+	})
+	h, err := host.NewHost(ctx, host.Config{
+		Identity: id, ListenPort: 0, ExtraOptions: mgr.LibP2POptions(),
+	})
+	if err != nil {
+		t.Fatalf("host.NewHost: %v", err)
+	}
+	defer func() { _ = h.Close() }()
+	mgr.SetHost(h)
+
+	if addr := mgr.ConfirmedPublicAddr(); addr != "" {
+		t.Skipf("this host has a confirmed public address (%s); the silence "+
+			"this test asserts does not apply", addr)
+	}
+
+	var mu sync.Mutex
+	var lines []string
+	logf := func(format string, _ ...any) {
+		mu.Lock()
+		defer mu.Unlock()
+		lines = append(lines, format)
+	}
+
+	wctx, stop := context.WithCancel(ctx)
+	defer stop()
+	mgr.WatchRelayContribution(wctx, 10*time.Millisecond, 20*time.Millisecond, logf)
+	time.Sleep(400 * time.Millisecond)
+
+	mu.Lock()
+	defer mu.Unlock()
+	for _, l := range lines {
+		if strings.Contains(l, "not serving as a circuit relay") {
+			t.Fatalf("warned a node with no confirmed public address: %q", l)
+		}
+	}
+}
+
+// A node already running the relay service is never nagged: the watch returns
+// before starting a goroutine at all.
+func TestRelayWatchIsSilentWhenAlreadyContributing(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	mgr := nat.NewManager(nat.Config{EnableRelayService: true})
+
+	var mu sync.Mutex
+	var lines []string
+	logf := func(format string, _ ...any) {
+		mu.Lock()
+		defer mu.Unlock()
+		lines = append(lines, format)
+	}
+	mgr.WatchRelayContribution(ctx, 0, 10*time.Millisecond, logf)
+	time.Sleep(200 * time.Millisecond)
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(lines) != 0 {
+		t.Fatalf("nagged a node that is already relaying: %v", lines)
+	}
+}
+
+// ConfirmedPublicAddr must be STRICTLY narrower than ObservedAddr, which falls
+// back to unconfirmed and then to any non-loopback address. If they ever agree
+// on a host with no confirmation, the narrowing was lost and the watch would
+// warn NATed nodes -- exactly the false positive it is built to avoid.
+func TestConfirmedPublicAddrIsNarrowerThanObservedAddr(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	id := makeIdentity(t)
+
+	mgr := nat.NewManager(nat.Config{EnableHolePunching: true})
+	h, err := host.NewHost(ctx, host.Config{
+		Identity: id, ListenPort: 0, ExtraOptions: mgr.LibP2POptions(),
+	})
+	if err != nil {
+		t.Fatalf("host.NewHost: %v", err)
+	}
+	defer func() { _ = h.Close() }()
+	mgr.SetHost(h)
+
+	if confirmed := mgr.ConfirmedPublicAddr(); confirmed != "" {
+		// Not a failure by itself, but then it must be genuinely confirmed --
+		// and it must also be something ObservedAddr would return.
+		if obs := mgr.ObservedAddr(); obs == "" {
+			t.Fatalf("ConfirmedPublicAddr returned %q while ObservedAddr "+
+				"returned nothing; confirmed must be a SUBSET of observed",
+				confirmed)
+		}
+	}
+}
+
+// Every combination of the relay-contribution policy, including the one the
+// silence tests structurally cannot reach.
+func TestRelayWarningPolicy(t *testing.T) {
+	cases := []struct {
+		name     string
+		addr     string
+		relaying bool
+		want     bool
+	}{
+		{"reachable and declining -- the only case worth reporting",
+			"/ip4/1.2.3.4/udp/7749/quic-v1", false, true},
+		{"reachable and already relaying", "/ip4/1.2.3.4/udp/7749/quic-v1", true, false},
+		{"behind NAT and not relaying -- the correct default, never nag", "", false, false},
+		{"behind NAT but relaying anyway", "", true, false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := nat.RelayWarningWarranted(c.addr, c.relaying); got != c.want {
+				t.Fatalf("RelayWarningWarranted(%q, %v) = %v, want %v",
+					c.addr, c.relaying, got, c.want)
+			}
+		})
+	}
 }

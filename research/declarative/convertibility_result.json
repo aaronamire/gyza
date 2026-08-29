@@ -1,0 +1,14 @@
+{
+ "assertive": 7,
+ "convertible": 0,
+ "decl_now": 10,
+ "decl_max": 10,
+ "n": 18,
+ "decl_share_now": 0.5555555555555556,
+ "decl_share_max": 0.5555555555555556,
+ "constituted_decl_share": 0.7692307692307693,
+ "observed_decl_share": 0.0,
+ "external_convertible": 0,
+ "external_sample": 30,
+ "judgement_fraction": 0.7142857142857143
+}

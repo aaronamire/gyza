@@ -91,6 +91,9 @@ class Escalation:
 
 @dataclass
 class PromotionResult:
+    #: See StagingArea.NON_ADOPTED.
+    NON_ADOPTED = ("result type of PromotionGate, which is NON_ADOPTED; "
+                   "transitively unreachable from any adopted path.")
     promoted: bool
     batch_size: int
     decision: Decision | None = None
@@ -101,6 +104,14 @@ class PromotionResult:
 class StagingArea:
     """The append-only interior. Nothing written here is visible to
     `baseline_state()` until it is promoted."""
+    #: Read by tests/test_declared_is_wired.py. A component with zero
+    #: production constructions is either a DEFECT or a DELIBERATE choice,
+    #: and only the source can say which -- so the exemption lives HERE
+    #: rather than in a list inside the test, where it would rot silently.
+    NON_ADOPTED = ("staged-interior/promotion-boundary execution model; "
+                   "AgentRunner implements execute-then-sign instead. An "
+                   "alternative production did not adopt, not an unwired "
+                   "copy of production -- see the module header.")
 
     def __init__(self, projector: Callable[[list[Event]], object],
                  reversibility: ReversibilityTable | None = None,
@@ -273,6 +284,9 @@ class StagingArea:
 class PromotionGate:
     """C-6. Batched, SERIALIZED, and the only place cumulative invariants are
     evaluated."""
+    #: See StagingArea.NON_ADOPTED.
+    NON_ADOPTED = ("half of the non-adopted execution model above; it "
+                   "gates promotions that AgentRunner never stages.")
 
     def __init__(self, engine: GuardEngine, staging: StagingArea):
         self._engine = engine

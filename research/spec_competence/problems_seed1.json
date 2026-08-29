@@ -1,0 +1,552 @@
+[
+ {
+  "i": 0,
+  "fn": "multiples_of_num",
+  "prompt": "Write a function to find m number of multiples of n.",
+  "code": "def multiples_of_num(m,n): \r\n    multiples_of_num= list(range(n,(m+1)*n, n)) \r\n    return list(multiples_of_num)",
+  "tests": [
+   "assert multiples_of_num(4,3)== [3,6,9,12]",
+   "assert multiples_of_num(2,5)== [5,10]",
+   "assert multiples_of_num(9,2)== [2,4,6,8,10,12,14,16,18]"
+  ]
+ },
+ {
+  "i": 1,
+  "fn": "check_k_elements",
+  "prompt": "Write a function to check if the given tuple list has all k elements.",
+  "code": "def check_k_elements(test_list, K):\r\n  res = True\r\n  for tup in test_list:\r\n    for ele in tup:\r\n      if ele != K:\r\n        res = False\r\n  return (res) ",
+  "tests": [
+   "assert check_k_elements([(4, 4), (4, 4, 4), (4, 4), (4, 4, 4, 4), (4, )], 4) == True",
+   "assert check_k_elements([(7, 7, 7), (7, 7)], 7) == True",
+   "assert check_k_elements([(9, 9), (9, 9, 9, 9)], 7) == False"
+  ]
+ },
+ {
+  "i": 2,
+  "fn": "remove",
+  "prompt": "Write a python function to remove all digits from a list of strings.",
+  "code": "import re  \r\ndef remove(list): \r\n    pattern = '[0-9]'\r\n    list = [re.sub(pattern, '', i) for i in list] \r\n    return list",
+  "tests": [
+   "assert remove(['4words', '3letters', '4digits']) == ['words', 'letters', 'digits']",
+   "assert remove(['28Jan','12Jan','11Jan']) == ['Jan','Jan','Jan']",
+   "assert remove(['wonder1','wonder2','wonder3']) == ['wonder','wonder','wonder']"
+  ]
+ },
+ {
+  "i": 3,
+  "fn": "freq_element",
+  "prompt": "Write a function to find frequency of the elements in a given list of lists using collections module.",
+  "code": "from collections import Counter\r\nfrom itertools import chain\r\ndef freq_element(nums):\r\n  result = Counter(chain.from_iterable(nums))\r\n  return result",
+  "tests": [
+   "assert freq_element([[1, 2, 3, 2], [4, 5, 6, 2], [7, 1, 9, 5]])==({2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1})",
+   "assert freq_element([[1,2,3,4],[5,6,7,8],[9,10,11,12]])==({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1})",
+   "assert freq_element([[15,20,30,40],[80,90,100,110],[30,30,80,90]])==({30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1})"
+  ]
+ },
+ {
+  "i": 4,
+  "fn": "test_distinct",
+  "prompt": "Write a python function to determine whether all the numbers are different from each other are not.",
+  "code": "def test_distinct(data):\r\n  if len(data) == len(set(data)):\r\n    return True\r\n  else:\r\n    return False;",
+  "tests": [
+   "assert test_distinct([1,5,7,9]) == True",
+   "assert test_distinct([2,4,5,5,7,9]) == False",
+   "assert test_distinct([1,2,3]) == True"
+  ]
+ },
+ {
+  "i": 5,
+  "fn": "compute_Last_Digit",
+  "prompt": "Write a python function to find the last digit when factorial of a divides factorial of b.",
+  "code": "def compute_Last_Digit(A,B): \r\n    variable = 1\r\n    if (A == B): \r\n        return 1\r\n    elif ((B - A) >= 5):  \r\n        return 0\r\n    else:   \r\n        for i in range(A + 1,B + 1): \r\n            variable = (variable * (i % 10)) % 10\r\n        return variable % 10",
+  "tests": [
+   "assert compute_Last_Digit(2,4) == 2",
+   "assert compute_Last_Digit(6,8) == 6",
+   "assert compute_Last_Digit(1,2) == 2"
+  ]
+ },
+ {
+  "i": 6,
+  "fn": "min_length_list",
+  "prompt": "Write a function to find the list with minimum length using lambda function.",
+  "code": "def min_length_list(input_list):\r\n    min_length = min(len(x) for x in input_list )  \r\n    min_list = min(input_list, key = lambda i: len(i))\r\n    return(min_length, min_list)",
+  "tests": [
+   "assert min_length_list([[0], [1, 3], [5, 7], [9, 11], [13, 15, 17]])==(1, [0])",
+   "assert min_length_list([[1,2,3,4,5],[1,2,3,4],[1,2,3],[1,2],[1]])==(1,[1])",
+   "assert min_length_list([[3,4,5],[6,7,8,9],[10,11,12],[1,2]])==(2,[1,2])"
+  ]
+ },
+ {
+  "i": 7,
+  "fn": "volume_sphere",
+  "prompt": "Write a function to find the volume of a sphere.",
+  "code": "import math\r\ndef volume_sphere(r):\r\n  volume=(4/3)*math.pi*r*r*r\r\n  return volume",
+  "tests": [
+   "assert volume_sphere(10)==4188.790204786391",
+   "assert volume_sphere(25)==65449.84694978735",
+   "assert volume_sphere(20)==33510.32163829113"
+  ]
+ },
+ {
+  "i": 8,
+  "fn": "extract_missing",
+  "prompt": "Write a function to extract the ranges that are missing from the given list with the given start range and end range values.",
+  "code": "def extract_missing(test_list, strt_val, stop_val):\r\n  res = []\r\n  for sub in test_list:\r\n    if sub[0] > strt_val:\r\n      res.append((strt_val, sub[0]))\r\n      strt_val = sub[1]\r\n    if strt_val < stop_val:\r\n      res.append((strt_val, stop_val))\r\n  return (res) ",
+  "tests": [
+   "assert extract_missing([(6, 9), (15, 34), (48, 70)], 2, 100) == [(2, 6), (9, 100), (9, 15), (34, 100), (34, 48), (70, 100)]",
+   "assert extract_missing([(7, 2), (15, 19), (38, 50)], 5, 60) == [(5, 7), (2, 60), (2, 15), (19, 60), (19, 38), (50, 60)]",
+   "assert extract_missing([(7, 2), (15, 19), (38, 50)], 1, 52) == [(1, 7), (2, 52), (2, 15), (19, 52), (19, 38), (50, 52)]"
+  ]
+ },
+ {
+  "i": 9,
+  "fn": "tuple_to_int",
+  "prompt": "Write a function to convert a given tuple of positive integers into an integer.",
+  "code": "def tuple_to_int(nums):\r\n    result = int(''.join(map(str,nums)))\r\n    return result",
+  "tests": [
+   "assert tuple_to_int((1,2,3))==123",
+   "assert tuple_to_int((4,5,6))==456",
+   "assert tuple_to_int((5,6,7))==567"
+  ]
+ },
+ {
+  "i": 10,
+  "fn": "sum",
+  "prompt": "Write a python function to find the sum of common divisors of two given numbers.",
+  "code": "def sum(a,b): \r\n    sum = 0\r\n    for i in range (1,min(a,b)): \r\n        if (a % i == 0 and b % i == 0): \r\n            sum += i \r\n    return sum",
+  "tests": [
+   "assert sum(10,15) == 6",
+   "assert sum(100,150) == 93",
+   "assert sum(4,6) == 3"
+  ]
+ },
+ {
+  "i": 11,
+  "fn": "check_last",
+  "prompt": "Write a python function to check whether the last element of given array is even or odd after performing an operation p times.",
+  "code": "def check_last (arr,n,p): \r\n    _sum = 0\r\n    for i in range(n): \r\n        _sum = _sum + arr[i] \r\n    if p == 1: \r\n        if _sum % 2 == 0: \r\n            return \"ODD\"\r\n        else: \r\n            return \"EVEN\"\r\n    return \"EVEN\"\r\n      ",
+  "tests": [
+   "assert check_last([5,7,10],3,1) == \"ODD\"",
+   "assert check_last([2,3],2,3) == \"EVEN\"",
+   "assert check_last([1,2,3],3,1) == \"ODD\""
+  ]
+ },
+ {
+  "i": 12,
+  "fn": "sum_digits_twoparts",
+  "prompt": "Write a function to divide a number into two parts such that the sum of digits is maximum.",
+  "code": "def sum_digits_single(x) : \r\n    ans = 0\r\n    while x : \r\n        ans += x % 10\r\n        x //= 10  \r\n    return ans \r\ndef closest(x) : \r\n    ans = 0\r\n    while (ans * 10 + 9 <= x) : \r\n        ans = ans * 10 + 9  \r\n    return ans   \r\ndef sum_digits_twoparts(N) : \r\n    A = closest(N)  \r\n    return sum_digits_single(A) + sum_digits_single(N - A) ",
+  "tests": [
+   "assert sum_digits_twoparts(35)==17",
+   "assert sum_digits_twoparts(7)==7",
+   "assert sum_digits_twoparts(100)==19"
+  ]
+ },
+ {
+  "i": 13,
+  "fn": "merge_sort",
+  "prompt": "Write a function to sort the given array by using merge sort.",
+  "code": "def merge(a,b):\r\n    c = []\r\n    while len(a) != 0 and len(b) != 0:\r\n        if a[0] < b[0]:\r\n            c.append(a[0])\r\n            a.remove(a[0])\r\n        else:\r\n            c.append(b[0])\r\n            b.remove(b[0])\r\n    if len(a) == 0:\r\n        c += b\r\n    else:\r\n        c += a\r\n    return c\r\ndef merge_sort(x):\r\n    if len(x) == 0 or len(x) == 1:\r\n        return x\r\n    else:\r\n        middle = len(x)//2\r\n        a = merge_sort(x[:middle])\r\n        b = merge_sort(x[middle:])\r\n        return merge(a,b)\r\n",
+  "tests": [
+   "assert merge_sort([3, 4, 2, 6, 5, 7, 1, 9]) == [1, 2, 3, 4, 5, 6, 7, 9]",
+   "assert merge_sort([7, 25, 45, 78, 11, 33, 19]) == [7, 11, 19, 25, 33, 45, 78]",
+   "assert merge_sort([3, 1, 4, 9, 8]) == [1, 3, 4, 8, 9]"
+  ]
+ },
+ {
+  "i": 14,
+  "fn": "min_Ops",
+  "prompt": "Write a python function to find k number of operations required to make all elements equal.",
+  "code": "def min_Ops(arr,n,k): \r\n    max1 = max(arr) \r\n    res = 0\r\n    for i in range(0,n):  \r\n        if ((max1 - arr[i]) % k != 0): \r\n            return -1 \r\n        else: \r\n            res += (max1 - arr[i]) / k \r\n    return int(res) ",
+  "tests": [
+   "assert min_Ops([2,2,2,2],4,3) == 0",
+   "assert min_Ops([4,2,6,8],4,3) == -1",
+   "assert min_Ops([21,33,9,45,63],5,6) == 24"
+  ]
+ },
+ {
+  "i": 15,
+  "fn": "remove_elements",
+  "prompt": "Write a function to remove all elements from a given list present in another list.",
+  "code": "def remove_elements(list1, list2):\r\n    result = [x for x in list1 if x not in list2]\r\n    return result",
+  "tests": [
+   "assert remove_elements([1,2,3,4,5,6,7,8,9,10],[2,4,6,8])==[1, 3, 5, 7, 9, 10]",
+   "assert remove_elements([1, 2, 3, 4, 5, 6, 7, 8, 9, 10],[1, 3, 5, 7])==[2, 4, 6, 8, 9, 10]",
+   "assert remove_elements([1, 2, 3, 4, 5, 6, 7, 8, 9, 10],[5,7])==[1, 2, 3, 4, 6, 8, 9, 10]"
+  ]
+ },
+ {
+  "i": 16,
+  "fn": "sum_series",
+  "prompt": "Write a function to calculate the sum of the positive integers of n+(n-2)+(n-4)... (until n-x =< 0).",
+  "code": "def sum_series(n):\r\n  if n < 1:\r\n    return 0\r\n  else:\r\n    return n + sum_series(n - 2)",
+  "tests": [
+   "assert sum_series(6)==12",
+   "assert sum_series(10)==30",
+   "assert sum_series(9)==25"
+  ]
+ },
+ {
+  "i": 17,
+  "fn": "perimeter_triangle",
+  "prompt": "Write a function to find the perimeter of a triangle.",
+  "code": "def perimeter_triangle(a,b,c):\r\n  perimeter=a+b+c\r\n  return perimeter",
+  "tests": [
+   "assert perimeter_triangle(10,20,30)==60",
+   "assert perimeter_triangle(3,4,5)==12",
+   "assert perimeter_triangle(25,35,45)==105"
+  ]
+ },
+ {
+  "i": 18,
+  "fn": "string_literals",
+  "prompt": "Write a function to search some literals strings in a string.",
+  "code": "import re\r\ndef string_literals(patterns,text):\r\n  for pattern in patterns:\r\n     if re.search(pattern,  text):\r\n       return ('Matched!')\r\n     else:\r\n       return ('Not Matched!')",
+  "tests": [
+   "assert string_literals(['language'],'python language')==('Matched!')",
+   "assert string_literals(['program'],'python language')==('Not Matched!')",
+   "assert string_literals(['python'],'programming language')==('Not Matched!')"
+  ]
+ },
+ {
+  "i": 19,
+  "fn": "common_prefix",
+  "prompt": "Write a function to find the longest common prefix in the given set of strings.",
+  "code": "def common_prefix_util(str1, str2): \r\n\tresult = \"\"; \r\n\tn1 = len(str1) \r\n\tn2 = len(str2) \r\n\ti = 0\r\n\tj = 0\r\n\twhile i <= n1 - 1 and j <= n2 - 1: \r\n\t\tif (str1[i] != str2[j]): \r\n\t\t\tbreak\r\n\t\tresult += str1[i] \r\n\t\ti += 1\r\n\t\tj += 1\r\n\treturn (result) \r\ndef common_prefix (arr, n): \r\n\tprefix = arr[0] \r\n\tfor i in range (1, n): \r\n\t\tprefix = common_prefix_util(prefix, arr[i]) \r\n\treturn (prefix) ",
+  "tests": [
+   "assert common_prefix([\"tablets\", \"tables\", \"taxi\", \"tamarind\"], 4) == 'ta'",
+   "assert common_prefix([\"apples\", \"ape\", \"april\"], 3) == 'ap'",
+   "assert common_prefix([\"teens\", \"teenager\", \"teenmar\"], 3) == 'teen'"
+  ]
+ },
+ {
+  "i": 20,
+  "fn": "check_literals",
+  "prompt": "Write a function to search some literals strings in a string by using regex.",
+  "code": "import re\r\ndef check_literals(text, patterns):\r\n  for pattern in patterns:\r\n    if re.search(pattern,  text):\r\n        return ('Matched!')\r\n    else:\r\n        return ('Not Matched!')",
+  "tests": [
+   "assert check_literals('The quick brown fox jumps over the lazy dog.',['fox']) == 'Matched!'",
+   "assert check_literals('The quick brown fox jumps over the lazy dog.',['horse']) == 'Not Matched!'",
+   "assert check_literals('The quick brown fox jumps over the lazy dog.',['lazy']) == 'Matched!'"
+  ]
+ },
+ {
+  "i": 21,
+  "fn": "remove_tuples",
+  "prompt": "Write a function to remove all the tuples with length k.",
+  "code": "def remove_tuples(test_list, K):\r\n  res = [ele for ele in test_list if len(ele) != K]\r\n  return (res) ",
+  "tests": [
+   "assert remove_tuples([(4, 5), (4, ), (8, 6, 7), (1, ), (3, 4, 6, 7)] , 1) == [(4, 5), (8, 6, 7), (3, 4, 6, 7)]",
+   "assert remove_tuples([(4, 5), (4,5), (6, 7), (1, 2, 3), (3, 4, 6, 7)] ,2) == [(1, 2, 3), (3, 4, 6, 7)]",
+   "assert remove_tuples([(1, 4, 4), (4, 3), (8, 6, 7), (1, ), (3, 6, 7)] , 3) == [(4, 3), (1,)]"
+  ]
+ },
+ {
+  "i": 22,
+  "fn": "heap_replace",
+  "prompt": "Write a function to delete the smallest element from the given heap and then insert a new item.",
+  "code": "import heapq as hq\r\ndef heap_replace(heap,a):\r\n  hq.heapify(heap)\r\n  hq.heapreplace(heap, a)\r\n  return heap",
+  "tests": [
+   "assert heap_replace( [25, 44, 68, 21, 39, 23, 89],21)==[21, 25, 23, 44, 39, 68, 89]",
+   "assert heap_replace([25, 44, 68, 21, 39, 23, 89],110)== [23, 25, 68, 44, 39, 110, 89]",
+   "assert heap_replace([25, 44, 68, 21, 39, 23, 89],500)==[23, 25, 68, 44, 39, 500, 89]"
+  ]
+ },
+ {
+  "i": 23,
+  "fn": "extract_min_max",
+  "prompt": "Write a function to extract maximum and minimum k elements in the given tuple.",
+  "code": "\r\ndef extract_min_max(test_tup, K):\r\n  res = []\r\n  test_tup = list(test_tup)\r\n  temp = sorted(test_tup)\r\n  for idx, val in enumerate(temp):\r\n    if idx < K or idx >= len(temp) - K:\r\n      res.append(val)\r\n  res = tuple(res)\r\n  return (res) ",
+  "tests": [
+   "assert extract_min_max((5, 20, 3, 7, 6, 8), 2) == (3, 5, 8, 20)",
+   "assert extract_min_max((4, 5, 6, 1, 2, 7), 3) == (1, 2, 4, 5, 6, 7)",
+   "assert extract_min_max((2, 3, 4, 8, 9, 11, 7), 4) == (2, 3, 4, 7, 8, 9, 11)"
+  ]
+ },
+ {
+  "i": 24,
+  "fn": "count_charac",
+  "prompt": "Write a function to count total characters in a string.",
+  "code": "def count_charac(str1):\r\n total = 0\r\n for i in str1:\r\n    total = total + 1\r\n return total",
+  "tests": [
+   "assert count_charac(\"python programming\")==18",
+   "assert count_charac(\"language\")==8",
+   "assert count_charac(\"words\")==5"
+  ]
+ },
+ {
+  "i": 25,
+  "fn": "harmonic_sum",
+  "prompt": "Write a function to calculate the harmonic sum of n-1.",
+  "code": "def harmonic_sum(n):\r\n  if n < 2:\r\n    return 1\r\n  else:\r\n    return 1 / n + (harmonic_sum(n - 1)) ",
+  "tests": [
+   "assert harmonic_sum(7) == 2.5928571428571425",
+   "assert harmonic_sum(4) == 2.083333333333333",
+   "assert harmonic_sum(19) == 3.547739657143682"
+  ]
+ },
+ {
+  "i": 26,
+  "fn": "convert",
+  "prompt": "Write a python function to convert complex numbers to polar coordinates.",
+  "code": "import cmath  \r\ndef convert(numbers):    \r\n  num = cmath.polar(numbers)  \r\n  return (num) ",
+  "tests": [
+   "assert convert(1) == (1.0, 0.0)",
+   "assert convert(4) == (4.0,0.0)",
+   "assert convert(5) == (5.0,0.0)"
+  ]
+ },
+ {
+  "i": 27,
+  "fn": "newman_prime",
+  "prompt": "Write a function to find the nth newman\u2013shanks\u2013williams prime number.",
+  "code": "def newman_prime(n): \r\n\tif n == 0 or n == 1: \r\n\t\treturn 1\r\n\treturn 2 * newman_prime(n - 1) + newman_prime(n - 2)",
+  "tests": [
+   "assert newman_prime(3) == 7 ",
+   "assert newman_prime(4) == 17",
+   "assert newman_prime(5) == 41"
+  ]
+ },
+ {
+  "i": 28,
+  "fn": "substract_elements",
+  "prompt": "Write a function to substract the contents of one tuple with corresponding index of other tuple.",
+  "code": "def substract_elements(test_tup1, test_tup2):\r\n  res = tuple(map(lambda i, j: i - j, test_tup1, test_tup2))\r\n  return (res) ",
+  "tests": [
+   "assert substract_elements((10, 4, 5), (2, 5, 18)) == (8, -1, -13)",
+   "assert substract_elements((11, 2, 3), (24, 45 ,16)) == (-13, -43, -13)",
+   "assert substract_elements((7, 18, 9), (10, 11, 12)) == (-3, 7, -3)"
+  ]
+ },
+ {
+  "i": 29,
+  "fn": "max_sub_array_sum_repeated",
+  "prompt": "Write a function to find the largest sum of contiguous array in the modified array which is formed by repeating the given array k times.",
+  "code": "def max_sub_array_sum_repeated(a, n, k): \r\n\tmax_so_far = -2147483648\r\n\tmax_ending_here = 0\r\n\tfor i in range(n*k): \r\n\t\tmax_ending_here = max_ending_here + a[i%n] \r\n\t\tif (max_so_far < max_ending_here): \r\n\t\t\tmax_so_far = max_ending_here \r\n\t\tif (max_ending_here < 0): \r\n\t\t\tmax_ending_here = 0\r\n\treturn max_so_far",
+  "tests": [
+   "assert max_sub_array_sum_repeated([10, 20, -30, -1], 4, 3) == 30",
+   "assert max_sub_array_sum_repeated([-1, 10, 20], 3, 2) == 59",
+   "assert max_sub_array_sum_repeated([-1, -2, -3], 3, 3) == -1"
+  ]
+ },
+ {
+  "i": 30,
+  "fn": "find",
+  "prompt": "Write a python function to find quotient of two numbers.",
+  "code": "def find(n,m):  \r\n    q = n//m \r\n    return (q)",
+  "tests": [
+   "assert find(10,3) == 3",
+   "assert find(4,2) == 2",
+   "assert find(20,5) == 4"
+  ]
+ },
+ {
+  "i": 31,
+  "fn": "get_Inv_Count",
+  "prompt": "Write a python function to count inversions in an array.",
+  "code": "def get_Inv_Count(arr,n): \r\n    inv_count = 0\r\n    for i in range(n): \r\n        for j in range(i + 1,n): \r\n            if (arr[i] > arr[j]): \r\n                inv_count += 1\r\n    return inv_count ",
+  "tests": [
+   "assert get_Inv_Count([1,20,6,4,5],5) == 5",
+   "assert get_Inv_Count([1,2,1],3) == 1",
+   "assert get_Inv_Count([1,2,5,6,1],5) == 3"
+  ]
+ },
+ {
+  "i": 32,
+  "fn": "count_binary_seq",
+  "prompt": "Write a function to find the count of all binary sequences of length 2n such that sum of first n bits is same as sum of last n bits.",
+  "code": "def count_binary_seq(n): \r\n\tnCr = 1\r\n\tres = 1\r\n\tfor r in range(1, n + 1): \r\n\t\tnCr = (nCr * (n + 1 - r)) / r \r\n\t\tres += nCr * nCr \r\n\treturn res ",
+  "tests": [
+   "assert count_binary_seq(1) == 2.0",
+   "assert count_binary_seq(2) == 6.0",
+   "assert count_binary_seq(3) == 20.0"
+  ]
+ },
+ {
+  "i": 33,
+  "fn": "char_frequency",
+  "prompt": "Write a function to count character frequency of a given string.",
+  "code": "def char_frequency(str1):\r\n    dict = {}\r\n    for n in str1:\r\n        keys = dict.keys()\r\n        if n in keys:\r\n            dict[n] += 1\r\n        else:\r\n            dict[n] = 1\r\n    return dict",
+  "tests": [
+   "assert char_frequency('python')=={'p': 1, 'y': 1, 't': 1, 'h': 1, 'o': 1, 'n': 1}",
+   "assert char_frequency('program')=={'p': 1, 'r': 2, 'o': 1, 'g': 1, 'a': 1, 'm': 1}",
+   "assert char_frequency('language')=={'l': 1, 'a': 2, 'n': 1, 'g': 2, 'u': 1, 'e': 1}"
+  ]
+ },
+ {
+  "i": 34,
+  "fn": "zigzag",
+  "prompt": "Write a function to find entringer number e(n, k).",
+  "code": "def zigzag(n, k): \r\n\tif (n == 0 and k == 0): \r\n\t\treturn 1\r\n\tif (k == 0): \r\n\t\treturn 0\r\n\treturn zigzag(n, k - 1) + zigzag(n - 1, n - k)",
+  "tests": [
+   "assert zigzag(4, 3) == 5",
+   "assert zigzag(4, 2) == 4",
+   "assert zigzag(3, 1) == 1"
+  ]
+ },
+ {
+  "i": 35,
+  "fn": "tn_ap",
+  "prompt": "Write a function to find t-nth term of arithemetic progression.",
+  "code": "def tn_ap(a,n,d):\r\n  tn = a + (n - 1) * d\r\n  return tn",
+  "tests": [
+   "assert tn_ap(1,5,2)==9",
+   "assert tn_ap(2,6,4)==22",
+   "assert tn_ap(1,4,5)==16"
+  ]
+ },
+ {
+  "i": 36,
+  "fn": "count_Rectangles",
+  "prompt": "Write a python function to count the number of rectangles in a circle of radius r.",
+  "code": "def count_Rectangles(radius):  \r\n    rectangles = 0 \r\n    diameter = 2 * radius \r\n    diameterSquare = diameter * diameter \r\n    for a in range(1, 2 * radius):  \r\n        for b in range(1, 2 * radius): \r\n            diagnalLengthSquare = (a * a +  b * b)  \r\n            if (diagnalLengthSquare <= diameterSquare) : \r\n                rectangles += 1\r\n    return rectangles ",
+  "tests": [
+   "assert count_Rectangles(2) == 8",
+   "assert count_Rectangles(1) == 1",
+   "assert count_Rectangles(0) == 0"
+  ]
+ },
+ {
+  "i": 37,
+  "fn": "adjacent_num_product",
+  "prompt": "Write a python function to find the largest product of the pair of adjacent elements from a given list of integers.",
+  "code": "def adjacent_num_product(list_nums):\r\n    return max(a*b for a, b in zip(list_nums, list_nums[1:]))",
+  "tests": [
+   "assert adjacent_num_product([1,2,3,4,5,6]) == 30",
+   "assert adjacent_num_product([1,2,3,4,5]) == 20",
+   "assert adjacent_num_product([2,3]) == 6"
+  ]
+ },
+ {
+  "i": 38,
+  "fn": "move_first",
+  "prompt": "Write a python function to shift last element to first position in the given list.",
+  "code": "def move_first(test_list):\r\n  test_list = test_list[-1:] + test_list[:-1]  \r\n  return test_list",
+  "tests": [
+   "assert move_first([1,2,3,4]) == [4,1,2,3]",
+   "assert move_first([0,1,2,3]) == [3,0,1,2]",
+   "assert move_first([9,8,7,1]) == [1,9,8,7]"
+  ]
+ },
+ {
+  "i": 39,
+  "fn": "highest_Power_of_2",
+  "prompt": "Write a python function to find the highest power of 2 that is less than or equal to n.",
+  "code": "def highest_Power_of_2(n): \r\n    res = 0; \r\n    for i in range(n, 0, -1): \r\n        if ((i & (i - 1)) == 0): \r\n            res = i; \r\n            break; \r\n    return res; ",
+  "tests": [
+   "assert highest_Power_of_2(10) == 8",
+   "assert highest_Power_of_2(19) == 16",
+   "assert highest_Power_of_2(32) == 32"
+  ]
+ },
+ {
+  "i": 40,
+  "fn": "max_Product",
+  "prompt": "Write a python function to find a pair with highest product from a given array of integers.",
+  "code": "def max_Product(arr): \r\n    arr_len = len(arr) \r\n    if (arr_len < 2): \r\n        return (\"No pairs exists\")           \r\n    x = arr[0]; y = arr[1]      \r\n    for i in range(0,arr_len): \r\n        for j in range(i + 1,arr_len): \r\n            if (arr[i] * arr[j] > x * y): \r\n                x = arr[i]; y = arr[j] \r\n    return x,y    ",
+  "tests": [
+   "assert max_Product([1,2,3,4,7,0,8,4]) == (7,8)",
+   "assert max_Product([0,-1,-2,-4,5,0,-6]) == (-4,-6)",
+   "assert max_Product([1,2,3]) == (2,3)"
+  ]
+ },
+ {
+  "i": 41,
+  "fn": "find_Average_Of_Cube",
+  "prompt": "Write a python function to find the average of cubes of first n natural numbers.",
+  "code": "def find_Average_Of_Cube(n):  \r\n    sum = 0\r\n    for i in range(1, n + 1): \r\n        sum += i * i * i  \r\n    return round(sum / n, 6) ",
+  "tests": [
+   "assert find_Average_Of_Cube(2) == 4.5",
+   "assert find_Average_Of_Cube(3) == 12",
+   "assert find_Average_Of_Cube(1) == 1"
+  ]
+ },
+ {
+  "i": 42,
+  "fn": "remove_odd",
+  "prompt": "Write a function to remove odd characters in a string.",
+  "code": "def remove_odd(str1):\r\n str2 = ''\r\n for i in range(1, len(str1) + 1):\r\n    if(i % 2 == 0):\r\n        str2 = str2 + str1[i - 1]\r\n return str2",
+  "tests": [
+   "assert remove_odd(\"python\")==(\"yhn\")",
+   "assert remove_odd(\"program\")==(\"rga\")",
+   "assert remove_odd(\"language\")==(\"agae\")"
+  ]
+ },
+ {
+  "i": 43,
+  "fn": "check_Triangle",
+  "prompt": "Write a python function to check whether the triangle is valid or not if 3 points are given.",
+  "code": "def check_Triangle(x1,y1,x2,y2,x3,y3): \r\n    a = (x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2))   \r\n    if a == 0: \r\n        return ('No') \r\n    else: \r\n        return ('Yes') ",
+  "tests": [
+   "assert check_Triangle(1,5,2,5,4,6) == 'Yes'",
+   "assert check_Triangle(1,1,1,4,1,5) == 'No'",
+   "assert check_Triangle(1,1,1,1,1,1) == 'No'"
+  ]
+ },
+ {
+  "i": 44,
+  "fn": "rectangle_area",
+  "prompt": "Write a function to find the area of a rectangle.",
+  "code": "def rectangle_area(l,b):\r\n  area=l*b\r\n  return area",
+  "tests": [
+   "assert rectangle_area(10,20)==200",
+   "assert rectangle_area(10,5)==50",
+   "assert rectangle_area(4,2)==8"
+  ]
+ },
+ {
+  "i": 45,
+  "fn": "remove_uppercase",
+  "prompt": "Write a function to remove uppercase substrings from a given string by using regex.",
+  "code": "import re\r\ndef remove_uppercase(str1):\r\n  remove_upper = lambda text: re.sub('[A-Z]', '', text)\r\n  result =  remove_upper(str1)\r\n  return (result)",
+  "tests": [
+   "assert remove_uppercase('cAstyoUrFavoRitETVshoWs') == 'cstyoravoitshos'",
+   "assert remove_uppercase('wAtchTheinTernEtrAdIo') == 'wtchheinerntrdo'",
+   "assert remove_uppercase('VoicESeaRchAndreComMendaTionS') == 'oiceachndreomendaion'"
+  ]
+ },
+ {
+  "i": 46,
+  "fn": "upper_ctr",
+  "prompt": "Write a python function to count the upper case characters in a given string.",
+  "code": "def upper_ctr(str):\r\n    upper_ctr = 0\r\n    for i in range(len(str)):\r\n          if str[i] >= 'A' and str[i] <= 'Z': upper_ctr += 1\r\n          return upper_ctr",
+  "tests": [
+   "assert upper_ctr('PYthon') == 1",
+   "assert upper_ctr('BigData') == 1",
+   "assert upper_ctr('program') == 0"
+  ]
+ },
+ {
+  "i": 47,
+  "fn": "area_pentagon",
+  "prompt": "Write a function to find the area of a pentagon.",
+  "code": "import math\r\ndef area_pentagon(a):\r\n  area=(math.sqrt(5*(5+2*math.sqrt(5)))*pow(a,2))/4.0\r\n  return area",
+  "tests": [
+   "assert area_pentagon(5)==43.01193501472417",
+   "assert area_pentagon(10)==172.0477400588967",
+   "assert area_pentagon(15)==387.10741513251753"
+  ]
+ },
+ {
+  "i": 48,
+  "fn": "add_consecutive_nums",
+  "prompt": "Write a function to add consecutive numbers of a given list.",
+  "code": "def add_consecutive_nums(nums):\r\n    result = [b+a for a, b in zip(nums[:-1], nums[1:])]\r\n    return result",
+  "tests": [
+   "assert add_consecutive_nums([1, 1, 3, 4, 4, 5, 6, 7])==[2, 4, 7, 8, 9, 11, 13]",
+   "assert add_consecutive_nums([4, 5, 8, 9, 6, 10])==[9, 13, 17, 15, 16]",
+   "assert add_consecutive_nums([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])==[3, 5, 7, 9, 11, 13, 15, 17, 19]"
+  ]
+ },
+ {
+  "i": 49,
+  "fn": "same_order",
+  "prompt": "Write a function to check if the common elements between two given lists are in the same order or not.",
+  "code": "def same_order(l1, l2):\r\n    common_elements = set(l1) & set(l2)\r\n    l1 = [e for e in l1 if e in common_elements]\r\n    l2 = [e for e in l2 if e in common_elements]\r\n    return l1 == l2",
+  "tests": [
+   "assert same_order([\"red\",\"green\",\"black\",\"orange\"],[\"red\",\"pink\",\"green\",\"white\",\"black\"])==True",
+   "assert same_order([\"red\",\"pink\",\"green\",\"white\",\"black\"],[\"white\",\"orange\",\"pink\",\"black\"])==False",
+   "assert same_order([\"red\",\"green\",\"black\",\"orange\"],[\"red\",\"pink\",\"green\",\"white\",\"black\"])==True"
+  ]
+ }
+]

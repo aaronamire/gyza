@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gyza"
-version = "0.1.3"
-description = "Peer-to-peer compute network with cryptographic provenance and bilateral settlement"
+version = "0.1.1"
+description = "Cryptographic provenance and capability attenuation for AI agent execution"
 readme = "README.md"
 license = "Apache-2.0"
 authors = [

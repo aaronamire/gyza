@@ -79,16 +79,123 @@ def ledger_genesis_origin() -> WindowOrigin:
     return WindowOrigin(ledger_ns=0, capital_seq=0)
 
 
+def genesis_origin() -> WindowOrigin:
+    """The immutable origin for the H3/H5/H6 window: the beginning of time.
+
+    Same argument as `ledger_genesis_origin` -- an origin at process start
+    refills the budget on restart, which is artifact #13 wearing a hat. At
+    genesis the store holds 0 bytes and the logs hold 0 rows, so the `s0`
+    values this implies are exact rather than assumed.
+    """
+    return WindowOrigin(ledger_ns=0, capital_seq=0, envelope_ns=0)
+
+
+def observe_now(*, owner: str, blackboard: object | None = None,
+                artifact_store: object | None = None,
+                authority_violations=(), ledger_entries=(),
+                active_holds: float = 0.0,
+                mesh_exit_window_ns: int = 3600 * 1_000_000_000):
+    """Fold the REAL sources into the state the harm model reads.
+
+    THIS FUNCTION IS THE MISSING LINK, and its absence is why the containment
+    layer measured nothing. `GyzaState` carries `stored_bytes`,
+    `signed_envelope_count` and `mesh_exit_sends`; `projection.py` deliberately
+    does not know what a blackboard is ("the caller folds, this projects"), and
+    **no caller folded**. All three parameters defaulted to 0 at every call
+    site in the repository, so H3, H5 and H6 computed `0 - 0 = 0` in every
+    evaluation while H5 and H6 carried declared, signed bounds.
+
+    That is H2_market_capital's retirement condition -- "reported as a bounded
+    class while measuring exactly 0.0 in every production evaluation" -- alive
+    in two more classes, and it is the reason `can_claim_containment` must not
+    be flipped by declaring an H3 level. See research/H3_WIRING_GAP.md.
+
+    The three accessors all already existed:
+      H5  `ArtifactStore.total_size_bytes()`
+      H6  `Blackboard.count_envelopes_since()`
+      H3  `mesh_exit_sends_since()`  (the MESH_EXIT-filtered one, so a grant is
+          never folded into a send count)
+
+    `None` sources fold to 0, which is the pre-existing behaviour and is honest
+    for a node that has no store or no blackboard -- but a caller that passes
+    None for a source that EXISTS reintroduces the silent zero, which is what
+    `tests/test_containment_observes_real_state.py` exists to prevent.
+    """
+    from gyza.containment.gyza_model import (
+        irreversible_actions_since, mesh_exit_bytes_in_window,
+        mesh_exit_sends_since,
+    )
+
+    origin = genesis_origin()
+    stored = int(artifact_store.total_size_bytes()) if artifact_store else 0
+    envelopes = (int(blackboard.count_envelopes_since(origin.envelope_ns))
+                 if blackboard else 0)
+    exits = mesh_exit_sends_since(blackboard, origin.envelope_ns) \
+        if blackboard else 0
+    # H3 AS A RATE. Windowed, so it does NOT take an origin from `genesis` --
+    # the window IS the frame. Folding it from the same append-only log the
+    # count comes from, so the two readings cannot disagree about what left.
+    exit_bytes = (mesh_exit_bytes_in_window(blackboard, mesh_exit_window_ns)
+                  if blackboard else 0)
+    # H7. Folded from the SAME append-only envelope log as the count above, so
+    # the two readings cannot disagree about what happened -- and folded from
+    # the signed enforcement record inside each action's artifact, which is
+    # exactly what a third party verifying a bundle reads.
+    irreversible = (irreversible_actions_since(blackboard, origin.envelope_ns)
+                    if blackboard else 0)
+
+    return project_now(
+        irreversible_actions=irreversible,
+        owner=owner, ledger_entries=list(ledger_entries),
+        active_holds=active_holds, capital_entries=[],
+        authority_violations=tuple(authority_violations),
+        stored_bytes=stored, signed_envelope_count=envelopes,
+        mesh_exit_sends=exits,
+        mesh_exit_bytes_in_window=exit_bytes,
+        mesh_exit_window_ns=int(mesh_exit_window_ns),
+    )
+
+
+def observe_at_origin(*, owner: str, ledger_entries=()):
+    """The `s0` matching `observe_now`. Exact, not assumed -- see
+    `genesis_origin`: at genesis every cumulative quantity is 0."""
+    return project_at_origin(
+        owner=owner, ledger_entries=list(ledger_entries),
+        capital_entries=[], origin=genesis_origin(),
+        stored_bytes_at_origin=0, mesh_exit_sends_at_origin=0,
+    )
+
+
 class SettlementGuard:
     """Evaluates the declared H1 bound at the settlement serialization point.
 
     Everything is REQUIRED. There is no constructor default that yields a guard
     measuring nothing -- the defect this whole line of work removed was two
     `getattr` defaults that turned an absent measurement into a passing one.
+
+    THE DOCSTRING ABOVE WAS FALSE UNTIL 2026-08-19. `harm_class` defaulted to
+    `"H1_credits"`, which was RETIRED on 2026-08-15, so the one default the
+    class had pointed at a class that does not exist -- `SettlementGuard(...)`
+    with no `harm_class` raised `KeyError` deep in `__init__`. The default is
+    removed so the requirement is expressed in the signature rather than
+    asserted in prose. AN UNENFORCED INVARIANT IS AN ASSUMPTION.
+
+    STATUS: ZERO PRODUCTION CONSTRUCTORS. `LedgerSettlementService` accepts
+    `harm_guard=`, and nothing supplies it. The tests that exercise this class
+    build their own registries and guard a synthetic `"X_exposure"` class, so
+    no registered production class has ever been guarded here. Recorded rather
+    than left to be rediscovered -- an unconsumed component that LOOKS live is
+    the artifact-#16 species.
     """
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = ("H1_credits was retired 2026-08-15 and nothing else "
+                   "moves at the settlement boundary, so no guard is "
+                   "installed (network/global_cluster.py records the "
+                   "decision). Kept and tested as the place to hang a real "
+                   "exposure class when credits gain an external referent.")
 
     def __init__(self, engine: GuardEngine, owner: str, origin: WindowOrigin,
-                 harm_class: str = "H1_credits"):
+                 harm_class: str):
         # REFUSE TO WATCH A CLASS THAT DOES NOT EXIST. H1 was retired
         # 2026-08-15 (credits are TOKEN_IS_FAKE, so no level in them is
         # checkable), and a guard constructed against a retired class would

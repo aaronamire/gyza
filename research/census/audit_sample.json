@@ -1,0 +1,182 @@
+[
+ {
+  "name": "Build wheel for cp314t-manylinux_x86_64-manylinux_2_28",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "Test macos-latest / 3.12",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "core / Test pyemscripten wheel (Pyodide 314.0.0a2)",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "core / Build WASM Emscripten",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "check-assignment",
+  "act": "COMMISSIVE",
+  "det": "EXOGENOUS",
+  "why": "mutates an external tracker; success is that service's state"
+ },
+ {
+  "name": "Build wheel for cp312-manylinux_x86_64-manylinux_2_28",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "Retrieve the latest commit message",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Build wheel for cp314-win_arm64-",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "Test Redis OM Python (main branch) on Python 3.11",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "check",
+  "act": "UNSURE",
+  "det": "UNSURE",
+  "why": "no declared pattern matched -- NOT defaulted"
+ },
+ {
+  "name": "Test Pandera (main branch) on Python 3.10",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test Polar (main branch) on Python 3.11",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test typing-extensions (`main` branch) on Python 3.13",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test FastDepends (main branch) on Python 3.12",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "codecov/project",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a ratio computed over held source + held tests"
+ },
+ {
+  "name": "Lint 3.9",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a rule set applied to held source"
+ },
+ {
+  "name": "Build wheel for cp313-win_arm64-",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "Test Redis OM Python (main branch) on Python ${{ matrix.python-version }}",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Build wheel for cp311-macosx_arm64-",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "it compiles or it does not; evaluable over held source"
+ },
+ {
+  "name": "core / Test on macos",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test FastMCP (main branch) on Python 3.10",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test MCP Python SDK (main branch) on Python 3.14",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test openapi-python-client (main branch) on Python 3.11",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "smokeshow / coverage",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a ratio computed over held source + held tests"
+ },
+ {
+  "name": "ci/circleci: deploy",
+  "act": "COMMISSIVE",
+  "det": "EXOGENOUS",
+  "why": "success depends on a THIRD-PARTY SERVICE's state, outside the repo"
+ },
+ {
+  "name": "A reviewer will let you know if it is required or can be bypassed",
+  "act": "DECLARATIVE",
+  "det": "CONTESTED",
+  "why": "a notice, not a check: no success condition at all"
+ },
+ {
+  "name": "Test windows-latest / 3.10",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Test Pandera (main branch) on Python ${{ matrix.python-version }}",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ },
+ {
+  "name": "Send tweet",
+  "act": "UNSURE",
+  "det": "UNSURE",
+  "why": "no declared pattern matched -- NOT defaulted"
+ },
+ {
+  "name": "Test windows-latest / 3.9",
+  "act": "ASSERTIVE",
+  "det": "INTERNAL",
+  "why": "a named test suite executed against held source"
+ }
+]

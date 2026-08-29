@@ -96,6 +96,7 @@ def _load_or_issue_local_agent(
     compositor, state_path: Path, *, memory_mb: int, allowed_hosts: list[str],
     read_paths: "list[str] | None" = None,
     write_paths: "list[str] | None" = None,
+    max_children: int = 0,
 ):
     """
     The local agent persists across runs — one identity accumulating an
@@ -119,7 +120,13 @@ def _load_or_issue_local_agent(
             budget = caps["spawn"]["resource_budget"]
             hosts = caps["network"]["allowed_hosts"]
             fs = caps["filesystem"]
+            # `max_children` IS PART OF THE GRANT and belongs in this
+            # comparison. Omitting it would reuse a saved zero-spawn manifest
+            # when the operator asked for spawn authority, so the flag would
+            # appear to work and grant nothing -- the same species as a
+            # field-by-field rebuild that silently drops the field added last.
             if (budget.get("memory_limit_mb") == memory_mb
+                    and int(budget.get("max_children", 0) or 0) == int(max_children)
                     and sorted(hosts) == sorted(allowed_hosts)
                     and sorted(fs.get("read", [])) == sorted(read_paths)
                     and sorted(fs.get("write", [])) == sorted(write_paths)):
@@ -133,6 +140,12 @@ def _load_or_issue_local_agent(
         agent_type="local.worker", model_path="local",
         fs_read_paths=read_paths, fs_write_paths=write_paths,
         allowed_hosts=allowed_hosts,
+        # LEAST PRIVILEGE BY DEFAULT: max_children=0 means an agent cannot
+        # decompose at all, and `spawn_permitted` stays empty so the runner's
+        # gate refuses on the FIRST condition rather than on a zero cap.
+        # Spawn authority is an explicit operator grant, never a default.
+        spawn_permitted=["worker"] if int(max_children) > 0 else [],
+        max_children=int(max_children),
         memory_limit_mb=memory_mb, attestation_tier=0,
     )
     state_path.parent.mkdir(parents=True, exist_ok=True)
@@ -240,6 +253,21 @@ def run_local_task(
         read_paths=read_paths, write_paths=write_paths,
     )
 
+    # Did WE build the sandbox, or did a caller hand us an executor?
+    #
+    # This decides whether the bounds-proof requirement can be turned on.
+    # `REQUIRE_ENFORCEMENT_DEFAULT` is False and runner.py claimed "Production
+    # entry points set it True explicitly" -- NOTHING DID, anywhere in gyza/.
+    # The guarantee rested on every branch below happening to sandbox, which is
+    # true today and enforced by nothing; a fourth branch added without a
+    # sandbox would have signed envelopes carrying no bounds-proof.
+    #
+    # It cannot be unconditional: an INJECTED executor (tests, demos, the
+    # capability-eval harness) stamps no record, and refusing those would turn
+    # a security decision into test churn -- which is exactly why the default
+    # was left False in the first place. So it is tied to the branch that
+    # already refuses to run without bubblewrap, and is structural there.
+    _built_sandboxed = executor is None
     if executor is None:
         if shutil.which("bwrap") is None:
             print(
@@ -252,6 +280,13 @@ def run_local_task(
         # The manifest is the single source of truth for the sandbox:
         # what it declares is, by construction, what bwrap enforces.
         scfg = sandbox_config_from_manifest(ident.manifest)
+        # H3's grant measurand. `run_sandboxed` records an UNBOUNDED_GRANT when
+        # a sandbox is given network, and NOTHING EVER SUPPLIED A RECORDER, so
+        # that branch never fired -- every network-granted agent had unbounded,
+        # unobservable egress that nothing counted. A grant is a DIFFERENT UNIT
+        # from a send and stays in its own accessor (`count_grants_since`).
+        from gyza.containment.egress import default_egress_recorder
+        _egress = default_egress_recorder()
         if command_argv is not None:
             # Run the command in the user's current directory when that
             # directory is among the granted paths (so it's bound and
@@ -264,9 +299,10 @@ def run_local_task(
             granted = {str(Path(p).resolve()) for p in read_paths + write_paths}
             cmd_cwd = host_cwd if str(Path(host_cwd).resolve()) in granted else None
             executor = make_sandboxed_executor(
-                "gyza.runner:make_command_executor",
+                "gyza.executors:make_command_executor",
                 init_kwargs={"argv": command_argv, "cwd": cmd_cwd},
                 config=scfg,
+                egress_recorder=_egress,
             )
             executor_label = (
                 f"command: {' '.join(command_argv)} (sandboxed"
@@ -279,14 +315,16 @@ def run_local_task(
                 init_kwargs={"api_key": api_key,
                              "model": model or cfg.default_model},
                 config=scfg,
+                egress_recorder=_egress,
             )
             executor_label = f"anthropic {model or cfg.default_model} (sandboxed)"
         else:
             executor = make_sandboxed_executor(
-                "gyza.runner:make_mock_executor",
+                "gyza.executors:make_mock_executor",
                 init_kwargs={"response": "[mock executor — no AI] "
                                          f"task acknowledged: {task[:120]}"},
                 config=scfg,
+                egress_recorder=_egress,
             )
             executor_label = "mock — no AI, deterministic placeholder (sandboxed)"
     else:
@@ -315,8 +353,17 @@ def run_local_task(
     print(f"executor: {executor_label}")
 
     bb = Blackboard(rp["blackboard_db_path"])
+    # EVICTION ON, and it is what makes H5 a bound rather than a timer.
+    # Without it the store raises once the declared cap is reached and keeps
+    # raising: the node stops working permanently at H5's level. With it the
+    # store evicts oldest-first, appending a tombstone per eviction, so the
+    # quantity oscillates below the cap and the node runs indefinitely.
+    # Provenance is unaffected -- chains verify over hashes carried in the
+    # envelopes, not over stored bytes -- so what an eviction costs is the
+    # ability to inspect old CONTENT, not the ability to verify old CLAIMS.
     store = ArtifactStore(base_path=artifact_store_base,
-                          max_bytes=_declared_storage_cap())
+                          max_bytes=_declared_storage_cap(),
+                          evict_when_full=True)
     bb.attach_artifact_store(store)
 
     intent_id = str(_uuid.uuid7())
@@ -351,11 +398,19 @@ def run_local_task(
         agent_id=ident.agent_id, initial_embedding=spec_v,
         db_path=str(Path(rp["memory_db_path"]).parent / "run-spec.db"),
     )
+    # H6's consumer, on the one path that actually signs envelopes. Without
+    # this the runner's cadence check is dead code: `review_queue` defaulted to
+    # None at every production construction, so `check_cadence` never ran and
+    # the autonomy bound that REPLACED the retired H1 was never in force.
+    from gyza.containment.review import default_cadence_wiring
+    _rq, _hr, _origin = default_cadence_wiring()
     runner = AgentRunner(
         identity=ident, blackboard=bb, memory=mem, specialization=spec,
         lsh=LSHIndex(seed=42), executor=executor,
         min_reward_threshold=0.0, min_similarity_threshold=-1.0,
         verify_chain_before_claim=False,
+        review_queue=_rq, harm_registry=_hr, cadence_origin_ns=_origin,
+        require_enforcement=_built_sandboxed,
     )
 
     # One synchronous execute+sign cycle — the exact producer path the
@@ -526,6 +581,272 @@ def _human_bytes(n: int) -> str:
             return f"{n:.1f}{unit}" if unit != "B" else f"{n}B"
         n = int(n / 1024)
     return f"{n}TB"
+
+
+def cmd_swarm(args: argparse.Namespace) -> int:
+    """Run a gossip-attached agent roster: the AGENT-HOST half of a deployment.
+
+    `gyza serve` is single-node. It opens a local blackboard and supervises one
+    OS PROCESS per agent, which is correct up to a few dozen agents and costs
+    ~138 MB each, so 500 agents would need ~69 GB. It also does no networking
+    at all, so N nodes running it are N islands with nothing for a partition to
+    partition.
+
+    This command is the other half. Agents are THREADS in one process, which
+    measured as the right topology rather than being assumed: subprocess-bound
+    work scales 29.89x at 32 threads where CPU-bound work scales 0.66x, because
+    the GIL is released across the sandbox call. The blackboard is a
+    `NetworkBlackboard` attached to a gossip project, so work posted on any
+    node is claimable on every node.
+
+    THE DAEMON MUST ALREADY BE RUNNING AND MESHED. This attaches to it; it does
+    not start it. Verify `gyza global peers` shows the expected count on every
+    node BEFORE starting agents, because a roster on an unmeshed node is a
+    single-node fleet wearing a distributed name.
+    """
+    import signal as _signal
+    import time as _time
+
+    from gyza.identity import LocalCompositor
+    from gyza.network.netd_client import GossipClient, NetdClient
+    from gyza.network.network_blackboard import NetworkBlackboard
+    from gyza.roster import RunnerThreadRoster
+    from gyza.supervisor import RunnerSpec
+
+    cfg = load_config()
+    key_path = Path(_resolve(cfg.compositor_key_path))
+    if not key_path.exists():
+        print("no compositor key; run `gyza init` first", file=sys.stderr)
+        return 1
+    sock = _resolve(cfg.netd_socket_path)
+    if not Path(sock).exists():
+        print(f"no daemon socket at {sock}. Start gyza-netd and confirm the "
+              f"mesh with `gyza global peers` before running agents.",
+              file=sys.stderr)
+        return 1
+
+    n = int(args.agents)
+    if n < 1:
+        print(f"--agents must be >= 1, got {n}", file=sys.stderr)
+        return 1
+    sandboxed = not args.no_sandbox
+    argv_cmd = list(args.agent_argv or [])
+    if argv_cmd and argv_cmd[0] == "--":
+        argv_cmd = argv_cmd[1:]
+    if argv_cmd:
+        resolved = shutil.which(argv_cmd[0])
+        if resolved is None:
+            print(f"command not found: {argv_cmd[0]}", file=sys.stderr)
+            return 1
+        argv_cmd[0] = resolved
+    kind = "command" if argv_cmd else "mock"
+    if kind != "mock" and not sandboxed:
+        print("refusing to run real work unsandboxed: a signed envelope would "
+              "imply containment that never happened.", file=sys.stderr)
+        return 1
+    if sandboxed and not _built_sandboxed():
+        print("bubblewrap not available; refusing to start. Pass --no-sandbox "
+              "for mock work only.", file=sys.stderr)
+        return 1
+
+    compositor = LocalCompositor(key_path=str(key_path))
+    base = key_path.parent
+    agents_dir = base / "swarm-agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    bb_path = _resolve(cfg.blackboard_db_path)
+    bb = NetworkBlackboard(bb_path)
+
+    gossip = GossipClient(str(sock))
+    try:
+        gossip.join_project(args.project)
+        info = NetdClient(str(sock)).get_node_info()
+        bb.attach_gossip(gossip, args.project, node_id=info.compositor_pubkey)
+    except Exception as exc:                                    # noqa: BLE001
+        print(f"could not attach to the gossip project: {exc}", file=sys.stderr)
+        return 1
+
+    roster = []
+    for i in range(n):
+        state = agents_dir / f"agent-{i:04d}.json"
+        ident = _load_or_issue_local_agent(
+            compositor, state, memory_mb=args.memory_mb, allowed_hosts=[],
+            read_paths=[], write_paths=[],
+            max_children=int(getattr(args, "spawn_children", 0) or 0))
+        roster.append(RunnerSpec(
+            agent_id=ident.agent_id, agent_state_path=str(state),
+            blackboard_path=bb_path,
+            memory_path=str(base / "swarm-memory" / f"agent-{i:04d}"),
+            spec_db_path=str(base / "swarm-spec" / f"agent-{i:04d}.db"),
+            artifact_store_path=_resolve("~/.gyza/artifacts"),
+            poll_interval_s=float(args.poll_interval),
+            min_reward=0.0, min_similarity=-1.0, sandboxed=sandboxed,
+            executor_kind=kind,
+            command_argv=tuple(argv_cmd) if argv_cmd else None,
+            model=args.model))
+
+    sup = RunnerThreadRoster(roster, blackboard=bb,
+                             max_restarts=args.max_restarts,
+                             stall_timeout_s=args.stall_timeout)
+    stopping = {"now": False}
+
+    def _sig(_s, _f):
+        stopping["now"] = True
+
+    _signal.signal(_signal.SIGINT, _sig)
+    _signal.signal(_signal.SIGTERM, _sig)
+    print(f"swarm: {n} agent thread(s), project {args.project!r}, "
+          f"{kind} executor, {'sandboxed' if sandboxed else 'UNSANDBOXED'}")
+    sup.start()
+    try:
+        while not stopping["now"]:
+            _time.sleep(5.0)
+            st = sup.summary()
+            print(f"  alive {st['alive']}/{st['agents']}  "
+                  f"restarts {st['restarts']}  gave_up {st['gave_up']}")
+            if st["gave_up"] == st["agents"]:
+                print("every agent gave up; nothing left to supervise",
+                      file=sys.stderr)
+                break
+    finally:
+        print("stopping...")
+        sup.stop()
+        s2 = sup.summary()
+        print(f"  final: alive {s2['alive']}/{s2['agents']}, "
+              f"restarts {s2['restarts']}, gave_up {s2['gave_up']}")
+    return 0
+
+
+def cmd_serve(args: argparse.Namespace) -> int:
+    """Run a FIXED ROSTER of agents, one OS process each, restarted on crash.
+
+    THE ENTRY POINT THAT DID NOT EXIST. Before this, nothing in the CLI hosted
+    runners: `gyza run` executes ONE work item synchronously and returns, and
+    the only `runner.start()` was inside the capability-eval harness. So
+    "N agents" had no code path at all -- not merely no supervisor. Wiring
+    `AgentSupervisor` would not have helped, because there was no program for
+    it to be wired into.
+
+    EACH AGENT GETS ITS OWN IDENTITY, not N runners sharing one. Sharing would
+    make every envelope attribute to the same key, and the per-principal action
+    rate cap is enforced per agent -- N runners behind one identity would share
+    one budget and exhaust it N times faster, which is the aggregate-bounding
+    argument (R-M1/A2/R-B) failing quietly.
+    """
+    import shutil
+    import signal as _signal
+    import time
+
+    from gyza.supervisor import RunnerProcessSupervisor, RunnerSpec
+
+    cfg = load_config()
+    key_path = Path(_resolve(cfg.compositor_key_path))
+    if not key_path.exists():
+        print("no compositor key; run `gyza init` first", file=sys.stderr)
+        return 1
+
+    n = int(args.agents)
+    if n < 1:
+        print(f"--agents must be >= 1, got {n}", file=sys.stderr)
+        return 1
+
+    sandboxed = not args.no_sandbox
+    # WHAT the agents do, separate from WHETHER they are sandboxed. `serve`
+    # shipped able to run only mock work because one field meant both, so a
+    # sandboxed fleet did nothing real and looked production-ready.
+    argv_cmd = list(args.agent_argv or [])
+    if argv_cmd and argv_cmd[0] == "--":
+        argv_cmd = argv_cmd[1:]
+    if argv_cmd:
+        # Resolve host-side: the sandbox gets a fresh environment, so a bare
+        # name would not resolve inside, and failing here is a clearer error
+        # than a sandbox exec failure. Same reasoning as `gyza exec`.
+        resolved = shutil.which(argv_cmd[0])
+        if resolved is None:
+            print(f"command not found: {argv_cmd[0]}", file=sys.stderr)
+            return 1
+        argv_cmd[0] = resolved
+
+    kind = "mock"
+    if argv_cmd:
+        kind = "command"
+    elif args.anthropic:
+        kind = "anthropic"
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            print("--anthropic needs ANTHROPIC_API_KEY in the environment",
+                  file=sys.stderr)
+            return 1
+    if kind != "mock" and not sandboxed:
+        print(f"--{kind} with --no-sandbox is refused: real work outside "
+              f"bubblewrap carries no bounds-proof, and the envelopes would "
+              f"imply containment that never happened.", file=sys.stderr)
+        return 1
+    if sandboxed and shutil.which("bwrap") is None:
+        # Same refusal as `gyza run`: this will NOT fall back to unenforced
+        # execution, because a roster of agents believing they are contained
+        # is worse than a roster that refuses to start.
+        print("gyza serve needs bubblewrap for real enforcement and will not "
+              "fall back to an unenforced sandbox.\n"
+              "install it:  pacman -S bubblewrap  |  apt install bubblewrap\n"
+              "or pass --no-sandbox to run MOCK executors (no containment).",
+              file=sys.stderr)
+        return 1
+
+    compositor = LocalCompositor(key_path=str(key_path))
+    base = key_path.parent
+    agents_dir = base / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+
+    roster = []
+    for i in range(n):
+        state = agents_dir / f"agent-{i:03d}.json"
+        ident = _load_or_issue_local_agent(
+            compositor, state, memory_mb=args.memory_mb, allowed_hosts=[],
+            read_paths=[], write_paths=[],
+            max_children=int(getattr(args, "spawn_children", 0) or 0))
+        roster.append(RunnerSpec(
+            agent_id=ident.agent_id,
+            agent_state_path=str(state),
+            blackboard_path=_resolve(cfg.blackboard_db_path),
+            memory_path=str(base / "run-memory" / f"agent-{i:03d}"),
+            spec_db_path=str(base / f"serve-spec-{i:03d}.db"),
+            artifact_store_path=_resolve("~/.gyza/artifacts"),
+            poll_interval_s=float(args.poll_interval),
+            min_reward=0.0, min_similarity=-1.0,
+            sandboxed=sandboxed, executor_kind=kind,
+            command_argv=tuple(argv_cmd) if argv_cmd else None,
+            model=args.model,
+        ))
+
+    sup = RunnerProcessSupervisor(roster, max_restarts=args.max_restarts,
+                                  stall_timeout_s=args.stall_timeout)
+    stopping = {"now": False}
+
+    def _sigterm(_sig, _frm):
+        stopping["now"] = True
+
+    _signal.signal(_signal.SIGINT, _sigterm)
+    _signal.signal(_signal.SIGTERM, _sigterm)
+
+    print(f"serving {n} agent(s): {kind} executor, "
+          f"{'sandboxed' if sandboxed else 'UNSANDBOXED (no containment)'}, "
+          f"max {args.max_restarts} restarts each")
+    sup.start()
+    try:
+        while not stopping["now"]:
+            time.sleep(1.0)
+            st = sup.status()
+            dead = [x for x in st if x["gave_up"]]
+            if dead and len(dead) == len(st):
+                print("every agent has given up; nothing left to supervise",
+                      file=sys.stderr)
+                break
+    finally:
+        print("stopping...")
+        sup.stop()
+        for x in sup.status():
+            print(f"  {x['agent_id'][:16]}  restarts={x['restarts']}  "
+                  f"gave_up={x['gave_up']}  last_exit={x['last_exit']}")
+    return 0
 
 
 def cmd_status(args: argparse.Namespace) -> int:
@@ -818,6 +1139,10 @@ def cmd_verify(args: argparse.Namespace) -> int:
         return 1
     title = f"GYZA EVIDENCE VERIFY — bundle {bundle_hash(bundle)[:16]}…"
     print(render_audit_report(report, title=title))
+    # Completeness is reported on EVERY verify, including when it is absent.
+    # A reader who is not told is entitled to assume the verdict covers it.
+    from gyza.evidence import verify_closure
+    print(verify_closure(bundle).line)
     return 0 if report.valid else 1
 
 
@@ -870,7 +1195,9 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     """
     try:
         from gyza.containment.engine import GuardEngine
-        from gyza.containment.gyza_model import UNMODELLED, build_registries
+        from gyza.containment.gyza_model import (
+            RETIRED_AS_HARM_CLASS, UNMODELLED, build_registries,
+        )
         # C-8: when an authority key is configured, bounds must come through a
         # VERIFIED configuration and an unsigned file is refused outright.
         pub = (cfg.guard_authority_pubkey or "").strip()
@@ -886,17 +1213,125 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
     prov = r["bounds_provenance"]
     print()
     print("containment (declared harm model):")
+
+    # MEASURED, NOT JUST DECLARED. Until 2026-08-19 this loop printed the
+    # BOUND alone for every class, and only H6 had a hand-rolled block showing
+    # the operator their position against it. H3 and H5 were invisible -- and
+    # all three measured a constant 0 anyway, because nothing folded the real
+    # sources into `GyzaState` (research/H3_WIRING_GAP.md). A bound nobody can
+    # see their position against is a bound nobody can act on, and a bound
+    # measured against a hardcoded zero is not a bound at all.
+    _measured: dict[str, float] = {}
+    try:
+        from pathlib import Path as _P
+
+        from gyza.containment.gates import observe_at_origin, observe_now
+
+        _bb = None
+        _bbp = _P(_resolve(cfg.blackboard_db_path))
+        if _bbp.exists():
+            from gyza.blackboard import Blackboard
+            _bb = Blackboard(str(_bbp))
+
+        # `ArtifactStore.__init__` mkdirs, and a status command must not
+        # create state it is only reporting on.
+        _store = None
+        _sp = _P(_resolve("~/.gyza/artifacts"))
+        if _sp.exists():
+            from gyza.network.artifact_store import ArtifactStore
+            _store = ArtifactStore(base_path=str(_sp))
+
+        _owner = (prov.get("authority_pubkey") or "local-node")[:16] or "local-node"
+        _s0 = observe_at_origin(owner=_owner)
+        _s = observe_now(owner=_owner, blackboard=_bb, artifact_store=_store)
+        _measured = {c.id: float(c.quantity(_s0, _s)) for c in harm}
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        _measured = {}
+
     for c in harm:
         try:
-            print(f"  {c.id:22s} bound {harm.bound(c.id):>10.2f}")
+            b = harm.bound(c.id)
+            bound_s = f"{b:>12,.0f}"
         except Exception:  # noqa: BLE001
-            print(f"  {c.id:22s} bound   UNDECLARED")
+            b, bound_s = None, "   UNDECLARED"
+        if c.id in _measured:
+            m = _measured[c.id]
+            pos = f"{m:>12,.0f} of {bound_s.strip()}"
+            if b:
+                pos += f"  ({m / b:.2%})"
+            elif b == 0:
+                # A bound of 0 is a BREACH THRESHOLD, not a budget (H4).
+                pos += "  (any nonzero value is a breach)"
+            print(f"  {c.id:22s} {pos}")
+        else:
+            print(f"  {c.id:22s} bound {bound_s}  — NOT MEASURED HERE")
     for cid, why in UNMODELLED.items():
         print(f"  {cid:22s} NOT MODELLED — {why.split('(')[0].strip()}")
+    for cid, why in RETIRED_AS_HARM_CLASS.items():
+        print(f"  {cid:22s} RETIRED — {why.split('.')[0].strip()}")
+
+    # THE RETIRED COUNT IS STILL MEASURED, and is shown as a diagnostic rather
+    # than dropped. It cannot carry a level -- benign and exfiltrating nodes
+    # emit the same number of sends -- but "how many times did something leave
+    # the attested mesh" is a real operational reading, and retiring the class
+    # should not cost the operator the number.
+    try:
+        from pathlib import Path as _P3
+        _ep = _P3(_resolve(cfg.blackboard_db_path))
+        if _ep.exists():
+            from gyza.blackboard import Blackboard as _BB3
+            from gyza.containment.gyza_model import mesh_exit_sends_since
+            _exits = mesh_exit_sends_since(_BB3(str(_ep)), 0)
+            print(f"  {'mesh exits (count)':22s} {_exits:>12,d} "
+                  f"(diagnostic — carries no evidence, cannot be bounded)")
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        pass
 
     if prov["trusted"]:
         print(f"  bounds: SIGNED (v{prov['version']}, authority "
               f"{prov['authority_pubkey'][:16]}…)")
+        # SIGNED IS NOT THE SAME AS SEPARATED, and only one of those is what
+        # the induction needs. C-8's base case is that the constrained system
+        # does not hold the signing key; if it does, a local compromise can
+        # re-sign any bounds and the signature stops being evidence against the
+        # adversary that matters. Checked rather than assumed.
+        # READ FROM THE PREDICATE, not recomputed here. This block used to be
+        # the ONLY caller of `authority_key_is_colocated` anywhere in
+        # production, so the base case of the containment induction was checked
+        # by a print statement while `can_claim_containment` said nothing about
+        # separation. `readiness()` now asks, and this reports what it found --
+        # one source, so the operator's warning and the machine's verdict can
+        # never disagree.
+        try:
+            _where = r.get("authority_key_colocated")
+            if _where:
+                print(f"    ** the AUTHORITY PRIVATE KEY is on this host "
+                      f"({_where}).")
+                print("    Signed bounds are still better than unsigned — "
+                      "tampering without the key")
+                print("    is detectable. But C-8's separation does not hold: "
+                      "anything that can")
+                print("    read that file can re-sign the policy it is "
+                      "constrained by. Move it to")
+                print("    a machine that does not run agents and keep only "
+                      "the pubkey here.")
+        except Exception:  # noqa: BLE001 - status must survive anything
+            pass
+    elif prov["source"] == "SIGNED_UNVERIFIED":
+        # A DIFFERENT STATE WITH A DIFFERENT REMEDY. The bytes in force carry a
+        # signature; what is missing is a key to check it against. Reporting
+        # this as "NOT SIGNED" would send the operator to re-sign a document
+        # that is already signed.
+        print(f"  bounds: SIGNED BUT UNVERIFIED (v{prov['version']})")
+        print("    The loaded bytes carry a signature and NO AUTHORITY PUBKEY "
+              "is configured,")
+        print("    so nothing here can check it. Tampering would break the "
+              "signature — but")
+        print("    only a verifier that holds the key would notice. Containment "
+              "cannot be")
+        print("    claimed until it is checked.")
+        print("    Fix: export GYZA_GUARD_AUTHORITY=<pubkey hex>  "
+              "(scripts/sign_guard_config.py prints it)")
     else:
         print(f"  bounds: NOT SIGNED — {prov['source']}")
         print("    The guard configuration is the trust root of every "
@@ -905,17 +1340,65 @@ def _print_containment_section(cfg: GyzaConfig) -> None:
               "the claim")
         print("    has no base case. Sign it: scripts/sign_guard_config.py "
               "--generate-key")
-    # THE CADENCE, in the unit the operator actually chose. A bound nobody can
-    # see their position against is a bound nobody can act on.
+    # CAPABILITY GRANTS, IN THEIR OWN UNIT AND THEIR OWN LINE.
+    #
+    # A grant is not a send: `bwrap`'s network control is all-or-nothing, so
+    # one network-granted sandbox permits arbitrarily many sends this process
+    # cannot observe. Reporting grants inside the H3 row would add two
+    # different units and present the sum as harm. They are shown separately,
+    # unbounded, and labelled as what they are -- the honest answer to "what
+    # can leave this machine".
     try:
-        from pathlib import Path as _P
-        bb_path = _P(_resolve(cfg.blackboard_db_path))
-        if bb_path.exists():
-            from gyza.blackboard import Blackboard
-            n = Blackboard(str(bb_path)).count_envelopes_since(0)
-            cad = harm.bound("H6_unsupervised_actions")
-            print(f"  review cadence: {n:,} of {cad:,.0f} actions used "
-                  f"({n/cad:.2%}) — a human is due in {max(cad-n,0):,.0f}")
+        from pathlib import Path as _P2
+        _gp = _P2(_resolve(cfg.blackboard_db_path))
+        if _gp.exists():
+            from gyza.blackboard import Blackboard as _BB
+            _grants = _BB(str(_gp)).count_grants_since(0)
+            print(f"  {'network grants':22s} {_grants:>12,d} "
+                  f"(UNBOUNDED — each permits uncountable egress)")
+            # THE CEILING ON H3's HEADLINE PROPERTY, beside the count.
+            # Only peer-addressed sends could ever be reclassified by an
+            # attestation source; DHT puts, gossip fan-out and the inference
+            # boundary have no single destination to attest. A property that
+            # can apply to only part of the traffic must say which part.
+            from gyza.containment.egress import is_attestable_channel
+            _split = _BB(str(_gp)).egress_by_channel_since(0)
+            _tot = sum(_split.values())
+            if _tot:
+                _att = sum(n for c, n in _split.items()
+                           if is_attestable_channel(c))
+                print(f"  {'attestable share':22s} {_att:>12,d} of {_tot:,d} "
+                      f"({_att / _tot:.1%}) — the CEILING on how much H3 could")
+                print("    ever shrink with attestation; the rest is fan-out "
+                      "with no single destination.")
+            if _grants:
+                print("    Each grant shares a network namespace with a "
+                      "sandboxed agent; after that")
+                print("    point nothing here can see what was sent. "
+                      "`research/H3_BLIND_CHANNEL.md`.")
+    except Exception:  # noqa: BLE001 - status must survive a broken store
+        pass
+
+    # THE CADENCE, in the unit the operator actually chose. The position
+    # itself now comes from the uniform fold above -- this adds only the
+    # actionable remainder, which is what an operator schedules against.
+    try:
+        # H6 was RETIRED as a harm class 2026-08-21, so neither the position nor
+        # the interval comes from the harm model any more. The position is
+        # folded from the same append-only envelope log it always was, and the
+        # interval from the guard configuration's SIGNED policy -- so the
+        # operator's displayed remainder and the runner's enforced one are still
+        # the same number, which is the property that mattered.
+        from gyza.containment.review import _signed_cadence_actions
+        _cbb = _P(_resolve(cfg.blackboard_db_path))
+        n = None
+        if _cbb.exists():
+            from gyza.blackboard import Blackboard as _BB4
+            n = float(_BB4(str(_cbb)).count_envelopes_since(0))
+        cad = _signed_cadence_actions(cfg.guard_bounds_path)
+        if n is not None and cad:
+            print(f"  review cadence: a human is due in "
+                  f"{max(cad - n, 0):,.0f} actions")
     except Exception:  # noqa: BLE001 - status must survive a broken store
         pass
     # PENDING ESCALATIONS BELONG WHERE THE OPERATOR ALREADY LOOKS.
@@ -1603,7 +2086,7 @@ def cmd_global_attest(args: argparse.Namespace) -> int:
         "per_task": report.per_task,
     }
     payload_bytes = _json.dumps(
-        payload, sort_keys=True, separators=(",", ":"),
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")
     signature = compositor.sign(payload_bytes)
 
@@ -2616,6 +3099,70 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("status", help="show blackboard, artifact store, and cluster stats")
 
+    p_swarm = sub.add_parser(
+        "swarm",
+        help="run a gossip-attached roster of agent THREADS (multi-node)")
+    p_swarm.add_argument("--agents", type=int, default=1)
+    p_swarm.add_argument(
+        "--project", default="gyza-swarm",
+        help="gossip project id. EVERY NODE IN THE DEPLOYMENT MUST USE THE "
+             "SAME VALUE, or the nodes mesh at the transport layer and share "
+             "no work, which looks like a working cluster doing nothing.")
+    p_swarm.add_argument("--poll-interval", type=float, default=1.0)
+    p_swarm.add_argument("--max-restarts", type=int, default=5)
+    p_swarm.add_argument("--stall-timeout", type=float, default=120.0)
+    p_swarm.add_argument("--memory-mb", type=int, default=512,
+                         help="per-agent sandbox grant. BELOW 512 A SANDBOX "
+                              "CANNOT START: the numerical library loaded "
+                              "inside fails to allocate and names itself "
+                              "rather than the grant in the error.")
+    p_swarm.add_argument("--spawn-children", type=int, default=0, metavar="N",
+                         help="grant each agent authority to decompose a task "
+                              "into at most N subtasks. Default 0.")
+    p_swarm.add_argument("--no-sandbox", action="store_true",
+                         help="mock work only, no containment")
+    p_swarm.add_argument("--model", default="none")
+    # NAMED `agent_argv`, NOT `command`: `add_subparsers(dest="command")`
+    # already owns that name and a positional would silently overwrite the
+    # subcommand the dispatcher reads.
+    p_swarm.add_argument(
+        "agent_argv", nargs="*", default=[], metavar="-- COMMAND [ARGS...]",
+        help="run this as each agent's action, inside the sandbox")
+
+    p_serve = sub.add_parser(
+        "serve", help="run a fixed roster of agents, one process each")
+    p_serve.add_argument("--agents", type=int, default=1)
+    p_serve.add_argument("--poll-interval", type=float, default=1.0)
+    p_serve.add_argument("--max-restarts", type=int, default=5)
+    p_serve.add_argument(
+        "--stall-timeout", type=float, default=900.0,
+        help="restart an agent that is ALIVE but has completed nothing for "
+             "this long WHILE WORK IS AVAILABLE (idle agents are never "
+             "restarted). Above the 300s sandbox cap by default.")
+    p_serve.add_argument("--memory-mb", type=int, default=512)
+    p_serve.add_argument(
+        "--spawn-children", type=int, default=0, metavar="N",
+        help="grant each agent authority to decompose a task into at most N "
+             "subtasks. DEFAULT 0 — least privilege: without this flag an "
+             "agent cannot create work for another agent at all.")
+    p_serve.add_argument(
+        "--no-sandbox", action="store_true",
+        help="run MOCK executors with no containment (testing only)")
+    # `-- COMMAND [ARGS...]`, matching `gyza exec`. A bare
+    # `--command X -a` loses `-a` to the top-level parser, and inventing a
+    # different convention for the same job is worse than the flag being long.
+    # NAMED `agent_argv`, NOT `command`. `add_subparsers(dest="command")`
+    # already owns that name, so a positional called `command` silently
+    # overwrites the subcommand the dispatcher reads -- every invocation fell
+    # through to the top-level usage message with no error explaining why.
+    p_serve.add_argument(
+        "agent_argv", nargs="*", default=[], metavar="-- COMMAND [ARGS...]",
+        help="run this as each agent's action, inside the sandbox")
+    p_serve.add_argument(
+        "--anthropic", action="store_true",
+        help="use the Anthropic executor (needs ANTHROPIC_API_KEY)")
+    p_serve.add_argument("--model", default=None)
+
     p_audit = sub.add_parser(
         "audit",
         help="forensically audit a stored workflow's provenance DAG + bounds",
@@ -2925,6 +3472,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "serve":
+        return cmd_serve(args)
+    if args.command == "swarm":
+        return cmd_swarm(args)
     if args.command == "review":
         return cmd_review(args)
     if args.command == "audit":

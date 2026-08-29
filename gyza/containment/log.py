@@ -61,6 +61,12 @@ GENESIS = "0" * 64
 
 @dataclass(frozen=True)
 class Event:
+    #: See StagingArea.NON_ADOPTED. Appended only by AppendOnlyLog, which
+    #: is itself NON_ADOPTED, so this record type is transitively
+    #: unreachable -- a value type of an execution model production did
+    #: not adopt, not a defect.
+    NON_ADOPTED = ("record type of AppendOnlyLog, which is NON_ADOPTED; "
+                   "transitively unreachable from any adopted path.")
     seq: int
     partition: str
     kind: str
@@ -75,7 +81,7 @@ class Event:
             {"seq": self.seq, "partition": self.partition, "kind": self.kind,
              "payload": self.payload, "ts_ns": self.ts_ns,
              "prev_hash": self.prev_hash},
-            sort_keys=True, separators=(",", ":"),
+            sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")
 
 
@@ -84,7 +90,7 @@ def _hash(seq: int, partition: str, kind: str, payload: dict, ts_ns: int,
     return blake3.blake3(json.dumps(
         {"seq": seq, "partition": partition, "kind": kind, "payload": payload,
          "ts_ns": ts_ns, "prev_hash": prev_hash},
-        sort_keys=True, separators=(",", ":"),
+        sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")).hexdigest()
 
 
@@ -92,6 +98,11 @@ class AppendOnlyLog:
     """There is deliberately no ``update`` and no ``delete``. Adjustments are
     made by appending a compensating event, exactly as the credit ledger issues
     a counter-entry rather than editing one."""
+    #: See StagingArea.NON_ADOPTED for the convention.
+    NON_ADOPTED = ("in-memory and therefore NOT durable; ReviewQueue "
+                   "supersedes it for anything that must survive a restart "
+                   "(review.py header). Its only construction is inside "
+                   "staging.py, which is itself NON_ADOPTED.")
 
     def __init__(self) -> None:
         self._events: list[Event] = []

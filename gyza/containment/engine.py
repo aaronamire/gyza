@@ -28,7 +28,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from gyza.containment.harm import HarmModelRegistry, UnsetBoundError
+from gyza.containment.harm import DriftClass, HarmModelRegistry, UnsetBoundError
 from gyza.containment.invariants import InvariantRegistry
 from gyza.containment.reversibility import Reversibility, ReversibilityTable
 
@@ -126,7 +126,7 @@ class GuardEngine:
             "promotion_serialized": [i.id for i in self._inv.promotion_only()],
         }
 
-    def readiness(self) -> dict:
+    def readiness(self, authority_key_search: "list[str] | None" = None) -> dict:
         """What this guard can and cannot currently claim.
 
         `can_claim_containment` REQUIRES SIGNED BOUNDS (C-8), and that is a
@@ -136,20 +136,79 @@ class GuardEngine:
         ordinary repo file are exactly that case, so a guard holding them may
         report its levels and must not claim containment over them.
 
-        The three obstacles are reported separately -- unbounded classes,
-        uncovered classes, unsigned bounds -- because they have different
-        remedies and a single boolean would hide which one is in force.
+        The obstacles are reported separately -- unbounded classes,
+        uncovered classes, unsigned bounds, and a colocated authority key --
+        because they have different remedies and a single boolean would hide
+        which one is in force. The fourth was checked only by a print statement
+        until 2026-08-21.
         """
         prov = self._harm.bounds_provenance
+        # R-EVID Part C: a level is a BOUND only if its quantity has
+        # non-positive benign drift with reflection; otherwise it is a TIMER
+        # that refuses every benign agent at ceil(L/b). Reported beside the
+        # levels because a level without its drift class does not say whether
+        # the number means anything -- H6 carried a SIGNED 10,000 while its
+        # benign and adversarial rates were identical.
+        # C-8'S BASE CASE, IN THE PREDICATE RATHER THAN IN A PRINT STATEMENT.
+        #
+        # The containment induction rests on one premise: the constrained system
+        # does not hold the key that signs its bounds. `authority_key_is_colocated`
+        # was written to check exactly that -- and its ONLY production caller was
+        # a print block in `gyza status` (cli.py:986). `readiness()` never asked,
+        # so `can_claim_containment` required signed bounds and said nothing
+        # about separation. Bound H3 tomorrow and the claim would have flipped
+        # TRUE with the authority private key sitting in ~/.gyza next to the
+        # agents it constrains.
+        #
+        # Signed-but-colocated is still strictly better than unsigned: tampering
+        # without the key remains detectable. What it cannot support is the
+        # CLAIM, because a local compromise re-signs any bounds it likes.
+        colocated = None
+        if prov.trusted and prov.authority_pubkey_hex:
+            try:
+                from gyza.containment.guardconfig import (
+                    authority_key_is_colocated,
+                )
+                colocated = authority_key_is_colocated(
+                    prov.authority_pubkey_hex, authority_key_search)
+            except Exception:                                # noqa: BLE001
+                # An error here is NOT a value. Failing to determine
+                # separation must not read as "separated" -- that is the
+                # reassuring direction. Report the uncertainty as if
+                # colocated, which is the conservative reading for a claim.
+                colocated = "UNDETERMINED"
+
+        timers = [c.id for c in self._harm
+                  if c.bound is not None and c.drift_class == DriftClass.TIMER]
+        unclassified = [c.id for c in self._harm if c.drift_class is None]
         return {
             "harm_classes": [c.id for c in self._harm],
+            "drift_classes": {c.id: c.drift_class for c in self._harm},
+            "bounded_but_only_a_timer": timers,
+            "unclassified_drift": unclassified,
             "unbounded": self._harm.unbounded(),
             "mutable_frames": self._harm.mutable_frames(),
             "uncovered": self._inv.uncovered([c.id for c in self._harm]),
             "bounds_provenance": prov.as_dict(),
             "bounds_signed": prov.trusted,
+            "authority_key_colocated": colocated,
+            # A TIMER IS NOT A BOUND, so a level on one cannot buy the claim.
+            #
+            # Without this the claim was available while H5 and H6 carried
+            # SIGNED levels over quantities R-EVID proved to be timers -- a
+            # containment assertion whose content is "this agent has not run
+            # for ceil(L/b) actions yet". That is H2_market_capital's
+            # retirement condition in a new costume: reported as bounded while
+            # bounding nothing.
+            #
+            # UNCLASSIFIED also blocks. A class that has not said which of the
+            # four cases it is in has not shown its level means anything, and
+            # an unanswered question must not read as a passing one.
             "can_claim_containment": (not self._harm.unbounded()
                                       and not self._inv.uncovered(
                                           [c.id for c in self._harm])
-                                      and prov.trusted),
+                                      and prov.trusted
+                                      and colocated is None
+                                      and not timers
+                                      and not unclassified),
         }

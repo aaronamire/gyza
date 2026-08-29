@@ -8,8 +8,16 @@ Everything a reader needs to reproduce the result, pulled from the repo
 Headline: on the confound-free primary battery, **cross-family same-bug
 convergence 0.560 vs. null 0.044** and **within-family 0.603**, R = 1.08 —
 which triggers the pre-registered falsifier (0.8 ≤ R ≤ 1.2, both > null):
-**H2 falsified, universal blind spot.** Diversity does not decorrelate
-failure.
+**H2 falsified.** Diversity does not decorrelate failure.
+
+**Mechanism corrected (§9, conditional-independence null).** The
+permutation null above only shows the wrong-answer distribution is
+non-degenerate *across problems*; against the *right* null — the
+leave-pair-out per-problem wrong-answer distribution — pairwise excess is
+≈ 0 for both within and cross (Case A). The H2 decision (family-invariant
+failure) stands; the mechanism is a **constrained wrong-answer space**
+(median 1 distinct wrong answer/problem), not a shared cognitive blind
+spot. Full reanalysis: `FINDINGS_CI_NULL.md`.
 
 ---
 
@@ -219,7 +227,49 @@ Two positive methodological results:
 - **Direction, not frequency:** decorrelating *which* answer a model gives
   when wrong matters; decorrelating error *timing* does nothing.
 
-## 9. Reproduction package
+## 9. Conditional-independence null — the real H2 test (cache-only)
+
+The permutation null answers "is the wrong-answer distribution
+non-degenerate across problems?" — not "does pair/family identity add
+correlation *beyond* the population's per-problem wrong-answer structure?"
+The conditional-independence reanalysis (`conditional_independence_null.py`,
+no new generations) adds that missing null.
+
+- **Layer 1 (pairwise excess).** For a pair (i,j), over problems where both
+  are wrong: baseline(i,j) = P(two *other* wrong models agree),
+  leave-pair-out, ratio-of-sums; excess = observed − baseline. Aggregated
+  as within/cross means with bootstrap CIs over pairs (reusing
+  `run_openrouter._ci`). **cross-excess −0.024 [−0.052, +0.001],
+  within-excess +0.026 [−0.013, +0.065] — both include 0 (Case A).**
+- **Layer 2 (space concentration, pair-independent).** Per problem, over
+  all in-band wrong models: Simpson agreement, distinct wrong signatures,
+  effective # of wrong answers. **Median distinct = 1, median Simpson =
+  0.60** — the wrong-answer space is tiny.
+- **Robustness.** R2 (all-9, weak-inclusive reference) shows positive
+  excess but within ≈ cross — a capability-homogeneity effect, not family.
+  R3 (distinct ≥ 3, 12 problems) → excess ≈ 0. ERR-sensitivity (exclude
+  all-`ERR`) → observed 0.56 → 0.36 but excess ≈ 0.
+- **Sentinel handling (artifact #4).** Primary sentinel set = {TIMEOUT,
+  IMPORTERR}; a two-sentinel collision never counts as agreement, in
+  observed OR baseline (pinned by `test_ci_null.py`). Zero of the observed
+  agreements are TIMEOUT/IMPORTERR — the 90 highest-weight ones are all
+  `ERR` (identical exceptions, real behavior) — so the published 0.560/0.603
+  are not artifact-#4-contaminated.
+
+**Run it (fully offline, from `or_cache/`, no API):**
+
+```
+HF_HUB_OFFLINE=1 python conditional_independence_null.py   # -> ci_null_result.json
+python -m pytest test_ci_null.py -q                        # 5 tests, green
+```
+
+The module reproduces the published within/cross/null/R from cache first
+(±0.000) before computing anything new; a mismatch aborts. Interpretation:
+Layer 1 answers "does pair/family identity add correlation beyond problem
+structure" (no); neither layer separates genuine shared cognition from an
+intrinsically small answer space — Layer 2 only bounds the latter.
+
+## 10. Reproduction package
 
 **In the repo (`main`, `research/correlated_failure/`):**
 - Protocol/pre-registration: `PREREGISTRATION.md`.
@@ -229,9 +279,12 @@ Two positive methodological results:
   (earlier inconclusive run).
 - Results: `decisive_result_openrouter.json` (all numbers above),
   `decisive_result.json` (Groq run).
-- Write-up: `FINDINGS.md`.
+- Write-up: `FINDINGS.md`; conditional-independence reanalysis (§9):
+  `conditional_independence_null.py`, `FINDINGS_CI_NULL.md`,
+  `ci_null_result.json`.
 - Instrument validation: `test_codebench.py`, `test_truthful.py`,
-  `test_rho_measure.py`, `test_sharpened.py`, `test_*` — all green.
+  `test_rho_measure.py`, `test_sharpened.py`, `test_ci_null.py`, `test_*`
+  — all green.
 - Config/seeds are harness constants: `SEED=1, N_TQA=80, N_CODE=50,
   BAND=0.10`.
 

@@ -76,7 +76,26 @@ CAPABILITY_MANIFEST_SCHEMA: dict[str, Any] = {
 
 
 def _canon_bytes(d: dict) -> bytes:
-    return json.dumps(d, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+    # `allow_nan=False` IS THE CROSS-LANGUAGE INVARIANT, ENFORCED.
+    #
+    # Python emits bare `NaN` / `Infinity`, which RFC 8259 does not define and
+    # a conforming parser (Rust's serde_json included) refuses. Every field of
+    # `ICPEnvelope` is annotated `str`/`int`, so "no float can reach here" is
+    # TRUE OF THE ANNOTATIONS AND ENFORCED BY NOTHING -- dataclasses do not
+    # check types at runtime, and `duration_ms=float("nan")` serialises fine.
+    #
+    # This is the ASCII invariant's twin, and that one was already recorded as
+    # a mistake: every clause of "no envelope field holds non-ASCII" was true
+    # and it was still the wrong call, because nothing restricted any field.
+    # Here the consequence is worse than a mismatch -- these bytes get
+    # BLAKE3-hashed and Ed25519-signed, so a non-finite value produces a
+    # SIGNATURE OVER BYTES NO OTHER IMPLEMENTATION CAN REPRODUCE.
+    #
+    # Raising at signing time is the only fail-closed option: refuse to sign,
+    # rather than sign something unverifiable.
+    return json.dumps(d, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 def _manifest_payload_hash(manifest: dict) -> bytes:

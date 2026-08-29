@@ -207,3 +207,46 @@ def test_embed_work_description_matches_direct_embedder(monkeypatch):
         embed_work_description(text),
         default_embedder().embed(text),
     )
+
+
+# --------------------------------------------------------------------------- #
+#  memory._embed routes through default_embedder WITHOUT losing honest         #
+#  degradation. A naive route-through would have made retrieve_similar rank    #
+#  episodes by stub vectors instead of returning [] -- "it broke" and "it      #
+#  found nothing" are opposite claims and must not share a channel.            #
+# --------------------------------------------------------------------------- #
+def test_memory_embed_accepts_an_EXPLICITLY_REQUESTED_stub(monkeypatch):
+    import gyza.embeddings as E
+    import gyza.memory as M
+
+    monkeypatch.setenv("GYZA_EMBEDDER", "stub")
+    E.reset_default_embedder()
+    try:
+        out = M._embed(["hello"])
+        assert out.shape == (1, 384) and out.dtype.name == "float32"
+    finally:
+        E.reset_default_embedder()
+
+
+def test_memory_embed_RAISES_on_a_stub_arrived_at_by_FALLBACK(monkeypatch):
+    """The reassuring-direction bug this guards against."""
+    import gyza.embeddings as E
+    import gyza.memory as M
+
+    monkeypatch.delenv("GYZA_EMBEDDER", raising=False)
+    E.reset_default_embedder()
+    monkeypatch.setattr(E, "default_embedder", lambda: E.StubEmbedder())
+    try:
+        with pytest.raises(M._EmbeddingsUnavailable):
+            M._embed(["hello"])
+    finally:
+        E.reset_default_embedder()
+
+
+def test_memory_no_longer_loads_sentence_transformers_itself():
+    """The architectural debt the module's own comment asked to remove."""
+    import gyza.memory as M
+
+    assert not hasattr(M, "_get_model")
+    src = __import__("inspect").getsource(M)
+    assert "from sentence_transformers import" not in src

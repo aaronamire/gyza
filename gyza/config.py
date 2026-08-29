@@ -53,6 +53,21 @@ class GyzaConfig:
     guard_authority_pubkey: str = field(
         default_factory=lambda: os.environ.get("GYZA_GUARD_AUTHORITY", ""))
     guard_bounds_path: str = "gyza/containment/guard_bounds.signed.json"
+    #: Append-only, hash-chained record of every guard configuration this host
+    #: has installed. It exists so VERSION MONOTONICITY SURVIVES A RESTART: both
+    #: monotonicity checks compare against the in-process config, which is None
+    #: on a cold start, so before 2026-08-21 a validly-signed OLD configuration
+    #: installed cleanly and every signature still verified. Kept OUTSIDE the
+    #: repo, next to the other host state, because it is a fact about THIS HOST
+    #: and not about the checked-in policy.
+    #: `GYZA_GUARD_HISTORY` overrides it. The override exists so a TEST never
+    #: reads or writes the host's real floor: without it, `build_registries`
+    #: in a unit test consults ~/.gyza and a synthetic v1 fixture is refused
+    #: because the developer's own machine has installed v3. A suite whose
+    #: result depends on host state is not a suite.
+    guard_config_history_path: str = field(
+        default_factory=lambda: os.environ.get(
+            "GYZA_GUARD_HISTORY", "~/.gyza/guard_config_history.jsonl"))
     review_db_path: str = "~/.gyza/review.db"
     enable_relay: bool = False
     attestation_tier: int = 1

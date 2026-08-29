@@ -1,0 +1,119 @@
+{
+ "vocab": [
+  {
+   "action": "ICP envelope authorship (signature)",
+   "bucket": "NATIVE",
+   "witness": "gyza/icp.py:82 verify_envelope",
+   "note": "Ed25519 over canonical JSON; mechanical."
+  },
+  {
+   "action": "Envelope chain / DAG linkage",
+   "bucket": "NATIVE",
+   "witness": "gyza/icp.py:105 verify_chain, :217 verify_dag",
+   "note": "parent-hash linkage + acyclicity."
+  },
+  {
+   "action": "Envelope hash binds payload",
+   "bucket": "NATIVE",
+   "witness": "gyza/icp.py:63 compute_envelope_hash",
+   "note": "BLAKE3 content address."
+  },
+  {
+   "action": "Capability manifest identity",
+   "bucket": "NATIVE",
+   "witness": "gyza/identity.py:101 manifest_hash_hex",
+   "note": "hash comparison."
+  },
+  {
+   "action": "Sandbox enforcement within manifest",
+   "bucket": "NATIVE",
+   "witness": "gyza/sandbox/config.py:286 enforcement_satisfies_manifest",
+   "note": "the brick-3 gate; subset predicate over 4 dimensions."
+  },
+  {
+   "action": "Delegated authority attenuation",
+   "bucket": "NATIVE",
+   "witness": "gyza/economy/delegation.py:213 verify_delegation, :157 capability_subset",
+   "note": "monotone non-increasing down the chain, with a proof."
+  },
+  {
+   "action": "Ledger entry bilateral signature",
+   "bucket": "NATIVE",
+   "witness": "gyza/economy/ledger.py:348 verify_entry",
+   "note": "both parties' signatures over canonical bytes."
+  },
+  {
+   "action": "Spendable balance / headroom",
+   "bucket": "NATIVE",
+   "witness": "gyza/economy/wallet.py:274 net_balance, gyza/economy/subcontract.py:184 available",
+   "note": "pure fold over append-only entries; the gate reads the same fold."
+  },
+  {
+   "action": "Tier-3 attestation quorum cosig",
+   "bucket": "NATIVE",
+   "witness": "gyza/network/netd_client.py:1144 verify_attestation",
+   "note": "k-of-n cosignature check."
+  },
+  {
+   "action": "Artifact content address",
+   "bucket": "NATIVE",
+   "witness": "gyza/network/artifact_store.py:47 store",
+   "note": "BLAKE3 CAS; hash comparison."
+  },
+  {
+   "action": "HLC timestamp ordering",
+   "bucket": "CHEAP_PARTIAL",
+   "witness": "gyza/schema.py:123 HLC.now",
+   "note": "the monotone ratchet is mechanically checkable; whether the stamp reflects real time is not."
+  },
+  {
+   "action": "Reputation score (EWMA)",
+   "bucket": "CHEAP_PARTIAL",
+   "witness": "gyza/economy/reputation.py:188 record_success, :192 record_failure",
+   "note": "range bound and per-event direction are checkable; whether the score tracks real trustworthiness is not."
+  },
+  {
+   "action": "Work-item claim exclusivity",
+   "bucket": "CHEAP_PARTIAL",
+   "witness": "gyza/blackboard.py:252 post_work_item, gyza/network/network_blackboard.py:154 try_claim",
+   "note": "single-claim conservation is checkable; claimant competence is not."
+  },
+  {
+   "action": "Agent execution OUTPUT content",
+   "bucket": "NONE",
+   "witness": "gyza/runner.py:374 _execute",
+   "note": "is the produced artifact CORRECT? semantic - the competence bound."
+  },
+  {
+   "action": "Episodic memory retrieval relevance",
+   "bucket": "NONE",
+   "witness": "gyza/memory.py:402 retrieve_similar",
+   "note": "are these the right episodes? semantic."
+  },
+  {
+   "action": "LSH/demand routing match quality",
+   "bucket": "NONE",
+   "witness": "gyza/demand.py:35 LSHIndex, :92 DemandOracle",
+   "note": "is this agent a good match? semantic."
+  },
+  {
+   "action": "External network send content",
+   "bucket": "NONE",
+   "witness": "gyza/network/netd_client.py:461 send_message",
+   "note": "leaves modeled state entirely; beyond containment (R13 boundary)."
+  }
+ ],
+ "summary": {
+  "n_action_types": 17,
+  "counts": {
+   "NATIVE": 10,
+   "CHEAP_PARTIAL": 3,
+   "NONE": 4
+  },
+  "fractions": {
+   "NATIVE": 0.5882,
+   "CHEAP_PARTIAL": 0.1765,
+   "NONE": 0.2353
+  }
+ }
+}

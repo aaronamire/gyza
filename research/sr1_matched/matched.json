@@ -1,0 +1,160 @@
+{
+ "_status": "MEASURED over the existing corpus. Zero API calls.",
+ "n": 181,
+ "arms": {
+  "REVISITING": 167,
+  "CONSERVING": 14
+ },
+ "strata": {
+  "3": {
+   "CONSERVING": 11,
+   "REVISITING": 45
+  },
+  "4": {
+   "CONSERVING": 2,
+   "REVISITING": 24
+  },
+  "5": {
+   "CONSERVING": 1,
+   "REVISITING": 27
+  },
+  "6": {
+   "CONSERVING": 0,
+   "REVISITING": 15
+  },
+  "7": {
+   "CONSERVING": 0,
+   "REVISITING": 8
+  },
+  "8": {
+   "CONSERVING": 0,
+   "REVISITING": 6
+  },
+  "9": {
+   "CONSERVING": 0,
+   "REVISITING": 5
+  },
+  "10": {
+   "CONSERVING": 0,
+   "REVISITING": 6
+  },
+  "11": {
+   "CONSERVING": 0,
+   "REVISITING": 5
+  },
+  "12": {
+   "CONSERVING": 0,
+   "REVISITING": 4
+  },
+  "13": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "14": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "15": {
+   "CONSERVING": 0,
+   "REVISITING": 3
+  },
+  "16": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "17": {
+   "CONSERVING": 0,
+   "REVISITING": 2
+  },
+  "18": {
+   "CONSERVING": 0,
+   "REVISITING": 2
+  },
+  "22": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "23": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "24": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "28": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "30": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "31": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "34": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "41": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "44": {
+   "CONSERVING": 0,
+   "REVISITING": 2
+  },
+  "62": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  },
+  "100": {
+   "CONSERVING": 0,
+   "REVISITING": 1
+  }
+ },
+ "matchable_strata": [
+  3,
+  4,
+  5
+ ],
+ "matched": {
+  "conserving_n": 14,
+  "conserving_fail": 0,
+  "revisiting_n": 96,
+  "revisiting_fail": 11,
+  "p_conserving": 0.0,
+  "p_revisiting": 0.11458333333333333,
+  "ci_conserving": [
+   0.0,
+   0.21531080281693193
+  ],
+  "ci_revisiting": [
+   0.06519871992559444,
+   0.19362621239474814
+  ],
+  "difference": 0.11458333333333333
+ },
+ "counter_metric": {
+  "conserving_depths": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   4,
+   4,
+   5
+  ],
+  "conserving_at_min_depth_3": 11,
+  "fraction_at_min": 0.7857142857142857
+ }
+}

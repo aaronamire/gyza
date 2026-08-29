@@ -1,0 +1,2035 @@
+{
+  "n_transforms": 288,
+  "n_items": 80,
+  "verified": 288,
+  "by_relation": {
+    "T2": 80,
+    "T3": 67,
+    "T5": 61,
+    "T1": 40,
+    "T4": 40
+  },
+  "excluded": {},
+  "declared_counts": {
+    "invariance": 227,
+    "equivariance_k3": 61
+  },
+  "transforms": [
+    {
+      "item_id": "i_classic_00",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A game show has three doors: one conceals a car, the other two conceal goats. You choose door 1. The host, who has NO knowledge of the car's location, opens one of the two other doors picked completely at random, and by chance it shows a goat. If you now switch to the last closed door, what is the probability you win the car? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1/2"
+    },
+    {
+      "item_id": "i_classic_00",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A show has 3 doors (1 prize, 2 blanks). You pick door 1. A host who does not know where the prize is opens another door uniformly at random and it happens to reveal a blank. What is your probability of winning if you switch to the remaining door? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1/2"
+    },
+    {
+      "item_id": "i_classic_01",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A couple has exactly two children. Their FIRSTBORN is a boy. What is the probability that both of their children are boys? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1/2"
+    },
+    {
+      "item_id": "i_classic_01",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In a family of two kids, the elder is male. What is the chance that both children are male? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1/2"
+    },
+    {
+      "item_id": "i_classic_02",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A couple has two children. At least one of them is a boy who was born on a Tuesday. Assuming days of the week and sexes are independent and uniform, what is the probability that both children are boys? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "13/27"
+    },
+    {
+      "item_id": "i_classic_02",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A family has two kids; it is known that one is a boy born on a Tuesday (sexes and weekdays independent and uniform). Probability both are boys? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "13/27"
+    },
+    {
+      "item_id": "i_classic_03",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Assuming 365 equally likely birthdays and no leap years, how many people must gather so that it is more likely than not that at least one of them has the SAME birthday as you? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "253"
+    },
+    {
+      "item_id": "i_classic_03",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "With 365 equally likely birthdays, how many strangers are needed before it is more probable than not that someone among them was born on your exact birthday? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "253"
+    },
+    {
+      "item_id": "i_classic_04",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "You are handed 5 pills and told to take the first immediately and then one more every half hour. How many minutes pass from the first pill until you swallow the fifth? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "120"
+    },
+    {
+      "item_id": "i_classic_04",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "Starting now, you take a pill and then another every 30 minutes. How many minutes elapse between taking the 1st and the 5th pill? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "120"
+    },
+    {
+      "item_id": "i_classic_05",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 17 sheep. Every one of them dies except 8. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "i_classic_05",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 17 goats. All but 8 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "i_classic_05",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 51 sheep. All but 24 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "i_classic_06",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 23 sheep. Every one of them dies except 6. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "6"
+    },
+    {
+      "item_id": "i_classic_06",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 23 goats. All but 6 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "6"
+    },
+    {
+      "item_id": "i_classic_06",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 69 sheep. All but 18 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "18"
+    },
+    {
+      "item_id": "i_classic_07",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 30 sheep. Every one of them dies except 7. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "7"
+    },
+    {
+      "item_id": "i_classic_07",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 30 goats. All but 7 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "7"
+    },
+    {
+      "item_id": "i_classic_07",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 90 sheep. All but 21 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "21"
+    },
+    {
+      "item_id": "i_classic_08",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 11 sheep. Every one of them dies except 4. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "4"
+    },
+    {
+      "item_id": "i_classic_08",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 11 goats. All but 4 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "4"
+    },
+    {
+      "item_id": "i_classic_08",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 33 sheep. All but 12 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "12"
+    },
+    {
+      "item_id": "i_classic_09",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 40 sheep. Every one of them dies except 9. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "i_classic_09",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 40 goats. All but 9 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "i_classic_09",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 120 sheep. All but 27 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "27"
+    },
+    {
+      "item_id": "i_classic_10",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 25 sheep. Every one of them dies except 3. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "3"
+    },
+    {
+      "item_id": "i_classic_10",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 25 goats. All but 3 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "3"
+    },
+    {
+      "item_id": "i_classic_10",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 75 sheep. All but 9 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "i_classic_11",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 14 sheep. Every one of them dies except 5. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "5"
+    },
+    {
+      "item_id": "i_classic_11",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 14 goats. All but 5 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "5"
+    },
+    {
+      "item_id": "i_classic_11",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 42 sheep. All but 15 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "15"
+    },
+    {
+      "item_id": "i_classic_12",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "A shepherd owns 33 sheep. Every one of them dies except 8. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "i_classic_12",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A rancher has 33 goats. All but 8 of them die. How many goats are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "i_classic_12",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A farmer has 99 sheep. All but 24 of them die. How many sheep are still alive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "i_classic_13",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 20-metre fence, a post is placed every 2 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "11"
+    },
+    {
+      "item_id": "i_classic_13",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 20-metre wall has a pillar every 2 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "11"
+    },
+    {
+      "item_id": "i_classic_14",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 30-metre fence, a post is placed every 3 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "11"
+    },
+    {
+      "item_id": "i_classic_14",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 30-metre wall has a pillar every 3 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "11"
+    },
+    {
+      "item_id": "i_classic_15",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 100-metre fence, a post is placed every 5 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "21"
+    },
+    {
+      "item_id": "i_classic_15",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 100-metre wall has a pillar every 5 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "21"
+    },
+    {
+      "item_id": "i_classic_16",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 48-metre fence, a post is placed every 4 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "13"
+    },
+    {
+      "item_id": "i_classic_16",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 48-metre wall has a pillar every 4 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "13"
+    },
+    {
+      "item_id": "i_classic_17",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 36-metre fence, a post is placed every 6 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "7"
+    },
+    {
+      "item_id": "i_classic_17",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 36-metre wall has a pillar every 6 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "7"
+    },
+    {
+      "item_id": "i_classic_18",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 60-metre fence, a post is placed every 10 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "7"
+    },
+    {
+      "item_id": "i_classic_18",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 60-metre wall has a pillar every 10 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "7"
+    },
+    {
+      "item_id": "i_classic_19",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Along a straight 21-metre fence, a post is placed every 3 metres, with one at each end. How many posts are used altogether? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "i_classic_19",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A straight 21-metre wall has a pillar every 3 metres, including one at each end. How many pillars are there in total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "iii_substitution_00",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 1 to 99, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "4950"
+    },
+    {
+      "item_id": "iii_substitution_00",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 1 to 99 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "14850"
+    },
+    {
+      "item_id": "iii_substitution_01",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 2 to 100, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "5049"
+    },
+    {
+      "item_id": "iii_substitution_01",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 2 to 100 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "15147"
+    },
+    {
+      "item_id": "iii_substitution_02",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 1 to 101, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "5151"
+    },
+    {
+      "item_id": "iii_substitution_02",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 1 to 101 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "15453"
+    },
+    {
+      "item_id": "iii_substitution_03",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 1 to 50, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1275"
+    },
+    {
+      "item_id": "iii_substitution_03",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 1 to 50 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "3825"
+    },
+    {
+      "item_id": "iii_substitution_04",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 1 to 200, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "20100"
+    },
+    {
+      "item_id": "iii_substitution_04",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 1 to 200 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "60300"
+    },
+    {
+      "item_id": "iii_substitution_05",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 3 to 100, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "5047"
+    },
+    {
+      "item_id": "iii_substitution_05",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 3 to 100 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "15141"
+    },
+    {
+      "item_id": "iii_substitution_06",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add up every whole number from 1 to 49, inclusive. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1225"
+    },
+    {
+      "item_id": "iii_substitution_06",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Each of the integers from 1 to 49 inclusive is multiplied by 3, then they are all added together. What is the total? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "3675"
+    },
+    {
+      "item_id": "iii_substitution_07",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 5-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "540"
+    },
+    {
+      "item_id": "iii_substitution_07",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 5 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "540"
+    },
+    {
+      "item_id": "iii_substitution_08",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 6-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "720"
+    },
+    {
+      "item_id": "iii_substitution_08",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 6 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "720"
+    },
+    {
+      "item_id": "iii_substitution_09",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 7-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "900"
+    },
+    {
+      "item_id": "iii_substitution_09",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 7 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "900"
+    },
+    {
+      "item_id": "iii_substitution_10",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 8-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1080"
+    },
+    {
+      "item_id": "iii_substitution_10",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 8 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1080"
+    },
+    {
+      "item_id": "iii_substitution_11",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 9-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1260"
+    },
+    {
+      "item_id": "iii_substitution_11",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 9 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1260"
+    },
+    {
+      "item_id": "iii_substitution_12",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 10-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1440"
+    },
+    {
+      "item_id": "iii_substitution_12",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 10 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1440"
+    },
+    {
+      "item_id": "iii_substitution_13",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "What do the interior angles of a convex 12-sided polygon add up to, in degrees? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1800"
+    },
+    {
+      "item_id": "iii_substitution_13",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "In degrees, what is the total of all interior angles of a simple polygon with 12 sides? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "1800"
+    },
+    {
+      "item_id": "iii_substitution_14",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add together the first 4 positive multiples of 2. What is the sum? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "20"
+    },
+    {
+      "item_id": "iii_substitution_14",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Add together the first 4 positive even numbers, then multiply the total by 3. What is the result? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "60"
+    },
+    {
+      "item_id": "iii_substitution_15",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add together the first 6 positive multiples of 2. What is the sum? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "42"
+    },
+    {
+      "item_id": "iii_substitution_15",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Add together the first 6 positive even numbers, then multiply the total by 3. What is the result? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "126"
+    },
+    {
+      "item_id": "iii_substitution_16",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add together the first 7 positive multiples of 2. What is the sum? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "56"
+    },
+    {
+      "item_id": "iii_substitution_16",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Add together the first 7 positive even numbers, then multiply the total by 3. What is the result? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "168"
+    },
+    {
+      "item_id": "iii_substitution_17",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add together the first 9 positive multiples of 2. What is the sum? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "90"
+    },
+    {
+      "item_id": "iii_substitution_17",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Add together the first 9 positive even numbers, then multiply the total by 3. What is the result? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "270"
+    },
+    {
+      "item_id": "iii_substitution_18",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add together the first 11 positive multiples of 2. What is the sum? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "132"
+    },
+    {
+      "item_id": "iii_substitution_18",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Add together the first 11 positive even numbers, then multiply the total by 3. What is the result? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "396"
+    },
+    {
+      "item_id": "iii_substitution_19",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Add together the first 15 positive multiples of 2. What is the sum? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "240"
+    },
+    {
+      "item_id": "iii_substitution_19",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Add together the first 15 positive even numbers, then multiply the total by 3. What is the result? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "720"
+    },
+    {
+      "item_id": "ii_noop_00",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 73 apples. 20 of the apples are eaten, and 27 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_00",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 73 apples in a basket. After 20 of them are eaten \u2014 and noting that 20 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_00",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 73 pears. 20 of the pears are sold, and 20 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_00",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 20 of the apples are slightly smaller than average. The basket holds 73 apples in total, and 20 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_00",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 219 apples. 60 of the apples are eaten, and 60 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "159"
+    },
+    {
+      "item_id": "ii_noop_01",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 116 apples. 6 of the apples are eaten, and 17 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "110"
+    },
+    {
+      "item_id": "ii_noop_01",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 116 apples in a basket. After 6 of them are eaten \u2014 and noting that 10 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "110"
+    },
+    {
+      "item_id": "ii_noop_01",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 116 pears. 6 of the pears are sold, and 10 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "110"
+    },
+    {
+      "item_id": "ii_noop_01",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 10 of the apples are slightly smaller than average. The basket holds 116 apples in total, and 6 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "110"
+    },
+    {
+      "item_id": "ii_noop_01",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 348 apples. 18 of the apples are eaten, and 30 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "330"
+    },
+    {
+      "item_id": "ii_noop_02",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 104 apples. 49 of the apples are eaten, and 15 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "55"
+    },
+    {
+      "item_id": "ii_noop_02",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 104 apples in a basket. After 49 of them are eaten \u2014 and noting that 8 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "55"
+    },
+    {
+      "item_id": "ii_noop_02",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 104 pears. 49 of the pears are sold, and 8 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "55"
+    },
+    {
+      "item_id": "ii_noop_02",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 8 of the apples are slightly smaller than average. The basket holds 104 apples in total, and 49 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "55"
+    },
+    {
+      "item_id": "ii_noop_02",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 312 apples. 147 of the apples are eaten, and 24 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "165"
+    },
+    {
+      "item_id": "ii_noop_03",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 58 apples. 25 of the apples are eaten, and 15 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "33"
+    },
+    {
+      "item_id": "ii_noop_03",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 58 apples in a basket. After 25 of them are eaten \u2014 and noting that 8 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "33"
+    },
+    {
+      "item_id": "ii_noop_03",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 58 pears. 25 of the pears are sold, and 8 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "33"
+    },
+    {
+      "item_id": "ii_noop_03",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 8 of the apples are slightly smaller than average. The basket holds 58 apples in total, and 25 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "33"
+    },
+    {
+      "item_id": "ii_noop_03",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 174 apples. 75 of the apples are eaten, and 24 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "99"
+    },
+    {
+      "item_id": "ii_noop_04",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 54 apples. 23 of the apples are eaten, and 13 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_04",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 54 apples in a basket. After 23 of them are eaten \u2014 and noting that 6 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_04",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 54 pears. 23 of the pears are sold, and 6 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_04",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 6 of the apples are slightly smaller than average. The basket holds 54 apples in total, and 23 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_04",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 162 apples. 69 of the apples are eaten, and 18 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "93"
+    },
+    {
+      "item_id": "ii_noop_05",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 67 apples. 23 of the apples are eaten, and 20 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_05",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 67 apples in a basket. After 23 of them are eaten \u2014 and noting that 13 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_05",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 67 pears. 23 of the pears are sold, and 13 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_05",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 13 of the apples are slightly smaller than average. The basket holds 67 apples in total, and 23 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_05",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 201 apples. 69 of the apples are eaten, and 39 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "132"
+    },
+    {
+      "item_id": "ii_noop_06",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 37 apples. 5 of the apples are eaten, and 21 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "32"
+    },
+    {
+      "item_id": "ii_noop_06",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 37 apples in a basket. After 5 of them are eaten \u2014 and noting that 14 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "32"
+    },
+    {
+      "item_id": "ii_noop_06",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 37 pears. 5 of the pears are sold, and 14 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "32"
+    },
+    {
+      "item_id": "ii_noop_06",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 14 of the apples are slightly smaller than average. The basket holds 37 apples in total, and 5 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "32"
+    },
+    {
+      "item_id": "ii_noop_06",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 111 apples. 15 of the apples are eaten, and 42 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "96"
+    },
+    {
+      "item_id": "ii_noop_07",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 98 apples. 41 of the apples are eaten, and 23 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_07",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 98 apples in a basket. After 41 of them are eaten \u2014 and noting that 16 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_07",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 98 pears. 41 of the pears are sold, and 16 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_07",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 16 of the apples are slightly smaller than average. The basket holds 98 apples in total, and 41 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_07",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 294 apples. 123 of the apples are eaten, and 48 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "171"
+    },
+    {
+      "item_id": "ii_noop_08",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 104 apples. 20 of the apples are eaten, and 27 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "84"
+    },
+    {
+      "item_id": "ii_noop_08",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 104 apples in a basket. After 20 of them are eaten \u2014 and noting that 20 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "84"
+    },
+    {
+      "item_id": "ii_noop_08",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 104 pears. 20 of the pears are sold, and 20 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "84"
+    },
+    {
+      "item_id": "ii_noop_08",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 20 of the apples are slightly smaller than average. The basket holds 104 apples in total, and 20 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "84"
+    },
+    {
+      "item_id": "ii_noop_08",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 312 apples. 60 of the apples are eaten, and 60 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "252"
+    },
+    {
+      "item_id": "ii_noop_09",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 101 apples. 10 of the apples are eaten, and 22 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "91"
+    },
+    {
+      "item_id": "ii_noop_09",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 101 apples in a basket. After 10 of them are eaten \u2014 and noting that 15 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "91"
+    },
+    {
+      "item_id": "ii_noop_09",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 101 pears. 10 of the pears are sold, and 15 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "91"
+    },
+    {
+      "item_id": "ii_noop_09",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 15 of the apples are slightly smaller than average. The basket holds 101 apples in total, and 10 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "91"
+    },
+    {
+      "item_id": "ii_noop_09",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 303 apples. 30 of the apples are eaten, and 45 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "273"
+    },
+    {
+      "item_id": "ii_noop_10",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 41 apples. 11 of the apples are eaten, and 21 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "30"
+    },
+    {
+      "item_id": "ii_noop_10",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 41 apples in a basket. After 11 of them are eaten \u2014 and noting that 14 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "30"
+    },
+    {
+      "item_id": "ii_noop_10",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 41 pears. 11 of the pears are sold, and 14 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "30"
+    },
+    {
+      "item_id": "ii_noop_10",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 14 of the apples are slightly smaller than average. The basket holds 41 apples in total, and 11 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "30"
+    },
+    {
+      "item_id": "ii_noop_10",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 123 apples. 33 of the apples are eaten, and 42 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "90"
+    },
+    {
+      "item_id": "ii_noop_11",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 42 apples. 11 of the apples are eaten, and 14 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_11",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 42 apples in a basket. After 11 of them are eaten \u2014 and noting that 7 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_11",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 42 pears. 11 of the pears are sold, and 7 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_11",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 7 of the apples are slightly smaller than average. The basket holds 42 apples in total, and 11 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "31"
+    },
+    {
+      "item_id": "ii_noop_11",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 126 apples. 33 of the apples are eaten, and 21 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "93"
+    },
+    {
+      "item_id": "ii_noop_12",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 112 apples. 15 of the apples are eaten, and 32 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "97"
+    },
+    {
+      "item_id": "ii_noop_12",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 112 apples in a basket. After 15 of them are eaten \u2014 and noting that 25 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "97"
+    },
+    {
+      "item_id": "ii_noop_12",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 112 pears. 15 of the pears are sold, and 25 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "97"
+    },
+    {
+      "item_id": "ii_noop_12",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 25 of the apples are slightly smaller than average. The basket holds 112 apples in total, and 15 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "97"
+    },
+    {
+      "item_id": "ii_noop_12",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 336 apples. 45 of the apples are eaten, and 75 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "291"
+    },
+    {
+      "item_id": "ii_noop_13",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 53 apples. 5 of the apples are eaten, and 25 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "48"
+    },
+    {
+      "item_id": "ii_noop_13",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 53 apples in a basket. After 5 of them are eaten \u2014 and noting that 18 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "48"
+    },
+    {
+      "item_id": "ii_noop_13",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 53 pears. 5 of the pears are sold, and 18 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "48"
+    },
+    {
+      "item_id": "ii_noop_13",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 18 of the apples are slightly smaller than average. The basket holds 53 apples in total, and 5 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "48"
+    },
+    {
+      "item_id": "ii_noop_13",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 159 apples. 15 of the apples are eaten, and 54 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "144"
+    },
+    {
+      "item_id": "ii_noop_14",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 35 apples. 8 of the apples are eaten, and 14 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "27"
+    },
+    {
+      "item_id": "ii_noop_14",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 35 apples in a basket. After 8 of them are eaten \u2014 and noting that 7 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "27"
+    },
+    {
+      "item_id": "ii_noop_14",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 35 pears. 8 of the pears are sold, and 7 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "27"
+    },
+    {
+      "item_id": "ii_noop_14",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 7 of the apples are slightly smaller than average. The basket holds 35 apples in total, and 8 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "27"
+    },
+    {
+      "item_id": "ii_noop_14",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 105 apples. 24 of the apples are eaten, and 21 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "81"
+    },
+    {
+      "item_id": "ii_noop_15",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 74 apples. 8 of the apples are eaten, and 39 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "66"
+    },
+    {
+      "item_id": "ii_noop_15",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 74 apples in a basket. After 8 of them are eaten \u2014 and noting that 32 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "66"
+    },
+    {
+      "item_id": "ii_noop_15",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 74 pears. 8 of the pears are sold, and 32 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "66"
+    },
+    {
+      "item_id": "ii_noop_15",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 32 of the apples are slightly smaller than average. The basket holds 74 apples in total, and 8 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "66"
+    },
+    {
+      "item_id": "ii_noop_15",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 222 apples. 24 of the apples are eaten, and 96 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "198"
+    },
+    {
+      "item_id": "ii_noop_16",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 98 apples. 47 of the apples are eaten, and 12 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "51"
+    },
+    {
+      "item_id": "ii_noop_16",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 98 apples in a basket. After 47 of them are eaten \u2014 and noting that 5 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "51"
+    },
+    {
+      "item_id": "ii_noop_16",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 98 pears. 47 of the pears are sold, and 5 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "51"
+    },
+    {
+      "item_id": "ii_noop_16",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 5 of the apples are slightly smaller than average. The basket holds 98 apples in total, and 47 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "51"
+    },
+    {
+      "item_id": "ii_noop_16",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 294 apples. 141 of the apples are eaten, and 15 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "153"
+    },
+    {
+      "item_id": "ii_noop_17",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 95 apples. 17 of the apples are eaten, and 29 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "78"
+    },
+    {
+      "item_id": "ii_noop_17",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 95 apples in a basket. After 17 of them are eaten \u2014 and noting that 22 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "78"
+    },
+    {
+      "item_id": "ii_noop_17",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 95 pears. 17 of the pears are sold, and 22 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "78"
+    },
+    {
+      "item_id": "ii_noop_17",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 22 of the apples are slightly smaller than average. The basket holds 95 apples in total, and 17 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "78"
+    },
+    {
+      "item_id": "ii_noop_17",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 285 apples. 51 of the apples are eaten, and 66 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "234"
+    },
+    {
+      "item_id": "ii_noop_18",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 114 apples. 19 of the apples are eaten, and 41 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "95"
+    },
+    {
+      "item_id": "ii_noop_18",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 114 apples in a basket. After 19 of them are eaten \u2014 and noting that 34 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "95"
+    },
+    {
+      "item_id": "ii_noop_18",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 114 pears. 19 of the pears are sold, and 34 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "95"
+    },
+    {
+      "item_id": "ii_noop_18",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 34 of the apples are slightly smaller than average. The basket holds 114 apples in total, and 19 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "95"
+    },
+    {
+      "item_id": "ii_noop_18",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 342 apples. 57 of the apples are eaten, and 102 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "285"
+    },
+    {
+      "item_id": "ii_noop_19",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 44 apples. 10 of the apples are eaten, and 23 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "34"
+    },
+    {
+      "item_id": "ii_noop_19",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 44 apples in a basket. After 10 of them are eaten \u2014 and noting that 16 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "34"
+    },
+    {
+      "item_id": "ii_noop_19",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 44 pears. 10 of the pears are sold, and 16 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "34"
+    },
+    {
+      "item_id": "ii_noop_19",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 16 of the apples are slightly smaller than average. The basket holds 44 apples in total, and 10 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "34"
+    },
+    {
+      "item_id": "ii_noop_19",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 132 apples. 30 of the apples are eaten, and 48 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "102"
+    },
+    {
+      "item_id": "ii_noop_20",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 68 apples. 19 of the apples are eaten, and 16 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_20",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 68 apples in a basket. After 19 of them are eaten \u2014 and noting that 9 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_20",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 68 pears. 19 of the pears are sold, and 9 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_20",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 9 of the apples are slightly smaller than average. The basket holds 68 apples in total, and 19 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_20",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 204 apples. 57 of the apples are eaten, and 27 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "147"
+    },
+    {
+      "item_id": "ii_noop_21",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 40 apples. 11 of the apples are eaten, and 16 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "29"
+    },
+    {
+      "item_id": "ii_noop_21",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 40 apples in a basket. After 11 of them are eaten \u2014 and noting that 9 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "29"
+    },
+    {
+      "item_id": "ii_noop_21",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 40 pears. 11 of the pears are sold, and 9 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "29"
+    },
+    {
+      "item_id": "ii_noop_21",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 9 of the apples are slightly smaller than average. The basket holds 40 apples in total, and 11 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "29"
+    },
+    {
+      "item_id": "ii_noop_21",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 120 apples. 33 of the apples are eaten, and 27 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "87"
+    },
+    {
+      "item_id": "ii_noop_22",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 71 apples. 28 of the apples are eaten, and 16 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "43"
+    },
+    {
+      "item_id": "ii_noop_22",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 71 apples in a basket. After 28 of them are eaten \u2014 and noting that 9 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "43"
+    },
+    {
+      "item_id": "ii_noop_22",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 71 pears. 28 of the pears are sold, and 9 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "43"
+    },
+    {
+      "item_id": "ii_noop_22",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 9 of the apples are slightly smaller than average. The basket holds 71 apples in total, and 28 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "43"
+    },
+    {
+      "item_id": "ii_noop_22",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 213 apples. 84 of the apples are eaten, and 27 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "129"
+    },
+    {
+      "item_id": "ii_noop_23",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 85 apples. 33 of the apples are eaten, and 31 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "52"
+    },
+    {
+      "item_id": "ii_noop_23",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 85 apples in a basket. After 33 of them are eaten \u2014 and noting that 24 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "52"
+    },
+    {
+      "item_id": "ii_noop_23",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 85 pears. 33 of the pears are sold, and 24 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "52"
+    },
+    {
+      "item_id": "ii_noop_23",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 24 of the apples are slightly smaller than average. The basket holds 85 apples in total, and 33 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "52"
+    },
+    {
+      "item_id": "ii_noop_23",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 255 apples. 99 of the apples are eaten, and 72 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "156"
+    },
+    {
+      "item_id": "ii_noop_24",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 68 apples. 6 of the apples are eaten, and 30 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "62"
+    },
+    {
+      "item_id": "ii_noop_24",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 68 apples in a basket. After 6 of them are eaten \u2014 and noting that 23 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "62"
+    },
+    {
+      "item_id": "ii_noop_24",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 68 pears. 6 of the pears are sold, and 23 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "62"
+    },
+    {
+      "item_id": "ii_noop_24",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 23 of the apples are slightly smaller than average. The basket holds 68 apples in total, and 6 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "62"
+    },
+    {
+      "item_id": "ii_noop_24",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 204 apples. 18 of the apples are eaten, and 69 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "186"
+    },
+    {
+      "item_id": "ii_noop_25",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 78 apples. 34 of the apples are eaten, and 18 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_25",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 78 apples in a basket. After 34 of them are eaten \u2014 and noting that 11 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_25",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 78 pears. 34 of the pears are sold, and 11 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_25",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 11 of the apples are slightly smaller than average. The basket holds 78 apples in total, and 34 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "44"
+    },
+    {
+      "item_id": "ii_noop_25",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 234 apples. 102 of the apples are eaten, and 33 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "132"
+    },
+    {
+      "item_id": "ii_noop_26",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 63 apples. 6 of the apples are eaten, and 21 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_26",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 63 apples in a basket. After 6 of them are eaten \u2014 and noting that 14 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_26",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 63 pears. 6 of the pears are sold, and 14 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_26",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 14 of the apples are slightly smaller than average. The basket holds 63 apples in total, and 6 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "57"
+    },
+    {
+      "item_id": "ii_noop_26",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 189 apples. 18 of the apples are eaten, and 42 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "171"
+    },
+    {
+      "item_id": "ii_noop_27",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "A basket holds 88 apples. 35 of the apples are eaten, and 29 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_27",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "There are 88 apples in a basket. After 35 of them are eaten \u2014 and noting that 22 of the ones left are a little smaller than usual \u2014 how many apples are left in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_27",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A crate holds 88 pears. 35 of the pears are sold, and 22 of the remaining pears are slightly smaller than average. How many pears remain in the crate? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_27",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "In a basket, 22 of the apples are slightly smaller than average. The basket holds 88 apples in total, and 35 of them are eaten. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_27",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "A basket holds 264 apples. 105 of the apples are eaten, and 66 of the remaining apples are slightly smaller than average. How many apples remain in the basket? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "159"
+    },
+    {
+      "item_id": "ii_noop_28",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 17 apples. He also keeps 33 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "17"
+    },
+    {
+      "item_id": "ii_noop_28",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 17 apples at the market. Separately, there are 24 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "17"
+    },
+    {
+      "item_id": "ii_noop_28",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 17 crates of lettuce. In a different warehouse the grocer also stores 24 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "17"
+    },
+    {
+      "item_id": "ii_noop_28",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 24 oranges in a bowl at Liam's home. Separately, Liam buys 17 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "17"
+    },
+    {
+      "item_id": "ii_noop_28",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 51 apples. He also keeps 72 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "51"
+    },
+    {
+      "item_id": "ii_noop_29",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 49 apples. He also keeps 21 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_29",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 49 apples at the market. Separately, there are 12 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_29",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 49 crates of lettuce. In a different warehouse the grocer also stores 12 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_29",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 12 oranges in a bowl at Liam's home. Separately, Liam buys 49 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "49"
+    },
+    {
+      "item_id": "ii_noop_29",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 147 apples. He also keeps 36 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "147"
+    },
+    {
+      "item_id": "ii_noop_30",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 24 apples. He also keeps 43 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "ii_noop_30",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 24 apples at the market. Separately, there are 34 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "ii_noop_30",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 24 crates of lettuce. In a different warehouse the grocer also stores 34 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "ii_noop_30",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 34 oranges in a bowl at Liam's home. Separately, Liam buys 24 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "ii_noop_30",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 72 apples. He also keeps 102 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "72"
+    },
+    {
+      "item_id": "ii_noop_31",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 37 apples. He also keeps 30 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "37"
+    },
+    {
+      "item_id": "ii_noop_31",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 37 apples at the market. Separately, there are 21 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "37"
+    },
+    {
+      "item_id": "ii_noop_31",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 37 crates of lettuce. In a different warehouse the grocer also stores 21 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "37"
+    },
+    {
+      "item_id": "ii_noop_31",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 21 oranges in a bowl at Liam's home. Separately, Liam buys 37 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "37"
+    },
+    {
+      "item_id": "ii_noop_31",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 111 apples. He also keeps 63 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "111"
+    },
+    {
+      "item_id": "ii_noop_32",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 42 apples. He also keeps 30 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "42"
+    },
+    {
+      "item_id": "ii_noop_32",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 42 apples at the market. Separately, there are 21 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "42"
+    },
+    {
+      "item_id": "ii_noop_32",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 42 crates of lettuce. In a different warehouse the grocer also stores 21 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "42"
+    },
+    {
+      "item_id": "ii_noop_32",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 21 oranges in a bowl at Liam's home. Separately, Liam buys 42 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "42"
+    },
+    {
+      "item_id": "ii_noop_32",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 126 apples. He also keeps 63 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "126"
+    },
+    {
+      "item_id": "ii_noop_33",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 58 apples. He also keeps 39 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "58"
+    },
+    {
+      "item_id": "ii_noop_33",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 58 apples at the market. Separately, there are 30 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "58"
+    },
+    {
+      "item_id": "ii_noop_33",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 58 crates of lettuce. In a different warehouse the grocer also stores 30 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "58"
+    },
+    {
+      "item_id": "ii_noop_33",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 30 oranges in a bowl at Liam's home. Separately, Liam buys 58 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "58"
+    },
+    {
+      "item_id": "ii_noop_33",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 174 apples. He also keeps 90 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "174"
+    },
+    {
+      "item_id": "ii_noop_34",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 8 apples. He also keeps 17 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "ii_noop_34",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 8 apples at the market. Separately, there are 8 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "ii_noop_34",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 8 crates of lettuce. In a different warehouse the grocer also stores 8 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "ii_noop_34",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 8 oranges in a bowl at Liam's home. Separately, Liam buys 8 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "8"
+    },
+    {
+      "item_id": "ii_noop_34",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 24 apples. He also keeps 24 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "24"
+    },
+    {
+      "item_id": "ii_noop_35",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 35 apples. He also keeps 42 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_35",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 35 apples at the market. Separately, there are 33 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_35",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 35 crates of lettuce. In a different warehouse the grocer also stores 33 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_35",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 33 oranges in a bowl at Liam's home. Separately, Liam buys 35 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_35",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 105 apples. He also keeps 99 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "105"
+    },
+    {
+      "item_id": "ii_noop_36",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 9 apples. He also keeps 37 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "ii_noop_36",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 9 apples at the market. Separately, there are 28 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "ii_noop_36",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 9 crates of lettuce. In a different warehouse the grocer also stores 28 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "ii_noop_36",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 28 oranges in a bowl at Liam's home. Separately, Liam buys 9 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "9"
+    },
+    {
+      "item_id": "ii_noop_36",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 27 apples. He also keeps 84 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "27"
+    },
+    {
+      "item_id": "ii_noop_37",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 47 apples. He also keeps 41 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "47"
+    },
+    {
+      "item_id": "ii_noop_37",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 47 apples at the market. Separately, there are 32 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "47"
+    },
+    {
+      "item_id": "ii_noop_37",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 47 crates of lettuce. In a different warehouse the grocer also stores 32 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "47"
+    },
+    {
+      "item_id": "ii_noop_37",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 32 oranges in a bowl at Liam's home. Separately, Liam buys 47 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "47"
+    },
+    {
+      "item_id": "ii_noop_37",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 141 apples. He also keeps 96 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "141"
+    },
+    {
+      "item_id": "ii_noop_38",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 53 apples. He also keeps 19 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_38",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 53 apples at the market. Separately, there are 10 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_38",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 53 crates of lettuce. In a different warehouse the grocer also stores 10 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_38",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 10 oranges in a bowl at Liam's home. Separately, Liam buys 53 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "53"
+    },
+    {
+      "item_id": "ii_noop_38",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 159 apples. He also keeps 30 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "159"
+    },
+    {
+      "item_id": "ii_noop_39",
+      "relation": "T1",
+      "declared": "invariance",
+      "transformed_prompt": "Liam buys 35 apples. He also keeps 41 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_39",
+      "relation": "T2",
+      "declared": "invariance",
+      "transformed_prompt": "Liam bought 35 apples at the market. Separately, there are 32 oranges sitting in a bowl in his kitchen. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_39",
+      "relation": "T3",
+      "declared": "invariance",
+      "transformed_prompt": "A grocer receives 35 crates of lettuce. In a different warehouse the grocer also stores 32 barrels of vinegar. How many crates of lettuce did the grocer receive? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_39",
+      "relation": "T4",
+      "declared": "invariance",
+      "transformed_prompt": "There are 32 oranges in a bowl at Liam's home. Separately, Liam buys 35 apples at the market. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "35"
+    },
+    {
+      "item_id": "ii_noop_39",
+      "relation": "T5",
+      "declared": "equivariance_k3",
+      "transformed_prompt": "Liam buys 105 apples. He also keeps 96 oranges in a bowl at home. How many apples did Liam buy? Give the final answer as \\boxed{...} (a single number or reduced fraction).",
+      "transformed_true": "105"
+    }
+  ]
+}

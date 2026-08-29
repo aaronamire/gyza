@@ -30,12 +30,7 @@ import pytest
 from gyza.canon import canonical_form, sequences_equal, values_equal
 
 ROOT = Path(__file__).resolve().parents[1]
-# ONLY WHAT IS PRESENT. `research/` is not published in code-only releases, so
-# a source scan hardcoding it fails on a tree where it is absent -- and an
-# exemption for a file that does not exist here is not stale, it is
-# inapplicable. Scanning what exists keeps this an honest check of the tree it
-# can actually see, in both trees.
-SCAN = [p for p in (ROOT / "gyza", ROOT / "research") if p.is_dir()]
+SCAN = [ROOT / "gyza", ROOT / "research"]
 
 PATTERN = re.compile(r"\brepr\(|str\([^()]*\)\s*[=!]=\s*str\(")
 SKIP_LINE = re.compile(r"def __repr__|__repr__\s*=|\.__repr__")
@@ -142,14 +137,7 @@ def test_every_exemption_is_real_and_carries_a_reason():
     """An exemption for a site that no longer matches is dead weight that hides
     the next one."""
     hit = {f for f, _i, _l in _sites()}
-    # AN EXEMPTION FOR AN ABSENT FILE IS INAPPLICABLE, NOT STALE, and the
-    # distinction is file-level rather than directory-level: `research/` may be
-    # present with only part of its contents (code-only releases publish
-    # `gyza/` and a subset of `research/`). Requiring an exemption to match a
-    # file that was never shipped would fail for a reason that says nothing
-    # about canonicalisation.
-    applicable = {f for f in EXEMPT if (ROOT / f).is_file()}
-    stale = sorted(applicable - hit)
+    stale = sorted(set(EXEMPT) - hit)
     assert not stale, f"exemptions no longer matching any site: {stale}"
     for f, reason in EXEMPT.items():
         assert len(reason) > 40, f"exemption for {f} needs a real reason"

@@ -52,7 +52,7 @@ def test_detect_backend_returns_an_enum():
 @_REQUIRES_BWRAP
 def test_roundtrip_mock_executor():
     r = run_sandboxed(
-        factory_qualname="gyza.runner:make_mock_executor",
+        factory_qualname="gyza.executors:make_mock_executor",
         init_kwargs={"response": "hi-from-sandbox"},
         prompt="prompt",
         context={},
@@ -66,7 +66,7 @@ def test_roundtrip_mock_executor():
 @_REQUIRES_BWRAP
 def test_make_sandboxed_executor_matches_runner_protocol():
     fn = make_sandboxed_executor(
-        "gyza.runner:make_mock_executor",
+        "gyza.executors:make_mock_executor",
         init_kwargs={"response": "abc"},
         config=SandboxConfig(timeout_s=15.0),
     )
@@ -99,7 +99,7 @@ def test_sandboxed_executor_accepts_runner_context():
         success=None, created_at_ns=time.time_ns(), ttl_ns=10**12,
     )
     fn = make_sandboxed_executor(
-        "gyza.runner:make_mock_executor",
+        "gyza.executors:make_mock_executor",
         init_kwargs={"response": "ok"},
         config=SandboxConfig(timeout_s=15.0),
     )
@@ -365,7 +365,7 @@ def test_none_backend_runs_in_process():
     executor directly. Used as fallback when bwrap is unavailable.
     """
     r = run_sandboxed(
-        factory_qualname="gyza.runner:make_mock_executor",
+        factory_qualname="gyza.executors:make_mock_executor",
         init_kwargs={"response": "in-process"},
         prompt="",
         context={},

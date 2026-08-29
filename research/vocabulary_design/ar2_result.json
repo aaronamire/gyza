@@ -1,0 +1,1408 @@
+{
+ "seed": 1,
+ "n": 196,
+ "n_correct": 79,
+ "n_failing": 117,
+ "feasible": true,
+ "envelopes": {
+  "TYPE_ONLY": {
+   "TPR": 0.4017,
+   "FPR": 0.0,
+   "rejected_failing": 47,
+   "rejected_correct": 0
+  },
+  "STRUCTURAL": {
+   "TPR": 0.5128,
+   "FPR": 0.0,
+   "rejected_failing": 60,
+   "rejected_correct": 0
+  },
+  "ORACLE": {
+   "TPR": 1.0,
+   "FPR": 0.0,
+   "rejected_failing": 117,
+   "rejected_correct": 0
+  }
+ },
+ "mixture_decomposition": {
+  "note": "STRUCTURAL TPR mixes 'the program crashed' (caught by the FLOOR) with 'the output looked structurally wrong'. A crash is an execution failure, not a respecified semantic claim.",
+  "failing_that_ran": 70,
+  "correct_that_ran": 79,
+  "marginal_TPR_among_programs_that_ran": 0.1857,
+  "marginal_FPR_among_programs_that_ran": 0.0
+ },
+ "rows": [
+  {
+   "key": "google/gemma-2-27b-it|0",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|1",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|2",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|3",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|4",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|5",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|6",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|7",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|8",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|9",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|10",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|11",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|12",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|13",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|14",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|15",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|16",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|17",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|18",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|19",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|20",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|21",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|22",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|23",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|24",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|25",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|26",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|27",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|28",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|29",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|30",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|31",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|32",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|33",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|34",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|35",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|36",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|37",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|38",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|39",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|40",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|41",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|42",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|43",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|44",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|45",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|46",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|47",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "google/gemma-2-27b-it|48",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "google/gemma-2-27b-it|49",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|0",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|1",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|2",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|3",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|4",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|5",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|6",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|7",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|8",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|9",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|10",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|11",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|12",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|13",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|14",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|15",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|16",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|17",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|18",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|19",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|20",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|21",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|22",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|23",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|24",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|25",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|27",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|28",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|29",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|30",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|31",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|32",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|33",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|34",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|35",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|36",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|37",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|38",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|39",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|40",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|41",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|42",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|44",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|45",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|46",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|47",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|48",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "meta-llama/llama-3.1-70b-instruct|49",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|0",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|1",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|2",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|3",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|4",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|5",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|6",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|7",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|8",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|9",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|10",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|11",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|12",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|13",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|14",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|15",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|16",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|17",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|18",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|19",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|20",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|21",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|22",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|23",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|24",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|25",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|26",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|27",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|28",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|29",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|30",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|32",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|33",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|34",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|35",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|36",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|37",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|38",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|39",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|40",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|41",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|42",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|43",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|44",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|45",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|46",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "microsoft/phi-4|47",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|48",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "microsoft/phi-4|49",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|0",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|1",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|2",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|3",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|4",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|5",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|6",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|7",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|8",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|9",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|10",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|11",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|12",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|13",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|14",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|15",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|16",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|17",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|18",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|19",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|20",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|21",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|22",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|23",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|24",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|25",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|26",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|28",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|29",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|30",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|31",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|32",
+   "correct": false,
+   "acc_TYPE_ONLY": false,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|33",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|34",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|35",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|36",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": false,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|37",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|38",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|39",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|40",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|41",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|42",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|43",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|44",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|45",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|46",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|47",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|48",
+   "correct": false,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": false
+  },
+  {
+   "key": "mistralai/mistral-small-24b-instruct-2501|49",
+   "correct": true,
+   "acc_TYPE_ONLY": true,
+   "acc_STRUCTURAL": true,
+   "acc_ORACLE": true
+  }
+ ]
+}

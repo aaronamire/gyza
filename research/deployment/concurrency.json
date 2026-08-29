@@ -1,0 +1,151 @@
+{
+  "cells": [
+    {
+      "runners": 1,
+      "items": 25,
+      "claimed": 25,
+      "double_claims": 0,
+      "unclaimed": 0,
+      "wall_s": 0.002,
+      "claims_per_s": 13080.3,
+      "attempts": 25,
+      "claim_p50_ms": 0.032,
+      "claim_p99_ms": 0.123,
+      "distribution": {
+        "agent-0": 25
+      }
+    },
+    {
+      "runners": 2,
+      "items": 50,
+      "claimed": 50,
+      "double_claims": 0,
+      "unclaimed": 0,
+      "wall_s": 0.015,
+      "claims_per_s": 3418.6,
+      "attempts": 100,
+      "claim_p50_ms": 0.034,
+      "claim_p99_ms": 8.649,
+      "distribution": {
+        "agent-0": 9,
+        "agent-1": 41
+      }
+    },
+    {
+      "runners": 4,
+      "items": 100,
+      "claimed": 100,
+      "double_claims": 0,
+      "unclaimed": 0,
+      "wall_s": 0.022,
+      "claims_per_s": 4452.0,
+      "attempts": 400,
+      "claim_p50_ms": 0.021,
+      "claim_p99_ms": 1.296,
+      "distribution": {
+        "agent-0": 0,
+        "agent-1": 81,
+        "agent-2": 19,
+        "agent-3": 0
+      }
+    },
+    {
+      "runners": 8,
+      "items": 200,
+      "claimed": 200,
+      "double_claims": 0,
+      "unclaimed": 0,
+      "wall_s": 0.09,
+      "claims_per_s": 2224.4,
+      "attempts": 1600,
+      "claim_p50_ms": 0.02,
+      "claim_p99_ms": 1.186,
+      "distribution": {
+        "agent-0": 0,
+        "agent-1": 0,
+        "agent-2": 0,
+        "agent-3": 0,
+        "agent-4": 0,
+        "agent-5": 0,
+        "agent-6": 0,
+        "agent-7": 200
+      }
+    },
+    {
+      "runners": 16,
+      "items": 400,
+      "claimed": 400,
+      "double_claims": 0,
+      "unclaimed": 0,
+      "wall_s": 0.184,
+      "claims_per_s": 2178.1,
+      "attempts": 6400,
+      "claim_p50_ms": 0.019,
+      "claim_p99_ms": 1.372,
+      "distribution": {
+        "agent-0": 0,
+        "agent-1": 0,
+        "agent-10": 0,
+        "agent-11": 0,
+        "agent-12": 2,
+        "agent-13": 0,
+        "agent-14": 271,
+        "agent-15": 0,
+        "agent-2": 96,
+        "agent-3": 9,
+        "agent-4": 0,
+        "agent-5": 0,
+        "agent-6": 0,
+        "agent-7": 0,
+        "agent-8": 0,
+        "agent-9": 22
+      }
+    },
+    {
+      "runners": 32,
+      "items": 800,
+      "claimed": 800,
+      "double_claims": 0,
+      "unclaimed": 0,
+      "wall_s": 0.815,
+      "claims_per_s": 981.5,
+      "attempts": 25600,
+      "claim_p50_ms": 0.019,
+      "claim_p99_ms": 18.283,
+      "distribution": {
+        "agent-0": 0,
+        "agent-1": 0,
+        "agent-10": 144,
+        "agent-11": 30,
+        "agent-12": 0,
+        "agent-13": 0,
+        "agent-14": 0,
+        "agent-15": 0,
+        "agent-16": 0,
+        "agent-17": 0,
+        "agent-18": 0,
+        "agent-19": 0,
+        "agent-2": 0,
+        "agent-20": 0,
+        "agent-21": 0,
+        "agent-22": 620,
+        "agent-23": 0,
+        "agent-24": 0,
+        "agent-25": 0,
+        "agent-26": 0,
+        "agent-27": 0,
+        "agent-28": 0,
+        "agent-29": 1,
+        "agent-3": 0,
+        "agent-30": 0,
+        "agent-31": 0,
+        "agent-4": 0,
+        "agent-5": 5,
+        "agent-6": 0,
+        "agent-7": 0,
+        "agent-8": 0,
+        "agent-9": 0
+      }
+    }
+  ]
+}

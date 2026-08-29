@@ -493,3 +493,95 @@ func ObservedFromString(s string) (peer.AddrInfo, error) {
 	}
 	return *ai, nil
 }
+
+// ConfirmedPublicAddr returns an AutoNAT-CONFIRMED public multiaddr, or "".
+//
+// Deliberately narrower than ObservedAddr, which falls back to AllAddrs and
+// then to any non-loopback address. Those fallbacks are right for advertising
+// -- an address that might work is better than none -- and wrong for deciding
+// whether this node OWES the network anything, because an unconfirmed address
+// would make a NATed node look publicly reachable. A warning that fires on
+// correctly-configured nodes is one operators learn to ignore, and then it is
+// not there for the case it was written for.
+func (m *Manager) ConfirmedPublicAddr() string {
+	h := m.Host()
+	if h == nil {
+		return ""
+	}
+	bh, ok := h.(*basichost.BasicHost)
+	if !ok {
+		return ""
+	}
+	reachable, _, _ := bh.ConfirmedAddrs()
+	for _, a := range reachable {
+		if isPublicAddr(a) {
+			return a.String()
+		}
+	}
+	return ""
+}
+
+// RelayWarningWarranted is the whole policy, separated from the observation so
+// it can be tested in every combination.
+//
+// The watch's other tests can only assert SILENCE: a loopback test host has no
+// AutoNAT-confirmed address, so the firing branch is unreachable there, and a
+// watch that never fired under any condition would pass all of them. Splitting
+// the decision out means the branch that MATTERS is exercised directly, and
+// what stays untested is only the thin observation `ConfirmedPublicAddr`.
+func RelayWarningWarranted(confirmedAddr string, relayServiceEnabled bool) bool {
+	if relayServiceEnabled {
+		return false // already contributing
+	}
+	return confirmedAddr != "" // reachable and declining
+}
+
+// WatchRelayContribution warns once if this node is CONFIRMED publicly
+// reachable and is not serving as a circuit relay.
+//
+// THE SECOND FREE-RIDER DEFAULT, and structurally the same as the DHT's.
+// --autorelay defaults to true (this node USES relays) while
+// --enable-relay-service defaults to false (this node PROVIDES none), so every
+// node consumes relay capacity and none supplies it. Relay capacity then rests
+// entirely on whichever hosts opted in -- for this network, the bootstrap
+// nodes.
+//
+// The default is CORRECT for the common case: a node behind NAT genuinely
+// cannot serve as a relay, and turning the service on by default would donate
+// bandwidth nobody agreed to donate. The gap is the node that CAN serve and
+// does not, which is invisible today. This reports it and coerces nothing --
+// the same choice as WatchPromotion, for the same reason.
+//
+// Returns immediately; the watch runs until ctx is done.
+func (m *Manager) WatchRelayContribution(
+	ctx context.Context, grace, interval time.Duration,
+	logf func(string, ...any),
+) {
+	if logf == nil || interval <= 0 || m.cfg.EnableRelayService {
+		return // already contributing: nothing to report
+	}
+	go func() {
+		deadline := time.Now().Add(grace)
+		t := time.NewTicker(interval)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+			}
+			if time.Now().Before(deadline) {
+				continue
+			}
+			addr := m.ConfirmedPublicAddr()
+			if RelayWarningWarranted(addr, m.cfg.EnableRelayService) {
+				logf("[nat] NOTE: this node is confirmed reachable at %s and is "+
+					"not serving as a circuit relay. NATed peers depend on relays "+
+					"they do not provide; a reachable node that declines leaves "+
+					"that cost on whoever opted in. Pass --enable-relay-service "+
+					"to contribute.", addr)
+			}
+			return // report once, either way
+		}
+	}()
+}

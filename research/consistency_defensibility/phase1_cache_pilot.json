@@ -1,0 +1,74 @@
+{
+  "program": "consistency_defensibility Channel A \u2014 Phase 1 FREE cache pilot",
+  "not_a_route2_rescue": "Route 2 terminal decision UNFALSIFIABLE-IN-PRACTICE stands; this tests single-agent CONSISTENCY, a different channel.",
+  "circularity_1a": "base\u2194perturbed change is definitionally tied to perturbed-wrongness once conditioned on base-correctness (competence) or under the known-change relation (memorized). This pilot validates the FALSE-POSITIVE side and base rates ONLY, never detection.",
+  "cache_basis": "base=CONTROL(COT/original), perturbed=COT(perturbed); COT-only (DECOMP/CODE have no base).",
+  "n_pairs_total": 320,
+  "n_excluded_nonanswer": 8,
+  "n_evaluable": 312,
+  "canonical_collapse_1c": {
+    "raw_diff_pairs": 142,
+    "collapsed_by_canonicalization": 1,
+    "note": "raw-string differences that vanish under canonical equivalence (uncanonicalized comparison would manufacture these as violations)"
+  },
+  "answer_mobility_1b": {
+    "overall": 0.4519,
+    "by_category": {
+      "ii_noop": 0.1562,
+      "i_classic": 0.5,
+      "iii_substitution": 1.0
+    },
+    "by_model": {
+      "meta-llama/llama-3.1-70b-instruct": 0.3974,
+      "google/gemma-2-27b-it": 0.625,
+      "mistralai/mistral-small-3.2-24b-instruct": 0.4079,
+      "microsoft/phi-4": 0.3718
+    }
+  },
+  "false_positive_rate_1b": {
+    "invariance_competence": {
+      "n_correct": 193,
+      "FPR": 0.1244,
+      "by_model": {
+        "meta-llama/llama-3.1-70b-instruct": 0.1296,
+        "google/gemma-2-27b-it": 0.0968,
+        "mistralai/mistral-small-3.2-24b-instruct": 0.1346,
+        "microsoft/phi-4": 0.125
+      }
+    },
+    "change_memorized": {
+      "n_correct": 76,
+      "FPR_no_change": 0.0
+    }
+  },
+  "unconditional_association_1b_partially_definitional": {
+    "ii_noop": {
+      "n": 160,
+      "P_change_given_wrong": 1.0,
+      "P_change_given_correct": 0.0,
+      "J": 1.0,
+      "perm_null_p": 0.0
+    },
+    "i_classic": {
+      "n": 72,
+      "P_change_given_wrong": 0.7778,
+      "P_change_given_correct": 0.4603,
+      "J": 0.3175,
+      "perm_null_p": 0.0793
+    },
+    "iii_substitution": {
+      "n": 80,
+      "P_change_given_wrong": 1.0,
+      "P_change_given_correct": 1.0,
+      "J": 0.0,
+      "perm_null_p": 1.0
+    },
+    "ALL": {
+      "n": 312,
+      "P_change_given_wrong": 0.9535,
+      "P_change_given_correct": 0.3717,
+      "J": 0.5817,
+      "perm_null_p": 0.0
+    }
+  }
+}

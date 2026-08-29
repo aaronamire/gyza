@@ -181,6 +181,43 @@ def _drafts() -> list[SpecDraft]:
            ["read_set_subset", "write_set_subset", "network_not_widened",
             "memory_cap_not_raised"])
 
+    native("decomposition_within_manifest",
+           "The number of subtasks named in the parent's signed output "
+           "artifact is at most `max_children` from the parent's "
+           "compositor-signed manifest, and `spawn.permitted` is non-empty. "
+           "THE SCOPE IS PART OF THE CLAIM: this checks spawn AUTHORITY and "
+           "FAN-OUT only. It does NOT check decomposition DEPTH, because "
+           "work-DAG depth is a property of the blackboard and appears in no "
+           "envelope, so a bundle cannot carry it; MAX_TASK_DEPTH is enforced "
+           "at production only (gyza/runner.py). A claim that said merely "
+           "'the decomposition was bounded' would not say which bound.",
+           "PROOF", MEASURED,
+           "the fan-out is counted from the signed artifact and the cap is "
+           "read from the signed manifest; a total check over two fields with "
+           "no sampling and no caller-supplied parameter",
+           _na("a per-action postcondition, not a quantity that accumulates"),
+           _na("both operands are passed by value; there is no set to move"),
+           ["spawn_permitted_non_empty", "fanout_within_max_children"])
+
+    native("combine_covers_siblings",
+           "The combining action's envelope commits, in its input_hashes, to "
+           "the output hash of EVERY sibling named in the parent's signed "
+           "subtask list. FAILING CLOSED ON AN ABSENT SIBLING IS PART OF THE "
+           "CLAIM: a sibling named in signed bytes but missing from the "
+           "evidence is treated as a REMOVAL, not as work in progress, "
+           "because the combiner ran and the dependency gate refuses to serve "
+           "a combiner while any sibling is outstanding. An earlier form that "
+           "skipped absent siblings narrowed the expectation to whatever "
+           "survived and passed vacuously.",
+           "PROOF", MEASURED,
+           "the expected set is recomputed from the parent's signed child "
+           "list and compared by set inclusion against the combiner's signed "
+           "inputs; every named sibling is checked, none sampled",
+           _na("a per-combination postcondition"),
+           _na("the child list is fixed by the parent's signature before this "
+               "check runs, so the set cannot move under it"),
+           ["every_named_sibling_present", "every_sibling_output_consumed"])
+
     native("delegation_attenuation",
            "For every hop i in the chain, manifest(h_i) is a subset of "
            "manifest(h_0); the chain is acyclic; and its depth is at most "

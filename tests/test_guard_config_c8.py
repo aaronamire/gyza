@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import secrets
+from pathlib import Path
 
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -29,7 +30,9 @@ from gyza.containment.engine import GuardEngine
 from gyza.containment.guardconfig import (
     GuardConfigError, GuardConfigStore, sign_config,
 )
-from gyza.containment.gyza_model import DEFAULT_BOUNDS_FILE, build_registries
+from gyza.containment.gyza_model import (
+    DEFAULT_BOUNDS_FILE, PLAIN_BOUNDS_FILE, build_registries,
+)
 from gyza.containment.harm import UnsignedBoundsError
 
 # H1_credits was RETIRED 2026-08-15 — credits are TOKEN_IS_FAKE, so no level
@@ -38,8 +41,10 @@ from gyza.containment.harm import UnsignedBoundsError
 # production constructors, so the class measured 0.0 in every production
 # evaluation. Removing a bound is a TIGHTENING (an unset bound fails closed),
 # so no loosening record was required.
-BOUNDS = {"H4_authority": 0.0,
-          "H5_storage_growth": 1e10, "H6_unsupervised_actions": 10000}
+# H6 was RETIRED as a harm class 2026-08-21 (it is a review cadence, and its
+# interval now lives in the signed `policy`). These fixtures exercise
+# GuardConfigStore mechanics, so they use the two remaining real harm classes.
+BOUNDS = {"H4_authority": 0.0, "H5_storage_growth": 1e10}
 
 
 def _authority():
@@ -67,18 +72,22 @@ def _readiness(**kw):
 # --------------------------------------------------------------------------- #
 def test_UNSIGNED_bounds_load_but_CANNOT_claim_containment():
     """The state the repo shipped in. Bounds are in force and reportable; the
-    containment claim is not available over them."""
-    h, r = _readiness(bounds_file=DEFAULT_BOUNDS_FILE)
+    containment claim is not available over them.
+
+    Uses PLAIN_BOUNDS_FILE explicitly: on 2026-08-19 DEFAULT_BOUNDS_FILE became
+    the SIGNED configuration, because the signature had been covering a document
+    nothing loaded. This test is about the PLAIN path and must name it.
+    """
+    h, r = _readiness(bounds_file=PLAIN_BOUNDS_FILE)
     assert r["bounds_provenance"]["source"] == "UNSIGNED_FILE"
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False
-    # TWO blockers now, and separating them matters. Provenance is one; the
-    # other is that H3_mesh_exit_sends is REGISTERED AND UNBOUNDED on purpose
-    # (measured, not bounded — the level waits on the measurement that H1's
-    # retirement bought). Before H3 was declared, this list was empty and the
-    # claim was blocked by provenance alone — not because the gap was smaller,
-    # but because it was UNNAMED.
-    assert r["unbounded"] == ["H3_mesh_exit_sends"]
+    # ONE blocker again since v3 declared H3's level (2026-08-21): provenance.
+    # This list held H3 while its level waited on measurement, and the point
+    # that mattered then still holds now -- the two gates are INDEPENDENT, and
+    # this test is about the provenance one. A `[]` here does not mean the
+    # claim is available; the assertion above is what refuses it.
+    assert r["unbounded"] == []
     assert r["uncovered"] == []
     assert h.bound("H4_authority") == 0.0
 
@@ -89,12 +98,12 @@ def test_SIGNED_bounds_lift_the_claim(tmp_path):
                       authority_pubkey=pub)
     assert r["bounds_provenance"]["source"] == "SIGNED"
     assert r["bounds_signed"] is True
-    # SIGNING DOES NOT MANUFACTURE THE CLAIM. C-8 (provenance) is open; D1
-    # (every class bounded) is not, because H3 has no declared level. Two
-    # independent gates — the property KEY_PROVENANCE.md recorded when H5 was
-    # the unbounded one, now re-exercised by H3.
+    # SIGNING DOES NOT MANUFACTURE THE CLAIM. This file is built from THIS
+    # MODULE'S `BOUNDS` fixture, which declares H4 and H5 only -- so H3 is
+    # genuinely unbounded here regardless of what the shipped configuration
+    # says, and D1 is open for that reason. Two independent gates.
     assert r["can_claim_containment"] is False
-    assert r["unbounded"] == ["H3_mesh_exit_sends"]
+    assert r["unbounded"] == ["H3_mesh_exit_rate"]
     assert r["bounds_provenance"]["authority_pubkey"] == pub.hex()
     assert len(r["bounds_provenance"]["config_hash"]) == 64
 
@@ -103,9 +112,18 @@ def test_the_BOUNDS_THEMSELVES_are_identical_either_way(tmp_path):
     """Counter-control. If signing changed the levels, the test above would be
     measuring a different policy rather than the same one under authority."""
     seed, pub = _authority()
+    # SIGN THE SHIPPED BOUNDS, not this module's fixture. Comparing the shipped
+    # configuration against a synthetic one measures two different POLICIES and
+    # calls the difference an effect of signing -- which is the exact confusion
+    # this test's docstring warns about. It began failing the moment the two
+    # diverged (H3's level was declared in the shipped file at v3, 2026-08-21),
+    # which is the test noticing correctly.
+    shipped = json.loads(Path(DEFAULT_BOUNDS_FILE).read_text())
+    shipped_bounds = shipped.get("config", shipped)["bounds"]
     unsigned, _ = _readiness(bounds_file=DEFAULT_BOUNDS_FILE)
-    signed, _ = _readiness(bounds_file=_signed_file(tmp_path, seed),
-                           authority_pubkey=pub)
+    signed, _ = _readiness(
+        bounds_file=_signed_file(tmp_path, seed, bounds=shipped_bounds),
+        authority_pubkey=pub)
     def _levels(reg):
         out = {}
         for c in reg:
@@ -125,7 +143,7 @@ def test_TAMPERED_bounds_are_refused(tmp_path):
     seed, pub = _authority()
     p = _signed_file(tmp_path, seed)
     doc = json.loads(p.read_text())
-    doc["config"]["bounds"]["H6_unsupervised_actions"] = 10_000_000  # edit the policy
+    doc["config"]["bounds"]["H5_storage_growth"] = 10_000_000_000_000  # edit the policy
     p.write_text(json.dumps(doc))
 
     with pytest.raises(UnsignedBoundsError, match="did not verify"):
@@ -147,7 +165,7 @@ def test_a_PLAIN_file_under_an_authority_is_refused_AS_UNSIGNED(tmp_path):
     the wrong one debugs the wrong thing."""
     _, pub = _authority()
     with pytest.raises(UnsignedBoundsError) as ei:
-        build_registries(bounds_file=DEFAULT_BOUNDS_FILE, authority_pubkey=pub)
+        build_registries(bounds_file=PLAIN_BOUNDS_FILE, authority_pubkey=pub)
     msg = str(ei.value)
     assert "not a SIGNED configuration" in msg
     assert "sign_guard_config.py" in msg, "the refusal must say what to do"
@@ -173,7 +191,7 @@ def test_NO_bounds_is_a_DISTINCT_state_from_UNSIGNED_bounds():
     # unbounded in BOTH states, so it is added rather than compared away --
     # writing `set(BOUNDS) | {"H3..."}` keeps the assertion about the FILE's
     # effect rather than quietly widening it to whatever is registered.
-    assert set(r["unbounded"]) == set(BOUNDS) | {"H3_mesh_exit_sends"}
+    assert set(r["unbounded"]) == set(BOUNDS) | {"H3_mesh_exit_rate"}
 
 
 # --------------------------------------------------------------------------- #
@@ -209,7 +227,7 @@ def test_the_store_still_REFUSES_a_silent_loosening(tmp_path):
     store = GuardConfigStore(pub)
     store.load_file(_signed_file(tmp_path, seed))
 
-    loose = dict(BOUNDS, H6_unsupervised_actions=500000)
+    loose = dict(BOUNDS, H5_storage_growth=5e10)
     cfg = {"version": 2, "bounds": loose, "tier_assignments": {}}
     with pytest.raises(GuardConfigError, match="LOOSEN"):
         store.load(cfg, sign_config(cfg, seed))
@@ -226,11 +244,24 @@ def test_gyza_status_REPORTS_that_the_bounds_are_unsigned(capsys):
 
     _print_containment_section(GyzaConfig())
     out = capsys.readouterr().out
-    assert "NOT SIGNED" in out
+    # The default now loads the SIGNED bytes with no key configured, which is
+    # a DIFFERENT state from unsigned and carries a DIFFERENT remedy: configure
+    # a pubkey, do not re-sign a document that is already signed.
+    assert "SIGNED BUT UNVERIFIED" in out
+    assert "GYZA_GUARD_AUTHORITY" in out, "the report must say what to do"
     assert "can claim containment: NO" in out
-    assert "sign_guard_config.py" in out, "the report must say what to do"
-    # the declared levels are still shown: unsigned is not the same as unknown
-    assert "H6_unsupervised_actions" in out and "10000.00" in out
+    assert "sign_guard_config.py" in out
+    # the declared levels are still shown: unsigned is not the same as unknown.
+    # The format moved from `10000.00` to `10,000` on 2026-08-19 when the
+    # section began reporting MEASURED-of-BOUND instead of the bound alone --
+    # a count of actions has no meaningful hundredths.
+    assert "H5_storage_growth" in out
+    # AND the operator's POSITION against it, which is the point of the
+    # section. Before that change H3/H5 printed a bound with no measurement and
+    # every quantity was structurally 0 (research/H3_WIRING_GAP.md), so a bound
+    # nobody could see their position against was one nobody could act on.
+    assert " of 10,000" in out, "the measured position must be shown, not just the bound"
+    assert "H5_storage_growth" in out and " of 10,000,000,000" in out
     # and a RETIRED class must still be REPORTED, not silently dropped. H2 was
     # retired 2026-08-17; if retirement removed it from the report, the operator
     # would see a smaller model rather than a named gap.
@@ -263,7 +294,7 @@ def test_a_correctly_signed_TIGHTENING_installs(tmp_path):
     # (unset fails closed -> refuse-all becomes admit-some), so the previous
     # version of this line stopped being a tightening the moment H2 was retired
     # out of BOUNDS.
-    tight = dict(BOUNDS, H6_unsupervised_actions=5000)
+    tight = dict(BOUNDS, H5_storage_growth=5e9)
     cfg = {"version": 2, "bounds": tight, "tier_assignments": {}}
     assert store.load(cfg, sign_config(cfg, seed)
-                      ).bounds["H6_unsupervised_actions"] == 5000
+                      ).bounds["H5_storage_growth"] == 5e9

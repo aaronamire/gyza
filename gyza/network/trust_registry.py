@@ -57,7 +57,8 @@ CREATE TABLE IF NOT EXISTS cached_manifests (
 
 
 def _canon_bytes(d: dict) -> bytes:
-    return json.dumps(d, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return json.dumps(d, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 def _manifest_payload_hash(manifest: dict) -> bytes:

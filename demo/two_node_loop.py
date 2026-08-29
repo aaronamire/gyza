@@ -85,7 +85,7 @@ def _build_executor(side, bwrap: bool):
         Path(_SANDBOX_WORKDIR).mkdir(parents=True, exist_ok=True)
         scfg = sandbox_config_from_manifest(manifest)
         executor = make_sandboxed_executor(
-            "gyza.runner:make_mock_executor",
+            "gyza.executors:make_mock_executor",
             init_kwargs={"response": "two-node loop: bounded work complete"},
             config=scfg,
         )

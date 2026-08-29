@@ -1,0 +1,352 @@
+{
+ "0": {
+  "0": "```python\ndef multiples_of_num(n, m):\n  return [i * n for i in range(1, m + 1)]\n```",
+  "1": "```python\ndef multiples_of_num(n, m):\n  return [i * n for i in range(1, m + 1)] \n```",
+  "2": "```python\ndef multiples_of_num(n, m):\n  return [i * n for i in range(1, m + 1)] \n```",
+  "3": "```python\ndef multiples_of_num(n, m):\n  return [i * n for i in range(1, m + 1)] \n```",
+  "4": "```python\ndef multiples_of_num(n, m):\n  return [i * n for i in range(1, m + 1)]\n```"
+ },
+ "1": {
+  "0": "```python\ndef check_k_elements(tuple_list, k):\n  return len(set(tuple_list)) == k\n```",
+  "1": "```python\ndef check_k_elements(tuple_list, k):\n  return len(set(tuple_list)) == k\n```",
+  "2": "```python\ndef check_k_elements(tuple_list, k):\n  return len(set(tuple_list)) == k\n```",
+  "3": "```python\ndef check_k_elements(tuple_list, k):\n  return len(set(tuple_list)) == k\n\n```",
+  "4": "```python\ndef check_k_elements(tuple_list, k):\n  return len(set(tuple_list)) == k\n```"
+ },
+ "2": {
+  "0": "```python\ndef remove(list_of_strings):\n  return [''.join([char for char in string if not char.isdigit()]) for string in list_of_strings]\n```",
+  "1": "```python\ndef remove(strings):\n  return [s for s in strings if not s.isdigit()]\n```",
+  "2": "```python\ndef remove(list_of_strings):\n  return [string for string in list_of_strings if not string.isdigit()] \n```",
+  "3": "```python\ndef remove(strings):\n  return [s for s in strings if not s.isdigit()] \n```",
+  "4": "```python\ndef remove(strings):\n  return [s for s in strings if not s.isdigit()]\n```"
+ },
+ "3": {
+  "0": "```python\nfrom collections import Counter\n\ndef freq_element(list_of_lists):\n  flat_list = [item for sublist in list_of_lists for item in sublist]\n  return dict(Counter(flat_list))\n```",
+  "1": "```python\nfrom collections import Counter\n\ndef freq_element(list_of_lists):\n  return dict(Counter([element for sublist in list_of_lists for element in sublist]))\n```",
+  "2": "```python\nfrom collections import Counter\n\ndef freq_element(list_of_lists):\n  flattened_list = [item for sublist in list_of_lists for item in sublist]\n  return dict(Counter(flattened_list))\n```",
+  "3": "```python\nfrom collections import Counter\n\ndef freq_element(nested_list):\n  flattened_list = [item for sublist in nested_list for item in sublist]\n  return dict(Counter(flattened_list))\n```",
+  "4": "```python\nfrom collections import Counter\n\ndef freq_element(list_of_lists):\n  return dict(Counter(item for sublist in list_of_lists for item in sublist))\n```"
+ },
+ "4": {
+  "0": "```python\ndef test_distinct(numbers):\n  return len(set(numbers)) == len(numbers)\n```",
+  "1": "```python\ndef test_distinct(data):\n  return len(set(data)) == len(data)\n```",
+  "2": "```python\ndef test_distinct(numbers):\n  return len(set(numbers)) == len(numbers)\n```",
+  "3": "```python\ndef test_distinct(numbers):\n  return len(set(numbers)) == len(numbers)\n```",
+  "4": "```python\ndef test_distinct(numbers):\n    return len(set(numbers)) == len(numbers)\n```"
+ },
+ "5": {
+  "0": "```python\ndef compute_Last_Digit(a, b):\n  def factorial(n):\n    if n == 0:\n      return 1\n    else:\n      return n * factorial(n-1)\n  return factorial(a) // factorial(b) % 10\n```",
+  "1": "```python\ndef compute_Last_Digit(a, b):\n  def factorial(n):\n    if n == 0:\n      return 1\n    else:\n      return n * factorial(n-1)\n  return factorial(a) // factorial(b) % 10\n```",
+  "2": "```python\ndef compute_Last_Digit(a, b):\n  def factorial(n):\n    if n == 0:\n      return 1\n    else:\n      return n * factorial(n-1)\n  return factorial(a) // factorial(b) % 10 \n```",
+  "3": "```python\ndef compute_Last_Digit(a, b):\n  def factorial(n):\n    if n == 0:\n      return 1\n    else:\n      return n * factorial(n-1)\n  return factorial(a) // factorial(b) % 10\n```",
+  "4": "```python\ndef compute_Last_Digit(a, b):\n  def factorial(n):\n    if n == 0:\n      return 1\n    else:\n      return n * factorial(n-1)\n  return factorial(a) // factorial(b) % 10   \n```"
+ },
+ "6": {
+  "0": "```python\ndef min_length_list(lists):\n  return min(lists, key=lambda x: len(x))\n```",
+  "1": "```python\nmin_length_list = lambda lists: min(lists, key=len)\n```",
+  "2": "```python\nmin_length_list = lambda lists: min(lists, key=len)\n```",
+  "3": "```python\ndef min_length_list(lists):\n  return min(lists, key=lambda x: len(x))\n```",
+  "4": "```python\nmin_length_list = lambda lists: min(lists, key=len)\n```"
+ },
+ "7": {
+  "0": "```python\nimport math\n\ndef volume_sphere(radius):\n  return (4/3) * math.pi * radius**3\n```",
+  "1": "```python\nimport math\n\ndef volume_sphere(radius):\n  return (4/3) * math.pi * radius**3 \n```",
+  "2": "```python\nimport math\n\ndef volume_sphere(radius):\n  return (4/3) * math.pi * radius**3\n```",
+  "3": "```python\nimport math\n\ndef volume_sphere(radius):\n  \"\"\"Calculates the volume of a sphere.\n\n  Args:\n    radius: The radius of the sphere.\n\n  Returns:\n    The volume of the sphere.\n  \"\"\"\n  return (4/3) * math.pi * radius**3\n```",
+  "4": "```python\nimport math\n\ndef volume_sphere(radius):\n  return (4/3) * math.pi * radius**3 \n```"
+ },
+ "8": {
+  "0": "\n\n```python\ndef extract_missing(data, start, end):\n  missing = []\n  for i in range(start, end + 1):\n    if i not in data:\n      missing.append(i)\n  return missing \n```\n",
+  "1": "```python\ndef extract_missing(data, start, end):\n  missing = []\n  for i in range(start, end + 1):\n    if i not in data:\n      missing.append(i)\n  return missing \n```",
+  "2": "```python\ndef extract_missing(data, start, end):\n  missing = []\n  for i in range(start, end + 1):\n    if i not in data:\n      missing.append(i)\n  return missing \n```",
+  "3": "```python\ndef extract_missing(data, start, end):\n  missing_ranges = []\n  last = start\n\n  for i in data:\n    if i != last:\n      if i - last > 1:\n        missing_ranges.append((last, i - 1))\n    last = i + 1\n\n  if last <= end:\n    missing_ranges.append((last, end))\n\n  return missing_ranges\n```",
+  "4": "```python\ndef extract_missing(data, start, end):\n  missing_ranges = []\n  last = start\n  for i in range(start, end + 1):\n    if i not in data:\n      missing_ranges.append(i)\n      last = i\n    else:\n      if last != i - 1:\n        missing_ranges.append((last, i - 1))\n      last = i\n  return missing_ranges\n```"
+ },
+ "9": {
+  "0": "```python\ndef tuple_to_int(t):\n  result = 0\n  for i, digit in enumerate(t[::-1]):\n    result += digit * 10**i\n  return result \n```",
+  "1": "```python\ndef tuple_to_int(nums):\n  return int(\"\".join(str(x) for x in nums))\n```",
+  "2": "```python\ndef tuple_to_int(t):\n  result = 0\n  for i, digit in enumerate(t):\n    result += digit * 10**(len(t) - i - 1)\n  return result\n```",
+  "3": "```python\ndef tuple_to_int(t):\n  result = 0\n  for i, digit in enumerate(t):\n    result += digit * 10**(len(t) - i - 1)\n  return result\n```",
+  "4": "```python\ndef tuple_to_int(t):\n  result = 0\n  for i, digit in enumerate(t[::-1]):\n    result += digit * 10**i\n  return result\n```"
+ },
+ "10": {
+  "0": "```python\ndef sum(a, b):\n  \"\"\"Finds the sum of common divisors of two given numbers.\n\n  Args:\n    a: The first number.\n    b: The second number.\n\n  Returns:\n    The sum of common divisors of a and b.\n  \"\"\"\n  common_divisors = []\n  for i in range(1, min(a, b) + 1):\n    if a % i == 0 and b % i == 0:\n      common_divisors.append(i)\n  return sum(common_divisors) \n```",
+  "1": "```python\ndef sum(a, b):\n  common",
+  "2": "```python\ndef sum(a, b):\n  common_divisors = []\n  for i in range(1, min(a, b) + 1):\n    if a % i == 0 and b % i == 0:\n      common_divisors.append(i)\n  return sum(common_divisors)\n```",
+  "3": "```python\ndef sum(a, b):\n  common_divisors = []\n  for i in range(1, min(a, b) + 1):\n    if a % i == 0 and b % i == 0:\n      common_divisors.append(i)\n  return sum(common_divisors) \n```",
+  "4": "```python\ndef sum(a, b):\n  common_divisors = []\n  for i in range(1, min(a, b) + 1):\n    if a % i == 0 and b % i == 0:\n      common_divisors.append(i)\n  return sum(common_divisors) \n```"
+ },
+ "11": {
+  "0": "```python\ndef check_last(arr, p):\n  return (arr[-1] + p) % 2 == 0\n```",
+  "1": "```python\ndef check_last(arr, p):\n  last_element = arr[-1]\n  for _ in range(p):\n    last_element *= 2\n  return last_element % 2 == 0\n```",
+  "2": "```python\ndef check_last(arr, p):\n  return (arr[-1] + p) % 2 == 0 \n```",
+  "3": "```python\ndef check_last(arr, p):\n  last = arr[-1]\n  for _ in range(p):\n    last = last * 2\n  return last % 2 == 0 \n```",
+  "4": "```python\ndef check_last(arr, p):\n  op = 0\n  while op < p:\n    arr[-1] += 1\n    op += 1\n  return arr[-1] % 2 == 0 \n```"
+ },
+ "12": {
+  "0": "```python\ndef sum_digits_twoparts(n):\n  max_sum = 0\n  for i in range(n // 2 , 0, -1):\n    part1 = i\n    part2 = n - i\n    sum1 = sum(int(digit) for digit in str(part1))\n    sum2 = sum(int(digit) for digit in str(part2))\n    if sum1 + sum2 > max_sum:\n      max_sum = sum1 + sum2\n  return max_sum \n```",
+  "1": "```python\ndef sum_digits_twoparts(num):\n  max_sum = 0\n  for i in range(1, num):\n    left_part = i\n    right_part = num - i\n    left_sum = sum(int(digit) for digit in str(left_part))\n    right_sum = sum(int(digit) for digit in str(right_part))\n    max_sum = max(max_sum, left_sum + right_sum)\n  return max_sum \n```",
+  "2": "```python\ndef sum_digits_twoparts(num):\n  max_sum = 0\n  for i in range(len(str(num))):\n    part1 = int(str(num)[:i])\n    part2 = int(str(num)[i:])\n    max_sum = max(max_sum, sum(map(int, str(part1))) + sum(map(int, str(part2))))\n  return max_sum \n```",
+  "3": "```python\ndef sum_digits_twoparts(num):\n    max_sum = 0\n    for i in range(1, num):\n        part1 = i\n        part2 = num - i\n        sum1 = sum(int(digit) for digit in str(part1))\n        sum2 = sum(int(digit) for digit in str(part2))\n        max_sum = max(max_sum, sum1 + sum2)\n    return max_sum\n```",
+  "4": "```python\ndef sum_digits_twoparts(n):\n  max_sum = 0\n  for i in range(1, n):\n    part1 = i\n    part2 = n - i\n    sum1 = sum(int(digit) for digit in str(part1))\n    sum2 = sum(int(digit) for digit in str(part2))\n    max_sum = max(max_sum, sum1 + sum2)\n  return max_sum  \n```"
+ },
+ "13": {
+  "0": "```python\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n\n    mid = len(arr) // 2\n    left_half = merge_sort(arr[:mid])\n    right_half = merge_sort(arr[mid:])\n\n    return merge(left_half, right_half)\n\ndef merge(left, right):\n    merged = []\n    i = 0\n    j = 0\n\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            merged.append(left[i])\n            i += 1\n        else:\n            merged.append(right[j])\n            j += 1\n\n    while i < len(left):\n        merged.append(left[i])\n        i += 1\n\n    while j < len(right):\n        merged.append(right[j])\n        j += 1\n\n    return merged\n```",
+  "1": "```python\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n\n    mid = len(arr) // 2\n    left_half = merge_sort(arr[:mid])\n    right_half = merge_sort(arr[mid:])\n\n    return merge(left_half, right_half)\n\ndef merge(left, right):\n    merged = []\n    i = 0\n    j = 0\n\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            merged.append(left[i])\n            i += 1\n        else:\n            merged.append(right[j])\n            j += 1\n\n    while i < len(left):\n        merged.append(left[i])\n        i += 1\n\n    while j < len(right):\n        merged.append(right[j])\n        j += 1\n\n    return merged\n```",
+  "2": "```python\ndef merge_sort(arr):\n  if len(arr) <= 1:\n    return arr\n\n  mid = len(arr) // 2\n  left_half = merge_sort(arr[:mid])\n  right_half = merge_sort(arr[mid:])\n\n  return merge(left_half, right_half)\n\ndef merge(left, right):\n  merged = []\n  i = 0\n  j = 0\n\n  while i < len(left) and j < len(right):\n    if left[i] <= right[j]:\n      merged.append(left[i])\n      i += 1\n    else:\n      merged.append(right[j])\n      j += 1\n\n  while i < len(left):\n    merged.append(left[i])\n    i += 1\n\n  while j < len(right):\n    merged.append(right[j])\n    j += 1\n\n  return merged\n```",
+  "3": "```python\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n\n    mid = len(arr) // 2\n    left_half = merge_sort(arr[:mid])\n    right_half = merge_sort(arr[mid:])\n\n    return merge(left_half, right_half)\n\ndef merge(left, right):\n    merged = []\n    i = 0\n    j = 0\n\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            merged.append(left[i])\n            i += 1\n        else:\n            merged.append(right[j])\n            j += 1\n\n    while i < len(left):\n        merged.append(left[i])\n        i += 1\n\n    while j < len(right):\n        merged.append(right[j])\n        j += 1\n\n    return merged\n```",
+  "4": "```python\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n\n    mid = len(arr) // 2\n    left_half = merge_sort(arr[:mid])\n    right_half = merge_sort(arr[mid:])\n\n    return merge(left_half, right_half)\n\ndef merge(left, right):\n    merged = []\n    i = 0\n    j = 0\n\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            merged.append(left[i])\n            i += 1\n        else:\n            merged.append(right[j])\n            j += 1\n\n    while i < len(left):\n        merged.append(left[i])\n        i += 1\n\n    while j < len(right):\n        merged.append(right[j])\n        j += 1\n\n    return merged\n```\n"
+ },
+ "14": {
+  "0": "```python\ndef min_Ops(arr, k):\n    n = len(arr)\n    sum_arr = sum(arr)\n    return abs(k * sum_arr // n - sum_arr) \n```",
+  "1": "```python\ndef min_Ops(nums):\n  return sum(nums) - min(nums) * len(nums) \n```",
+  "2": "```python\ndef min_Ops(nums, k):\n  return sum(abs(x - sum(nums) // k) for x in nums)\n```",
+  "3": "```python\ndef min_Ops(arr, k):\n  return sum(abs(x - sum(arr) // k) for x in arr) \n```",
+  "4": "```python\ndef min_Ops(nums):\n  return sum(nums) - min(nums) * len(nums)\n```"
+ },
+ "15": {
+  "0": "```python\ndef remove_elements(list1, list2):\n  return [x for x in list1 if x not in list2]\n```",
+  "1": "```python\ndef remove_elements(list1, list2):\n  return [element for element in list1 if element not in list2]\n```",
+  "2": "```python\ndef remove_elements(list1, list2):\n  return [x for x in list1 if x not in list2] \n```",
+  "3": "```python\ndef remove_elements(list1, list2):\n  for element in list2:\n    if element in list1:\n      list1.remove(element)\n  return list1\n```",
+  "4": "```python\ndef remove_elements(list1, list2):\n  for element in list2:\n    if element in list1:\n      list1.remove(element)\n```"
+ },
+ "16": {
+  "0": "```python\ndef sum_series(n):\n  total = 0\n  i = n\n  while i >= 0:\n    total += i\n    i -= 2\n  return total\n```",
+  "1": "```python\ndef sum_series(n):\n  total = 0\n  i = n\n  while i > 0:\n    total += i\n    i -= 2\n  return total \n```",
+  "2": "```python\ndef sum_series(n):\n  sum = 0\n  i = n\n  while i > 0:\n    sum += i\n    i -= 2\n  return sum \n```",
+  "3": "```python\ndef sum_series(n):\n  total = 0\n  i = n\n  while i >= 0:\n    total += i\n    i -= 2\n  return total \n```",
+  "4": "```python\ndef sum_series(n):\n  total = 0\n  i = n\n  while i > 0:\n    total += i\n    i -= 2\n  return total \n```"
+ },
+ "17": {
+  "0": "```python\ndef perimeter_triangle(side1, side2, side3):\n  return side1 + side2 + side3\n```",
+  "1": "```python\ndef perimeter_triangle(side1, side2, side3):\n  return side1 + side2 + side3 \n```",
+  "2": "```python\ndef perimeter_triangle(side1, side2, side3):\n  return side1 + side2 + side3\n```",
+  "3": "```python\ndef perimeter_triangle(side1, side2, side3):\n  return side1 + side2 + side3\n```",
+  "4": "```python\ndef perimeter_triangle(side1, side2, side3):\n  return side1 + side2 + side3 \n```"
+ },
+ "18": {
+  "0": "```python\ndef string_literals(text, literals):\n  \"\"\"\n  Searches for literal strings within a given text.\n\n  Args:\n      text: The string to search within.\n      literals: A list of string literals to search for.\n\n  Returns:\n      A list of tuples, where each tuple contains a matching literal and its index in the text.\n  \"\"\"\n  matches = []\n  for literal in literals:\n    index = text.find(literal)\n    if index != -1:\n      matches.append((literal, index))\n  return matches \n```",
+  "1": "```python\ndef string_literals(text, literals):\n  \"\"\"\n  Searches for literal strings in a given text.\n\n  Args:\n    text: The string to search within.\n    literals: A list of strings to search for.\n\n  Returns:\n    A list of strings from 'literals' that were found in 'text'.\n  \"\"\"\n  return [literal for literal in literals if literal in text] \n```\n",
+  "2": "```python\ndef string_literals(text, literals):\n  \"\"\"\n  This function searches for literal strings in a given text.\n\n  Args:\n    text: The string to search within.\n    literals: A list of strings to search for.\n\n  Returns:\n    A list of strings that were found in the text.\n  \"\"\"\n  found_literals = []\n  for literal in literals:\n    if literal in text:\n      found_literals.append(literal)\n  return found_literals\n```\n",
+  "3": "```python\ndef string_literals(text, literals):\n  \"\"\"\n  Searches for literal strings within a given text.\n\n  Args:\n    text: The string to search within.\n    literals: A list of strings to search for.\n\n  Returns:\n    A list of the found literals.\n  \"\"\"\n  found_literals = []\n  for literal in literals:\n    if literal in text:\n      found_literals.append(literal)\n  return found_literals\n```\n",
+  "4": "```python\ndef string_literals(string, literals):\n  return [literal for literal in literals if literal in string]\n```"
+ },
+ "19": {
+  "0": "```python\ndef common_prefix(strs):\n    if not strs:\n        return \"\"\n    shortest = min(strs, key=len)\n    for i, char in enumerate(shortest):\n        for other in strs:\n            if other[i] != char:\n                return shortest[:i]\n    return shortest \n```",
+  "1": "```python\ndef common_prefix(strings):\n  if not strings:\n    return \"\"\n  shortest = min(strings, key=len)\n  for i, char in enumerate(shortest):\n    for other in strings:\n      if other[i] != char:\n        return shortest[:i]\n  return shortest\n```",
+  "2": "```python\ndef common_prefix(strings):\n  if not strings:\n    return \"\"\n  shortest = min(strings, key=len)\n  for i, char in enumerate(shortest):\n    for other_string in strings:\n      if other_string[i] != char:\n        return shortest[:i]\n  return shortest\n```",
+  "3": "```python\ndef common_prefix(strs):\n  if not strs:\n    return \"\"\n  shortest = min(strs, key=len)\n  for i, char in enumerate(shortest):\n    for other in strs:\n      if other[i] != char:\n        return shortest[:i]\n  return shortest \n```",
+  "4": "```python\ndef common_prefix(strs):\n  if not strs:\n    return \"\"\n\n  shortest = min(strs, key=len)\n  for i, char in enumerate(shortest):\n    for other_str in strs:\n      if other_str[i] != char:\n        return shortest[:i]\n  return shortest\n```"
+ },
+ "20": {
+  "0": "```python\nimport re\n\ndef check_literals(text, literals):\n  \"\"\"\n  Searches for literal strings in a given text using regular expressions.\n\n  Args:\n    text: The string to search within.\n    literals: A list of literal strings to search for.\n\n  Returns:\n    A dictionary where keys are the literals and values are booleans indicating if they were found in the text.\n  \"\"\"\n  found_literals = {}\n  for literal in literals:\n    found_literals[literal] = bool(re.search(literal, text))\n  return found_literals\n\n```\n",
+  "1": "```python\nimport re\n\ndef check_literals(text, literals):\n  \"\"\"\n  Checks if any of the given literal strings are present in a text string.\n\n  Args:\n      text: The string to be searched.\n      literals: A list of strings representing the literals to search for.\n\n  Returns:\n      A list of the literals that were found in the text string.\n  \"\"\"\n  found_literals = []\n  for literal in literals:\n    if re.search(literal, text):\n      found_literals.append(literal)\n  return found_literals\n```\n",
+  "2": "```python\nimport re\n\ndef check_literals(text, literals):\n    return bool(re.search('|'.join(literals), text))\n```",
+  "3": "```python\nimport re\n\ndef check_literals(text, literals):\n  \"\"\"\n  Checks if any of the given literal strings are present in the input text.\n\n  Args:\n    text: The string to search within.\n    literals: A list of strings to search for.\n\n  Returns:\n    A list of strings from 'literals' that were found in the 'text'.\n  \"\"\"\n  return [literal for literal in literals if re.search(literal, text)]\n```\n",
+  "4": "```python\nimport re\n\ndef check_literals(text, literals):\n  \"\"\"\n  Searches for literal strings in a given text using regular expressions.\n\n  Args:\n    text: The text to search within.\n    literals: A list of literal strings to search for.\n\n  Returns:\n    A dictionary where keys are the literals and values are boolean\n    indicating if the literal was found in the text.\n  \"\"\"\n  found_literals = {}\n  for literal in literals:\n    found_literals[literal] = bool(re.search(literal, text))\n  return found_literals \n```\n"
+ },
+ "21": {
+  "0": "```python\ndef remove_tuples(lst, k):\n  return [t for t in lst if len(t) != k] \n```",
+  "1": "```python\ndef remove_tuples(data, k):\n  return [t for t in data if len(t) != k] \n```",
+  "2": "```python\ndef remove_tuples(lst, k):\n  return [t for t in lst if len(t) != k]\n```",
+  "3": "```python\ndef remove_tuples(lst, k):\n  return [t for t in lst if len(t) != k]\n```",
+  "4": "```python\ndef remove_tuples(lst, k):\n  return [t for t in lst if len(t) != k]\n```"
+ },
+ "22": {
+  "0": "```python\nimport heapq\n\ndef heap_replace(heap, new_item):\n  smallest = heapq.heappop(heap)\n  heapq.heappush(heap, new_item)\n  return smallest\n```",
+  "1": "```python\nimport heapq\n\ndef heap_replace(heap, new_item):\n  smallest = heapq.heappop(heap)\n  heapq.heappush(heap, new_item)\n  return smallest\n```",
+  "2": "```python\nimport heapq\n\ndef heap_replace(heap, new_item):\n  smallest = heapq.heappop(heap)\n  heapq.heappush(heap, new_item)\n  return smallest \n```",
+  "3": "```python\nimport heapq\n\ndef heap_replace(heap, new_item):\n  smallest = heapq.heappop(heap)\n  heapq.heappush(heap, new_item)\n  return smallest\n```",
+  "4": "```python\nimport heapq\n\ndef heap_replace(heap, new_item):\n  smallest = heapq.heappop(heap)\n  heapq.heappush(heap, new_item)\n  return smallest\n```\n"
+ },
+ "23": {
+  "0": "```python\nfrom heapq import nlargest, nsmallest\n\ndef extract_min_max(data, k):\n  return nlargest(k, data), nsmallest(k, data) \n```",
+  "1": "```python\ndef extract_min_max(data, k):\n  sorted_data = sorted(data)\n  return sorted_data[:k], sorted_data[-k:] \n```",
+  "2": "```python\ndef extract_min_max(data, k):\n  \"\"\"Extracts the maximum and minimum k elements from a tuple.\n\n  Args:\n    data: The input tuple.\n    k: The number of minimum and maximum elements to extract.\n\n  Returns:\n    A tuple containing two lists: the k minimum elements and the k maximum elements.\n  \"\"\"\n  sorted_data = sorted(data)\n  return sorted_data[:k], sorted_data[-k:]\n```",
+  "3": "```python\nfrom heapq import nlargest, nsmallest\n\ndef extract_min_max(data, k):\n  return (nlargest(k, data), nsmallest(k, data)) \n```",
+  "4": "```python\nimport heapq\n\ndef extract_min_max(nums, k):\n  return heapq.nsmallest(k, nums), heapq.nlargest(k, nums)\n```"
+ },
+ "24": {
+  "0": "```python\ndef count_charac(string):\n  return len(string)\n```",
+  "1": "```python\ndef count_charac(string):\n  return len(string)\n```",
+  "2": "```python\ndef count_charac(string):\n  return len(string)\n```",
+  "3": "```python\ndef count_charac(string):\n  return len(string)\n```",
+  "4": "```python\ndef count_charac(string):\n  return len(string)\n```"
+ },
+ "25": {
+  "0": "```python\ndef harmonic_sum(n):\n  sum = 0\n  for i in range(1, n):\n    sum += 1/i\n  return sum\n```",
+  "1": "```python\ndef harmonic_sum(n):\n  total = 0\n  for i in range(1, n):\n    total += 1/i\n  return total \n```",
+  "2": "```python\ndef harmonic_sum(n):\n  sum = 0\n  for i in range(1, n):\n    sum += 1/i\n  return round(sum, 6) \n```",
+  "3": "```python\ndef harmonic_sum(n):\n  total = 0\n  for i in range(1, n):\n    total += 1 / i\n  return total\n```",
+  "4": "```python\ndef harmonic_sum(n):\n  sum = 0\n  for i in range(1, n):\n    sum += 1/i\n  return sum\n```"
+ },
+ "26": {
+  "0": "```python\nimport cmath\n\ndef convert(complex_number):\n  \"\"\"Converts a complex number to polar coordinates (radius, angle).\n\n  Args:\n    complex_number: A complex number.\n\n  Returns:\n    A tuple containing the radius and angle in radians.\n  \"\"\"\n  return abs(complex_number), cmath.phase(complex_number)\n```",
+  "1": "```python\nimport cmath\n\ndef convert(complex_number):\n  return cmath.polar(complex_number)\n```",
+  "2": "```python\nimport cmath\n\ndef convert(complex_num):\n  return cmath.polar(complex_num)\n```",
+  "3": "\n\n```python\nimport cmath\n\ndef convert(complex_number):\n  return cmath.polar(complex_number) \n```",
+  "4": "```python\nimport math\n\ndef convert(complex_number):\n  real = complex_number.real\n  imag = complex_number.imag\n  radius = math.sqrt(real**2 + imag**2)\n  angle = math.atan2(imag, real)\n  return (radius, angle)\n```"
+ },
+ "27": {
+  "0": "```python\ndef newman_prime(n):\n  def is_prime(num):\n    if num <= 1:\n      return False\n    for i in range(2, int(num**0.5) + 1):\n      if num % i == 0:\n        return False\n    return True\n\n  count = 0\n  num = 2\n  while count < n:\n    if is_prime(num):\n      count += 1\n      if count == n:\n        return num\n    num += 1\n```",
+  "1": "```python\ndef newman_prime(n):\n  def is_prime(num):\n    if num <= 1:\n      return False\n    for i in range(2, int(num**0.5) + 1):\n      if num % i == 0:\n        return False\n    return True\n\n  count = 0\n  num = 2\n  while count < n:\n    if is_prime(num):\n      count += 1\n      if count == n:\n        return num\n    num += 1 \n  return num\n```",
+  "2": "```python\ndef newman_prime(n):\n  \"\"\"\n  Finds the nth Newman-Shanks-Williams prime number.\n\n  Args:\n      n: The index of the desired prime number (1-based indexing).\n\n  Returns:\n      The nth Newman-Shanks-Williams prime number.\n  \"\"\"\n  def is_prime(num):\n    if num <= 1:\n      return False\n    for i in range(2, int(num**0.5) + 1):\n      if num % i == 0:\n        return False\n    return True\n\n  count = 0\n  num = 2\n  while count < n:\n    if is_prime(num):\n      if is_prime(num + 1):\n        count += 1\n    num += 1\n  return num - 1\n```",
+  "3": "```python\ndef newman_prime(n):\n  count = 0\n  num = 2\n  while count < n:\n    is_prime = True\n    for i in range(2, int(num**0.5) + 1):\n      if num % i == 0:\n        is_prime = False\n        break\n    if is_prime:\n      count += 1\n    num += 1\n  return num - 1\n```",
+  "4": "```python\ndef newman_prime(n):\n    def is_prime(num):\n        if num <= 1:\n            return False\n        for i in range(2, int(num**0.5) + 1):\n            if num % i == 0:\n                return False\n        return True\n\n    count = 0\n    num = 2\n    while count < n:\n        if is_prime(num):\n            if is_prime(num + 1):\n                count += 1\n        num += 1\n    return num - 1\n```"
+ },
+ "28": {
+  "0": "```python\ndef substract_elements(tuple1, tuple2):\n  if len(tuple1) != len(tuple2):\n    raise ValueError(\"Tuples must have the same length\")\n  return tuple(a - b for a, b in zip(tuple1, tuple2))\n```",
+  "1": "```python\ndef substract_elements(tuple1, tuple2):\n  if len(tuple1) != len(tuple2):\n    raise ValueError(\"Tuples must have the same length.\")\n  return tuple(a - b for a, b in zip(tuple1, tuple2))\n```",
+  "2": "```python\ndef substract_elements(tuple1, tuple2):\n  if len(tuple1) != len(tuple2):\n    raise ValueError(\"Tuples must have the same length\")\n  return tuple(a - b for a, b in zip(tuple1, tuple2))\n```",
+  "3": "```python\ndef substract_elements(tuple1, tuple2):\n  if len(tuple1) != len(tuple2):\n    raise ValueError(\"Tuples must have the same length\")\n  return tuple(a - b for a, b in zip(tuple1, tuple2))\n```",
+  "4": "```python\ndef substract_elements(tuple1, tuple2):\n  if len(tuple1) != len(tuple2):\n    raise ValueError(\"Tuples must have the same length\")\n  return tuple(a - b for a, b in zip(tuple1, tuple2)) \n```"
+ },
+ "29": {
+  "0": "```python\ndef max_sub_array_sum_repeated(arr, k):\n  n = len(arr)\n  max_so_far = arr[0]\n  curr_max = arr[0]\n  for i in range(1, n * k):\n    if i % n == 0:\n      curr_max = arr[i % n]\n    else:\n      curr_max = max(arr[i % n], curr_max + arr[i % n])\n    max_so_far = max(max_so_far, curr_max)\n  return max_so_far \n```",
+  "1": "```python\ndef max_sub_array_sum_repeated(arr, k):\n    n = len(arr)\n    max_so_far = arr[0]\n    curr_max = arr[0]\n    for i in range(1, n * k):\n        curr_index = i % n\n        curr_max = max(arr[curr_index], curr_max + arr[curr_index])\n        max_so_far = max(max_so_far, curr_max)\n    return max_so_far \n```",
+  "2": "```python\ndef max_sub_array_sum_repeated(arr, k):\n  n = len(arr)\n  max_so_far = float('-inf')\n  for i in range(n * k):\n    current_max = 0\n    for j in range(i, min(i + n, n * k)):\n      current_max += arr[j % n]\n      max_so_far = max(max_so_far, current_max)\n  return max_so_far\n\n```",
+  "3": "```python\ndef max_sub_array_sum_repeated(arr, k):\n  n = len(arr)\n  max_so_far = arr[0]\n  curr_max = arr[0]\n  for i in range(1, n * k):\n    curr_index = i % n\n    curr_max = max(arr[curr_index], curr_max + arr[curr_index])\n    max_so_far = max(max_so_far, curr_max)\n  return max_so_far \n```",
+  "4": "```python\ndef max_sub_array_sum_repeated(arr, k):\n    n = len(arr)\n    max_so_far = float('-inf')\n    for i in range(n * k):\n        current_max = 0\n        for j in range(i, i + n):\n            current_max += arr[j % n]\n            max_so_far = max(max_so_far, current_max)\n    return max_so_far\n```"
+ },
+ "30": {
+  "0": "```python\ndef find(a, b):\n  if b == 0:\n    return \"Division by zero is not allowed\"\n  return a / b\n```",
+  "1": "```python\ndef find(a, b):\n  if b == 0:\n    return \"Division by zero\"\n  return a / b \n```",
+  "2": "```python\ndef find(a, b):\n  if b == 0:\n    return \"Division by zero not allowed\"\n  else:\n    return a / b \n```",
+  "3": "```python\ndef find(x, y):\n  if y == 0:\n    return \"Division by zero error\"\n  return x / y \n```",
+  "4": "```python\ndef find(a, b):\n  if b == 0:\n    return \"Division by zero error\"\n  else:\n    return a / b \n```"
+ },
+ "31": {
+  "0": "```python\ndef get_Inv_Count(arr):\n    n = len(arr)\n    inv_cnt = 0\n    for i in range(n):\n        for j in range(i + 1, n):\n            if arr[i] > arr[j]:\n                inv_cnt += 1\n    return inv_cnt\n```",
+  "1": "```python\ndef get_Inv_Count(arr):\n    n = len(arr)\n    inv_count = 0\n    for i in range(n):\n        for j in range(i+1, n):\n            if arr[i] > arr[j]:\n                inv_count += 1\n    return inv_count\n```",
+  "2": "```python\ndef get_Inv_Count(arr):\n    n = len(arr)\n    count = 0\n    for i in range(n):\n        for j in range(i + 1, n):\n            if arr[i] > arr[j]:\n                count += 1\n    return count\n```",
+  "3": "```python\ndef get_Inv_Count(arr):\n    n = len(arr)\n    inv_count = 0\n    for i in range(n):\n        for j in range(i + 1, n):\n            if arr[i] > arr[j]:\n                inv_count += 1\n    return inv_count \n```",
+  "4": "```python\ndef get_Inv_Count(arr):\n  count = 0\n  for i in range(len(arr)):\n    for j in range(i + 1, len(arr)):\n      if arr[i] > arr[j]:\n        count += 1\n  return count\n```"
+ },
+ "32": {
+  "0": "```python\ndef count_binary_seq(n):\n    total_sequences = 2**n\n    count = 0\n    for i in range(total_sequences):\n        binary = bin(i)[2:].zfill(2 * n)\n        sum_first_half = sum(int(bit) for bit in binary[:n])\n        sum_second_half = sum(int(bit) for bit in binary[n:])\n        if sum_first_half == sum_second_half:\n            count += 1\n    return count \n```",
+  "1": "```python\ndef count_binary_seq(n):\n  count = 0\n  for i in range(2**n):\n    binary = bin(i)[2:].zfill(n)\n    sum1 = sum(int(bit) for bit in binary)\n    sum2 = sum(int(bit) for bit in binary[::-1])\n    if sum1 == sum2:\n      count += 1\n  return count\n```",
+  "2": "```python\ndef count_binary_seq(n):\n  total_sequences = 2**(2*n)\n  balanced_sequences = 0\n  for i in range(2**n):\n    binary_representation = bin(i)[2:].zfill(n)\n    sum_first_n = sum([int(bit) for bit in binary_representation])\n    sum_last_n = sum([int(bit) for bit in binary_representation[::-1]])\n    if sum_first_n == sum_last_n:\n      balanced_sequences += 1\n  return balanced_sequences\n\n```",
+  "3": "```python\ndef count_binary_seq(n):\n  count = 0\n  for i in range(2**n):\n    binary = bin(i)[2:].zfill(2*n)\n    first_sum = sum([int(bit) for bit in binary[:n]])\n    last_sum = sum([int(bit) for bit in binary[n:]])\n    if first_sum == last_sum:\n      count += 1\n  return count \n```",
+  "4": "```python\ndef count_binary_seq(n):\n  total_sequences = 2**(2*n)\n  count = 0\n  for i in range(2**n):\n    binary = bin(i)[2:].zfill(n)\n    sum_first_n = sum([int(bit) for bit in binary])\n    sum_last_n = sum([int(bit) for bit in binary[::-1]])\n    if sum_first_n == sum_last_n:\n      count += 1\n  return count\n```"
+ },
+ "33": {
+  "0": "```python\ndef char_frequency(text):\n  frequency = {}\n  for char in text:\n    if char in frequency:\n      frequency[char] += 1\n    else:\n      frequency[char] = 1\n  return frequency\n```",
+  "1": "```python\ndef char_frequency(text):\n  frequency = {}\n  for char in text:\n    if char in frequency:\n      frequency[char] += 1\n    else:\n      frequency[char] = 1\n  return frequency \n```",
+  "2": "```python\ndef char_frequency(text):\n  frequency = {}\n  for char in text:\n    if char in frequency:\n      frequency[char] += 1\n    else:\n      frequency[char] = 1\n  return frequency\n```",
+  "3": "```python\ndef char_frequency(text):\n  frequency = {}\n  for char in text:\n    if char in frequency:\n      frequency[char] += 1\n    else:\n      frequency[char] = 1\n  return frequency\n```",
+  "4": "```python\ndef char_frequency(text):\n  \"\"\"Counts the frequency of characters in a string.\n\n  Args:\n    text: The string to analyze.\n\n  Returns:\n    A dictionary where keys are characters and values are their frequencies.\n  \"\"\"\n  frequency = {}\n  for char in text:\n    if char in frequency:\n      frequency[char] += 1\n    else:\n      frequency[char] = 1\n  return frequency\n```\n"
+ },
+ "34": {
+  "0": "```python\ndef zigzag(n, k):\n  if k >= n:\n    return n\n  return ((n - 1) // k) * k + min((n - 1) % k + 1, k) \n```",
+  "1": "```python\ndef zigzag(n, k):\n  if k == 0:\n    return n\n  elif k > 0:\n    return zigzag(n - 1, k - 1) + 1\n  else:\n    return zigzag(n - 1, k + 1) + 1\n```",
+  "2": "```python\ndef zigzag(n, k):\n  return int(n * (k - 1) / 2 + (n % 2) * (k - 1) / 2)\n```",
+  "3": "```python\ndef zigzag(n, k):\n  if k == 0:\n    return n\n  if n == 0:\n    return 0\n  if k > 0:\n    return zigzag(n - 1, k - 1) + n\n  return zigzag(n - 1, k + 1) - n\n```",
+  "4": "```python\ndef zigzag(n, k):\n  if k == 0:\n    return n\n  if k > 0:\n    return zigzag(n - 1, k - 1) + 1\n  return zigzag(n - 1, k + 1) - 1\n```"
+ },
+ "35": {
+  "0": "```python\ndef tn_ap(a, d, n):\n  return a + (n - 1) * d\n```",
+  "1": "```python\ndef tn_ap(a, d, n):\n  \"\"\"\n  Finds the t-nth term of an arithmetic progression.\n\n  Args:\n      a: The first term of the progression.\n      d: The common difference.\n      n: The term number.\n\n  Returns:\n      The t-nth term of the arithmetic progression.\n  \"\"\"\n  return a + (n - 1) * d \n```",
+  "2": "```python\ndef tn_ap(a, d, n):\n  return a + (n - 1) * d \n```",
+  "3": "```python\ndef tn_ap(a, d, n):\n  \"\"\"\n  This function finds the t-nth term of an arithmetic progression.\n\n  Args:\n      a: The first term of the arithmetic progression.\n      d: The common difference of the arithmetic progression.\n      n: The term number.\n\n  Returns:\n      The t-nth term of the arithmetic progression.\n  \"\"\"\n  return a + (n - 1) * d \n```",
+  "4": "```python\ndef tn_ap(a, d, n):\n  return a + (n - 1) * d \n```"
+ },
+ "36": {
+  "0": "```python\nimport math\n\ndef count_Rectangles(r):\n  return int(math.ceil(math.pi * r**2 / 2))\n```",
+  "1": "```python\nimport math\n\ndef count_Rectangles(r):\n  \"\"\"Counts the number of rectangles that fit inside a circle of radius r.\n\n  Args:\n    r: The radius of the circle.\n\n  Returns:\n    The number of rectangles that fit inside the circle.\n  \"\"\"\n  return int(math.floor(math.sqrt(2) * r) ** 2) \n```",
+  "2": "```python\nimport math\n\ndef count_Rectangles(r):\n  \"\"\"\n  Counts the number of rectangles that can fit inside a circle of radius r.\n\n  Args:\n    r: The radius of the circle.\n\n  Returns:\n    The number of rectangles that can fit inside the circle.\n  \"\"\"\n  return int(math.floor(r * 2 * r * 2 / 2))\n```",
+  "3": "```python\nimport math\n\ndef count_Rectangles(r):\n  \"\"\"Counts the number of rectangles that can fit inside a circle of radius r.\n\n  Args:\n    r: The radius of the circle.\n\n  Returns:\n    The number of rectangles that can fit inside the circle.\n  \"\"\"\n  return int(math.floor(r * 2 * math.sqrt(2)))\n```",
+  "4": "```python\nimport math\n\ndef count_Rectangles(r):\n  return math.floor( (2 * r * 2 * r) / (2 * 2) )\n```"
+ },
+ "37": {
+  "0": "```python\ndef adjacent_num_product(nums):\n  max_product = nums[0] * nums[1]\n  for i in range(1, len(nums) - 1):\n    product = nums[i] * nums[i + 1]\n    if product > max_product:\n      max_product = product\n  return max_product\n```",
+  "1": "```python\ndef adjacent_num_product(nums):\n  if len(nums) < 2:\n    return None\n  max_product = nums[0] * nums[1]\n  for i in range(1, len(nums) - 1):\n    product = nums[i] * nums[i + 1]\n    if product > max_product:\n      max_product = product\n  return max_product \n```",
+  "2": "```python\ndef adjacent_num_product(nums):\n  if len(nums) < 2:\n    return None\n  max_product = nums[0] * nums[1]\n  for i in range(1, len(nums) - 1):\n    product = nums[i] * nums[i + 1]\n    if product > max_product:\n      max_product = product\n  return max_product \n```",
+  "3": "```python\ndef adjacent_num_product(nums):\n    if len(nums) < 2:\n        return None\n    max_product = nums[0] * nums[1]\n    for i in range(1, len(nums) - 1):\n        product = nums[i] * nums[i + 1]\n        if product > max_product:\n            max_product = product\n    return max_product \n```",
+  "4": "```python\ndef adjacent_num_product(nums):\n  if len(nums) < 2:\n    return None\n  max_product = nums[0] * nums[1]\n  for i in range(1, len(nums) - 1):\n    product = nums[i] * nums[i + 1]\n    if product > max_product:\n      max_product = product\n  return max_product \n```"
+ },
+ "38": {
+  "0": "```python\ndef move_first(lst):\n  return lst[len(lst)-1:] + lst[:-1] \n```",
+  "1": "```python\ndef move_first(lst):\n  return lst[-1:] + lst[:-1] \n```",
+  "2": "```python\ndef move_first(lst):\n  return lst[len(lst)-1:] + lst[:-1] \n```",
+  "3": "```python\ndef move_first(lst):\n  return lst[len(lst) - 1:] + lst[:-1]\n```",
+  "4": "```python\ndef move_first(lst):\n  return lst[-1:] + lst[:-1]\n```"
+ },
+ "39": {
+  "0": "```python\ndef highest_Power_of_2(n):\n  \"\"\"\n  Finds the highest power of 2 that is less than or equal to n.\n\n  Args:\n    n: An integer.\n\n  Returns:\n    The highest power of 2 less than or equal to n.\n  \"\"\"\n  power = 1\n  while power * 2 <= n:\n    power *= 2\n  return power\n```",
+  "1": "```python\ndef highest_Power_of_2(n):\n  power = 0\n  while (1 << power) <= n:\n    power += 1\n  return 1 << (power - 1) \n```",
+  "2": "```python\ndef highest_Power_of_2(n):\n  result = 1\n  while result * 2 <= n:\n    result *= 2\n  return result \n```",
+  "3": "```python\ndef highest_Power_of_2(n):\n  n = int(n)\n  if n <= 0:\n    return 0\n  return 2**(n.bit_length() - 1)\n```",
+  "4": "```python\ndef highest_Power_of_2(n):\n  power = 1\n  while power * 2 <= n:\n    power *= 2\n  return power\n```"
+ },
+ "40": {
+  "0": "```python\ndef max_Product(arr):\n  if len(arr) < 2:\n    return None\n  max1 = max(arr[0], arr[1])\n  min1 = min(arr[0], arr[1])\n  for i in range(2, len(arr)):\n    if arr[i] > max1:\n      max1 = arr[i]\n    if arr[i] < min1:\n      min1 = arr[i]\n  return max1 * min1 \n```",
+  "1": "```python\ndef max_Product(arr):\n    if len(arr) < 2:\n        return None\n    max1 = arr[0]\n    max2 = arr[1]\n    if max2 > max1:\n        max1, max2 = max2, max1 \n    for i in range(2, len(arr)):\n        if arr[i] > max1:\n            max2 = max1\n            max1 = arr[i]\n        elif arr[i] > max2:\n            max2 = arr[i]\n    return max1 * max2 \n```",
+  "2": "```python\ndef max_Product(arr):\n    if len(arr) < 2:\n        return None\n    \n    max1 = arr[0]\n    max2 = arr[1]\n    if max2 > max1:\n        max1, max2 = max2, max1\n\n    for i in range(2, len(arr)):\n        if arr[i] > max1:\n            max2 = max1\n            max1 = arr[i]\n        elif arr[i] > max2:\n            max2 = arr[i]\n    return max1 * max2 \n```",
+  "3": "```python\ndef max_Product(nums):\n  if len(nums) < 2:\n    return None\n  \n  max1 = nums[0]\n  max2 = nums[1]\n  if max2 > max1:\n    max1, max2 = max2, max1\n  \n  for i in range(2, len(nums)):\n    if nums[i] > max1:\n      max2 = max1\n      max1 = nums[i]\n    elif nums[i] > max2:\n      max2 = nums[i]\n  return max1 * max2 \n```",
+  "4": "```python\ndef max_Product(arr):\n  if len(arr) < 2:\n    return None\n  \n  max1 = max(arr[0], arr[1])\n  min1 = min(arr[0], arr[1])\n\n  for i in range(2, len(arr)):\n    if arr[i] > max1:\n      min1 = max1\n      max1 = arr[i]\n    elif arr[i] > min1:\n      min1 = arr[i]\n  return max1 * min1 \n```"
+ },
+ "41": {
+  "0": "```python\ndef find_Average_Of_Cube(n):\n  sum = 0\n  for i in range(1, n + 1):\n    sum += i**3\n  return sum / n\n```",
+  "1": "```python\ndef find_Average_Of_Cube(n):\n  sum_of_cubes = 0\n  for i in range(1, n + 1):\n    sum_of_cubes += i**3\n  return sum_of_cubes / n\n```",
+  "2": "```python\ndef find_Average_Of_Cube(n):\n  sum = 0\n  for i in range(1, n + 1):\n    sum += i**3\n  return sum / n\n```",
+  "3": "```python\ndef find_Average_Of_Cube(n):\n  total_sum = 0\n  for i in range(1, n + 1):\n    total_sum += i**3\n  return total_sum / n\n```",
+  "4": "```python\ndef find_Average_Of_Cube(n):\n  sum_of_cubes = 0\n  for i in range(1, n + 1):\n    sum_of_cubes += i**3\n  return sum_of_cubes / n \n```"
+ },
+ "42": {
+  "0": "```python\ndef remove_odd(text):\n  return ''.join([char for i, char in enumerate(text) if i % 2 == 0]) \n```",
+  "1": "```python\ndef remove_odd(string):\n  return ''.join([char for i, char in enumerate(string) if i % 2 == 0]) \n```",
+  "2": "```python\ndef remove_odd(s):\n  return ''.join([s[i] for i in range(len(s)) if i % 2 == 0])\n```",
+  "3": "```python\ndef remove_odd(s):\n  return ''.join([c for i, c in enumerate(s) if i % 2 == 0])\n```",
+  "4": "```python\ndef remove_odd(s):\n  return ''.join([char for i, char in enumerate(s) if i % 2 == 0])\n```"
+ },
+ "43": {
+  "0": "```python\ndef check_Triangle(x1, y1, x2, y2, x3, y3):\n  \n  a = ((x2 - x1)**2 + (y2 - y1)**2)**0.5\n  b = ((x3 - x2)**2 + (y3 - y2)**2)**0.5\n  c = ((x3 - x1)**2 + (y3 - y1)**2)**0.5\n  \n  if (a + b > c) and (a + c > b) and (b + c > a):\n    return \"Valid Triangle\"\n  else:\n    return \"Not a Valid Triangle\"\n```",
+  "1": "```python\ndef check_Triangle(x1, y1, x2, y2, x3, y3):\n  return (x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2)) != 0\n```",
+  "2": "```python\ndef check_Triangle(x1, y1, x2, y2, x3, y3):\n    a = ((x2 - x1)**2 + (y2 - y1)**2)**0.5\n    b = ((x3 - x2)**2 + (y3 - y2)**2)**0.5\n    c = ((x1 - x3)**2 + (y1 - y3)**2)**0.5\n    if a + b > c and a + c > b and b + c > a:\n        return True\n    else:\n        return False \n```",
+  "3": "```python\ndef check_Triangle(x1, y1, x2, y2, x3, y3):\n  \n  # Calculate the distances between the points\n  a = ((x2 - x1)**2 + (y2 - y1)**2)**0.5\n  b = ((x3 - x2)**2 + (y3 - y2)**2)**0.5\n  c = ((x1 - x3)**2 + (y1 - y3)**2)**0.5\n\n  # Check the triangle inequality\n  if (a + b > c) and (a + c > b) and (b + c > a):\n    return True\n  else:\n    return False \n```",
+  "4": "```python\ndef check_Triangle(p1, p2, p3):\n  \n  def distance(a, b):\n    return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5\n\n  d1 = distance(p1, p2)\n  d2 = distance(p2, p3)\n  d3 = distance(p3, p1)\n\n  return (d1 + d2 > d3) and (d1 + d3 > d2) and (d2 + d3 > d1)  \n```"
+ },
+ "44": {
+  "0": "```python\ndef rectangle_area(length, width):\n  return length * width\n```",
+  "1": "```python\ndef rectangle_area(length, width):\n  return length * width```",
+  "2": "```python\ndef rectangle_area(length, width):\n  return length * width\n```",
+  "3": "```python\ndef rectangle_area(length, width):\n  return length * width\n```",
+  "4": "```python\ndef rectangle_area(length, width):\n  return length * width \n```"
+ },
+ "45": {
+  "0": "```python\nimport re\n\ndef remove_uppercase(text):\n  return re.sub(r'[A-Z]+', '', text)\n```",
+  "1": "```python\nimport re\n\ndef remove_uppercase(text):\n  return re.sub(r'[A-Z]+', '', text) \n```",
+  "2": "```python\nimport re\n\ndef remove_uppercase(text):\n  return re.sub(r'[A-Z]+', '', text)\n```",
+  "3": "```python\nimport re\ndef remove_uppercase(text):\n  return re.sub(r'[A-Z]+', '', text)\n```",
+  "4": "```python\nimport re\n\ndef remove_uppercase(text):\n  return re.sub(r'[A-Z]+', '', text) \n```"
+ },
+ "46": {
+  "0": "```python\ndef upper_ctr(s):\n  return sum(1 for c in s if c.isupper())\n```",
+  "1": "```python\ndef upper_ctr(text):\n  return sum(1 for char in text if char.isupper())\n```",
+  "2": "```python\ndef upper_ctr(text):\n  return sum(1 for char in text if char.isupper())\n```",
+  "3": "```python\ndef upper_ctr(string):\n  return sum(1 for char in string if char.isupper())\n```",
+  "4": "```python\ndef upper_ctr(text):\n  return sum(1 for char in text if char.isupper())\n```"
+ },
+ "47": {
+  "0": "```python\nimport math\n\ndef area_pentagon(side_length):\n  return (math.sqrt(5 * (5 + 2 * math.sqrt(5))) / 4) * side_length**2\n```",
+  "1": "```python\nimport math\n\ndef area_pentagon(side):\n  return (math.sqrt(5 * (5 + 2 * math.sqrt(5))) / 4) * side**2\n```",
+  "2": "```python\nimport math\n\ndef area_pentagon(side_length):\n  return (math.sqrt(5 * (5 + 2 * math.sqrt(5))) / 4) * side_length**2\n```",
+  "3": "```python\nimport math\n\ndef area_pentagon(side_length):\n  \"\"\"Calculates the area of a regular pentagon.\n\n  Args:\n    side_length: The length of one side of the pentagon.\n\n  Returns:\n    The area of the pentagon.\n  \"\"\"\n  return (math.sqrt(5 * (5 + 2 * math.sqrt(5))) / 4) * side_length**2\n```",
+  "4": "```python\nimport math\n\ndef area_pentagon(side_length):\n  return (math.sqrt(5 * (5 + 2 * math.sqrt(5))) / 4) * side_length**2\n```"
+ },
+ "48": {
+  "0": "```python\ndef add_consecutive_nums(nums):\n  total = 0\n  for i in range(len(nums) - 1):\n    total += nums[i] + nums[i+1]\n  return total \n```",
+  "1": "```python\ndef add_consecutive_nums(nums):\n  total = 0\n  for i in range(len(nums) - 1):\n    total += nums[i] + nums[i+1]\n  return total \n```",
+  "2": "```python\ndef add_consecutive_nums(nums):\n  total = 0\n  for i in range(len(nums) - 1):\n    total += nums[i] + nums[i+1]\n  return total \n```",
+  "3": "```python\ndef add_consecutive_nums(nums):\n  total = 0\n  for i in range(len(nums)):\n    total += nums[i]\n  return total \n```",
+  "4": "```python\ndef add_consecutive_nums(nums):\n  total = 0\n  for i in range(len(nums) - 1):\n    total += nums[i] + nums[i+1]\n  return total \n```"
+ },
+ "49": {
+  "0": "```python\ndef same_order(list1, list2):\n  for i in list1:\n    if i in list2:\n      list2.remove(i)\n  return len(list2) == 0\n```",
+  "1": "```python\ndef same_order(list1, list2):\n  common = set(list1) & set(list2)\n  return all(list1.index(i) <= list2.index(i) for i in common)\n```",
+  "2": "```python\ndef same_order(list1, list2):\n  common_elements = set(list1) & set(list2)\n  return all(list1.index(c) <= list2.index(c) for c in common_elements)\n```",
+  "3": "```python\ndef same_order(list1, list2):\n    common_elements = set(list1).intersection(set(list2))\n    for i, element in enumerate(list1):\n      if element in common_elements:\n        if list2.index(element) != i:\n          return False\n    return True\n```",
+  "4": "```python\ndef same_order(list1, list2):\n    common_elements = set(list1) & set(list2)\n    return all(list1.index(element) < list2.index(element) for element in common_elements)\n```"
+ }
+}

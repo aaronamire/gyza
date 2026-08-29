@@ -18,6 +18,7 @@ so two threads racing for the same item see one winner deterministically.
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 import threading
 import time
@@ -26,6 +27,8 @@ from pathlib import Path
 import numpy as np
 
 from gyza.schema import EMBEDDING_DIM, Artifact, HLC, WorkItem
+
+LOG = logging.getLogger(__name__)
 
 
 _SCHEMA_SQL = """
@@ -145,6 +148,14 @@ def _embedding_from_blob(blob: bytes) -> np.ndarray:
     # frombuffer returns a read-only view over the bytes; copy so callers
     # can mutate without surprising errors.
     return arr.copy()
+
+
+class ClaimLostError(RuntimeError):
+    """Raised when a completion names an owner that no longer holds the claim.
+
+    Distinct from a generic failure because the remedy differs: the work ran,
+    its envelope is valid, and only the board row belongs to someone else now.
+    """
 
 
 def _row_to_work_item(row: sqlite3.Row) -> WorkItem:
@@ -328,15 +339,49 @@ class Blackboard:
             ),
         )
 
-    def try_claim(self, work_item_id: str, agent_pubkey: str, hlc: HLC) -> bool:
+    def try_claim(self, work_item_id: str, agent_pubkey: str, hlc: HLC,
+                  claimant_tier: int | None = None) -> bool:
+        """Claim a work item.
+
+        `claimant_tier` is ADVISORY AND SELF-REPORTED. It closes the path Arena
+        2 walked -- `get_unclaimed` filters by `required_tier` in its WHERE
+        clause, so an agent that learns an item id any OTHER way (gossip, a DAG
+        parent, a log line) was never filtered at all -- but it is NOT the
+        boundary, because a compromised agent simply passes a higher number.
+        The boundary is `AgentRunner._require_attested_tier`, which reads the
+        COMPOSITOR-SIGNED manifest rather than an argument.
+
+        Saying that plainly is the point. A self-reported check described as an
+        authorization boundary would be the same overclaim as the "kernel-
+        enforced" sandbox: true-sounding, and load-bearing for nobody.
+
+        `None` means "did not say" and fails closed to tier 0, matching the
+        enforcement record's positive-declaration rule.
+        """
         l, c, node = hlc.now()
         if self._raft is not None:
+            # The tier is checked LOCALLY, before proposing. The Raft state
+            # machine replicates the claim, not the claimant's attestation, so
+            # a replica cannot re-derive this -- another reason it is advisory.
+            if not self._tier_permits(work_item_id, claimant_tier):
+                return False
             return bool(self._raft.raft_claim_work_item(
                 work_item_id, agent_pubkey, l, c, node,
                 self._raft._identity.pubkey_hex,
                 sync=True, timeout=10.0,
             ))
-        return self.try_claim_direct(work_item_id, agent_pubkey, l, c, node)
+        return self.try_claim_direct(work_item_id, agent_pubkey, l, c, node,
+                                     claimant_tier=claimant_tier)
+
+    def _tier_permits(self, work_item_id: str,
+                      claimant_tier: int | None) -> bool:
+        row = self._conn().execute(
+            "SELECT required_tier FROM work_items WHERE id=?",
+            (work_item_id,),
+        ).fetchone()
+        if row is None:
+            return True          # missing item is the caller's problem, not this check's
+        return int(row["required_tier"] or 0) <= int(claimant_tier or 0)
 
     def try_claim_direct(
         self,
@@ -345,6 +390,7 @@ class Blackboard:
         hlc_l: int,
         hlc_c: int,
         hlc_node: str,
+        claimant_tier: int | None = None,
     ) -> bool:
         # Derive claimed_at_ns from the HLC's millisecond component so
         # every node records the same value when applying the same
@@ -354,10 +400,15 @@ class Blackboard:
         conn.execute("BEGIN IMMEDIATE")
         try:
             row = conn.execute(
-                "SELECT claimed_by FROM work_items WHERE id=?",
+                "SELECT claimed_by, required_tier FROM work_items WHERE id=?",
                 (work_item_id,),
             ).fetchone()
             if row is None or row["claimed_by"] is not None:
+                conn.execute("ROLLBACK")
+                return False
+            # Advisory tier filter -- see `try_claim`. Inside the same
+            # transaction as the claimed_by read so it cannot race it.
+            if int(row["required_tier"] or 0) > int(claimant_tier or 0):
                 conn.execute("ROLLBACK")
                 return False
             cur = conn.execute(
@@ -511,7 +562,23 @@ class Blackboard:
         icp_envelope_hash: str,
         success: bool,
         hlc: HLC,
+        expected_owner: str | None = None,
     ) -> None:
+        """Mark an item complete. `expected_owner` REFUSES a completion by
+        anyone else.
+
+        IT USED TO BE `WHERE id=?` AND NOTHING ELSE, so any party could
+        complete any item, including one it had never claimed. That is
+        harmless while a claim is never taken away -- and it stops being
+        harmless the moment claims become LEASES, because a slow-but-alive
+        runner whose lease expired could then overwrite the result of whoever
+        legitimately reclaimed the item, silently and last-write-wins.
+        So this had to land BEFORE the reaper, not alongside it.
+
+        `expected_owner=None` preserves the old behaviour and is what the Raft
+        apply path uses: a replica applying a committed completion must not
+        re-litigate ownership that consensus already decided.
+        """
         # Tick the HLC on the calling node for ordering observers.
         hlc.now()
         completed_at_ns = time.time_ns()
@@ -525,7 +592,7 @@ class Blackboard:
             return
         self.complete_work_item_direct(
             work_item_id, output_hash, icp_envelope_hash,
-            bool(success), completed_at_ns,
+            bool(success), completed_at_ns, expected_owner=expected_owner,
         )
 
     def complete_work_item_direct(
@@ -535,18 +602,122 @@ class Blackboard:
         icp_envelope_hash: str,
         success: bool,
         completed_at_ns: int,
+        expected_owner: str | None = None,
     ) -> None:
-        self._conn().execute(
+        if expected_owner is None:
+            self._conn().execute(
+                """
+                UPDATE work_items
+                SET completed_at_ns=?, output_hash=?, icp_envelope_hash=?,
+                    success=?
+                WHERE id=?
+                """,
+                (completed_at_ns, output_hash, icp_envelope_hash,
+                 int(success), work_item_id),
+            )
+            return
+        cur = self._conn().execute(
             """
             UPDATE work_items
             SET completed_at_ns=?, output_hash=?, icp_envelope_hash=?, success=?
-            WHERE id=?
+            WHERE id=? AND claimed_by=?
             """,
             (completed_at_ns, output_hash, icp_envelope_hash,
-             int(success), work_item_id),
+             int(success), work_item_id, expected_owner),
         )
+        if cur.rowcount != 1:
+            # RAISE RATHER THAN RETURN FALSE. A completion that silently did
+            # not apply leaves a signed envelope describing work the board does
+            # not record, and the caller carries on believing it landed.
+            raise ClaimLostError(
+                f"refusing to complete {work_item_id}: it is no longer claimed "
+                f"by {expected_owner[:16]}. Its lease expired and another "
+                f"runner reclaimed it, or the claim was released. The work was "
+                f"done and its envelope is valid -- what is refused is "
+                f"overwriting whoever holds the item now.")
 
-    def get_unclaimed(self, min_reward: float, tier: int) -> list[WorkItem]:
+    #: How long a claim is held before another runner may reclaim it.
+    #:
+    #: A CLAIM IS A LEASE, NOT A DEED. Before 2026-08-21 it was a deed: a
+    #: runner that died holding one leaked its item permanently, because
+    #: `release_claim` has exactly one caller (the in-process failure path) and
+    #: the TTL filter in `get_unclaimed` only applies to rows that are ALREADY
+    #: unclaimed. A claimed row was never served again and never expired.
+    #:
+    #: That is survivable while a crash is rare and fatal to the node anyway.
+    #: It stops being survivable the moment runners are supervised and
+    #: restarted, because then a crash is ROUTINE -- so this had to land before
+    #: process supervision, not after it.
+    #:
+    #: SIZED FROM THE LONGEST LEGITIMATE ACTION, not from taste: the sandbox
+    #: caps an action at `max_cpu_seconds=300`, so 900 s is three times the
+    #: worst case a live runner can present. Too short steals work from slow
+    #: runners; too long leaves crashed work unavailable. Three times is the
+    #: margin, and it is stated so a future change is a decision rather than a
+    #: nudge.
+    CLAIM_LEASE_NS = 900 * 1_000_000_000
+
+    def reclaim_expired_claims(self, lease_ns: int | None = None,
+                               now_ns: int | None = None) -> list[str]:
+        """Release claims whose lease has expired. Returns the ids reclaimed.
+
+        NOT SILENT. Each reclaim is logged at WARNING, because it means work
+        somebody claimed is being taken from them -- if that happens routinely
+        the lease is mis-sized and an operator needs to see it, and if it never
+        happens the log stays empty and costs nothing.
+
+        Completed items are excluded: a finished row keeps its `claimed_by` as
+        the record of who did the work, and reclaiming it would erase
+        attribution for no benefit.
+        """
+        lease = int(self.CLAIM_LEASE_NS if lease_ns is None else lease_ns)
+        now = int(time.time_ns() if now_ns is None else now_ns)
+        cutoff = now - lease
+        rows = self._conn().execute(
+            """
+            SELECT id, claimed_by FROM work_items
+            WHERE claimed_by IS NOT NULL
+              AND completed_at_ns IS NULL
+              AND claimed_at_ns IS NOT NULL
+              AND claimed_at_ns < ?
+            """,
+            (cutoff,),
+        ).fetchall()
+        reclaimed = []
+        for r in rows:
+            cur = self._conn().execute(
+                """
+                UPDATE work_items
+                SET claimed_by=NULL, claimed_at_ns=NULL
+                WHERE id=? AND claimed_by=? AND completed_at_ns IS NULL
+                """,
+                (r["id"], r["claimed_by"]),
+            )
+            if cur.rowcount == 1:
+                reclaimed.append(r["id"])
+                LOG.warning(
+                    "[blackboard] reclaimed %s from %s: claim lease expired "
+                    "(%.0fs). The holder crashed, or is slower than the lease.",
+                    r["id"][:16], (r["claimed_by"] or "?")[:16],
+                    lease / 1e9)
+        if reclaimed:
+            self._conn().commit()
+        return reclaimed
+
+    def get_unclaimed(self, min_reward: float, tier: int,
+                      limit: int | None = None) -> list[WorkItem]:
+        """Unclaimed, live items at or below `tier`, best-rewarded first.
+
+        `limit` BOUNDS THE FETCH, and the default of None (unbounded) is kept
+        only for backwards compatibility -- it is the wrong default for a
+        polling loop. Measured 2026-08-23: with no limit, every agent on every
+        poll materialises the ENTIRE unclaimed backlog, each row carrying a
+        384-float embedding, and then scores all of them. Cost is O(backlog)
+        per poll per agent, so system cost is O(agents x backlog) per interval
+        and it grows as the backlog grows. That, not lock contention, is what
+        capped throughput at ~55 claims/s with a 99% claim win rate -- the
+        agents were not fighting, they were each re-reading the whole board.
+        """
         # TTL filter: an item whose (created_at_ns + ttl_ns) is in the
         # past is expired and must not be served. We don't garbage-
         # collect here — agents shouldn't pay write latency for
@@ -560,10 +731,34 @@ class Blackboard:
               AND required_tier <= ?
               AND (created_at_ns + ttl_ns) > ?
             ORDER BY reward DESC, created_at_ns ASC
+            LIMIT ?
             """,
-            (min_reward, tier, now_ns),
+            (min_reward, tier, now_ns, -1 if limit is None else int(limit)),
         ).fetchall()
-        return [_row_to_work_item(r) for r in rows]
+        items = [_row_to_work_item(r) for r in rows]
+
+        # DEPENDENCY GATE. A combiner must not be served while any sibling is
+        # still outstanding, or it would combine a partial result and sign it.
+        # Filtered here rather than in SQL because `output_spec` is JSON; the
+        # cost is paid only for rows that actually declare COMBINE_KIND, and
+        # combiners are rare relative to leaves.
+        ready = []
+        for w in items:
+            spec = w.output_spec if isinstance(w.output_spec, dict) else {}
+            if spec.get("kind") != self.COMBINE_KIND or not w.parent_id:
+                ready.append(w)
+                continue
+            if not self.pending_siblings(w):
+                ready.append(w)
+        return ready
+
+    def pending_siblings(self, item: WorkItem) -> list[str]:
+        """Ids of this item's siblings that have not completed. A combiner
+        with a non-empty result is not yet servable."""
+        if not item.parent_id:
+            return []
+        return [c.id for c in self.children_of(item.parent_id)
+                if c.id != item.id and c.completed_at_ns is None]
 
     def release_claim(self, work_item_id: str) -> bool:
         """
@@ -582,6 +777,41 @@ class Blackboard:
             (work_item_id,),
         )
         return cur.rowcount == 1
+
+    #: `output_spec["kind"]` marking an item that COMBINES its siblings'
+    #: results. Such an item is not servable until every other child of its
+    #: parent has completed. Carried in `output_spec` rather than a new column
+    #: so decomposition needs no schema migration.
+    COMBINE_KIND = "combine"
+
+    def get_work_item(self, work_item_id: str) -> WorkItem | None:
+        row = self._conn().execute(
+            "SELECT * FROM work_items WHERE id=?", (work_item_id,),
+        ).fetchone()
+        return _row_to_work_item(row) if row is not None else None
+
+    def children_of(self, parent_id: str) -> list[WorkItem]:
+        rows = self._conn().execute(
+            "SELECT * FROM work_items WHERE parent_id=? ORDER BY created_at_ns",
+            (parent_id,),
+        ).fetchall()
+        return [_row_to_work_item(r) for r in rows]
+
+    def lineage_depth(self, work_item_id: str, cap: int = 64) -> int:
+        """Number of parent hops above this item. 0 for a root.
+
+        `cap` is a CYCLE GUARD, not a policy: `parent_id` is written by agents
+        now, so a malformed or hostile graph must not be able to hang a walk.
+        The policy bound is the caller's.
+        """
+        depth, cur, seen = 0, self.get_work_item(work_item_id), {work_item_id}
+        while cur is not None and cur.parent_id and depth < cap:
+            if cur.parent_id in seen:
+                break                      # cycle; stop rather than loop
+            seen.add(cur.parent_id)
+            cur = self.get_work_item(cur.parent_id)
+            depth += 1
+        return depth
 
     def get_by_lineage(self, lineage_root: str) -> list[WorkItem]:
         rows = self._conn().execute(
@@ -617,7 +847,7 @@ class Blackboard:
         from dataclasses import asdict
         env_hash = compute_envelope_hash(envelope)
         payload = json.dumps(
-            asdict(envelope), sort_keys=True, separators=(",", ":"),
+            asdict(envelope), sort_keys=True, separators=(",", ":"), allow_nan=False,
         )
         self._conn().execute(
             """
@@ -649,6 +879,65 @@ class Blackboard:
         ).fetchone()
         return int(row["n"] if row is not None else 0)
 
+    def envelopes_since(self, origin_ns: int = 0) -> list:
+        """The envelopes `count_envelopes_since` counts, as objects.
+
+        Same append-only log, same filter, same ordering — so a fold over this
+        and a count over that cannot disagree about what happened. H7 needs the
+        rows rather than the tally, because reversibility is a property of each
+        action's enforcement record and not of how many actions there were.
+        """
+        from gyza.icp import ICPEnvelope
+        rows = self._conn().execute(
+            "SELECT payload_json FROM icp_envelopes WHERE timestamp_ns >= ? "
+            "ORDER BY timestamp_ns ASC",
+            (int(origin_ns),),
+        ).fetchall()
+        return [ICPEnvelope(**json.loads(r["payload_json"])) for r in rows]
+
+    def count_agent_envelopes_since(self, agent_pubkey: str,
+                                    origin_ns: int = 0) -> int:
+        """Signed envelopes by ONE agent since `origin_ns`.
+
+        `count_envelopes_since` folds the whole node; a per-principal rate cap
+        needs the per-principal fold, and using the node-wide count would make
+        one busy agent exhaust every other agent's budget. Derived from the
+        append-only log for the same reason H6 is: an in-process counter resets
+        on restart, and a cumulative bound whose origin can move is not a bound.
+        """
+        row = self._conn().execute(
+            "SELECT COUNT(*) AS n FROM icp_envelopes "
+            "WHERE agent_pubkey = ? AND timestamp_ns >= ?",
+            (agent_pubkey, int(origin_ns)),
+        ).fetchone()
+        return int(row["n"] if row is not None else 0)
+
+    def egress_by_channel_since(self, origin_ns: int = 0) -> "dict[str, int]":
+        """H3's count split by channel, for the ONE question that decides
+        whether an attestation source is worth building.
+
+        Only `send_message` carries a single peer destination. `publish_agent`
+        and `publish_attestation` are DHT puts landing on the k closest nodes;
+        `publish_delta` fans out to a gossip topic. For those three, "is the
+        destination attested?" IS NOT A WELL-FORMED QUESTION at send time, so
+        they can never be reclassified out of the exit count no matter how
+        complete attestation coverage becomes.
+
+        That makes the peer-addressed share the CEILING on H3's headline
+        property -- "the only declared quantity that shrinks as the mesh
+        grows". Reporting the ceiling beside the count is the same discipline
+        as reporting FPR beside TPR: a property that can only ever apply to a
+        fraction of traffic must say which fraction.
+        """
+        from gyza.containment.egress import EgressClass
+        rows = self._conn().execute(
+            "SELECT channel, COUNT(*) AS n FROM egress_log "
+            "WHERE timestamp_ns >= ? AND egress_class IN (?, ?) "
+            "GROUP BY channel",
+            (int(origin_ns), *EgressClass.MESH_EXIT),
+        ).fetchall()
+        return {r["channel"]: int(r["n"]) for r in rows}
+
     def count_grants_since(self, origin_ns: int = 0) -> int:
         """Capability grants permitting UNCOUNTABLE egress, since `origin_ns`.
 
@@ -664,6 +953,43 @@ class Blackboard:
             (int(origin_ns), EgressClass.UNBOUNDED_GRANT),
         ).fetchone()
         return int(row["n"] if row is not None else 0)
+
+    def mesh_exit_bytes_since(self, origin_ns: int = 0,
+                              classes: "tuple[str, ...] | list[str] | None" = None
+                              ) -> int:
+        """Bytes that left via the given egress classes at or after `origin_ns`.
+
+        H3's measurand once the quantity became a RATE. The COUNT of sends is
+        mute -- R-EVID measured a benign node and an exfiltrating one emitting
+        exactly 1.000 sends per action, so the count carries zero evidence and
+        no level over it can separate them. Bytes carry evidence.
+
+        SUMS ONLY NON-NULL byte counts, and that is safe here rather than
+        merely convenient: `record_egress` REFUSES a MESH_EXIT row without a
+        byte count, so a NULL can only belong to `UNBOUNDED_GRANT`, which is a
+        different unit and is excluded by the caller's class filter. If that
+        refusal is ever relaxed this sum silently understates disclosure, which
+        is the reassuring direction -- hence the assertion below rather than a
+        comment.
+        """
+        cs = list(classes) if classes is not None else None
+        sql = ("SELECT COALESCE(SUM(byte_count), 0) AS b, "
+               "SUM(byte_count IS NULL) AS nulls "
+               "FROM egress_log WHERE timestamp_ns >= ?")
+        args: list[object] = [int(origin_ns)]
+        if cs is not None:
+            if not cs:
+                return 0
+            sql += f" AND egress_class IN ({','.join('?' * len(cs))})"
+            args += cs
+        row = self._conn().execute(sql, tuple(args)).fetchone()
+        if row["nulls"]:
+            raise ValueError(
+                f"{row['nulls']} row(s) in this egress class set carry a NULL "
+                f"byte_count, so the byte total is UNDEFINED rather than "
+                f"{row['b']}. Reading a NULL as zero would understate "
+                f"disclosure.")
+        return int(row["b"])
 
     def record_egress(self, egress_class: str, channel: str, destination: str,
                       byte_count: int | None,
@@ -684,6 +1010,25 @@ class Blackboard:
         # NULL, not 0, when the volume is unknowable. Writing 0 would claim
         # nothing left the machine.
         n = None if byte_count is None else int(byte_count)
+        # A MESH_EXIT row with no byte count makes any byte-denominated harm
+        # measure UNDEFINED over this log, and the natural repair -- treat the
+        # NULL as 0 -- understates disclosure, which is the reassuring
+        # direction and therefore the one that does not get questioned.
+        #
+        # `peer_send` and `outside_send` both annotate `byte_count: int`, and
+        # every current caller passes one. That annotation is a type hint, not
+        # a check, and this method has always accepted None from anywhere; an
+        # unenforced invariant is an assumption. R-H3L needed the sum to be
+        # well-defined to measure anything at all, so the assumption becomes a
+        # check here. UNBOUNDED_GRANT is exempt by design: its volume is
+        # genuinely unknowable and it is excluded from MESH_EXIT for that
+        # reason.
+        if n is None and egress_class in EgressClass.MESH_EXIT:
+            raise ValueError(
+                f"MESH_EXIT class {egress_class!r} requires a byte_count: a "
+                f"NULL makes byte-denominated harm undefined over this log, "
+                f"and reading it as 0 would understate disclosure. Only "
+                f"UNBOUNDED_GRANT may omit it.")
         self._conn().execute(
             "INSERT INTO egress_log "
             "(egress_class, channel, destination, byte_count, timestamp_ns) "

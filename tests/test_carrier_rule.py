@@ -154,7 +154,12 @@ def test_the_rule_refuses_exactly_the_two_entries_found_by_hand():
 def test_every_other_entry_with_a_verifier_is_determinate():
     ok = [d.claim_type for d in DRAFTS if d.fn is not None
           and check_claim_determinacy(d.fn, d.carrier).no_declared_evidence]
-    assert len(ok) == 17   # 14 + the dag split + external_send_content
+    # 17 -> 19: `decomposition_within_manifest` and `combine_covers_siblings`
+    # (2026-08-23). Both are DETERMINATE by construction, which is the property
+    # this test protects: neither exposes a caller-settable parameter that can
+    # move the verdict, because both read their bounds from signed bytes -- the
+    # manifest's spawn grant and the parent's signed child list.
+    assert len(ok) == 19   # 14 + the dag split + external_send_content + 2
 
 
 def test_delegation_attenuation_names_its_depth_bound():

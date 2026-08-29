@@ -93,6 +93,9 @@ class NetworkBlackboard(Blackboard):
         # via post_intent_direct which does not record creator —
         # that's a Phase 4 concern (intent provenance gossip).
         self._intent_creator: dict[str, str] = {}
+        # Immutable intents, so a hit never goes stale. Avoids a PK
+        # lookup on every work-item publish.
+        self._lineage_intent_cache: dict[str, IntentRecord] = {}
         if raft_node is not None:
             self.attach_raft(raft_node)
 
@@ -145,20 +148,60 @@ class NetworkBlackboard(Blackboard):
             self._wait_for_lineage(w.lineage_root)
         result = super().post_work_item(w)
         if result and self._gossip is not None and self._gossip_project_id is not None:
+            # SELF-CONTAINED DELTA. Carry the lineage intent alongside the
+            # item. Gossip does not retry, so an intent published into a mesh
+            # that has not finished GRAFTing is lost PERMANENTLY, and every
+            # work item under that lineage then fails its FK on the receiving
+            # board -- silently, because the delta ARRIVES and is rejected at
+            # insert. Measured 2026-08-29 (research/arenas/arena1_contested/
+            # FINDINGS_NETEM_SWEEP.md): at 80 ms RTT delivery never recovered,
+            # 0 of ~60 items over 180 s. The previous code shipped new_items
+            # alone under a comment promising "a subsequent delta carrying the
+            # full state will heal once the intent arrives" -- no such delta
+            # was ever sent. post_intent_direct is INSERT OR IGNORE, so
+            # re-asserting costs one ignored row.
             self._publish_delta_if_attached(BlackboardDelta(
                 project_id=self._gossip_project_id,
+                new_intents=self._lineage_intent_records(w.lineage_root),
                 new_items=[_work_item_to_record(w)],
             ))
         return result
 
-    def try_claim(self, work_item_id, agent_pubkey, hlc):
+    def _lineage_intent_records(self, lineage_root: str) -> list[IntentRecord]:
+        """The intent row for a lineage as a wire record, cached.
+
+        Intents are immutable -- post_intent_direct is INSERT OR IGNORE and
+        there is no update path -- so a cache hit can never go stale.
+        """
+        hit = self._lineage_intent_cache.get(lineage_root)
+        if hit is not None:
+            return [hit]
+        row = self._conn().execute(
+            "SELECT intent_id, goal_spec_json, created_at_ns "
+            "FROM human_intents WHERE intent_id=?", (lineage_root,),
+        ).fetchone()
+        if row is None:
+            return []
+        rec = IntentRecord(
+            intent_id=row["intent_id"],
+            goal_spec_json=row["goal_spec_json"],
+            created_at_ns=row["created_at_ns"],
+        )
+        self._lineage_intent_cache[lineage_root] = rec
+        return [rec]
+
+    def try_claim(self, work_item_id, agent_pubkey, hlc, claimant_tier=None):
         # Bump the gossip-side HLC so cross-cluster total order
         # observes our claim. We use the agent's own HLC to drive the
         # claim (parent class semantics) but ALSO advance the gossip
         # HLC to keep its node-id slot fresh — this matters when a
         # remote cluster's HLC.recv() later sees our claim and decides
         # whether to ratchet forward.
-        won = super().try_claim(work_item_id, agent_pubkey, hlc)
+        # Pass the tier THROUGH. An override that drops it would silently
+        # reintroduce the gap on exactly the deployment -- networked, where
+        # item ids arrive by gossip -- that made it reachable in the first place.
+        won = super().try_claim(work_item_id, agent_pubkey, hlc,
+                                claimant_tier=claimant_tier)
         if won and self._gossip is not None and self._gossip_project_id is not None:
             compositor_pubkey = (
                 self._gossip_hlc.node_id if self._gossip_hlc is not None else ""
@@ -183,9 +226,22 @@ class NetworkBlackboard(Blackboard):
         icp_envelope_hash: str,
         success: bool,
         hlc: HLC,
+        expected_owner: "str | None" = None,
     ) -> None:
+        # `expected_owner` PASSED THROUGH. This override dropped it, so every
+        # runner call -- which always passes it by keyword -- raised TypeError
+        # inside `_complete`, where a best-effort `except Exception: pass`
+        # swallowed it. Result: on ANY networked deployment every completion
+        # silently failed to record. Envelopes were signed and stored; the
+        # board never advanced; items stayed claimed-but-incomplete until the
+        # lease expired and the work was done again, forever.
+        #
+        # `try_claim` two methods up carries a comment saying an override that
+        # drops a parameter "would silently reintroduce the gap". It was right,
+        # and this method is the instance it did not cover.
         super().complete_work_item(
-            work_item_id, output_hash, icp_envelope_hash, success, hlc,
+            work_item_id, output_hash, icp_envelope_hash, hlc=hlc,
+            success=success, expected_owner=expected_owner,
         )
         if self._gossip is not None and self._gossip_project_id is not None:
             compositor_pubkey = (
@@ -301,8 +357,12 @@ class NetworkBlackboard(Blackboard):
         """
         self._free_rider_filter = keep
 
-    def get_unclaimed(self, min_reward: float, tier: int) -> list[WorkItem]:
-        items = super().get_unclaimed(min_reward, tier)
+    def get_unclaimed(self, min_reward: float, tier: int,
+                      limit: int | None = None) -> list[WorkItem]:
+        # `limit` passed THROUGH. An override that dropped it would
+        # silently restore the unbounded fetch on exactly the networked
+        # deployment where the backlog is largest.
+        items = super().get_unclaimed(min_reward, tier, limit=limit)
         f = self._free_rider_filter
         if f is None:
             return items
@@ -480,10 +540,15 @@ class NetworkBlackboard(Blackboard):
             try:
                 self.post_work_item_direct(_record_to_work_item(record))
             except Exception as e:  # noqa: BLE001
-                # Most likely an FK failure (intent missing): a delta
-                # may carry just the work-item update without re-asserting
-                # the intent. We log; a subsequent delta carrying the
-                # full state will heal once the intent arrives.
+                # Most likely an FK failure: the lineage intent is not on
+                # this board yet. Since 2026-08-29 post_work_item ships the
+                # intent WITH the item, so the next item under this lineage
+                # heals it -- which is what makes the recovery real rather
+                # than assumed. Before that change no delta ever re-carried
+                # the intent and this path was a permanent silent drop:
+                # measured 0 of ~60 items over 180 s at 80 ms RTT. Deltas
+                # from an older peer still lack the intent, so the log line
+                # stays.
                 LOG.warning(
                     "[gossip] post_work_item_direct(%s) failed: %s",
                     record.id, e,

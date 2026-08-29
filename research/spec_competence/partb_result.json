@@ -1,0 +1,2952 @@
+{
+ "rows": [
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul1_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul1_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add111_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul2_add211_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add121_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul2_add022_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add111_sort2",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul3_add211_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add121_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "conservation",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": false,
+   "end_to_end_holds": false,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "monotone",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "drop",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "unsort",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 0,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": false,
+   "MISSED": true
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 1,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  },
+  {
+   "pipeline": "pl_mul3_add022_sort3",
+   "cls": "cumulative",
+   "mutation": "overadd",
+   "stage": 2,
+   "local_conjunction_accepts": true,
+   "end_to_end_holds": true,
+   "MISSED": false
+  }
+ ],
+ "summary": {
+  "conservation": {
+   "cells": 108,
+   "e2e_violations": 60,
+   "missed_by_local_conjunction": 0,
+   "caught": 60,
+   "detection_rate": 1.0,
+   "own_mutation_cells": 36,
+   "own_mutation_missed": 0,
+   "COMPOSES": true
+  },
+  "monotone": {
+   "cells": 108,
+   "e2e_violations": 17,
+   "missed_by_local_conjunction": 0,
+   "caught": 17,
+   "detection_rate": 1.0,
+   "own_mutation_cells": 36,
+   "own_mutation_missed": 0,
+   "COMPOSES": true
+  },
+  "cumulative": {
+   "cells": 108,
+   "e2e_violations": 15,
+   "missed_by_local_conjunction": 15,
+   "caught": 0,
+   "detection_rate": 0.0,
+   "own_mutation_cells": 36,
+   "own_mutation_missed": 15,
+   "COMPOSES": false
+  }
+ }
+}

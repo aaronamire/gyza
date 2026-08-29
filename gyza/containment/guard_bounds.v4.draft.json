@@ -1,0 +1,13 @@
+{
+  "version": 4,
+  "bounds": {
+    "H4_authority": 0.0,
+    "H5_storage_growth": 10000000000.0,
+    "H3_mesh_exit_rate": 300000000,
+    "H7_irreversible_actions": 0.0
+  },
+  "policy": {
+    "review_cadence_actions": 10000
+  },
+  "tier_assignments": {}
+}

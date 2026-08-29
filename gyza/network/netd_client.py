@@ -318,6 +318,32 @@ class AgentAdvertisement:
 
 
 # ---------------------------------------------------------------------------
+# H3 egress recording, shared by all three clients
+# ---------------------------------------------------------------------------
+
+def _safe_peer_send(recorder: "object | None", channel: str, peer_id: str,
+                    n_bytes: int) -> None:
+    """Record one peer send, and NEVER let the measurement break the send.
+
+    An exception here would turn a successful transmission into a failure --
+    worse than an unmeasured send -- and it would put an error into the same
+    channel as a measurement, which this program has recorded twice (AN ERROR
+    IS NOT A VALUE).
+
+    Shared by `NetdClient`, `GossipClient` and `CapabilityClient` because
+    `HARM_MODEL_DRAFT` §H3 cites four sites across all three, and until this
+    function existed only the two on `NetdClient` recorded anything.
+    """
+    if recorder is None:
+        return
+    try:
+        recorder.peer_send(channel, peer_id, n_bytes)
+    except Exception:                                        # noqa: BLE001
+        LOG.warning("[netd_client] egress not recorded for %s", channel,
+                    exc_info=True)
+
+
+# ---------------------------------------------------------------------------
 # NetdClient
 # ---------------------------------------------------------------------------
 
@@ -342,17 +368,8 @@ class NetdClient:
         self._egress = egress_recorder
 
     def _record_egress(self, channel: str, peer_id: str, n_bytes: int) -> None:
-        """Never let measurement break a send. An exception here would turn a
-        successful transmission into a failure, which is a worse outcome than
-        an unmeasured one -- and it would put an error into the same channel as
-        a measurement, which this program has recorded twice."""
-        if self._egress is None:
-            return
-        try:
-            self._egress.peer_send(channel, peer_id, n_bytes)
-        except Exception:                                    # noqa: BLE001
-            LOG.warning("[netd_client] egress not recorded for %s", channel,
-                        exc_info=True)
+        """See `_safe_peer_send` -- measurement must never break a send."""
+        _safe_peer_send(self._egress, channel, peer_id, n_bytes)
 
     # -- channel lifecycle ----------------------------------------------------
 
@@ -985,9 +1002,12 @@ class GossipClient:
     channel's HTTP/2 stream budget.
     """
 
-    def __init__(self, socket_path: str = "~/.gyza/netd.sock"):
+    def __init__(self, socket_path: str = "~/.gyza/netd.sock",
+                 egress_recorder: "object | None" = None):
         self._socket_path = _resolve(socket_path)
         self._channel: grpc.Channel | None = None
+        #: H3's measurand for `publish_delta`. See `NetdClient.__init__`.
+        self._egress = egress_recorder
 
     def _ensure(self) -> grpc.Channel:
         if self._channel is None:
@@ -1028,10 +1048,19 @@ class GossipClient:
         signature. Returns the assigned sender_seq.
         """
         stub = netd_pb2_grpc.GossipServiceStub(self._ensure())
-        msg = netd_pb2.PublishDeltaRequest(delta=delta.to_proto())
+        proto = delta.to_proto()
+        msg = netd_pb2.PublishDeltaRequest(delta=proto)
         result = stub.PublishDelta(msg)
         if not result.success:
             raise RuntimeError(f"PublishDelta failed: {result.error}")
+        # H3 site 3 of 4. A gossip publish has NO single destination peer -- it
+        # fans out to the topic mesh -- so the topic is recorded as the
+        # destination. That makes one log row stand for an unknown number of
+        # receiving nodes, which is why `publish_delta` UNDERSTATES peer count
+        # and is stated in research/H3_WIRING_GAP.md rather than left implied.
+        _safe_peer_send(self._egress, "publish_delta",
+                        f"topic:{getattr(delta, 'project_id', '') or 'default'}",
+                        proto.ByteSize())
         return result.sender_seq
 
     def subscribe_deltas(
@@ -1162,9 +1191,12 @@ class CapabilityClient:
     handler and Python's request_attestation() drives the dance.
     """
 
-    def __init__(self, socket_path: str = "~/.gyza/netd.sock"):
+    def __init__(self, socket_path: str = "~/.gyza/netd.sock",
+                 egress_recorder: "object | None" = None):
         self._socket_path = _resolve(socket_path)
         self._channel: grpc.Channel | None = None
+        #: H3's measurand for `publish_attestation`. See `NetdClient.__init__`.
+        self._egress = egress_recorder
 
     def _ensure(self) -> grpc.Channel:
         if self._channel is None:
@@ -1224,6 +1256,10 @@ class CapabilityClient:
         result = stub.PublishAttestation(cert_proto)
         if not result.success:
             raise RuntimeError(f"PublishAttestation failed: {result.error}")
+        # H3 site 4 of 4. A DHT put lands on the k closest nodes, so like
+        # publish_delta this one row stands for several destinations.
+        _safe_peer_send(self._egress, "publish_attestation", result.dht_key,
+                        cert_proto.ByteSize())
         return result.dht_key
 
     def fetch_attestation(self, applicant_pubkey_hex: str) -> AttestationCert | None:

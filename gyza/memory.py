@@ -36,52 +36,44 @@ _FEW_SHOT_CHAR_LIMIT = 2000
 
 # Process-wide model cache — avoids reloading 80MB of weights per agent.
 _model_lock = threading.Lock()
-_model_singleton: object | None = None
 
 
 class _EmbeddingsUnavailable(Exception):
     """sentence-transformers is not installed in this environment."""
 
 
-def _get_model():
-    global _model_singleton
-    with _model_lock:
-        if _model_singleton is None:
-            try:
-                from sentence_transformers import SentenceTransformer
-            except ImportError as e:
-                # On hosts that intentionally skip the [embeddings]
-                # extra (e.g. the demo agent on a 1 GB VPS), retrieving
-                # similar episodes is structurally impossible — there's
-                # no encoder. We raise a typed exception so
-                # retrieve_similar can degrade gracefully rather than
-                # crash mid-execution.
-                raise _EmbeddingsUnavailable(
-                    "sentence-transformers is not installed; "
-                    "EpisodicMemory.retrieve_similar will return []"
-                ) from e
-            _model_singleton = SentenceTransformer(_EMBED_MODEL_NAME)
-        return _model_singleton
-
-
 def _embed(texts: list[str]) -> np.ndarray:
-    # Architectural debt: this module loads SentenceTransformer
-    # independently of ``gyza.embeddings`` — it predates the unified
-    # embedder protocol. When ``GYZA_EMBEDDER=stub`` is set the rest
-    # of the system uses ``StubEmbedder`` but ``_get_model()`` would
-    # still cold-load ST, silently undoing the opt-out and causing a
-    # ~10-15s pause on the first ``retrieve_similar`` with non-empty
-    # memory (e.g. the 2nd round of demo/single_machine_global.py
-    # --fast). Honour the env var explicitly here. The longer-term
-    # fix is to delete ``_get_model`` and route through
-    # ``gyza.embeddings.default_embedder()``; this hop preserves the
-    # existing ``_EmbeddingsUnavailable`` semantics callers depend on.
-    if os.environ.get("GYZA_EMBEDDER", "").strip().lower() == "stub":
-        from gyza.embeddings import default_embedder
-        return default_embedder().embed_batch(texts).astype(np.float32)
-    model = _get_model()
-    arr = model.encode(texts, show_progress_bar=False)
-    return np.asarray(arr, dtype=np.float32)
+    """Embed via the unified embedder, WITHOUT losing honest degradation.
+
+    This module used to load SentenceTransformer independently of
+    ``gyza.embeddings``, so ``GYZA_EMBEDDER`` was honoured everywhere except
+    here. A later patch special-cased the single value ``"stub"``; every other
+    setting still leaked, because ``_get_model()`` cold-loaded ST regardless.
+    Routing through ``default_embedder()`` closes that for all settings and
+    keeps one model load per process.
+
+    THE NAIVE ROUTE-THROUGH WOULD HAVE BEEN WRONG, in the reassuring direction.
+    ``default_embedder()`` FALLS BACK to ``StubEmbedder`` when
+    sentence-transformers is absent, so a bare hop would make
+    ``retrieve_similar`` return neighbours ranked by stub vectors — plausible
+    output computed from nothing — where callers currently get
+    ``_EmbeddingsUnavailable`` and honestly degrade to ``[]``. "It broke" and
+    "it found nothing" are opposite claims and must not share a channel.
+
+    So a stub is accepted only when it was ASKED FOR, and a stub arrived at by
+    FALLBACK still raises.
+    """
+    from gyza.embeddings import StubEmbedder, default_embedder
+
+    explicit_stub = os.environ.get("GYZA_EMBEDDER", "").strip().lower() == "stub"
+    embedder = default_embedder()
+    if isinstance(embedder, StubEmbedder) and not explicit_stub:
+        raise _EmbeddingsUnavailable(
+            "sentence-transformers is not installed; default_embedder() fell "
+            "back to StubEmbedder. EpisodicMemory.retrieve_similar will return "
+            "[] rather than rank episodes by meaningless vectors."
+        )
+    return embedder.embed_batch(texts).astype(np.float32)
 
 
 @dataclass
@@ -243,6 +235,9 @@ class _LanceBackend:
         # already [0-9a-f]; just prefix to make the namespacing explicit.
         return f"episodes_{agent_id}"
 
+    #: Row count at the last successful index build; 0 means never built.
+    _indexed_at = 0
+
     def _connect(self) -> None:
         import lancedb
         self._db = lancedb.connect(str(self._lance_path))
@@ -258,10 +253,31 @@ class _LanceBackend:
         # construction, which adds a heavy dep we don't otherwise need.
         placeholder = self._episode_to_row(sample)
         placeholder["episode_id"] = "__placeholder__"
-        self._table = self._db.create_table(
-            self._table_name, data=[placeholder]
-        )
-        self._table.delete('episode_id = "__placeholder__"')
+        try:
+            self._table = self._db.create_table(
+                self._table_name, data=[placeholder]
+            )
+            self._table.delete('episode_id = "__placeholder__"')
+        except Exception:                                    # noqa: BLE001
+            # CREATE-OR-OPEN, because "does it exist?" and "create it" are two
+            # calls with a gap between them. `_connect` decides from a
+            # `list_tables()` SNAPSHOT taken at construction; anything that
+            # creates the table after that snapshot -- a sibling process, or
+            # this agent's own earlier run -- leaves `self._table` None while
+            # the table is on disk, and `create_table` then raises
+            # "Table ... already exists".
+            #
+            # MEASURED, NOT HYPOTHETICAL. `gyza serve` failed EVERY work item
+            # after the first few with exactly that error, and because
+            # `_run_loop` releases the claim and continues, the agent looked
+            # alive while completing nothing. A long-running agent is the case
+            # that hits this, which is why it surfaced with the fleet and not
+            # in a unit test that starts from an empty directory.
+            #
+            # Opening is the right recovery: the table already holds this
+            # agent's episodes, and re-raising would make a runner that has
+            # memory from a previous run permanently unable to use it.
+            self._table = self._db.open_table(self._table_name)
 
     @staticmethod
     def _episode_to_row(e: Episode) -> dict:
@@ -304,6 +320,68 @@ class _LanceBackend:
             self._ensure_table(episodes[0])
         rows = [self._episode_to_row(e) for e in episodes]
         self._table.add(rows)
+        self._maybe_build_index()
+
+    #: Below this, LanceDB's exhaustive scan is faster than an ANN index and
+    #: IVF has too few rows to partition sensibly.
+    _ANN_MIN_ROWS = 1024
+    #: Rebuild once the table has grown this many times past the last build,
+    #: so index maintenance stays amortized rather than per-write.
+    _ANN_REBUILD_FACTOR = 4
+
+    def _maybe_build_index(self) -> None:
+        """Build the ANN index once the corpus justifies it.
+
+        WHY THIS EXISTS. `search()` reads as an approximate-nearest-neighbour
+        query and this class documents itself as one, but **LanceDB performs an
+        EXHAUSTIVE SCAN until an index is explicitly created** and
+        `create_index` was called nowhere. So the indexed backend was selected,
+        in use, and had no index: retrieval was O(corpus) on the execution hot
+        path, measured at 17 ms / 200 episodes rising linearly to 163 ms /
+        8,000 -- roughly 1 s at 50,000 and 3.6 s at 180,000.
+
+        That is a SLOPE, not a constant: an agent got permanently slower the
+        longer it ran, which is precisely the regime "sustained, long-horizon
+        missions" require.
+
+        Failure is non-fatal. An index that cannot be built leaves the previous
+        behaviour intact -- a slow answer, never a wrong one -- so this cannot
+        be the reason a write fails.
+        """
+        try:
+            n = self._table.count_rows()
+        except Exception:                                    # noqa: BLE001
+            return
+        if n < self._ANN_MIN_ROWS:
+            return
+        if n < self._indexed_at * self._ANN_REBUILD_FACTOR:
+            return
+        try:
+            # cosine, because RetrievalClaim declares metric "cosine_unit" and
+            # the metric definition is the arbiter (see search()'s D2 note).
+            # Building under a different metric would rank by one measure and
+            # report another.
+            self._table.create_index(metric="cosine", replace=True)
+            # AND A SCALAR INDEX ON THE PREFILTER COLUMN. `search()` applies
+            # `where("success = true", prefilter=True)`, and a prefilter is
+            # evaluated across the WHOLE TABLE before the vector search -- so it
+            # is O(corpus) regardless of how good the vector index is. Measured
+            # at 8,000 episodes: the ANN query took 45.8 ms and the full
+            # backend.search 102.7 ms, so the prefilter alone was ~57 ms and
+            # rising linearly.
+            #
+            # Dropping the prefilter is NOT the fix: postfiltering is what
+            # caused D1's systematic under-retrieval, where a qualifying result
+            # could never be returned. Indexing the filtered column keeps the
+            # correctness and removes the scan.
+            try:
+                self._table.create_scalar_index("success", replace=True)
+            except Exception:                                # noqa: BLE001
+                pass          # vector index still stands on its own
+            self._indexed_at = n
+        except Exception:                                    # noqa: BLE001
+            # Leave _indexed_at alone so a later add retries.
+            pass
 
     def search(self, query_vec: np.ndarray, k: int,
                *, success_only: bool = False) -> list[tuple[Episode, float]]:

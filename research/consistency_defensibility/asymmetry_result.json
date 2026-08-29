@@ -1,0 +1,499 @@
+{
+  "program": "Phase 6B verification/generation asymmetry. NOT a Route 2 rescue.",
+  "DECISION": {
+    "case": "ASYMMETRY_WEAK",
+    "checkers_with_cellB_J>0.20_CIexcl0": [],
+    "pooled_cell_a_SOLVED": {
+      "n": 414,
+      "n_wrong": 30,
+      "TPR": 0.7333,
+      "FPR": 0.0391,
+      "firing_rate": 0.0894,
+      "precision": 0.5946,
+      "J": 0.6943,
+      "J_ci": [
+        0.6937,
+        0.5151,
+        0.8495
+      ],
+      "perm_p": 0.0,
+      "LR": 18.773
+    },
+    "pooled_cell_b_FAILED": {
+      "n": 71,
+      "n_wrong": 35,
+      "TPR": 0.2,
+      "FPR": 0.3333,
+      "firing_rate": 0.2676,
+      "precision": 0.3684,
+      "J": -0.1333,
+      "J_ci": [
+        -0.1333,
+        -0.3371,
+        0.0653
+      ],
+      "perm_p": 0.9433,
+      "LR": 0.6
+    }
+  },
+  "adversarial_note": "cross-model verify does NOT depend on claimant honesty (claimant cannot control the checker), unlike A2 self-inversion; it DOES depend on checker honesty (a lazy/colluding always-VALID checker -> J=0). A2 self-inversion is gameable (always-VALID optimal; mistral/phi-4 exhibit it) and is an honest-agent self-audit, not slashing.",
+  "parse_fail_verdict": 48,
+  "pooled_cross_verify": {
+    "n": 630,
+    "n_wrong": 103,
+    "TPR": 0.4466,
+    "FPR": 0.0683,
+    "firing_rate": 0.1302,
+    "precision": 0.561,
+    "J": 0.3783,
+    "J_ci": [
+      0.3785,
+      0.2793,
+      0.4743
+    ],
+    "perm_p": 0.0,
+    "LR": 6.538
+  },
+  "per_checker": {
+    "llama-3.1-70b-instruct": {
+      "solve_acc_on_these": 0.7152,
+      "verify_ALL": {
+        "n": 156,
+        "n_wrong": 26,
+        "TPR": 0.4231,
+        "FPR": 0.0308,
+        "firing_rate": 0.0962,
+        "precision": 0.7333,
+        "J": 0.3923,
+        "J_ci": [
+          0.391,
+          0.1987,
+          0.5968
+        ],
+        "perm_p": 0.0,
+        "LR": 13.75
+      },
+      "verify_a_checker_SOLVED": {
+        "n": 115,
+        "n_wrong": 14,
+        "TPR": 0.6429,
+        "FPR": 0.0297,
+        "firing_rate": 0.1043,
+        "precision": 0.75,
+        "J": 0.6132,
+        "J_ci": [
+          0.6135,
+          0.3429,
+          0.8567
+        ],
+        "perm_p": 0.0,
+        "LR": 21.643
+      },
+      "verify_b_checker_FAILED": {
+        "n": 12,
+        "n_wrong": 6,
+        "TPR": 0.0,
+        "FPR": 0.1667,
+        "firing_rate": 0.0833,
+        "precision": 0.0,
+        "J": -0.1667,
+        "J_ci": [
+          -0.1677,
+          -0.5,
+          0.0
+        ],
+        "perm_p": 1.0,
+        "LR": 0.0
+      }
+    },
+    "gemma-2-27b-it": {
+      "solve_acc_on_these": 0.5864,
+      "verify_ALL": {
+        "n": 159,
+        "n_wrong": 22,
+        "TPR": 0.5,
+        "FPR": 0.2044,
+        "firing_rate": 0.2453,
+        "precision": 0.2821,
+        "J": 0.2956,
+        "J_ci": [
+          0.2941,
+          0.0829,
+          0.5146
+        ],
+        "perm_p": 0.0043,
+        "LR": 2.446
+      },
+      "verify_a_checker_SOLVED": {
+        "n": 94,
+        "n_wrong": 2,
+        "TPR": 1.0,
+        "FPR": 0.1304,
+        "firing_rate": 0.1489,
+        "precision": 0.1429,
+        "J": 0.8696,
+        "J_ci": [
+          0.8706,
+          0.7957,
+          0.9348
+        ],
+        "perm_p": 0.021,
+        "LR": 7.667
+      },
+      "verify_b_checker_FAILED": {
+        "n": 39,
+        "n_wrong": 12,
+        "TPR": 0.4167,
+        "FPR": 0.4074,
+        "firing_rate": 0.4103,
+        "precision": 0.3125,
+        "J": 0.0093,
+        "J_ci": [
+          0.012,
+          -0.3173,
+          0.3587
+        ],
+        "perm_p": 0.625,
+        "LR": 1.023
+      }
+    },
+    "mistral-small-3.2-24b-instruct": {
+      "solve_acc_on_these": 0.4811,
+      "verify_ALL": {
+        "n": 163,
+        "n_wrong": 28,
+        "TPR": 0.3571,
+        "FPR": 0.0148,
+        "firing_rate": 0.0736,
+        "precision": 0.8333,
+        "J": 0.3423,
+        "J_ci": [
+          0.3437,
+          0.1705,
+          0.5273
+        ],
+        "perm_p": 0.0,
+        "LR": 24.107
+      },
+      "verify_a_checker_SOLVED": {
+        "n": 87,
+        "n_wrong": 2,
+        "TPR": 1.0,
+        "FPR": 0.0,
+        "firing_rate": 0.023,
+        "precision": 1.0,
+        "J": 1.0,
+        "J_ci": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "perm_p": 0.0,
+        "LR": "inf"
+      },
+      "verify_b_checker_FAILED": {
+        "n": 9,
+        "n_wrong": 8,
+        "TPR": 0.125,
+        "FPR": 0.0,
+        "firing_rate": 0.1111,
+        "precision": 1.0,
+        "J": 0.125,
+        "J_ci": [
+          0.1229,
+          0.0,
+          0.4286
+        ],
+        "perm_p": 0.8963,
+        "LR": "inf"
+      }
+    },
+    "phi-4": {
+      "solve_acc_on_these": 0.741,
+      "verify_ALL": {
+        "n": 152,
+        "n_wrong": 27,
+        "TPR": 0.5185,
+        "FPR": 0.016,
+        "firing_rate": 0.1053,
+        "precision": 0.875,
+        "J": 0.5025,
+        "J_ci": [
+          0.5019,
+          0.3105,
+          0.7
+        ],
+        "perm_p": 0.0,
+        "LR": 32.407
+      },
+      "verify_a_checker_SOLVED": {
+        "n": 118,
+        "n_wrong": 12,
+        "TPR": 0.75,
+        "FPR": 0.0,
+        "firing_rate": 0.0763,
+        "precision": 1.0,
+        "J": 0.75,
+        "J_ci": [
+          0.7494,
+          0.5,
+          1.0
+        ],
+        "perm_p": 0.0,
+        "LR": "inf"
+      },
+      "verify_b_checker_FAILED": {
+        "n": 11,
+        "n_wrong": 9,
+        "TPR": 0.1111,
+        "FPR": 0.0,
+        "firing_rate": 0.0909,
+        "precision": 1.0,
+        "J": 0.1111,
+        "J_ci": [
+          0.1104,
+          0.0,
+          0.375
+        ],
+        "perm_p": 0.8307,
+        "LR": "inf"
+      }
+    }
+  },
+  "cross_vs_self_by_claimant": {
+    "llama-3.1-70b-instruct": {
+      "self_verify": {
+        "n": 55,
+        "n_wrong": 7,
+        "TPR": 0.4286,
+        "FPR": 0.0208,
+        "firing_rate": 0.0727,
+        "precision": 0.75,
+        "J": 0.4077,
+        "J_ci": [
+          0.4075,
+          -0.0193,
+          0.8129
+        ],
+        "perm_p": 0.0047,
+        "LR": 20.571
+      },
+      "cross_verify_pooled_over_checkers": {
+        "n": 165,
+        "n_wrong": 21,
+        "TPR": 0.4762,
+        "FPR": 0.0833,
+        "firing_rate": 0.1333,
+        "precision": 0.4545,
+        "J": 0.3929,
+        "J_ci": [
+          0.3929,
+          0.1715,
+          0.6226
+        ],
+        "perm_p": 0.0,
+        "LR": 5.714
+      }
+    },
+    "gemma-2-27b-it": {
+      "self_verify": {
+        "n": 64,
+        "n_wrong": 24,
+        "TPR": 0.5833,
+        "FPR": 0.15,
+        "firing_rate": 0.3125,
+        "precision": 0.7,
+        "J": 0.4333,
+        "J_ci": [
+          0.4321,
+          0.2,
+          0.6561
+        ],
+        "perm_p": 0.0003,
+        "LR": 3.889
+      },
+      "cross_verify_pooled_over_checkers": {
+        "n": 171,
+        "n_wrong": 53,
+        "TPR": 0.6038,
+        "FPR": 0.0169,
+        "firing_rate": 0.1988,
+        "precision": 0.9412,
+        "J": 0.5868,
+        "J_ci": [
+          0.5873,
+          0.4556,
+          0.7143
+        ],
+        "perm_p": 0.0,
+        "LR": 35.623
+      }
+    },
+    "mistral-small-3.2-24b-instruct": {
+      "self_verify": {
+        "n": 40,
+        "n_wrong": 4,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_p": 1.0,
+        "LR": null
+      },
+      "cross_verify_pooled_over_checkers": {
+        "n": 121,
+        "n_wrong": 11,
+        "TPR": 0.0909,
+        "FPR": 0.0364,
+        "firing_rate": 0.0413,
+        "precision": 0.2,
+        "J": 0.0545,
+        "J_ci": [
+          0.058,
+          -0.0631,
+          0.282
+        ],
+        "perm_p": 0.4007,
+        "LR": 2.5
+      }
+    },
+    "phi-4": {
+      "self_verify": {
+        "n": 56,
+        "n_wrong": 6,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_p": 1.0,
+        "LR": null
+      },
+      "cross_verify_pooled_over_checkers": {
+        "n": 173,
+        "n_wrong": 18,
+        "TPR": 0.1667,
+        "FPR": 0.1161,
+        "firing_rate": 0.1214,
+        "precision": 0.1429,
+        "J": 0.0505,
+        "J_ci": [
+          0.0487,
+          -0.121,
+          0.2481
+        ],
+        "perm_p": 0.394,
+        "LR": 1.435
+      }
+    }
+  },
+  "weak_checks_strong_all_pairs": {
+    "llama-3.1-70b-instruct checks gemma-2-27b-it": {
+      "n": 58,
+      "n_wrong": 18,
+      "J": 0.5861,
+      "FPR": 0.025,
+      "LR": 24.444,
+      "precision": 0.9167
+    },
+    "llama-3.1-70b-instruct checks mistral-small-3.2-24b-instruct": {
+      "n": 40,
+      "n_wrong": 3,
+      "J": 0.0,
+      "FPR": 0.0,
+      "LR": null,
+      "precision": null
+    },
+    "llama-3.1-70b-instruct checks phi-4": {
+      "n": 58,
+      "n_wrong": 5,
+      "J": -0.0566,
+      "FPR": 0.0566,
+      "LR": 0.0,
+      "precision": 0.0
+    },
+    "gemma-2-27b-it checks llama-3.1-70b-instruct": {
+      "n": 60,
+      "n_wrong": 11,
+      "J": 0.4119,
+      "FPR": 0.2245,
+      "LR": 2.835,
+      "precision": 0.3889
+    },
+    "gemma-2-27b-it checks mistral-small-3.2-24b-instruct": {
+      "n": 40,
+      "n_wrong": 4,
+      "J": 0.1389,
+      "FPR": 0.1111,
+      "LR": 2.25,
+      "precision": 0.2
+    },
+    "gemma-2-27b-it checks phi-4": {
+      "n": 59,
+      "n_wrong": 7,
+      "J": 0.1786,
+      "FPR": 0.25,
+      "LR": 1.714,
+      "precision": 0.1875
+    },
+    "mistral-small-3.2-24b-instruct checks llama-3.1-70b-instruct": {
+      "n": 52,
+      "n_wrong": 5,
+      "J": 0.2,
+      "FPR": 0.0,
+      "LR": "inf",
+      "precision": 1.0
+    },
+    "mistral-small-3.2-24b-instruct checks gemma-2-27b-it": {
+      "n": 55,
+      "n_wrong": 17,
+      "J": 0.5294,
+      "FPR": 0.0,
+      "LR": "inf",
+      "precision": 1.0
+    },
+    "mistral-small-3.2-24b-instruct checks phi-4": {
+      "n": 56,
+      "n_wrong": 6,
+      "J": -0.04,
+      "FPR": 0.04,
+      "LR": 0.0,
+      "precision": 0.0
+    },
+    "phi-4 checks llama-3.1-70b-instruct": {
+      "n": 53,
+      "n_wrong": 5,
+      "J": 0.3792,
+      "FPR": 0.0208,
+      "LR": 19.2,
+      "precision": 0.6667
+    },
+    "phi-4 checks gemma-2-27b-it": {
+      "n": 58,
+      "n_wrong": 18,
+      "J": 0.6417,
+      "FPR": 0.025,
+      "LR": 26.667,
+      "precision": 0.9231
+    },
+    "phi-4 checks mistral-small-3.2-24b-instruct": {
+      "n": 41,
+      "n_wrong": 4,
+      "J": 0.0,
+      "FPR": 0.0,
+      "LR": null,
+      "precision": null
+    }
+  }
+}

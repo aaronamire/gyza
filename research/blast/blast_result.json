@@ -1,0 +1,122 @@
+[
+  {
+    "mode": "SHED",
+    "regime": "UNILATERAL",
+    "d": 1,
+    "f": 512,
+    "clusters": 1,
+    "delta": 0.295,
+    "k_star": 2,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SHED",
+    "regime": "UNILATERAL",
+    "d": 2,
+    "f": 23,
+    "clusters": 23,
+    "delta": 0.0,
+    "k_star": 37,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SHED",
+    "regime": "UNILATERAL",
+    "d": 3,
+    "f": 8,
+    "clusters": 64,
+    "delta": 0.0,
+    "k_star": 103,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SHED",
+    "regime": "SUPERVISED",
+    "d": 1,
+    "f": 512,
+    "clusters": 1,
+    "delta": 0.295,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SHED",
+    "regime": "SUPERVISED",
+    "d": 2,
+    "f": 23,
+    "clusters": 23,
+    "delta": 0.0,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SHED",
+    "regime": "SUPERVISED",
+    "d": 3,
+    "f": 8,
+    "clusters": 64,
+    "delta": 0.0,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SKEW",
+    "regime": "UNILATERAL",
+    "d": 1,
+    "f": 512,
+    "clusters": 1,
+    "delta": 0.295,
+    "k_star": 23,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SKEW",
+    "regime": "UNILATERAL",
+    "d": 2,
+    "f": 23,
+    "clusters": 23,
+    "delta": 0.0,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SKEW",
+    "regime": "UNILATERAL",
+    "d": 3,
+    "f": 8,
+    "clusters": 64,
+    "delta": 0.0,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SKEW",
+    "regime": "SUPERVISED",
+    "d": 1,
+    "f": 512,
+    "clusters": 1,
+    "delta": 0.295,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SKEW",
+    "regime": "SUPERVISED",
+    "d": 2,
+    "f": 23,
+    "clusters": 23,
+    "delta": 0.0,
+    "k_star": null,
+    "honest_refusal": 0.0
+  },
+  {
+    "mode": "SKEW",
+    "regime": "SUPERVISED",
+    "d": 3,
+    "f": 8,
+    "clusters": 64,
+    "delta": 0.0,
+    "k_star": null,
+    "honest_refusal": 0.0
+  }
+]

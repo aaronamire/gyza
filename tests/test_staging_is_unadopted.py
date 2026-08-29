@@ -80,7 +80,8 @@ def test_the_alternatives_named_in_the_header_actually_exist():
 
     harm, _ = build_registries()
     ids = {c.id for c in harm}
-    assert {"H4_authority", "H5_storage_growth",
-            "H6_unsupervised_actions"} <= ids
+    # H6 was retired as a harm class 2026-08-21 (it is a review cadence); the
+    # mechanism it names still exists, which is what this test is about.
+    assert {"H4_authority", "H5_storage_growth"} <= ids
     assert storage_cap_bytes() == int(harm.bound("H5_storage_growth"))
     assert hasattr(ArtifactStore, "store")

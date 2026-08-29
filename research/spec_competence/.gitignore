@@ -1,0 +1,5 @@
+sc_cache/
+__pycache__/
+*.pyc
+
+ceiling_probe.json

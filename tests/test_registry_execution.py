@@ -160,6 +160,29 @@ def test_every_registered_invariant_predicate_executes():
 # --------------------------------------------------------------------------- #
 #  V-1 native verifier adapters                                                #
 # --------------------------------------------------------------------------- #
+def _spawn_manifest(idn, *, max_children):
+    """A copy of the identity's manifest that GRANTS spawn authority."""
+    import copy
+    m = copy.deepcopy(idn.manifest)
+    spawn = m.setdefault("capabilities", {}).setdefault("spawn", {})
+    spawn["permitted"] = ["worker"]
+    spawn.setdefault("resource_budget", {})["max_children"] = max_children
+    return m
+
+
+def _combine_actions(idn):
+    """`by_action` for a parent that made two leaves and one combiner, where
+    the combiner's signed inputs cover both leaves."""
+    leaves = [_envelope(idn, 10), _envelope(idn, 11)]
+    for e, aid in zip(leaves, ("c1", "c2")):
+        object.__setattr__(e, "action_id", aid)
+    comb = _envelope(idn, 12)
+    object.__setattr__(comb, "action_id", "cmb")
+    object.__setattr__(comb, "input_hashes",
+                       [e.output_hash for e in leaves])
+    return {e.action_id: e for e in (*leaves, comb)}
+
+
 def _verifier_inputs(idn):
     """One genuinely valid input per registered verifier."""
     e0 = _envelope(idn, 0)
@@ -180,6 +203,19 @@ def _verifier_inputs(idn):
         "envelope_dag_open": (([e0, e1],), {}),
         "manifest_identity": ((idn.manifest, manifest_hash_hex(idn.manifest)), {}),
         "enforcement_within_manifest": ((enf, idn.manifest), {}),
+        # A decomposition inside the manifest's spawn grant. `idn.manifest`
+        # must actually GRANT spawn for this to be a genuinely valid input
+        # rather than a vacuous one, which `_spawn_manifest` ensures.
+        "decomposition_within_manifest": (
+            ({"text": "split", "__subtasks__": ["c1", "c2"]},
+             _spawn_manifest(idn, max_children=4)), {}),
+        # A combination that consumed BOTH siblings. `by_action` maps the
+        # parent's named children to envelopes whose output hashes appear in
+        # the combiner's inputs.
+        "combine_covers_siblings": (
+            ({"text": "combined", "__subtasks__": ["c1", "c2", "cmb"],
+              "__combine__": "cmb"},
+             _combine_actions(idn)), {}),
         "delegation_attenuation": (([DelegationHop("r", root, root, None),
                                      DelegationHop("c", child, child, child)],), {}),
         "ledger_entry_signatures": (None, {}),          # special-cased below
@@ -339,6 +375,7 @@ def test_every_witness_citation_resolves_to_the_symbol_it_names():
 
     named = re.compile(r'((?:gyza|netd|tests|scripts)[\w/\-.]*\.py):(\d+)'
                        r'(?:-\d+)?\s+([A-Za-z_]\w*)')
+    _pins_a_line = re.compile(r'(?:gyza|netd|tests|scripts)[\w/\-.]*\.py:\d+')
     cites = []
     v, _s = _bv()
     for ct in v.claim_types():
@@ -351,7 +388,19 @@ def test_every_witness_citation_resolves_to_the_symbol_it_names():
     for ident, wit in cites:
         m = named.search(wit or "")
         if m is None:
-            continue                      # no symbol named: nothing to check
+            # A CITATION THAT PINS A LINE BUT NAMES NO SYMBOL IS EXEMPT BY
+            # OMISSION, and that is how two of them went stale unnoticed:
+            # `gyza/icp.py:82` drifted into `compute_envelope_hash` and
+            # `gyza/icp.py:105` into `verify_envelope`, while the checker
+            # skipped both because neither said what it pointed at.
+            #
+            # A line number is the part that rots. Naming a file alone is a
+            # durable citation and stays exempt; naming a LINE without a symbol
+            # is an unverifiable claim and now fails.
+            assert not _pins_a_line.search(wit or ""), (
+                f"{ident}: witness {wit!r} pins a line but names no symbol, so "
+                f"nothing checks it. Add the symbol, or cite the file alone.")
+            continue
         path, line, symbol = m.group(1), int(m.group(2)), m.group(3)
         src = pathlib.Path(path)
         assert src.is_file(), f"{ident}: cited file {path} does not exist"

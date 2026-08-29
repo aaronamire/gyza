@@ -83,8 +83,8 @@ def test_every_registered_quantity_measures_REAL_production_state(tmp_path):
         assert isinstance(v, float) and v == v, hc.id      # not NaN
         measured[hc.id] = v
 
-    assert set(measured) == {"H3_mesh_exit_sends", "H4_authority",
-                             "H5_storage_growth", "H6_unsupervised_actions"}
+    assert set(measured) == {"H3_mesh_exit_rate", "H4_authority", "H7_irreversible_actions",
+                             "H5_storage_growth"}
     assert "H2_market_capital" not in measured, "H2 was retired 2026-08-17"
     # H1 must SEE the 10-credit outflow. If it did not, this whole file would
     # be measuring a shape rather than a quantity.
@@ -380,12 +380,14 @@ def test_H6_counts_REAL_envelopes_and_survives_a_restart(tmp_path):
     assert Blackboard(db).count_envelopes_since(0) == n, \
         "the count reset across processes — the origin moved"
 
-    harm, _inv = build_registries()
-    kw = dict(owner=A, capital_entries=[], ledger_entries=[], active_holds=0.0)
-    s0 = project_now(signed_envelope_count=0, **kw)
-    s = project_now(signed_envelope_count=n, **kw)
-    assert harm.get("H6_unsupervised_actions").measure(s0, s) == pytest.approx(n)
-    assert harm.bound("H6_unsupervised_actions") == 10000
+    # H6 was RETIRED as a harm class 2026-08-21 -- it is a review cadence, and
+    # a cadence is a timer by design. The measurand and its durability are
+    # unchanged and are what this test is about: the count is DERIVED from the
+    # append-only log, so it survives a restart. The interval it feeds is now a
+    # signed policy value rather than a harm bound.
+    from gyza.containment.review import _signed_cadence_actions
+    assert _signed_cadence_actions() == 10000
+    assert n == Blackboard(db).count_envelopes_since(0)
 
 
 def test_H6_is_the_cadence_in_ACTIONS_not_credits():

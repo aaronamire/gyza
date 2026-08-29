@@ -1,0 +1,2927 @@
+[
+ {
+  "claim_id": "pandas#66089-0",
+  "text": "On pandas 3.0.4 + Python 3.14, pd.date_range(..., freq=\"h\") raises an OverflowError / OutOfBoundsTimedelta.",
+  "why_a_claim": "reporter states an observed failure",
+  "repo": "pandas-dev/pandas",
+  "issue": 66089,
+  "url": "https://github.com/pandas-dev/pandas/issues/66089",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66089-1",
+  "text": "pd.date_range(\"2026-04-17 00:00\", periods=24, freq=\"h\") should return a DatetimeIndex of 24 hourly timestamps, as it does on pandas 3.0.3.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66089,
+  "url": "https://github.com/pandas-dev/pandas/issues/66089",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66089-2",
+  "text": "The freq argument is silently reinterpreted as an astronomically large Hours offset instead of <1 * Hours>.",
+  "why_a_claim": "reporter states the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 66089,
+  "url": "https://github.com/pandas-dev/pandas/issues/66089",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34278-0",
+  "text": "scikit-learn should start publishing Pyodide/WASM wheels, i.e., with the pyemscripten platform tag as per the accepted and implemented PEP 783, to PyPI, for both ABIs that we currently support.",
+  "why_a_claim": "reporter proposes a required action",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34278,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34278",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34278-1",
+  "text": "This follows on from the RFC for Pyodide being regarded as a somewhat officially supported platform, and resolved as of June 2025.",
+  "why_a_claim": "reporter asserts a historical fact about the project",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34278,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34278",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34278-2",
+  "text": "The rationale to build this case is also Pyodide's ever-growing maturity and stability as a platform.",
+  "why_a_claim": "reporter asserts a property of a dependency",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34278,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34278",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#65871-0",
+  "text": "With matplotlib 3.11.0, the default property cycle now returns colors as RGB tuples rather than hex strings.",
+  "why_a_claim": "reporter asserts an upstream behaviour change",
+  "repo": "pandas-dev/pandas",
+  "issue": 65871,
+  "url": "https://github.com/pandas-dev/pandas/issues/65871",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65871-1",
+  "text": "This causes 5 pandas plotting tests to fail.",
+  "why_a_claim": "reporter asserts a causal consequence",
+  "repo": "pandas-dev/pandas",
+  "issue": 65871,
+  "url": "https://github.com/pandas-dev/pandas/issues/65871",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65871-2",
+  "text": "The upstream matplotlib change is PR 29469 (\"Separate property cycle handling from _process_plot_var_args\"), merged in commit ec65514 and released as part of matplotlib 3.11.0.",
+  "why_a_claim": "reporter asserts the provenance of the change",
+  "repo": "pandas-dev/pandas",
+  "issue": 65871,
+  "url": "https://github.com/pandas-dev/pandas/issues/65871",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66434-0",
+  "text": "Supposed to be here https://pandas.pydata.org/docs/whatsnew/v3.0.5.html",
+  "why_a_claim": "reporter asserts where the documentation should be",
+  "repo": "pandas-dev/pandas",
+  "issue": 66434,
+  "url": "https://github.com/pandas-dev/pandas/issues/66434",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "pandas#66434-1",
+  "text": "Not available",
+  "why_a_claim": "reporter asserts the documentation is missing -- VAGUE, deliberately kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66434,
+  "url": "https://github.com/pandas-dev/pandas/issues/66434",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "pandas#66434-2",
+  "text": "Please make it available.",
+  "why_a_claim": "reporter directs that it be fixed",
+  "repo": "pandas-dev/pandas",
+  "issue": 66434,
+  "url": "https://github.com/pandas-dev/pandas/issues/66434",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "pandas#66050-0",
+  "text": "When passing a numpy.ma.MaskedArray to pd.array(), the mask is silently ignored and masked (missing) values are not preserved in the resulting pandas array.",
+  "why_a_claim": "reporter states observed wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66050,
+  "url": "https://github.com/pandas-dev/pandas/issues/66050",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Constructors"
+  ]
+ },
+ {
+  "claim_id": "pandas#66050-1",
+  "text": "When converting a NumPy masked array using pd.array(), any masked entries should be converted to the appropriate pandas missing value (pd.NA or np.nan), preserving the mask information faithfully.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66050,
+  "url": "https://github.com/pandas-dev/pandas/issues/66050",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Constructors"
+  ]
+ },
+ {
+  "claim_id": "pandas#66050-2",
+  "text": "This leads to incorrect data without any warning or error.",
+  "why_a_claim": "reporter asserts the consequence",
+  "repo": "pandas-dev/pandas",
+  "issue": 66050,
+  "url": "https://github.com/pandas-dev/pandas/issues/66050",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Constructors"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34072-0",
+  "text": "Free-threading's lack of GIL makes thread safety issues more likely than in the past.",
+  "why_a_claim": "reporter asserts a causal property of the platform",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34072,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34072",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "module:test-suite",
+   "free-threading"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34072-1",
+  "text": "Switching from a process pool to a thread pool introduces thread-safety issues with the inputs to a Parallel() operation: whereas mutating in a process is fine, mutating in a thread can affect other threads.",
+  "why_a_claim": "reporter asserts a mechanism",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34072,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34072",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "module:test-suite",
+   "free-threading"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34072-2",
+  "text": "The inputs to a Parallel() operation that can correctly run with both process and thread pools should not change when the function is run.",
+  "why_a_claim": "reporter proposes an invariant",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34072,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34072",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "module:test-suite",
+   "free-threading"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33963-0",
+  "text": "Practitioners in safety-critical fields require a method to explicitly quantify the \"Indecision Zone\" of a binary classifier.",
+  "why_a_claim": "reporter asserts a user need",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33963,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33963",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33963-1",
+  "text": "While aggregate metrics like the F1-score or Area Under the ROC Curve provide a high-level view of model performance, they often mask the specific regions where a model's prediction is statistically equivalent to guessing.",
+  "why_a_claim": "reporter asserts a limitation of existing metrics",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33963,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33963",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33963-2",
+  "text": "By implementing the ambiguity_range_score, we enable a Tri-Modal Decision Workflow.",
+  "why_a_claim": "reporter asserts what the proposal would enable",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33963,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33963",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34483-0",
+  "text": "In most array API estimator methods that happen after .fit(), if an incompatible input is passed to the method, it throws an informative error message, usually coming from check_same_namespace.",
+  "why_a_claim": "reporter asserts the normal behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34483,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34483",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34483-1",
+  "text": "ValueError with a similar message as the one thrown by Ridge.",
+  "why_a_claim": "reporter states the required result",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34483,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34483",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34483-2",
+  "text": "But PCA's methods like inverse_transform do not use that utility function, erroring out with a less informative message instead, and with the error type being TypeError.",
+  "why_a_claim": "reporter asserts the deviation",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34483,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34483",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33758-0",
+  "text": "In the rendered doc, when the HTML repr of an estimator is too wide, it's just cropped on firefox.",
+  "why_a_claim": "reporter asserts an observed rendering defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33758,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33758",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33758-1",
+  "text": "And there's no way to move it or something.",
+  "why_a_claim": "reporter asserts absence of a workaround -- VAGUE (\"or something\"), kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33758,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33758",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33758-2",
+  "text": "I would expect either an horizontal scrollbar or to be able to drag it around.",
+  "why_a_claim": "reporter states the expected behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33758,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33758",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "pandas#66347-0",
+  "text": "The tokenize_bytes function currently has a cognitive complexity score of 551 according to clang-tidy, which significantly exceeds the default threshold of 25.",
+  "why_a_claim": "reporter asserts a measured property",
+  "repo": "pandas-dev/pandas",
+  "issue": 66347,
+  "url": "https://github.com/pandas-dev/pandas/issues/66347",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Refactor",
+   "IO CSV"
+  ]
+ },
+ {
+  "claim_id": "pandas#66347-1",
+  "text": "The complexity primarily comes from managing 16 distinct parser states within a single monolithic loop, combined with inline SIMD preprocessing and scalar fallback logic.",
+  "why_a_claim": "reporter asserts the cause",
+  "repo": "pandas-dev/pandas",
+  "issue": 66347,
+  "url": "https://github.com/pandas-dev/pandas/issues/66347",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Refactor",
+   "IO CSV"
+  ]
+ },
+ {
+  "claim_id": "pandas#66347-2",
+  "text": "Modularizing the state handling into smaller helper functions would help improve the readability and long-term maintainability of the CSV parser.",
+  "why_a_claim": "reporter asserts a proposed benefit",
+  "repo": "pandas-dev/pandas",
+  "issue": 66347,
+  "url": "https://github.com/pandas-dev/pandas/issues/66347",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Refactor",
+   "IO CSV"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34067-0",
+  "text": "There is a pre-commit hook which will error out if it detects a linting issue.",
+  "why_a_claim": "reporter asserts existing behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34067,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34067",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34067-1",
+  "text": "Would be ideal if it could also auto-format the offending files beyond just pointing out the error.",
+  "why_a_claim": "reporter proposes desired behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34067,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34067",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#65737-0",
+  "text": "In doc/source/user_guide/visualization.rst, under the \"Automatic date tick adjustment\" section, there is a link pinned to matplotlib v2.0.2.",
+  "why_a_claim": "reporter asserts a fact about the documentation",
+  "repo": "pandas-dev/pandas",
+  "issue": 65737,
+  "url": "https://github.com/pandas-dev/pandas/issues/65737",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "pandas#65737-1",
+  "text": "This page is outdated.",
+  "why_a_claim": "reporter asserts a property -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65737,
+  "url": "https://github.com/pandas-dev/pandas/issues/65737",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "pandas#65737-2",
+  "text": "The fix is to replace the hardcoded version URL with the newer, stable API reference link.",
+  "why_a_claim": "reporter proposes the fix",
+  "repo": "pandas-dev/pandas",
+  "issue": 65737,
+  "url": "https://github.com/pandas-dev/pandas/issues/65737",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33783-0",
+  "text": "We may consider to add a mechanism to re-set the max_subtasks on CallbackContext, so that progress bars can be re-scaled when new information on the maximum number of sub-tasks is available.",
+  "why_a_claim": "reporter proposes a change",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33783,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33783",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33783-1",
+  "text": "Currently, setting the max_subtasks after creating a new subcontext, we'd not be sure if this would update the total on a ProgressBar.",
+  "why_a_claim": "reporter asserts present uncertainty about behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33783,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33783",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33907-0",
+  "text": "The supported dtype can sometimes vary even if the device name is the same, and we need to do runtime inspection for instance using __array_namespace_info__.dtypes.",
+  "why_a_claim": "reporter asserts a platform fact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33907,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33907",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:test-suite",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33907-1",
+  "text": "We would need to update all the array API test to pass both device and dtype_name to _array_api_for_tests to do this check and raise SkipTest when appropriate instead of running a test that will fail with a low level error message.",
+  "why_a_claim": "reporter states required work",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33907,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33907",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:test-suite",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33907-2",
+  "text": "This is the case for PyTorch with the XPU device on different kinds of hardware: some Intel GPUs reachable via this device do support the xp.float64 dtype while others don't.",
+  "why_a_claim": "reporter asserts a specific hardware fact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33907,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33907",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:test-suite",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34356-0",
+  "text": "With v0.15.18, ruff introduces more rules.",
+  "why_a_claim": "reporter asserts an upstream change",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34356,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34356",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34356-1",
+  "text": "Same with Cython-lint v0.16.",
+  "why_a_claim": "reporter asserts the same for another tool",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34356,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34356",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65652-0",
+  "text": "We actually noticed the slowness from pandas.read_sql, but narrowed the problem down to its call to has_table.",
+  "why_a_claim": "reporter asserts an observed performance problem -- \"slowness\" VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65652,
+  "url": "https://github.com/pandas-dev/pandas/issues/65652",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Performance",
+   "IO SQL"
+  ]
+ },
+ {
+  "claim_id": "pandas#65652-1",
+  "text": "The problem sees to be in pandas.io.sql.ADBCDatabase.has_table, which calls self.con.adbc_get_objects() without passing depth=.",
+  "why_a_claim": "reporter asserts the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 65652,
+  "url": "https://github.com/pandas-dev/pandas/issues/65652",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Performance",
+   "IO SQL"
+  ]
+ },
+ {
+  "claim_id": "pandas#65652-2",
+  "text": "Adding depth=\"tables\" speeds things up dramatically for us - from 53 seconds without depth=\"tables\" down to 3 seconds with.",
+  "why_a_claim": "reporter asserts a measured improvement",
+  "repo": "pandas-dev/pandas",
+  "issue": 65652,
+  "url": "https://github.com/pandas-dev/pandas/issues/65652",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Performance",
+   "IO SQL"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34569-0",
+  "text": "CI is still failing on Wheel builder (Aug 07, 2026)",
+  "why_a_claim": "reporter asserts an observed CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34569,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34569",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Build / CI",
+   "OS:Windows"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33958-0",
+  "text": "#31127 was merged and so we can now rely on narwhals.",
+  "why_a_claim": "reporter asserts a state change in the project",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33958,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33958",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Meta-issue"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33958-1",
+  "text": "NW simplifies internal code by treating all dataframes (pandas, polars, arrow) with a unified API",
+  "why_a_claim": "reporter asserts a benefit",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33958,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33958",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Meta-issue"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33958-2",
+  "text": "NW can make code faster: for categorical feature support in OrdinalEncoder and other places",
+  "why_a_claim": "reporter asserts a performance benefit",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33958,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33958",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Meta-issue"
+  ]
+ },
+ {
+  "claim_id": "pandas#66474-0",
+  "text": "When writing and reading a DF from Excel the the named index is lost for flat indices.",
+  "why_a_claim": "reporter asserts observed data loss",
+  "repo": "pandas-dev/pandas",
+  "issue": 66474,
+  "url": "https://github.com/pandas-dev/pandas/issues/66474",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Enhancement"
+  ]
+ },
+ {
+  "claim_id": "pandas#66474-1",
+  "text": "Add a flag or ability to specify index name is present.",
+  "why_a_claim": "reporter proposes a feature",
+  "repo": "pandas-dev/pandas",
+  "issue": 66474,
+  "url": "https://github.com/pandas-dev/pandas/issues/66474",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Enhancement"
+  ]
+ },
+ {
+  "claim_id": "pandas#66474-2",
+  "text": "Do nothing.",
+  "why_a_claim": "reporter states an alternative course of action -- MAXIMALLY VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66474,
+  "url": "https://github.com/pandas-dev/pandas/issues/66474",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Enhancement"
+  ]
+ },
+ {
+  "claim_id": "pandas#66377-0",
+  "text": "In the 1st and the 2nd cases the \"intersection\" goes to the _index_ names.",
+  "why_a_claim": "reporter asserts observed behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66377,
+  "url": "https://github.com/pandas-dev/pandas/issues/66377",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "API Design",
+   "IO CSV",
+   "IO Excel",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#66377-1",
+  "text": "In the 3rd and the 4th cases the \"intersection\" goes to the _columns_ names.",
+  "why_a_claim": "reporter asserts observed behaviour, second case",
+  "repo": "pandas-dev/pandas",
+  "issue": 66377,
+  "url": "https://github.com/pandas-dev/pandas/issues/66377",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "API Design",
+   "IO CSV",
+   "IO Excel",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#66377-2",
+  "text": "In the 4th case only a _part_ of the \"intersection\" goes to the _columns_ names.",
+  "why_a_claim": "reporter asserts observed behaviour, third case",
+  "repo": "pandas-dev/pandas",
+  "issue": 66377,
+  "url": "https://github.com/pandas-dev/pandas/issues/66377",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "API Design",
+   "IO CSV",
+   "IO Excel",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34315-0",
+  "text": "found a small index error in the docstring for sklearn.metrics.pairwise.paired_manhattan_distances.",
+  "why_a_claim": "reporter asserts a documentation defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34315,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34315",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34315-1",
+  "text": "Because Python starts counting at 0, the last item in an array of size n_samples is actually at n_samples - 1.",
+  "why_a_claim": "reporter asserts a general fact used as the premise",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34315,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34315",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34315-2",
+  "text": "To fix this, we just need to update the docstring in sklearn/metrics/pairwise.py to end with (X[n_samples - 1], Y[n_samples - 1]).",
+  "why_a_claim": "reporter proposes the fix",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34315,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34315",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "pandas#65987-0",
+  "text": "The project would benefit from structured logging to make it easier to debug issues in production.",
+  "why_a_claim": "reporter asserts a benefit",
+  "repo": "pandas-dev/pandas",
+  "issue": 65987,
+  "url": "https://github.com/pandas-dev/pandas/issues/65987",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65987-1",
+  "text": "Currently it can be difficult to understand what the application is doing at runtime without adding print statements.",
+  "why_a_claim": "reporter asserts a current limitation -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65987,
+  "url": "https://github.com/pandas-dev/pandas/issues/65987",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65987-2",
+  "text": "Low risk change with high value for users running this in production environments.",
+  "why_a_claim": "reporter asserts risk and value -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65987,
+  "url": "https://github.com/pandas-dev/pandas/issues/65987",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66571-0",
+  "text": "Partial-string slicing on a PeriodIndex whose frequency is anchored to a month that does not line up with calendar quarters resolves the string bounds one period too early, so the slice is shifted and includes an extra label at the start.",
+  "why_a_claim": "reporter asserts precise wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66571,
+  "url": "https://github.com/pandas-dev/pandas/issues/66571",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Indexing",
+   "Period"
+  ]
+ },
+ {
+  "claim_id": "pandas#66571-1",
+  "text": "Q-DEC and Q-MAR are correct because their quarters coincide with calendar quarters.",
+  "why_a_claim": "reporter asserts the boundary of the defect",
+  "repo": "pandas-dev/pandas",
+  "issue": 66571,
+  "url": "https://github.com/pandas-dev/pandas/issues/66571",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Indexing",
+   "Period"
+  ]
+ },
+ {
+  "claim_id": "pandas#66571-2",
+  "text": "The cause is in PeriodIndex._parsed_string_to_bounds: the string is first parsed with the index frequency, which correctly applies the anchor, but the result is then re-bucketed into a calendar period before being converted back, which discards the anchor.",
+  "why_a_claim": "reporter asserts the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 66571,
+  "url": "https://github.com/pandas-dev/pandas/issues/66571",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Indexing",
+   "Period"
+  ]
+ },
+ {
+  "claim_id": "pandas#65740-0",
+  "text": "This found a bug in pandas that did not exist in pandas 2.1.x",
+  "why_a_claim": "reporter asserts a regression",
+  "repo": "pandas-dev/pandas",
+  "issue": 65740,
+  "url": "https://github.com/pandas-dev/pandas/issues/65740",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Resample"
+  ]
+ },
+ {
+  "claim_id": "pandas#65740-1",
+  "text": "The result is wrong",
+  "why_a_claim": "reporter asserts wrongness with no referent fixed -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65740,
+  "url": "https://github.com/pandas-dev/pandas/issues/65740",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Resample"
+  ]
+ },
+ {
+  "claim_id": "pandas#65740-2",
+  "text": "The result should have the correct type and no extra row",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 65740,
+  "url": "https://github.com/pandas-dev/pandas/issues/65740",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Resample"
+  ]
+ },
+ {
+  "claim_id": "pandas#65730-0",
+  "text": "i think we should implement zizmor in our workflow",
+  "why_a_claim": "reporter proposes an action",
+  "repo": "pandas-dev/pandas",
+  "issue": 65730,
+  "url": "https://github.com/pandas-dev/pandas/issues/65730",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "CI"
+  ]
+ },
+ {
+  "claim_id": "pandas#65735-0",
+  "text": "In a.map(b), when both a and b are Series and b's dtype is non-nullable, Pandas dynamically changes the output dtype if it can't match all the keys.",
+  "why_a_claim": "reporter asserts existing behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 65735,
+  "url": "https://github.com/pandas-dev/pandas/issues/65735",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions",
+   "Needs Discussion",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "pandas#65735-1",
+  "text": "This behaviour changed in the nightlies vs. 3.0; however I am seeing inconsistencies which make little sense to me.",
+  "why_a_claim": "reporter asserts a change plus an inconsistency -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65735,
+  "url": "https://github.com/pandas-dev/pandas/issues/65735",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions",
+   "Needs Discussion",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "pandas#65735-2",
+  "text": "IMHO there should be no difference in output in the three use cases.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 65735,
+  "url": "https://github.com/pandas-dev/pandas/issues/65735",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions",
+   "Needs Discussion",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34481-0",
+  "text": "CI failed on Unit tests Linux x86-64 ubuntu_atlas (Jul 15, 2026)",
+  "why_a_claim": "reporter asserts a CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34481,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34481",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34175-0",
+  "text": "Since a tree can be simultaneously used from multiple threads, the statistics will be garbage, as the numbers will get overwritten by different threads.",
+  "why_a_claim": "reporter asserts a concurrency defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34175,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34175",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34175-1",
+  "text": "It's possible that this will slow down operation as the same memory needs to be pushed between caches across CPU cores.",
+  "why_a_claim": "reporter asserts a possible performance consequence -- hedged, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34175,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34175",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65676-0",
+  "text": "df.eval(\"new=old\", inplace=True) was bypassing CoW protections.",
+  "why_a_claim": "reporter asserts a defect",
+  "repo": "pandas-dev/pandas",
+  "issue": 65676,
+  "url": "https://github.com/pandas-dev/pandas/issues/65676",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Discussion",
+   "Copy / view semantics"
+  ]
+ },
+ {
+  "claim_id": "pandas#65676-1",
+  "text": "Because the data took a detour through the external computation engine, the CoW reference tracking metadata was stripped.",
+  "why_a_claim": "reporter asserts the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 65676,
+  "url": "https://github.com/pandas-dev/pandas/issues/65676",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Discussion",
+   "Copy / view semantics"
+  ]
+ },
+ {
+  "claim_id": "pandas#65676-2",
+  "text": "The DataFrame assumed the returned array was unshared memory, leading to silent memory corruption when the alias was later modified.",
+  "why_a_claim": "reporter asserts the consequence",
+  "repo": "pandas-dev/pandas",
+  "issue": 65676,
+  "url": "https://github.com/pandas-dev/pandas/issues/65676",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Discussion",
+   "Copy / view semantics"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33760-0",
+  "text": "MLPClassifier with early_stopping=True raises a TypeError when target labels are strings.",
+  "why_a_claim": "reporter asserts an observed failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33760,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33760",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33760-1",
+  "text": "MLPClassifier should handle string labels with early_stopping=True, just as it does with early_stopping=False.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33760,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33760",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33760-2",
+  "text": "The issue is specifically the combination of early_stopping=True + string labels.",
+  "why_a_claim": "reporter asserts the precise trigger",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33760,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33760",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34550-0",
+  "text": "CI failed on Unit tests Linux x86-64 pymin_conda_forge_openblas_ubuntu_2204 (Jul 23, 2026)",
+  "why_a_claim": "reporter asserts a CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34550,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34550",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66356-0",
+  "text": "There are three python api call patterns that ujson objToJson doesn't reliably check the result code for.",
+  "why_a_claim": "reporter asserts a defect class",
+  "repo": "pandas-dev/pandas",
+  "issue": 66356,
+  "url": "https://github.com/pandas-dev/pandas/issues/66356",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "IO JSON",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "pandas#66356-1",
+  "text": "All of these are unusual/obscure cases, and apart from the massive int case, are not exercisable just by processing 'untrusted' data.",
+  "why_a_claim": "reporter asserts scope and severity",
+  "repo": "pandas-dev/pandas",
+  "issue": 66356,
+  "url": "https://github.com/pandas-dev/pandas/issues/66356",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "IO JSON",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "pandas#66356-2",
+  "text": "No crashes/segfaults.",
+  "why_a_claim": "reporter states the required behaviour -- TERSE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66356,
+  "url": "https://github.com/pandas-dev/pandas/issues/66356",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "IO JSON",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33885-0",
+  "text": "LogisticRegressionCV(use_legacy_attributes=False, refit=False) errors.",
+  "why_a_claim": "reporter asserts an observed failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33885,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33885",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33885-1",
+  "text": "no error",
+  "why_a_claim": "reporter states the required result -- MAXIMALLY TERSE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33885,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33885",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34641-0",
+  "text": "In the controlling pitfalls page, in section 12.3, there is a recommendation summary for controlling randomness.",
+  "why_a_claim": "reporter asserts a fact about the documentation",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34641,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34641",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34641-1",
+  "text": "I feel that while the note is okay, it makes sense to keep something simple to improve readability for beginners who need an easy reference to look at.",
+  "why_a_claim": "reporter asserts a judgement about documentation quality -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34641,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34641",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34641-2",
+  "text": "Add a table to the recommendation summary section, below the paragraph.",
+  "why_a_claim": "reporter proposes a change",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34641,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34641",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34140-0",
+  "text": "In lots of other libraries like XGBoost and LightGBM, callbacks are passed as input parameters to model objects.",
+  "why_a_claim": "reporter asserts an external fact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34140,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34140",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Decision",
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34140-1",
+  "text": "But in scikit-learn, callbacks need to be kept referenced outside of the object, which is less convenient.",
+  "why_a_claim": "reporter asserts a limitation -- \"less convenient\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34140,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34140",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Decision",
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "pandas#66372-0",
+  "text": "No errors.",
+  "why_a_claim": "reporter states the required behaviour -- TERSE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66372,
+  "url": "https://github.com/pandas-dev/pandas/issues/66372",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "IO Excel"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33939-0",
+  "text": "CI failed on Unit tests Linux x86-64 pylatest_pip_scipy_dev (May 07, 2026)",
+  "why_a_claim": "reporter asserts a CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33939,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33939",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:test-suite"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34661-0",
+  "text": "sklearn.datasets.dump_svmlight_file terminates the Python interpreter with a segmentation fault when multilabel=True is combined with a one-dimensional target array.",
+  "why_a_claim": "reporter asserts a crash",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34661,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34661",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34661-1",
+  "text": "The input passes the public API parameter validation because y is array-like and multilabel is a boolean.",
+  "why_a_claim": "reporter asserts why validation misses it",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34661,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34661",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34661-2",
+  "text": "A public scikit-learn API should reject it with a clear TypeError or ValueError. It should never terminate the entire Python process.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34661,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34661",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34230-0",
+  "text": "Once fit tasks are completed, the progress bars display 0:00:00 for tasks that last less than a second, which is quite common in practice.",
+  "why_a_claim": "reporter asserts an observed display defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34230,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34230",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Decision",
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34230-1",
+  "text": "I think we should display milliseconds and maybe drop the leading 0: for hours, since we almost never do fit tasks that last hours.",
+  "why_a_claim": "reporter proposes a change",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34230,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34230",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Decision",
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34230-2",
+  "text": "if a fit task last 10 ms, we could display 0:00:00.010 or 00:00.010 for instance.",
+  "why_a_claim": "reporter proposes a concrete format",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34230,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34230",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Needs Decision",
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "pandas#66379-0",
+  "text": "There is a missing backslash in the halflife argument causing the renderer to through a warning.",
+  "why_a_claim": "reporter asserts a defect",
+  "repo": "pandas-dev/pandas",
+  "issue": 66379,
+  "url": "https://github.com/pandas-dev/pandas/issues/66379",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs",
+   "Window"
+  ]
+ },
+ {
+  "claim_id": "pandas#66379-1",
+  "text": "It happens only for the dev, the 3.0 docs are correctly formatted.",
+  "why_a_claim": "reporter asserts the scope",
+  "repo": "pandas-dev/pandas",
+  "issue": 66379,
+  "url": "https://github.com/pandas-dev/pandas/issues/66379",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs",
+   "Window"
+  ]
+ },
+ {
+  "claim_id": "pandas#66379-2",
+  "text": "Reformat the math section in halflife so that it renders correctly.",
+  "why_a_claim": "reporter proposes the fix",
+  "repo": "pandas-dev/pandas",
+  "issue": 66379,
+  "url": "https://github.com/pandas-dev/pandas/issues/66379",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Docs",
+   "Window"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33658-0",
+  "text": "Currently, the n_bins parameter in sklearn.calibration.calibration_curve defaults to 5.",
+  "why_a_claim": "reporter asserts an existing default",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33658,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33658",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33658-1",
+  "text": "This is often suboptimal for datasets of varying sizes, especially for large datasets.",
+  "why_a_claim": "reporter asserts a quality judgement -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33658,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33658",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33658-2",
+  "text": "for a dataset of size n = 100,000, the optimal number of bins is on the order of 100, far exceeding the default 5.",
+  "why_a_claim": "reporter asserts a quantitative claim",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33658,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33658",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#66378-0",
+  "text": "Rows above min(header) are _ignored_.",
+  "why_a_claim": "reporter asserts observed behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66378,
+  "url": "https://github.com/pandas-dev/pandas/issues/66378",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "IO CSV",
+   "IO Excel"
+  ]
+ },
+ {
+  "claim_id": "pandas#66378-1",
+  "text": "Columns before min(index_col) are _ignored_.",
+  "why_a_claim": "reporter asserts observed behaviour, second case",
+  "repo": "pandas-dev/pandas",
+  "issue": 66378,
+  "url": "https://github.com/pandas-dev/pandas/issues/66378",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "IO CSV",
+   "IO Excel"
+  ]
+ },
+ {
+  "claim_id": "pandas#66378-2",
+  "text": "Can't see it documented.",
+  "why_a_claim": "reporter asserts absence from documentation -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66378,
+  "url": "https://github.com/pandas-dev/pandas/issues/66378",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "IO CSV",
+   "IO Excel"
+  ]
+ },
+ {
+  "claim_id": "pandas#66368-0",
+  "text": "Calling .str.split() with no separator on an ArrowDtype string column returns extra empty strings when values have leading or trailing whitespace, unlike Python's str.split() or the other pandas backends.",
+  "why_a_claim": "reporter asserts observed wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66368,
+  "url": "https://github.com/pandas-dev/pandas/issues/66368",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66368-1",
+  "text": "It happens because the Arrow implementation calls pyarrow's utf8_split_whitespace directly, which doesn't drop those empty pieces the way str.split() does.",
+  "why_a_claim": "reporter asserts the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 66368,
+  "url": "https://github.com/pandas-dev/pandas/issues/66368",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66368-2",
+  "text": ".str.split() with no separator should match Python's str.split(), giving [['hi', 'there'], []]",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66368,
+  "url": "https://github.com/pandas-dev/pandas/issues/66368",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33986-0",
+  "text": "For the CPU implementation chunking is already supported. For the array API path we currently perform no chunking.",
+  "why_a_claim": "reporter asserts the existing state",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33986,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33986",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33986-1",
+  "text": "Bigger chunks are better for GPU devices (in terms of execution time), but they require more memory.",
+  "why_a_claim": "reporter asserts a tradeoff",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33986,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33986",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33986-2",
+  "text": "With n_features=20_000 you'd use something like 1.6GB of extra memory without blocking.",
+  "why_a_claim": "reporter asserts a quantitative estimate",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33986,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33986",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "pandas#66517-0",
+  "text": "Series construction correctly infers object for an integer that no NumPy/nullable integer dtype can hold, but convert_dtypes then tries to force that column to Int64 regardless, and overflows.",
+  "why_a_claim": "reporter asserts observed wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66517,
+  "url": "https://github.com/pandas-dev/pandas/issues/66517",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions"
+  ]
+ },
+ {
+  "claim_id": "pandas#66517-1",
+  "text": "lib.infer_dtype reports \"integer\" for these values, and the object-block conversion maps that straight to Int64 without checking that the values actually fit.",
+  "why_a_claim": "reporter asserts the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 66517,
+  "url": "https://github.com/pandas-dev/pandas/issues/66517",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions"
+  ]
+ },
+ {
+  "claim_id": "pandas#66517-2",
+  "text": "Note this is a plain OverflowError escaping a public API rather than a pandas error type, so it is also not catchable via anything in pandas.errors.",
+  "why_a_claim": "reporter asserts the consequence",
+  "repo": "pandas-dev/pandas",
+  "issue": 66517,
+  "url": "https://github.com/pandas-dev/pandas/issues/66517",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34580-0",
+  "text": "Here I propose to require contributors to write comments, PR descriptions and issues using their own words, as opposed to posting AI generated text.",
+  "why_a_claim": "reporter proposes a policy",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34580,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34580",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34580-1",
+  "text": "Using AI to post long generated summaries on issues and PR descriptions and to comment on how to resolve a certain problem is very impolite / disrespectful anyway.",
+  "why_a_claim": "reporter asserts a normative judgement about conduct",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34580,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34580",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34580-2",
+  "text": "It puts the burden on filtering out the useful information (if any) on the reader.",
+  "why_a_claim": "reporter asserts a consequence",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34580,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34580",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33870-0",
+  "text": "When calling array API utilities such as get_namespace, device, etc. on DPNP GPU arrays, it returns incorrect namespaces and devices.",
+  "why_a_claim": "reporter asserts observed wrong behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33870,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33870",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33870-1",
+  "text": "Note that these objects have all the necessary info specified by the array API standard.",
+  "why_a_claim": "reporter asserts the premise",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33870,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33870",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33870-2",
+  "text": "(dpnp, False, \"gpu:0\")",
+  "why_a_claim": "reporter states the required result as a literal value",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33870,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33870",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34232-0",
+  "text": "PR 34187 sped up multi-threaded operations by using a thread-local, but slowed down single-threaded operations.",
+  "why_a_claim": "reporter asserts a measured tradeoff",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34232,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34232",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34232-1",
+  "text": "This suggests the amount of new work involved is meaningful, and slowing down multi-threaded operations as well.",
+  "why_a_claim": "reporter asserts an inference -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34232,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34232",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34232-2",
+  "text": "It's not clear if anyone actually uses these stats (BallTree.get_tree_stats(), BallTree.get_n_calls()), so deprecating it seems like one option.",
+  "why_a_claim": "reporter proposes an action under stated uncertainty",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34232,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34232",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34459-0",
+  "text": "When using LogisticRegression with warm_start=True, the n_iter_ attribute reports [0] on subsequent fits if the model has already converged.",
+  "why_a_claim": "reporter asserts observed behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34459,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34459",
+  "issue_state": "closed",
+  "issue_state_reason": "not_planned",
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34459-1",
+  "text": "This is technically correct - lbfgs needs 0 iterations when starting from an already-optimal point - but it is surprising and undocumented.",
+  "why_a_claim": "reporter asserts a judgement -- \"surprising\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34459,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34459",
+  "issue_state": "closed",
+  "issue_state_reason": "not_planned",
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34459-2",
+  "text": "Add a note to the n_iter_ attribute docstring mentioning that n_iter_ can be 0 when warm_start=True and the model has already converged from a previous fit.",
+  "why_a_claim": "reporter proposes the fix",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34459,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34459",
+  "issue_state": "closed",
+  "issue_state_reason": "not_planned",
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65917-0",
+  "text": "I built ChartScanAI, a free open-source tool that uses AI to analyze financial charts.",
+  "why_a_claim": "reporter asserts a fact about EXTERNAL software -- off-topic promotion, kept: excluding it would be a relevance judgement",
+  "repo": "pandas-dev/pandas",
+  "issue": 65917,
+  "url": "https://github.com/pandas-dev/pandas/issues/65917",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65917-1",
+  "text": "This could be useful for traders who want AI-powered chart analysis.",
+  "why_a_claim": "reporter asserts usefulness -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 65917,
+  "url": "https://github.com/pandas-dev/pandas/issues/65917",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66266-0",
+  "text": "The value passed to __getitem__ on the last line here is (\"A\", \"B\"), which is currently being treated the same way a list would.",
+  "why_a_claim": "reporter asserts observed behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66266,
+  "url": "https://github.com/pandas-dev/pandas/issues/66266",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Resample",
+   "Deprecate"
+  ]
+ },
+ {
+  "claim_id": "pandas#66266-1",
+  "text": "This should instead be treated as accessing a MultiIndex with levels \"A\" and \"B\" (which does not exist here, raising a KeyError instead).",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66266,
+  "url": "https://github.com/pandas-dev/pandas/issues/66266",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Resample",
+   "Deprecate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34431-0",
+  "text": "Currently, DecisionBoundaryDisplay.from_estimator does not allow users to control whether decision boundaries are drawn or to customize their line style.",
+  "why_a_claim": "reporter asserts a limitation",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34431,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34431",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34431-1",
+  "text": "Although users can customize the surface through **kwargs, passing parameters such as linewidth or color to style the boundary may instead affect the surface and lead to unexpected behavior.",
+  "why_a_claim": "reporter asserts wrong behaviour -- \"unexpected\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34431,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34431",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34431-2",
+  "text": "This API would provide separate and more explicit control over the response surface and the class boundaries, including their colors and other plotting properties.",
+  "why_a_claim": "reporter asserts a proposed benefit",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34431,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34431",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#66523-0",
+  "text": "times that are equally spaced should be equivalent to not passing times at all - that invariant is asserted directly by test_ewma_with_times_equal_spacing.",
+  "why_a_claim": "reporter asserts an invariant",
+  "repo": "pandas-dev/pandas",
+  "issue": 66523,
+  "url": "https://github.com/pandas-dev/pandas/issues/66523",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Needs Discussion",
+   "Window",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#66523-1",
+  "text": "It holds for three of the four adjust x ignore_na combinations, but breaks for adjust=False, ignore_na=False once the data contains NaN.",
+  "why_a_claim": "reporter asserts the observed defect",
+  "repo": "pandas-dev/pandas",
+  "issue": 66523,
+  "url": "https://github.com/pandas-dev/pandas/issues/66523",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Needs Discussion",
+   "Window",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#66523-2",
+  "text": "The two paths generalize adjust=False to a gap of delta differently. They agree at delta = 1 and diverge otherwise.",
+  "why_a_claim": "reporter asserts the mechanism",
+  "repo": "pandas-dev/pandas",
+  "issue": 66523,
+  "url": "https://github.com/pandas-dev/pandas/issues/66523",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "Needs Discussion",
+   "Window",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "pandas#66054-0",
+  "text": "Creating a DataFrame from an existing Series or Index does not always respect Copy-on-Write semantics.",
+  "why_a_claim": "reporter asserts observed wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66054,
+  "url": "https://github.com/pandas-dev/pandas/issues/66054",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Duplicate Report"
+  ]
+ },
+ {
+  "claim_id": "pandas#66054-1",
+  "text": "In some cases, modifying the resulting DataFrame can unexpectedly modify the original object.",
+  "why_a_claim": "reporter asserts the consequence -- \"some cases\" VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66054,
+  "url": "https://github.com/pandas-dev/pandas/issues/66054",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Duplicate Report"
+  ]
+ },
+ {
+  "claim_id": "pandas#66054-2",
+  "text": "Changes made to the DataFrame should not affect the original Series or Index.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66054,
+  "url": "https://github.com/pandas-dev/pandas/issues/66054",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Duplicate Report"
+  ]
+ },
+ {
+  "claim_id": "pandas#66616-0",
+  "text": "The \"Getitem ([])\" section of the \"10 minutes to pandas\" tutorial shows that a single label in brackets will return a Series.",
+  "why_a_claim": "reporter asserts a fact about the documentation",
+  "repo": "pandas-dev/pandas",
+  "issue": 66616,
+  "url": "https://github.com/pandas-dev/pandas/issues/66616",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66616-1",
+  "text": "It never shows the specific case of a list containing a single label (e.g. df[[\"A\"]], which also returns a DataFrame).",
+  "why_a_claim": "reporter asserts a documentation gap",
+  "repo": "pandas-dev/pandas",
+  "issue": 66616,
+  "url": "https://github.com/pandas-dev/pandas/issues/66616",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66616-2",
+  "text": "since df[\"A\"] and df[[\"A\"]] look nearly identical but return different object types, this could be a common point of confusion for beginners",
+  "why_a_claim": "reporter asserts a judgement -- VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66616,
+  "url": "https://github.com/pandas-dev/pandas/issues/66616",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34076-0",
+  "text": "Whenever an array-like of string types for a multi-class classification problem is passed into the confusion_matrix function without an argument passed for labels, the confusion matrix is returned with the classes in alphabetical order.",
+  "why_a_claim": "reporter asserts existing behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34076,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34076",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34076-1",
+  "text": "the outputted confusion matrix may have an output order that is different from the user's expectations, especially if the classes are ordinal",
+  "why_a_claim": "reporter asserts a consequence -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34076,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34076",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34076-2",
+  "text": "There is currently no warning for this, possibly leading to misunderstood confusions matrices by users.",
+  "why_a_claim": "reporter asserts a gap and its consequence",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34076,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34076",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34566-0",
+  "text": "CI failed on Unit tests Linux x86-64 pymin_conda_forge_openblas_min_dependencies (Jul 25, 2026)",
+  "why_a_claim": "reporter asserts a CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34566,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34566",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34086-0",
+  "text": "In line 530, sklearn/svm/src/libsvm/svm.cpp, it is said \"An SMO algorithm in Fan et al., JMLR 6(2005), p. 1889--1918\", but this paper does not appear in the page of the main author.",
+  "why_a_claim": "reporter asserts a citation defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34086,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34086",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34086-1",
+  "text": "I noticed that the pages, publishing year and issues are just the same to another work: Fan RE, Chen PH, Lin CJ, Working set selection using second order information.",
+  "why_a_claim": "reporter asserts the identity of the real source",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34086,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34086",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34086-2",
+  "text": "use the correct and full information of the article",
+  "why_a_claim": "reporter proposes the fix -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34086,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34086",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "pandas#66281-0",
+  "text": "Invoking .apply() with custom Python functions is notoriously slow in Pandas because it loops over rows in pure Python.",
+  "why_a_claim": "reporter asserts a performance property -- \"notoriously slow\" VAGUE, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66281,
+  "url": "https://github.com/pandas-dev/pandas/issues/66281",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66281-1",
+  "text": "While Pandas supports Numba engines in GroupBy and Rolling window methods, standard .apply() lacks direct JIT compilation engines.",
+  "why_a_claim": "reporter asserts a capability gap",
+  "repo": "pandas-dev/pandas",
+  "issue": 66281,
+  "url": "https://github.com/pandas-dev/pandas/issues/66281",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66281-2",
+  "text": "Introduce a JIT compilation execution engine option inside Series.apply(), supporting engine=\"numba\" and engine_kwargs parameters.",
+  "why_a_claim": "reporter proposes a feature",
+  "repo": "pandas-dev/pandas",
+  "issue": 66281,
+  "url": "https://github.com/pandas-dev/pandas/issues/66281",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66542-0",
+  "text": "the fix is a two-line validation at the top of to_datetime, mirroring to_timedelta.",
+  "why_a_claim": "reporter proposes the fix",
+  "repo": "pandas-dev/pandas",
+  "issue": 66542,
+  "url": "https://github.com/pandas-dev/pandas/issues/66542",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66509-0",
+  "text": "Passing self_destruct=True through to_pandas_kwargs segfaults the interpreter.",
+  "why_a_claim": "reporter asserts a crash",
+  "repo": "pandas-dev/pandas",
+  "issue": 66509,
+  "url": "https://github.com/pandas-dev/pandas/issues/66509",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "IO Parquet",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "pandas#66509-1",
+  "text": "to_pandas_kwargs is 3.0 only. On 2.3.3 the argument falls through to pyarrow.parquet.read_table and raises TypeError, so this looks specific to the 3.0 passthrough.",
+  "why_a_claim": "reporter asserts the scope",
+  "repo": "pandas-dev/pandas",
+  "issue": 66509,
+  "url": "https://github.com/pandas-dev/pandas/issues/66509",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "IO Parquet",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "pandas#66509-2",
+  "text": "So the trigger is self_destruct, and there is nothing wrong with the passthrough itself. I get the same results on macOS/arm64 and Linux/x86-64.",
+  "why_a_claim": "reporter asserts the isolated trigger and its portability",
+  "repo": "pandas-dev/pandas",
+  "issue": 66509,
+  "url": "https://github.com/pandas-dev/pandas/issues/66509",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "IO Parquet",
+   "Segfault"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34311-0",
+  "text": "We should make the array API dispatch flag explicit in tests that compare dispatch Off and On.",
+  "why_a_claim": "reporter proposes a change",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34311,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34311",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34311-1",
+  "text": "Right now we have tests that assume that the default setting of the flag is off when computing the reference values.",
+  "why_a_claim": "reporter asserts the existing state",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34311,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34311",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34311-2",
+  "text": "I'm not sure if this is a problem or will lead to false results in our tests. But it seems like a good idea to make the setting explicit in our tests.",
+  "why_a_claim": "reporter asserts a judgement under stated uncertainty -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34311,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34311",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34075-0",
+  "text": "In nilearn we have started using the HTML representation of estimators in the report we generate.",
+  "why_a_claim": "reporter asserts a downstream usage",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34075,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34075",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34075-1",
+  "text": "However when testing with 1.9.0rc1 I am now getting this error.",
+  "why_a_claim": "reporter asserts a regression",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34075,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34075",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34075-2",
+  "text": "My hunch would be to be able to define an optional list of attributes to skip in html representation.",
+  "why_a_claim": "reporter proposes a solution -- hedged, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34075,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34075",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34082-0",
+  "text": "in preparing the design matrix with StandardScaler we're seeing some unfortunate floating point deviations between MacOS ARM and x86_64 Linux platforms.",
+  "why_a_claim": "reporter asserts a cross-platform numerical deviation",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34082,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34082",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:preprocessing",
+   "Needs Investigation",
+   "Numerical Stability"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34082-1",
+  "text": "the differences are somewhat subtle, they are leading to downstream estimator scoring deviations that are perhaps not quite in the noise (accuracy score differences on the order of 0.0001).",
+  "why_a_claim": "reporter asserts the magnitude -- hedged, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34082,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34082",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:preprocessing",
+   "Needs Investigation",
+   "Numerical Stability"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34082-2",
+  "text": "We did check that if we serialize the design matrices on one platform and fit the estimator on those identical NumPy arrays on the other platform then the estimators perform identically on each platform as expected.",
+  "why_a_claim": "reporter asserts a control experiment",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34082,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34082",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:preprocessing",
+   "Needs Investigation",
+   "Numerical Stability"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33800-0",
+  "text": "The current workflow requires manually computing separate confusion matrices and subtracting them.",
+  "why_a_claim": "reporter asserts the existing workflow",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33800,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33800",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Info",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33800-1",
+  "text": "This pattern has no built-in support in sklearn and becomes error-prone when normalization is involved - normalizing before vs after subtraction gives different results.",
+  "why_a_claim": "reporter asserts a gap and a hazard",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33800,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33800",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Info",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33800-2",
+  "text": "Add confusion_matrix_diff to sklearn.metrics.",
+  "why_a_claim": "reporter proposes a feature",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33800,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33800",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Info",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34312-0",
+  "text": "if the uncalibrated classifier only exposes a decision_function and no predict_proba our implementation of sigmoid calibration is fine because the output values of decision_function are morally logits between -inf and +inf with 0 as the default decision threshold.",
+  "why_a_claim": "reporter asserts where the implementation is correct",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34312,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34312",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "module:calibration"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34312-1",
+  "text": "But if the uncalibrated classifier already exposes a predict_proba method, our current implementation takes the predicted probabilities as input of the parametrized sigmoid function. This is incorrect.",
+  "why_a_claim": "reporter asserts the defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34312,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34312",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "module:calibration"
+  ]
+ },
+ {
+  "claim_id": "pandas#65770-0",
+  "text": "pd.testing.assert_series_equal fails when comparing two equal Series objects if one is backed by a plain np.ndarray and the other by an np.ndarray subclass, even when check_series_type=False is passed.",
+  "why_a_claim": "reporter asserts observed wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 65770,
+  "url": "https://github.com/pandas-dev/pandas/issues/65770",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Testing",
+   "Error Reporting"
+  ]
+ },
+ {
+  "claim_id": "pandas#65770-1",
+  "text": "The error message is also misleading: it reports \"Series classes are different\", but the classes shown are the backing array classes, not the Series classes.",
+  "why_a_claim": "reporter asserts a second defect in the message",
+  "repo": "pandas-dev/pandas",
+  "issue": 65770,
+  "url": "https://github.com/pandas-dev/pandas/issues/65770",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Testing",
+   "Error Reporting"
+  ]
+ },
+ {
+  "claim_id": "pandas#65770-2",
+  "text": "The assertion should pass, since both objects are equal.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 65770,
+  "url": "https://github.com/pandas-dev/pandas/issues/65770",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Testing",
+   "Error Reporting"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34045-0",
+  "text": "Triage / fix / review issues and PR milestoned for 1.9 and then follow the release process.",
+  "why_a_claim": "reporter directs a course of work",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34045,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34045",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Build / CI"
+  ]
+ },
+ {
+  "claim_id": "pandas#66400-0",
+  "text": "My guess is that because these are such large integers, there is precision loss during the execution of the compiled C/Cython, possibly from casting to float64 types.",
+  "why_a_claim": "reporter asserts a hypothesised mechanism -- hedged, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66400,
+  "url": "https://github.com/pandas-dev/pandas/issues/66400",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Testing"
+  ]
+ },
+ {
+  "claim_id": "pandas#66400-1",
+  "text": "The atol should be respected such that no AssertionError is raised by the code snippet.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66400,
+  "url": "https://github.com/pandas-dev/pandas/issues/66400",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Testing"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33838-0",
+  "text": "CI failed on Unit tests Windows x64 pymin_conda_forge_openblas (Apr 23, 2026)",
+  "why_a_claim": "reporter asserts a CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33838,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33838",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#33838-1",
+  "text": "Unable to find junit file.",
+  "why_a_claim": "reporter asserts a missing artifact -- TERSE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33838,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33838",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#33867-0",
+  "text": "It seems that the https://api.openml.org/api/v1 URL used in our code should have been written https://www.openml.org/api/v1 instead.",
+  "why_a_claim": "reporter asserts a configuration defect -- hedged, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33867,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33867",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "module:datasets"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33867-1",
+  "text": "No error.",
+  "why_a_claim": "reporter states the required result -- TERSE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33867,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33867",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "module:datasets"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33867-2",
+  "text": "It's breaking the CI and negatively impacting all users of that functions, especially in educational material with runnable code snippets.",
+  "why_a_claim": "reporter asserts the impact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33867,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33867",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "module:datasets"
+  ]
+ },
+ {
+  "claim_id": "pandas#66232-0",
+  "text": "A CHANGELOG.md file would help users understand what changed between versions and make upgrade decisions easier.",
+  "why_a_claim": "reporter asserts a benefit",
+  "repo": "pandas-dev/pandas",
+  "issue": 66232,
+  "url": "https://github.com/pandas-dev/pandas/issues/66232",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66232-1",
+  "text": "When upgrading dependencies, developers need to know what bugs were fixed, what new features were added, whether there are any breaking changes.",
+  "why_a_claim": "reporter asserts a user need",
+  "repo": "pandas-dev/pandas",
+  "issue": 66232,
+  "url": "https://github.com/pandas-dev/pandas/issues/66232",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#66232-2",
+  "text": "This is purely a documentation change with no code impact.",
+  "why_a_claim": "reporter asserts the scope of the change",
+  "repo": "pandas-dev/pandas",
+  "issue": 66232,
+  "url": "https://github.com/pandas-dev/pandas/issues/66232",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#33742-0",
+  "text": "In LeaveOneOut and LeavePOut classes, the documentation mentions that these methods \"can be very costly\" for large datasets, but the warning is quite vague.",
+  "why_a_claim": "reporter asserts a documentation weakness -- \"quite vague\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33742,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33742",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33742-1",
+  "text": "Users often try these on datasets with thousands of samples and face very long runtimes or memory issues without clear guidance on when to avoid them.",
+  "why_a_claim": "reporter asserts a user-behaviour consequence",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33742,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33742",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33742-2",
+  "text": "Add a clearer UserWarning when n_samples is large (e.g., > 1000 for LeaveOneOut).",
+  "why_a_claim": "reporter proposes a change",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33742,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33742",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation",
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34200-0",
+  "text": "CI is still failing on Unit tests Linux x86-64 pylatest_free_threaded (Jul 22, 2026)",
+  "why_a_claim": "reporter asserts a CI failure",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34200,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34200",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#33746-0",
+  "text": "StratifiedGroupKFold has complex logic in _iter_test_indices and _find_best_fold.",
+  "why_a_claim": "reporter asserts a code property -- \"complex\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33746,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33746",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33746-1",
+  "text": "There are several corner cases (e.g. groups with only one sample, very uneven class distributions, or small number of groups) that can lead to unexpected behavior or degenerate splits.",
+  "why_a_claim": "reporter asserts a risk -- \"unexpected\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33746,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33746",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33746-2",
+  "text": "Current test coverage for these edge cases is limited.",
+  "why_a_claim": "reporter asserts a coverage gap -- VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33746,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33746",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Closing candidate"
+  ]
+ },
+ {
+  "claim_id": "pandas#65903-0",
+  "text": "In pandas/_libs/src/datetime/date_conversions.c, when make_iso_8601_datetime fails, result is freed via PyObject_Free but the function does NOT return.",
+  "why_a_claim": "reporter asserts a precise code defect",
+  "repo": "pandas-dev/pandas",
+  "issue": 65903,
+  "url": "https://github.com/pandas-dev/pandas/issues/65903",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "IO JSON"
+  ]
+ },
+ {
+  "claim_id": "pandas#65903-1",
+  "text": "Use-after-free: strlen reads freed memory. The freed pointer is returned to the caller, which will read/use corrupted data.",
+  "why_a_claim": "reporter asserts the consequence",
+  "repo": "pandas-dev/pandas",
+  "issue": 65903,
+  "url": "https://github.com/pandas-dev/pandas/issues/65903",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "IO JSON"
+  ]
+ },
+ {
+  "claim_id": "pandas#65903-2",
+  "text": "Add return NULL; after PyObject_Free(result);",
+  "why_a_claim": "reporter proposes the fix",
+  "repo": "pandas-dev/pandas",
+  "issue": 65903,
+  "url": "https://github.com/pandas-dev/pandas/issues/65903",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "IO JSON"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34537-0",
+  "text": "This was moved from the setuptools days to pyproject.toml, I don't think anyone is using it but I could be wrong of course.",
+  "why_a_claim": "reporter asserts a usage claim -- hedged, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34537,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34537",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34537-1",
+  "text": "It is definitely not mentioned in the doc, and I would rather remove all the extra_requires unless someone has a strong use case for it.",
+  "why_a_claim": "reporter asserts a documentation gap and proposes removal",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34537,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34537",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34537-2",
+  "text": "They are likely not used by anyone.",
+  "why_a_claim": "reporter asserts a usage claim -- hedged, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34537,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34537",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34087-0",
+  "text": "Torch offers sparse arrays which, unlike SciPy's objects, are sub-classed from regular dense arrays.",
+  "why_a_claim": "reporter asserts an external library fact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34087,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34087",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Decision"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34087-1",
+  "text": "Technically, sparse torch objects are torch tensors, and they appear to (unintendedly?) work under array API dispatch in some cases, but not in every scenario where array API is supported.",
+  "why_a_claim": "reporter asserts inconsistent behaviour -- \"some cases\" VAGUE, kept (R3)",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34087,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34087",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Decision"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34087-2",
+  "text": "Since torch does not really implement the array API standard and does not implement __array_namespace__ in any object class, it's not possible to make a check like \"is array API\" based on that.",
+  "why_a_claim": "reporter asserts an impossibility",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34087,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34087",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Decision"
+  ]
+ },
+ {
+  "claim_id": "pandas#66012-0",
+  "text": "If you build a DataFrame from an Index or Series backed by an Extension Array, CoW reference tracking is missing.",
+  "why_a_claim": "reporter asserts observed wrong behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66012,
+  "url": "https://github.com/pandas-dev/pandas/issues/66012",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Bug",
+   "Duplicate Report"
+  ]
+ },
+ {
+  "claim_id": "pandas#66012-1",
+  "text": "we ran into IPython kernel crashes when trying to display a DataFrame whose columns had been modified this way, which suggests some internal block manager invariants are getting broken too.",
+  "why_a_claim": "reporter asserts a further symptom -- hedged, kept (R3)",
+  "repo": "pandas-dev/pandas",
+  "issue": 66012,
+  "url": "https://github.com/pandas-dev/pandas/issues/66012",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Bug",
+   "Duplicate Report"
+  ]
+ },
+ {
+  "claim_id": "pandas#66012-2",
+  "text": "df.columns shouldn't be affected at all. CoW means either copy the data upfront or track the reference and copy on first write - neither is happening here.",
+  "why_a_claim": "reporter states the required behaviour",
+  "repo": "pandas-dev/pandas",
+  "issue": 66012,
+  "url": "https://github.com/pandas-dev/pandas/issues/66012",
+  "issue_state": "closed",
+  "issue_state_reason": "duplicate",
+  "issue_labels": [
+   "Bug",
+   "Duplicate Report"
+  ]
+ },
+ {
+  "claim_id": "pandas#66203-0",
+  "text": "When calling DataFrame.apply(..., raw=True) with the default Python engine, pandas currently delegates array execution to numpy.apply_along_axis.",
+  "why_a_claim": "reporter asserts the existing implementation",
+  "repo": "pandas-dev/pandas",
+  "issue": 66203,
+  "url": "https://github.com/pandas-dev/pandas/issues/66203",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "pandas#66203-1",
+  "text": "it introduces significant Python-level overhead (dynamic coordinate tuple creation, slice-by-slice writes, first-element inspection to determine dtype).",
+  "why_a_claim": "reporter asserts a performance cause",
+  "repo": "pandas-dev/pandas",
+  "issue": 66203,
+  "url": "https://github.com/pandas-dev/pandas/issues/66203",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "pandas#66203-2",
+  "text": "Since DataFrame values are strictly 2D, we can optimize this execution path by using a fast-path list comprehension and transposition logic, which yields a 1.4x to 2.2x performance improvement.",
+  "why_a_claim": "reporter asserts a quantified improvement",
+  "repo": "pandas-dev/pandas",
+  "issue": 66203,
+  "url": "https://github.com/pandas-dev/pandas/issues/66203",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Performance",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34128-0",
+  "text": "Modern CPUs such as Intel Core Ultra Series 3 processors and Apple M1/M2 series have different core speeds (P-cores, E-cores, LP-cores).",
+  "why_a_claim": "reporter asserts a hardware fact",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34128,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34128",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Parallelism and scalability"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34128-1",
+  "text": "joblib and native libraries such as OpenMP or BLAS libraries will often start one thread per core.",
+  "why_a_claim": "reporter asserts existing behaviour",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34128,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34128",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Parallelism and scalability"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34128-2",
+  "text": "thread scheduling overhead can cause performance degradation compared to using fewer threads on those architectures, especially when iterating on many small data problems.",
+  "why_a_claim": "reporter asserts a performance consequence",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34128,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34128",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Parallelism and scalability"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34401-0",
+  "text": "Typo in _RidgeClassifierMixin.predict: X : {array-like, spare matrix} should be X : {array-like, sparse matrix}.",
+  "why_a_claim": "reporter asserts a precise documentation defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34401,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34401",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34401-1",
+  "text": "Extra space in Ridge See Also section: RidgeClassifierCV :  Ridge classifier should be RidgeClassifierCV : Ridge classifier.",
+  "why_a_claim": "reporter asserts a second precise defect",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34401,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34401",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34401-2",
+  "text": "Missing RST function links in RidgeClassifier solver descriptions; Ridge correctly uses RST :func: links for solver references.",
+  "why_a_claim": "reporter asserts a third defect by contrast",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34401,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34401",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ }
+]

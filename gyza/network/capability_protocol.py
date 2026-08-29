@@ -246,7 +246,8 @@ class AttestationCert:
 # ---------------------------------------------------------------------------
 
 def _canonical(obj: Any) -> bytes:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
 
 
 def _challenge_canonical_bytes(c: Challenge) -> bytes:

@@ -178,7 +178,7 @@ def test_the_fallback_mechanism_still_exists_and_is_not_removed():
 def test_governance_reports_the_gap_rather_than_hiding_it():
     g = governed_router().governance(all_claim_types())
     assert g["policy"] == "FAIL_CLOSED"
-    assert g["governed"] == 17
+    assert g["governed"] == 19          # 17 + the two coordination verifiers
     assert g["ungoverned_fallback"] == 0
     assert set(GAP) <= set(g["failed_closed_claim_types"])
 

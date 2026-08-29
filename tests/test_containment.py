@@ -237,9 +237,8 @@ def test_gyza_model_cannot_claim_containment_until_bounds_are_declared():
     h, i = build_registries(bounds_file=None)
     r = GuardEngine(h, i).readiness()
     assert r["can_claim_containment"] is False
-    assert set(r["unbounded"]) == {"H3_mesh_exit_sends", "H4_authority",
-                                   "H5_storage_growth",
-                                   "H6_unsupervised_actions"}
+    assert set(r["unbounded"]) == {"H3_mesh_exit_rate", "H4_authority",
+                                   "H5_storage_growth"}
     assert r["uncovered"] == []
 
 
@@ -258,8 +257,11 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     # D1 is fully lifted: every registered class now has a declared level,
     # H5's transcribed from the operator's own GyzaConfig.max_artifact_store_gb.
     # So ONLY C-8 provenance blocks the claim, which is this test's whole point.
-    # H3 is registered and deliberately unbounded: measured, not bounded.
-    assert r["unbounded"] == ["H3_mesh_exit_sends"], r["unbounded"]
+    # EMPTY since v3 (2026-08-21) declared H3's rate level at 300 MB/h. Every
+    # registered class carries a bound, so D1 is fully lifted and the claim is
+    # refused by C-8 alone -- which is exactly what this test is named for, and
+    # is now demonstrated more cleanly than when H3 was also blocking.
+    assert r["unbounded"] == [], r["unbounded"]
     assert r["uncovered"] == []
     assert r["bounds_signed"] is False
     assert r["can_claim_containment"] is False, (
@@ -267,7 +269,10 @@ def test_declared_bounds_file_lifts_the_d1_gate_but_NOT_the_c8_one():
     assert h.bound("H4_authority") == 0.0, (
         "authority exceedance is a BREACH, not a budget — the attenuation "
         "theorem says it cannot happen at all")
-    assert h.bound("H6_unsupervised_actions") == 10000
+    # H6 was retired as a harm class 2026-08-21; the interval it drove is now
+    # a signed POLICY value, checked there.
+    from gyza.containment.review import _signed_cadence_actions
+    assert _signed_cadence_actions() == 10000
 
 
 def test_authority_bound_of_zero_admits_none_and_refuses_one():
@@ -295,7 +300,10 @@ def test_gyza_credit_invariant_is_cumulative_and_lands_at_the_gate():
     """A monotone budget over one pool does not compose (R10 H-CONS, R13)."""
     h, i = build_registries()
     plan = GuardEngine(h, i).concurrency_plan()
-    assert "INV-H6-cadence" in plan["promotion_serialized"]
+    # H5 is the remaining CUMULATIVE invariant since H6's retirement; the
+    # property under test is that a cumulative one lands at the gate, not that
+    # any particular class does.
+    assert "INV-H5-storage" in plan["promotion_serialized"]
     assert "INV-H4-attenuation" in plan["interior_concurrent"]
 
 

@@ -17,7 +17,7 @@ import pytest
 
 from gyza.containment.gyza_model import build_registries
 from gyza.containment.review import (
-    HALT, RESUME, ReviewQueue, check_cadence,
+    HALT, RESUME, ReviewQueue, _signed_cadence_actions, check_cadence,
 )
 
 
@@ -119,22 +119,25 @@ def test_the_cadence_fires_AT_the_bound_and_does_not_flood(tmp_path):
     hand a reviewer ten thousand identical rows, which they would review none
     of."""
     q = _q(tmp_path)
-    harm, _inv = build_registries()
+    # The interval is a SIGNED POLICY value since H6's retirement, not a harm
+    # bound. Same number, same behaviour; it simply no longer claims to bound
+    # harm.
+    cadence = _signed_cadence_actions()
 
-    assert check_cadence(q, harm, 9_999) is None
-    assert check_cadence(q, harm, 10_000) is not None
+    assert check_cadence(q, cadence, 9_999) is None
+    assert check_cadence(q, cadence, 10_000) is not None
     for n in (10_001, 12_000, 99_999):
-        assert check_cadence(q, harm, n) is None, f"flooded at {n}"
+        assert check_cadence(q, cadence, n) is None, f"flooded at {n}"
     assert len(q.pending()) == 1
 
 
 def test_the_cadence_can_fire_AGAIN_once_the_first_is_resolved(tmp_path):
     """Idempotence must not become permanent silence."""
     q = _q(tmp_path)
-    harm, _inv = build_registries()
-    e = check_cadence(q, harm, 10_000)
+    cadence = _signed_cadence_actions()
+    e = check_cadence(q, cadence, 10_000)
     q.resolve(e.record_id, "alice", RESUME, "checked")
-    assert check_cadence(q, harm, 20_000) is not None, \
+    assert check_cadence(q, cadence, 20_000) is not None, \
         "the cadence went permanently quiet after one review"
 
 
@@ -142,8 +145,10 @@ def test_an_UNBOUNDED_class_does_not_escalate(tmp_path):
     """An undeclared bound is a separate condition, already reported by
     readiness(). Escalating on it would hide one behind the other."""
     q = _q(tmp_path)
-    harm, _inv = build_registries()
-    assert check_cadence(q, harm, 10 ** 9, harm_class="H3_irreversible") is None
+    # `None` interval == "no cadence configured", which must not escalate --
+    # conflating it with "not yet due" would hide one behind the other.
+    assert check_cadence(q, None, 10 ** 9,
+                         harm_class="H3_irreversible") is None
     assert q.pending() == []
 
 
@@ -162,8 +167,7 @@ def test_gyza_review_LISTS_and_RESOLVES(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, "load_config", lambda *a, **k: cfg)
 
     q = ReviewQueue(cfg.review_db_path)
-    harm, _inv = build_registries()
-    check_cadence(q, harm, 10_000)
+    check_cadence(q, _signed_cadence_actions(), 10_000)
 
     assert cli.cmd_review(argparse.Namespace(
         escalation_id=None, reviewer=None, note=None, halt=False)) == 0

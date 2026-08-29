@@ -46,6 +46,15 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
+// How long a ModeAuto node may stay a client before the free-rider warning
+// fires, and how often the serving mode is sampled. The grace is generous
+// because AutoNAT needs peers and observed dial-backs before it can confirm
+// reachability; warning earlier would train operators to ignore it.
+const (
+	dhtPromotionGrace = 10 * time.Minute
+	dhtPromotionPoll  = 30 * time.Second
+)
+
 // stringSliceFlag accepts a comma-separated --bootstrap value.
 type stringSliceFlag []string
 
@@ -266,7 +275,16 @@ func main() {
 	if err != nil {
 		logger.Fatal("[dht] init: %v", err)
 	}
-	logger.Info("[dht] initialized (mode=%s, prefix=/gyza/1.0)", *dhtMode)
+	logger.Info("[dht] initialized (requested mode=%s, prefix=%s)", *dhtMode, dht.ProtocolPrefix)
+
+	// That line above reports the FLAG, not the state. Under ModeAuto the node
+	// starts as a client and promotes only if AutoNAT confirms inbound
+	// reachability, which behind NAT may never happen -- leaving a node that
+	// queries the routing layer without serving it, silently. The watch logs
+	// the mode actually in force, every transition, and warns once if an auto
+	// node is still a client after the grace period.
+	gdht.WatchPromotion(ctx, strings.ToLower(*dhtMode),
+		dhtPromotionGrace, dhtPromotionPoll, logger.Info)
 	natMgr.SetDHT(gdht)
 
 	// If the operator opted in to running a circuit relay, advertise
@@ -277,6 +295,14 @@ func main() {
 		logger.Info("[nat] relay advertise loop running every %s",
 			*relayAdvertiseInterval)
 	}
+
+	// The mirror of the DHT promotion watch, for the same free-rider shape:
+	// --autorelay defaults on (we USE relays) and --enable-relay-service
+	// defaults off (we PROVIDE none). Reports only a node that is CONFIRMED
+	// reachable and still declining, since that is the only case where the
+	// default is leaving a cost on someone else.
+	natMgr.WatchRelayContribution(ctx, dhtPromotionGrace, dhtPromotionPoll,
+		logger.Info)
 
 	// Periodic re-publication of every local agent so DHT records don't
 	// expire under their TTL. interval ≤ 0 disables.

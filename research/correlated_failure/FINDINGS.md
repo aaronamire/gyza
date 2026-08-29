@@ -2,7 +2,43 @@
 
 Write-up per the pre-registration. No new methodology thread follows.
 
-## DECISIVE RESULT (wider menu, capable models) — H2 FALSIFIED: universal blind spot
+## DECISIVE RESULT (wider menu, capable models) — H2 FALSIFIED **in the constrained-output regime**: family-invariant failure from a constrained wrong-answer space
+
+> **Mechanism corrected (conditional-independence null, FINDINGS_CI_NULL.md).**
+> Against the *right* null — the leave-pair-out per-problem wrong-answer
+> distribution — cross-family excess is −0.024 [−0.052, +0.001] and
+> within-family excess is +0.026 [−0.013, +0.065]: both include 0 (Case A).
+> The convergence is **problem-structural**, not a shared cognitive blind
+> spot. Median distinct wrong answers per problem = 1 (Simpson 0.60). Read
+> "universal blind spot" below as **constrained wrong-answer space**: the
+> family-invariance of failure stands; the "shared cognition" reading does
+> not. The ~13× permutation null cannot see pair-specificity and overstates
+> the effect.
+
+**Scope of the falsification (what is and is NOT claimed).**
+
+- **(a) Regime-scoped.** H2 is falsified **only for constrained-output tasks** —
+  here the code battery, where the median problem admits ~1 distinct wrong
+  answer (Simpson 0.60). The defended claim is narrow: *on tasks where the
+  wrong-answer space is tiny, failure convergence is set by the size of that
+  space, not by model family, so family diversity provides no decorrelation
+  there.* This is NOT an unqualified "diversity never decorrelates failure."
+- **(b) The ~13× was measured against a null that answers a different
+  question.** The permutation null (0.044) asks *"are the collisions
+  problem-aligned?"* — trivially yes, so convergence sits ~13× above it. It
+  **cannot** ask *"are these two models correlated beyond the problem?"* The
+  conditional-independence null answers *that*, and the excess is ≈0 (Case A).
+  So the mechanism is a **constrained wrong-answer space / family-invariant
+  failure**, not a "universal blind spot." The headline figure overstated a
+  real but different effect.
+- **(c) The open case is untested — and the one hint leans the other way.**
+  Whether diversity decorrelates in **large-output-space** tasks is NOT tested
+  by this experiment (the code battery contains no such regime). The secondary
+  TruthfulQA *verbatim* floor even leans family-*specific* — within-family
+  0.083 > cross-family 0.017 — the opposite of family-invariance. Do not read
+  the constrained-space result as general. (The follow-up MATH round confirmed
+  the open-space picture differs: there errors are sparse and diverse, not
+  convergent.)
 
 Re-run of the **unchanged** protocol on 9 capable models across 5 families
 via OpenRouter, capability-banded exactly as pre-registered. On the
@@ -23,9 +59,13 @@ code, not degenerate errors):
   emphatically above null.**
 - **within ≈ cross**: R = 0.603/0.560 = **1.08**, CIs overlap heavily.
 - Pre-registered decision rule: *0.8 ≤ R ≤ 1.2 and both > null ⇒ H2
-  FALSIFIED, universal blind spot.* R = 1.08, both ~13× null ⇒
-  **H2 is FALSIFIED. The blind spot is UNIVERSAL.** Mixing families does
-  **not** decorrelate failure on the confound-free test.
+  FALSIFIED.* R = 1.08 ⇒ **H2 is FALSIFIED: mixing families does not
+  decorrelate failure.** But the correct null (conditional-independence,
+  not permutation) shows the shared failure is a **constrained wrong-answer
+  space**, not a shared blind spot — family-invariant because it is
+  problem-driven. Diversity still cannot help; the reason is the small
+  answer space, and only external resolution breaks it. See
+  FINDINGS_CI_NULL.md.
 
 Code-band capability (±0.10, code pass rate): llama-3.1-70b 0.40, gemma-2
 0.38, gemma-3 0.40, mistral-2501 0.32, mistral-3.2 0.36, phi-4 0.38 — six
@@ -37,24 +77,30 @@ band (Gemma, Mistral), one short of the pre-registered ≥3 — so the *ratio*
 R has a slightly underpowered within side. But the two within pairs agree
 (0.64, 0.56) and both fall inside the cross range, and the crux — cross-
 family convergence ≫ null — is well-powered (13 pairs, all above null), so
-the universal-blind-spot conclusion does not rest on the underpowered
-side. (b) **Secondary TruthfulQA disagrees in part**: the verbatim floor
-leans family-specific (cross 0.017 [0, 0.05] < within 0.083, but 1 within
-pair — underpowered), while the topic-confounded semantic ceiling is
-universal (cross 0.74 ≥ within 0.67). Per the pre-registration the **code
-battery is authoritative** on disagreement ⇒ universal.
+the family-invariance conclusion does not rest on the underpowered
+side. (b) **Secondary TruthfulQA disagrees in part** — and this is the
+open-case signal in scope-note (c): the verbatim floor leans family-specific
+(cross 0.017 [0, 0.05] < within 0.083, but 1 within pair — underpowered),
+while the topic-confounded semantic ceiling shows cross ≈ within (0.74 vs
+0.67). Per the pre-registration the **code battery is authoritative** — but its
+authority is over the **constrained-output regime it measures**; the verbatim
+floor's family-specific lean is not overridden by it, it is the untested
+open-space case surfacing.
 
-**What this means for Gyza.** The diversity-invariant premise — that
-mixing model families reduces shared blind spots — is **refuted on the
-confound-free primary test**: different families make the *same specific
-bugs* ~13× more than chance, at essentially the same rate as same-family
-models. Diversity is **not** a reliable defense. This *strengthens* the
-case for the settlement-primary + sparse-ground-truth-resolution backstop
-over diversity: when the collective's blind spot is universal, no amount
-of pool diversity helps, and only an external verification signal
-(bonded-market resolution) can break it. The earlier "diversity helps"
-reading (from the artifact-inflated tiny-model runs) does not survive
-capable cross-family models.
+**What this means for Gyza.** In the **constrained-output regime**, the
+diversity-invariant premise — that mixing model families reduces shared blind
+spots — provides **no decorrelation**: different families produce the *same
+specific wrong answer* about as often as same-family models, but only because
+the wrong-answer space is tiny (excess over conditional independence ≈ 0).
+Where a decision has a small answer space, diversity is therefore **not** a
+reliable defense, and an external verification/reality anchor (bonded-market
+resolution) is required regardless of pool diversity. This is a
+**regime-specific** claim, not a universal one: in open-output tasks the
+picture differs (untested here; the follow-up MATH round found errors there are
+sparse and diverse, not convergent — see `research/CARDINALITY_LAW.md`). The
+earlier "diversity helps" reading (from the artifact-inflated tiny-model runs)
+does not survive capable models; the earlier "universal blind spot" reading
+does not survive the conditional-independence null.
 
 ---
 

@@ -146,8 +146,9 @@ def test_coverage_is_computed_from_the_registry_and_divergence_is_explained():
     r = TierRouter(v, s)
     cov = r.coverage(all_claim_types())
 
-    assert cov["n"] == 19   # 18 -> 19: envelope_dag split into closed/open
-    assert cov["tier_1"] == 14   # +1: the dag split yields two tier-1 types
+    # 19 -> 21: the two coordination verifiers added 2026-08-23.
+    assert cov["n"] == 21
+    assert cov["tier_1"] == 16
     assert cov["tier_2"] == 3
     assert cov["tier_3"] == len(NO_VERIFIER) == 2
 
@@ -164,9 +165,18 @@ def test_coverage_is_computed_from_the_registry_and_divergence_is_explained():
     # determinacy failure — one entry proving two propositions became two
     # entries proving one each. A split raises the count without adding any
     # new verification capability, so this asserts the split rather than a gain.
-    assert cov["tier_1"] - 1 - len(respecified) == 11, (
-        "R14 Part C's native count, +1 for the envelope_dag split")
-    assert cov["n"] - 1 == 18, "R14 Part C's type count, +1 for the envelope_dag split"
+    # 11 -> 13 on 2026-08-23, and the DISTINCTION the line above draws is why
+    # this is not the same kind of increase: the envelope_dag split raised the
+    # count without adding capability, whereas `decomposition_within_manifest`
+    # and `combine_covers_siblings` check properties nothing checked before —
+    # that a task decomposition stayed inside its signed spawn grant, and that
+    # a combination consumed every sibling. Those are new capability, so they
+    # belong on this side of the subtraction rather than being netted out.
+    assert cov["tier_1"] - 1 - len(respecified) == 13, (
+        "R14 Part C's native count (11), +1 for the envelope_dag split, "
+        "+2 for the coordination verifiers")
+    assert cov["n"] - 1 == 20, ("R14 Part C's type count (17), +1 for the "
+                                "envelope_dag split, +2 for coordination")
 
 
 def test_unit_test_adapter_is_tier_1_alone_but_forces_tier_3_in_a_chain():

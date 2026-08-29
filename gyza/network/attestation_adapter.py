@@ -406,7 +406,7 @@ def build_response_for_challenge(
         import json as _json
         parsed = r.output if r.output is not None else {}
         output_json = _json.dumps(
-            parsed, sort_keys=True, separators=(",", ":"),
+            parsed, sort_keys=True, separators=(",", ":"), allow_nan=False,
         ).encode("utf-8")
         task_results.append(pb.TaskResult(
             task_id=task.task_id,

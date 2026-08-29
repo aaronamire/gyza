@@ -1,0 +1,602 @@
+[
+  {
+    "claimant": "phi-4",
+    "problem_idx": 1,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "False",
+      "False",
+      "False"
+    ],
+    "expected": [
+      "True",
+      "True",
+      "False"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 1,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "False",
+      "False",
+      "False"
+    ],
+    "expected": [
+      "True",
+      "True",
+      "False"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 2,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:NameError",
+      "ERR:NameError",
+      "ERR:NameError"
+    ],
+    "expected": [
+      "['words', 'letters', 'digits']",
+      "['Jan', 'Jan', 'Jan']",
+      "['wonder', 'wonder', 'wonder']"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 3,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "{1: 2, 2: 3, 3: 1, 4: 1, 5: 2, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{15: 1, 20: 1, 30: 3, 40: 1, 80: 2, 90: 2, 100: 1, 110: 1}"
+    ],
+    "expected": [
+      "{2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1}"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 3,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "Counter({2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1})",
+      "Counter({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1})",
+      "Counter({30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1})"
+    ],
+    "expected": [
+      "{2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1}"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 3,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "Counter({2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1})",
+      "Counter({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1})",
+      "Counter({30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1})"
+    ],
+    "expected": [
+      "{2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1}"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 5,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2",
+      "ERR:ZeroDivisionError",
+      "1"
+    ],
+    "expected": [
+      "2",
+      "6",
+      "2"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 10,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:TypeError",
+      "ERR:TypeError",
+      "ERR:TypeError"
+    ],
+    "expected": [
+      "6",
+      "93",
+      "3"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 10,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:TypeError",
+      "ERR:TypeError",
+      "ERR:TypeError"
+    ],
+    "expected": [
+      "6",
+      "93",
+      "3"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 10,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:TypeError",
+      "ERR:TypeError",
+      "ERR:TypeError"
+    ],
+    "expected": [
+      "6",
+      "93",
+      "3"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 13,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "None",
+      "None",
+      "None"
+    ],
+    "expected": [
+      "[1, 2, 3, 4, 5, 6, 7, 9]",
+      "[7, 11, 19, 25, 33, 45, 78]",
+      "[1, 3, 4, 8, 9]"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 25,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2.4499999999999997",
+      "1.8333333333333333",
+      "3.4951080781963135"
+    ],
+    "expected": [
+      "2.5928571428571425",
+      "2.083333333333333",
+      "3.547739657143682"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 25,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2.45",
+      "1.8333333333333333",
+      "3.4951080781963135"
+    ],
+    "expected": [
+      "2.5928571428571425",
+      "2.083333333333333",
+      "3.547739657143682"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 25,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2.45",
+      "1.8333333333333333",
+      "3.4951080781963135"
+    ],
+    "expected": [
+      "2.5928571428571425",
+      "2.083333333333333",
+      "3.547739657143682"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 28,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:NameError",
+      "ERR:NameError",
+      "ERR:NameError"
+    ],
+    "expected": [
+      "(8, -1, -13)",
+      "(-13, -43, -13)",
+      "(-3, 7, -3)"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 28,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:NameError",
+      "ERR:NameError",
+      "ERR:NameError"
+    ],
+    "expected": [
+      "(8, -1, -13)",
+      "(-13, -43, -13)",
+      "(-3, 7, -3)"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 30,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "3.3333333333333335",
+      "2.0",
+      "4.0"
+    ],
+    "expected": [
+      "3",
+      "2",
+      "4"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 32,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "1",
+      "1",
+      "1"
+    ],
+    "expected": [
+      "2.0",
+      "6.0",
+      "20.0"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 32,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "0",
+      "-2",
+      "-10"
+    ],
+    "expected": [
+      "2.0",
+      "6.0",
+      "20.0"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 32,
+    "bugclass": "CRASH",
+    "signature": [
+      "ERR:RecursionError",
+      "ERR:RecursionError",
+      "ERR:RecursionError"
+    ],
+    "expected": [
+      "2.0",
+      "6.0",
+      "20.0"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 34,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "4",
+      "5",
+      "3"
+    ],
+    "expected": [
+      "5",
+      "4",
+      "1"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 34,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "7",
+      "5",
+      "1"
+    ],
+    "expected": [
+      "5",
+      "4",
+      "1"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 35,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "6",
+      "20",
+      "17"
+    ],
+    "expected": [
+      "9",
+      "22",
+      "16"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 35,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "6",
+      "20",
+      "17"
+    ],
+    "expected": [
+      "9",
+      "22",
+      "16"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 35,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "6",
+      "20",
+      "17"
+    ],
+    "expected": [
+      "9",
+      "22",
+      "16"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 36,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "4",
+      "1",
+      "0"
+    ],
+    "expected": [
+      "8",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 36,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "9",
+      "0",
+      "0"
+    ],
+    "expected": [
+      "8",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 36,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2",
+      "2",
+      "2"
+    ],
+    "expected": [
+      "8",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 41,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "4.5",
+      "12.0",
+      "1.0"
+    ],
+    "expected": [
+      "4.5",
+      "12",
+      "1"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 41,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "4.5",
+      "12.0",
+      "1.0"
+    ],
+    "expected": [
+      "4.5",
+      "12",
+      "1"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 41,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "4.5",
+      "12.0",
+      "1.0"
+    ],
+    "expected": [
+      "4.5",
+      "12",
+      "1"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 42,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "'pto'",
+      "'porm'",
+      "'lnug'"
+    ],
+    "expected": [
+      "'yhn'",
+      "'rga'",
+      "'agae'"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 42,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "'pto'",
+      "'porm'",
+      "'lnug'"
+    ],
+    "expected": [
+      "'yhn'",
+      "'rga'",
+      "'agae'"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 42,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "'pto'",
+      "'pom'",
+      "'lnu'"
+    ],
+    "expected": [
+      "'yhn'",
+      "'rga'",
+      "'agae'"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 46,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2",
+      "2",
+      "0"
+    ],
+    "expected": [
+      "1",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "claimant": "mistral-small-24b-instruct-2501",
+    "problem_idx": 46,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "2",
+      "2",
+      "0"
+    ],
+    "expected": [
+      "1",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "claimant": "gemma-2-27b-it",
+    "problem_idx": 49,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "False",
+      "False",
+      "False"
+    ],
+    "expected": [
+      "True",
+      "False",
+      "True"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 49,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "False",
+      "False",
+      "False"
+    ],
+    "expected": [
+      "True",
+      "False",
+      "True"
+    ]
+  },
+  {
+    "claimant": "llama-3.1-70b-instruct",
+    "problem_idx": 3,
+    "bugclass": "COMPUTATIONAL",
+    "signature": [
+      "{1: 2, 2: 3, 3: 1, 4: 1, 5: 2, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{15: 1, 20: 1, 30: 3, 40: 1, 80: 2, 90: 2, 100: 1, 110: 1}"
+    ],
+    "expected": [
+      "{2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1}"
+    ]
+  },
+  {
+    "claimant": "phi-4",
+    "problem_idx": 3,
+    "bugclass": "COMPREHENSION",
+    "signature": [
+      "Counter({2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1})",
+      "Counter({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1})",
+      "Counter({30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1})"
+    ],
+    "expected": [
+      "{2: 3, 1: 2, 5: 2, 3: 1, 4: 1, 6: 1, 7: 1, 9: 1}",
+      "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}",
+      "{30: 3, 80: 2, 90: 2, 15: 1, 20: 1, 40: 1, 100: 1, 110: 1}"
+    ]
+  }
+]

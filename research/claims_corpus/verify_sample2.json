@@ -1,0 +1,380 @@
+[
+ {
+  "claim_id": "scikit-learn#33914-0",
+  "text": "The CODE family is already compatible with the Array API, which is great for pytorch compatibility!",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33914,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33914",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature"
+  ]
+ },
+ {
+  "claim_id": "pandas#65857-0",
+  "text": "The page at URL still says 3.0.1 is the latest version, and points to 3.0.1 release notes and release date.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65857,
+  "url": "https://github.com/pandas-dev/pandas/issues/65857",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Web"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34286-1",
+  "text": "The only cases where random numbers are used is with solvers liblinear, sag, saga.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34286,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34286",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "API",
+   "Hard",
+   "module:linear_model"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34472-2",
+  "text": "So that whole ValueError branch is just dead code, nobody's ever going to hit it.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34472,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34472",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34072-0",
+  "text": "To ensure thread-safety, it's useful to have test infrastructure that will provide: * A way to identify thread-safety issues in code that has previously mostly been run in process pools.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34072,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34072",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "module:test-suite",
+   "free-threading"
+  ]
+ },
+ {
+  "claim_id": "pandas#66087-0",
+  "text": "The original DataFrame should not be affected",
+  "repo": "pandas-dev/pandas",
+  "issue": 66087,
+  "url": "https://github.com/pandas-dev/pandas/issues/66087",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66205-1",
+  "text": "Currently, this function walks the stack frames and calls CODE inside a loop: For workloads that emit multiple warnings (or libraries relying heavily on pandas warnings), this function is highly inefficient because: 1.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66205,
+  "url": "https://github.com/pandas-dev/pandas/issues/66205",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Performance",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65903-2",
+  "text": "- Use-after-free: CODE reads freed memory - The freed pointer is returned to the caller, which will read/use corrupted data - Can cause crashes, incorrect datetime string output, or memory corruption",
+  "repo": "pandas-dev/pandas",
+  "issue": 65903,
+  "url": "https://github.com/pandas-dev/pandas/issues/65903",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "IO JSON"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33737-1",
+  "text": "The goal of the transformer is to move the input array CODE to a specified array namespace (numpy, torch, cupy) and device (CPU, CUDA, MPS, etc).",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33737,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33737",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Needs Decision",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34260-0",
+  "text": "Two possible improvements (both useful): * In the error message, print the file name that is offending, and suggest to the user to remove it * Have a retry option",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34260,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34260",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Enhancement",
+   "Moderate"
+  ]
+ },
+ {
+  "claim_id": "pandas#65685-1",
+  "text": "I checked running CODE and this one is working fine.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65685,
+  "url": "https://github.com/pandas-dev/pandas/issues/65685",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Index"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34270-2",
+  "text": "I would like to avoid introducing CODE in all these estimators.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34270,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34270",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Needs Decision",
+   "Metadata Routing"
+  ]
+ },
+ {
+  "claim_id": "pandas#65987-2",
+  "text": "Proper logging would: - Allow users to control verbosity with log levels (DEBUG, INFO, WARNING, ERROR) - Make it easier to integrate with log aggregation systems - Help diagnose issues in production without code changes",
+  "repo": "pandas-dev/pandas",
+  "issue": 65987,
+  "url": "https://github.com/pandas-dev/pandas/issues/65987",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65880-0",
+  "text": "Open a file without using a context manager 2.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65880,
+  "url": "https://github.com/pandas-dev/pandas/issues/65880",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34319-0",
+  "text": "EDIT: scikit-learn uses Sphinx CODE but it seems that it doesn't check the whole docs webpage.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34319,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34319",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation"
+  ]
+ },
+ {
+  "claim_id": "pandas#66086-2",
+  "text": "With CODE , the C stack shows what looks like unbounded recursion between CODE and numpy's CODE , overflowing the C stack: The Python-level stack is just the single CODE call line \u2014 the fault is entirely in the compiled extension.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66086,
+  "url": "https://github.com/pandas-dev/pandas/issues/66086",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#34668-2",
+  "text": "ValueError: Input X contains infinity or a value too large for dtype('float32').",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34668,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34668",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34580-0",
+  "text": "Here I propose to require contributors to write comments, PR descriptions and issues using their own words, as opposed to posting AI generated text.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34580,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34580",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "pandas#66630-2",
+  "text": "Current Notes paragraph, which also appears in CODE function in CODE is inconsistent with the following Examples section(and with current behaviour):",
+  "repo": "pandas-dev/pandas",
+  "issue": 66630,
+  "url": "https://github.com/pandas-dev/pandas/issues/66630",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Docs",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65684-2",
+  "text": "There is no built-in, one-stop tool in Pandas to inject controlled chaos into a DataFrame.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65684,
+  "url": "https://github.com/pandas-dev/pandas/issues/65684",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Enhancement",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#65914-0",
+  "text": "Hopefully the reproducible code, messages and below plots explain the issue well enough.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65914,
+  "url": "https://github.com/pandas-dev/pandas/issues/65914",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Groupby"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33822-0",
+  "text": "The logic for array API was recently modified to allow 'y' inputs of a potentially different type than 'X', particularly when it comes to classifiers where 'y' might be strings.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33822,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33822",
+  "issue_state": "open",
+  "issue_state_reason": "reopened",
+  "issue_labels": [
+   "Documentation",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34312-2",
+  "text": "This is incorrect: we should the log of the probabilistic predictions (incremented by a small epsilon) to feed logits as inputs to the sigmoid function.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34312,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34312",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "module:calibration"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34076-2",
+  "text": "Since the output of the CODE function is an array, without any explicit labels, this means it will need to be manually re-aligned with the labels.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34076,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34076",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34151-1",
+  "text": "I would propose to enable this and re-enable it every 6 months.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34151,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34151",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33829-1",
+  "text": "But it appears to still rely on functions with numpy-specific code: URL .. which leads it to throw warnings when used with array API (see code snippet).",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33829,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33829",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34046-0",
+  "text": "Internal utility CODE appears to handle cases like Pandas series correctly with most array API namespaces.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34046,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34046",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Decision",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "pandas#65710-1",
+  "text": "The corresponding CODE reductions on the same data correctly return CODE .",
+  "repo": "pandas-dev/pandas",
+  "issue": 65710,
+  "url": "https://github.com/pandas-dev/pandas/issues/65710",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Missing-data",
+   "NA - MaskedArrays",
+   "Reduction Operations"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34595-0",
+  "text": "If I understand this correctly TunedThresholdClassifierCV calculates the metric values at the indicated threshold fo each folds, then takes the average metric per threshold, and with that it selects the best threshold.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34595,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34595",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "New Feature",
+   "Needs Investigation"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33715-1",
+  "text": "Switch the CODE CI wheel build from MSVC to **clang-cl** (LLVM).",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33715,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33715",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Build / CI",
+   "Needs Investigation"
+  ]
+ }
+]

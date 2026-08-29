@@ -70,6 +70,29 @@ mismatched amount or unknown envelope is silently rejected — production
 will want a structured "dispute" reply); ledger gossip across all peers
 in a project (Phase 4); rotation of the compositor key (a settled entry
 references the key valid at the moment of signing).
+
+COMPOSITOR ROTATION IS STILL DEFERRED, AND IT IS THE HARDER HALF. On 2026-08-19
+`containment/guardconfig.py` gained `KeySuccession` -- a record signed by the
+OUTGOING key naming its successor, with the chain walkable from a pinned genesis
+pubkey. **That solves the AUTHORITY key, not this one, and the two are not the
+same problem.**
+
+  * The authority key protects a SINGLE CURRENT DOCUMENT. Rotation swaps who
+    may sign the next guard configuration; nothing historical needs
+    reinterpreting. The only trap was that rotation must not reset the
+    monotonicity checks, or rotating becomes a loosening bypass.
+
+  * The compositor key is folded over HISTORY. `Wallet` sums `LedgerEntry`
+    keyed by pubkey, so a rotation splits one principal into two balances --
+    the live gate reads the new key while every settled entry is pinned to the
+    old. That is R9's `G4'` exactly, and CLAUDE.md flags this deferral as
+    reproducing it if implemented naively.
+
+So the template exists and the work does not transfer for free: the fold must
+resolve old-key entries to the current identity, which means `Wallet` (and every
+other pubkey-keyed projection) has to consult the succession chain rather than
+compare raw hex. The invariant's frame must follow the harm's frame, never the
+reverse.
 """
 from __future__ import annotations
 

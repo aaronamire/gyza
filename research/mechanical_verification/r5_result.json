@@ -1,0 +1,455 @@
+{
+  "program": "Route 5 mechanical step verification. NOT a Route 2 rescue.",
+  "datasets": {
+    "MATH": {
+      "coverage_Q1": {
+        "relation_distribution": {
+          "IDENTITY": 1407,
+          "ASSERTION": 1455,
+          "SUBSTITUTION": 318,
+          "SOLUTION_SET": 785,
+          "NOT_EXTRACTABLE": 285,
+          "DEFINITION": 3,
+          "SIMPLIFICATION": 1
+        },
+        "checkable_fraction_of_transitions": 0.2024,
+        "fraction_traces_with_ge1_checkable": 0.5774,
+        "mean_transitions_per_trace": 9.41,
+        "protocol_violation_rate": 0.0,
+        "parse_fail_rate": 0.0022
+      },
+      "per_extractor": {
+        "strong": {
+          "ALL": {
+            "n": 218,
+            "n_wrong": 28,
+            "TPR": 0.1429,
+            "FPR": 0.2316,
+            "firing_rate": 0.2202,
+            "precision": 0.0833,
+            "J": -0.0887,
+            "J_ci": [
+              -0.0879,
+              -0.222,
+              0.067
+            ],
+            "perm_p": 0.9037,
+            "LR": 0.617
+          },
+          "cell_a_ext_solved": {
+            "n": 181,
+            "n_wrong": 12,
+            "TPR": 0.0833,
+            "FPR": 0.2426,
+            "firing_rate": 0.232,
+            "precision": 0.0238,
+            "J": -0.1593,
+            "J_ci": [
+              -0.1606,
+              -0.2924,
+              0.0477
+            ],
+            "perm_p": 0.9593,
+            "LR": 0.343
+          },
+          "cell_b_ext_failed": {
+            "n": 10,
+            "n_wrong": 7,
+            "TPR": 0.2857,
+            "FPR": 0.0,
+            "firing_rate": 0.2,
+            "precision": 1.0,
+            "J": 0.2857,
+            "J_ci": [
+              0.2857,
+              0.0,
+              0.6667
+            ],
+            "perm_p": 0.4867,
+            "LR": "inf"
+          }
+        },
+        "weak": {
+          "ALL": {
+            "n": 218,
+            "n_wrong": 28,
+            "TPR": 0.4643,
+            "FPR": 0.3158,
+            "firing_rate": 0.3349,
+            "precision": 0.1781,
+            "J": 0.1485,
+            "J_ci": [
+              0.1484,
+              -0.0485,
+              0.342
+            ],
+            "perm_p": 0.091,
+            "LR": 1.47
+          },
+          "cell_a_ext_solved": {
+            "n": 144,
+            "n_wrong": 0,
+            "TPR": null,
+            "FPR": 0.2847,
+            "firing_rate": 0.2847,
+            "precision": 0.0,
+            "J": null,
+            "J_ci": [
+              null,
+              null,
+              null
+            ],
+            "perm_p": null,
+            "LR": NaN
+          },
+          "cell_b_ext_failed": {
+            "n": 48,
+            "n_wrong": 24,
+            "TPR": 0.4167,
+            "FPR": 0.4583,
+            "firing_rate": 0.4375,
+            "precision": 0.4762,
+            "J": -0.0417,
+            "J_ci": [
+              -0.0396,
+              -0.3287,
+              0.25
+            ],
+            "perm_p": 0.7117,
+            "LR": 0.909
+          }
+        }
+      },
+      "n_eval": 436,
+      "n_wrong": 56
+    },
+    "NoOp": {
+      "coverage_Q1": {
+        "relation_distribution": {
+          "IDENTITY": 323,
+          "ASSERTION": 258,
+          "SOLUTION_SET": 162,
+          "SUBSTITUTION": 17,
+          "NOT_EXTRACTABLE": 373
+        },
+        "checkable_fraction_of_transitions": 0.2842,
+        "fraction_traces_with_ge1_checkable": 0.6094,
+        "mean_transitions_per_trace": 3.54,
+        "protocol_violation_rate": 0.0,
+        "parse_fail_rate": 0.0
+      },
+      "per_extractor": {
+        "strong": {
+          "ALL": {
+            "n": 160,
+            "n_wrong": 25,
+            "TPR": 0.04,
+            "FPR": 0.2296,
+            "firing_rate": 0.2,
+            "precision": 0.0312,
+            "J": -0.1896,
+            "J_ci": [
+              -0.1903,
+              -0.2857,
+              -0.0757
+            ],
+            "perm_p": 0.9983,
+            "LR": 0.174
+          },
+          "cell_a_ext_solved": {
+            "n": 160,
+            "n_wrong": 25,
+            "TPR": 0.04,
+            "FPR": 0.2296,
+            "firing_rate": 0.2,
+            "precision": 0.0312,
+            "J": -0.1896,
+            "J_ci": [
+              -0.1888,
+              -0.2857,
+              -0.0685
+            ],
+            "perm_p": 0.9973,
+            "LR": 0.174
+          },
+          "cell_b_ext_failed": null
+        },
+        "weak": {
+          "ALL": {
+            "n": 160,
+            "n_wrong": 25,
+            "TPR": 0.0,
+            "FPR": 0.0741,
+            "firing_rate": 0.0625,
+            "precision": 0.0,
+            "J": -0.0741,
+            "J_ci": [
+              -0.0742,
+              -0.1214,
+              -0.032
+            ],
+            "perm_p": 1.0,
+            "LR": 0.0
+          },
+          "cell_a_ext_solved": {
+            "n": 80,
+            "n_wrong": 0,
+            "TPR": null,
+            "FPR": 0.0375,
+            "firing_rate": 0.0375,
+            "precision": 0.0,
+            "J": null,
+            "J_ci": [
+              null,
+              null,
+              null
+            ],
+            "perm_p": null,
+            "LR": NaN
+          },
+          "cell_b_ext_failed": {
+            "n": 80,
+            "n_wrong": 25,
+            "TPR": 0.0,
+            "FPR": 0.1273,
+            "firing_rate": 0.0875,
+            "precision": 0.0,
+            "J": -0.1273,
+            "J_ci": [
+              -0.1261,
+              -0.2222,
+              -0.0408
+            ],
+            "perm_p": 1.0,
+            "LR": 0.0
+          }
+        }
+      },
+      "n_eval": 320,
+      "n_wrong": 50
+    }
+  },
+  "Q3_weak_vs_strong_MATH": {
+    "n_paired_traces": 218,
+    "strong": {
+      "n": 218,
+      "n_wrong": 28,
+      "TPR": 0.1429,
+      "FPR": 0.2316,
+      "firing_rate": 0.2202,
+      "precision": 0.0833,
+      "J": -0.0887,
+      "J_ci": [
+        -0.0886,
+        -0.2222,
+        0.0711
+      ],
+      "perm_p": 0.907,
+      "LR": 0.617
+    },
+    "weak": {
+      "n": 218,
+      "n_wrong": 28,
+      "TPR": 0.4643,
+      "FPR": 0.3158,
+      "firing_rate": 0.3349,
+      "precision": 0.1781,
+      "J": 0.1485,
+      "J_ci": [
+        0.1476,
+        -0.0485,
+        0.3408
+      ],
+      "perm_p": 0.091,
+      "LR": 1.47
+    },
+    "strong_coverage": 0.2106,
+    "weak_coverage": 0.2183
+  },
+  "Q4_dissociation": {
+    "strong": {
+      "MATH": {
+        "ALL": {
+          "n": 218,
+          "n_wrong": 28,
+          "TPR": 0.1429,
+          "FPR": 0.2316,
+          "firing_rate": 0.2202,
+          "precision": 0.0833,
+          "J": -0.0887,
+          "J_ci": [
+            -0.0879,
+            -0.222,
+            0.067
+          ],
+          "perm_p": 0.9037,
+          "LR": 0.617
+        },
+        "cell_b": {
+          "n": 10,
+          "n_wrong": 7,
+          "TPR": 0.2857,
+          "FPR": 0.0,
+          "firing_rate": 0.2,
+          "precision": 1.0,
+          "J": 0.2857,
+          "J_ci": [
+            0.2857,
+            0.0,
+            0.6667
+          ],
+          "perm_p": 0.4867,
+          "LR": "inf"
+        }
+      },
+      "NoOp": {
+        "ALL": {
+          "n": 160,
+          "n_wrong": 25,
+          "TPR": 0.04,
+          "FPR": 0.2296,
+          "firing_rate": 0.2,
+          "precision": 0.0312,
+          "J": -0.1896,
+          "J_ci": [
+            -0.1903,
+            -0.2857,
+            -0.0757
+          ],
+          "perm_p": 0.9983,
+          "LR": 0.174
+        },
+        "cell_b": null
+      }
+    },
+    "weak": {
+      "MATH": {
+        "ALL": {
+          "n": 218,
+          "n_wrong": 28,
+          "TPR": 0.4643,
+          "FPR": 0.3158,
+          "firing_rate": 0.3349,
+          "precision": 0.1781,
+          "J": 0.1485,
+          "J_ci": [
+            0.1484,
+            -0.0485,
+            0.342
+          ],
+          "perm_p": 0.091,
+          "LR": 1.47
+        },
+        "cell_b": {
+          "n": 48,
+          "n_wrong": 24,
+          "TPR": 0.4167,
+          "FPR": 0.4583,
+          "firing_rate": 0.4375,
+          "precision": 0.4762,
+          "J": -0.0417,
+          "J_ci": [
+            -0.0396,
+            -0.3287,
+            0.25
+          ],
+          "perm_p": 0.7117,
+          "LR": 0.909
+        }
+      },
+      "NoOp": {
+        "ALL": {
+          "n": 160,
+          "n_wrong": 25,
+          "TPR": 0.0,
+          "FPR": 0.0741,
+          "firing_rate": 0.0625,
+          "precision": 0.0,
+          "J": -0.0741,
+          "J_ci": [
+            -0.0742,
+            -0.1214,
+            -0.032
+          ],
+          "perm_p": 1.0,
+          "LR": 0.0
+        },
+        "cell_b": {
+          "n": 80,
+          "n_wrong": 25,
+          "TPR": 0.0,
+          "FPR": 0.1273,
+          "firing_rate": 0.0875,
+          "precision": 0.0,
+          "J": -0.1273,
+          "J_ci": [
+            -0.1261,
+            -0.2222,
+            -0.0408
+          ],
+          "perm_p": 1.0,
+          "LR": 0.0
+        }
+      }
+    }
+  },
+  "independence_MATH": {
+    "n": 206,
+    "n_wrong": 22,
+    "phi_R5_A2": 0.1441,
+    "phi_R5_C1": 0.0554,
+    "phi_A2_C1": 0.1078,
+    "J_R5": -0.0919,
+    "J_A2": 0.4511,
+    "J_C1": 0.4269,
+    "J_OR_all": 0.3819,
+    "J_AND_all": 0.08,
+    "note": "cache-only; all three signals on identical (source,item) MATH traces."
+  },
+  "cost": {
+    "gen_solution_out_tok": 387.9,
+    "extraction_out_tok": 343.1,
+    "CAS_model_tokens": 0,
+    "ratio_extraction_over_gen": 0.884,
+    "note": "the CAS check has ZERO marginal model cost (structural difference vs prior mechanisms); but the extraction step still pays model tokens."
+  },
+  "DECISION": {
+    "case": "R5_DEAD",
+    "powered": false,
+    "note": "cell-(b) n_wrong=7 -> UNDERPOWERED-NULL if null",
+    "strong_cell_b": {
+      "n": 10,
+      "n_wrong": 7,
+      "TPR": 0.2857,
+      "FPR": 0.0,
+      "firing_rate": 0.2,
+      "precision": 1.0,
+      "J": 0.2857,
+      "J_ci": [
+        0.2857,
+        0.0,
+        0.6667
+      ],
+      "perm_p": 0.4867,
+      "LR": "inf"
+    },
+    "weak_cell_b": {
+      "n": 48,
+      "n_wrong": 24,
+      "TPR": 0.4167,
+      "FPR": 0.4583,
+      "firing_rate": 0.4375,
+      "precision": 0.4762,
+      "J": -0.0417,
+      "J_ci": [
+        -0.0396,
+        -0.3287,
+        0.25
+      ],
+      "perm_p": 0.7117,
+      "LR": 0.909
+    },
+    "coverage": 0.2024,
+    "weak_vs_strong_gap_J": 0.2372
+  }
+}

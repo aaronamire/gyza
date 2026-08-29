@@ -1,0 +1,346 @@
+{
+ "n": 18,
+ "structurally_ready": 14,
+ "blocked": 4,
+ "carrier_basis_counts": {
+  "MEASURED": 16,
+  "UNCLASSIFIABLE": 2
+ },
+ "judgement_fraction": 0.0,
+ "entries": [
+  {
+   "claim_type": "envelope_signature",
+   "success_condition": "The envelope's Ed25519 signature verifies against the agent pubkey over the canonical payload hash.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "delegates to gyza.icp.verify_envelope, which recomputes the canonical bytes, re-hashes and re-verifies the signature; no caller-supplied case set exists",
+   "invariant_class": "N/A: a per-envelope postcondition, not a quantity that accumulates",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: both operands are passed by value; there is no set to move",
+   "obligations": [
+    "signature_verifies_over_canonical_payload"
+   ],
+   "witness": "gyza/icp.py:82",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "manifest_identity",
+   "success_condition": "The manifest's canonical hash equals the declared hash.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "recomputes manifest_hash_hex and compares; a pure function of the two arguments",
+   "invariant_class": "N/A: a per-manifest postcondition",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: both operands passed by value",
+   "obligations": [
+    "recomputed_hash_equals_declared"
+   ],
+   "witness": "gyza/identity.py:101",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "artifact_content_address",
+   "success_condition": "blake3(data) equals the declared content address.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "recomputes the digest over the supplied bytes and compares",
+   "invariant_class": "N/A: a per-artifact postcondition",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: the bytes are passed by value",
+   "obligations": [
+    "recomputed_digest_equals_address"
+   ],
+   "witness": "gyza/network/artifact_store.py:47",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "envelope_chain",
+   "success_condition": "Every envelope in the sequence links to its parent and each signature verifies, over the WHOLE sequence supplied.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "gyza.icp.verify_chain walks every element; it does not sample",
+   "invariant_class": "N/A: a structural postcondition over the sequence, not a budget",
+   "reference_set_can_move": true,
+   "frame_identifier": "chain_head_envelope_hash",
+   "frame_status": "PENDING \u2014 the hash of the head envelope pins which chain was verified; not currently carried by the claim",
+   "obligations": [
+    "all_links_resolve",
+    "all_signatures_verify"
+   ],
+   "witness": "gyza/icp.py:105",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "envelope_dag",
+   "success_condition": "Every envelope's parents resolve within the supplied set and each signature verifies. NOTE: closure is NOT checked unless the caller passes require_closed=True.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "gyza.icp.verify_dag traverses every node; no sampling",
+   "invariant_class": "N/A: a structural postcondition over the supplied set",
+   "reference_set_can_move": true,
+   "frame_identifier": "dag_root_set_digest",
+   "frame_status": "PENDING \u2014 nothing currently pins WHICH envelopes were supplied; see blocked_reason",
+   "obligations": [
+    "all_parents_resolve",
+    "all_signatures_verify"
+   ],
+   "witness": "gyza/icp.py:217",
+   "structurally_ready": false,
+   "blocked_reason": "SUCCESS CONDITION IS NOT FIXED BY THE REGISTRY. The adapter forwards **kw to verify_dag, whose require_closed defaults to False (gyza/icp.py:220). Production calls it BOTH ways -- audit.py:101 and demo/ddil_partition.py:616 pass True, resilience.py:202 and two demos pass False -- so the registered entry proves a DIFFERENT PROPOSITION depending on the call site. Split into two claim types or bind the kwarg before attesting.",
+   "attestation": null
+  },
+  {
+   "claim_type": "enforcement_within_manifest",
+   "success_condition": "The enforcement record's read set, write set, network flag and memory cap are all within the signed manifest's.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "enforcement_satisfies_manifest compares the declared dimensions directly; a total check over four fields",
+   "invariant_class": "N/A: a per-work-item postcondition",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: both records passed by value",
+   "obligations": [
+    "memory_cap_not_raised",
+    "network_not_widened",
+    "read_set_subset",
+    "write_set_subset"
+   ],
+   "witness": "gyza/sandbox/config.py:286",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "delegation_attenuation",
+   "success_condition": "For every hop i in the chain, manifest(h_i) is a subset of manifest(h_0); the chain is acyclic; and its depth is at most max_depth = 8 (MAX_DELEGATION_DEPTH, gyza/economy/delegation.py). THE VALUE 8 IS PART OF THE CLAIM: it is a defaulted parameter of verify_delegation that moves the verdict, and a claim that says only 'depth is bounded' does not say which bound was checked.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "verify_delegation iterates every hop; the bound is structural, not sampled. FIXED-UNNAMED under the carrier rule: max_depth has a default, but the adapter does not expose it, so the verdict cannot vary per call site -- PROOF stands, and the remedy is naming the value here rather than refusing the entry",
+   "invariant_class": "MONOTONE_NON_CUMULATIVE",
+   "reference_set_can_move": true,
+   "frame_identifier": "delegation_root_manifest_hash",
+   "frame_status": "PENDING \u2014 the root manifest hash pins the origin the attenuation is measured FROM",
+   "obligations": [
+    "acyclic",
+    "authority_non_increasing_per_hop",
+    "depth_at_most_8"
+   ],
+   "witness": "gyza/economy/delegation.py:213",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "ledger_entry_signatures",
+   "success_condition": "Every required role signature on the entry verifies over the entry's canonical sign-bytes.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "ledger.verify_entry recomputes canonical_sign_bytes per role and verifies each signature",
+   "invariant_class": "N/A: a per-entry postcondition",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: the entry is passed by value; the ledger supplies keys only",
+   "obligations": [
+    "all_role_signatures_verify"
+   ],
+   "witness": "gyza/economy/ledger.py:348",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "balance_fold",
+   "success_condition": "The net balance derived by folding the supplied entries equals the declared balance.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "Wallet(entries).net_balance recomputes the fold over every entry",
+   "invariant_class": "CONSERVATION",
+   "reference_set_can_move": true,
+   "frame_identifier": "ledger_entry_set_digest",
+   "frame_status": "PENDING \u2014 which entries were folded is not pinned; a balance folded from a moving entry set is not a balance",
+   "obligations": [
+    "fold_over_all_entries_equals_declared"
+   ],
+   "witness": "gyza/economy/wallet.py:274",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "market_capital_fold",
+   "success_condition": "The capital derived by folding the market's capital entries for the pubkey equals the declared amount.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "sums market.capital_entries() in full; no sampling",
+   "invariant_class": "CONSERVATION",
+   "reference_set_can_move": true,
+   "frame_identifier": "capital_entry_set_digest",
+   "frame_status": "PENDING \u2014 and note this set is reached THROUGH the market object, so the authority's signature screen does not see it (see FINDINGS)",
+   "obligations": [
+    "fold_over_all_capital_entries_equals_declared"
+   ],
+   "witness": "gyza/economy/market.py:CapitalEntry fold",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "unit_test_execution",
+   "success_condition": "The function returns the expected output for every case in the SUPPLIED FINITE CASE SET, and for nothing else.",
+   "carrier": "TEST",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "the body is all(fn(x) == y for x, y in cases) -- it is sound exactly where it sampled and says nothing elsewhere. SR-3 measured TEST-carriers composing at 0.000",
+   "invariant_class": "N/A: a per-case postcondition",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: the case set IS the claim's scope, not a moving reference",
+   "obligations": [
+    "all_supplied_cases_pass"
+   ],
+   "witness": "V-3 adapter (finite sample)",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "memory_retrieval_relevance",
+   "success_condition": "The returned ids are exactly the first k candidates, in descending metric order, of the pinned corpus snapshot that satisfy the filter and score >= threshold.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "verify_retrieval_claim RECOMPUTES the whole neighbour set (respec.py:122-150) and refuses on corpus-digest mismatch; it does not sample the ranking",
+   "invariant_class": "N/A: a per-query postcondition",
+   "reference_set_can_move": true,
+   "frame_identifier": "corpus_snapshot",
+   "frame_status": "ALREADY CARRIED \u2014 RetrievalClaim.corpus_snapshot, checked at respec.py:134. This is the working precedent the other frames should follow.",
+   "obligations": [
+    "corpus_digest_matches",
+    "membership_exact",
+    "order_exact"
+   ],
+   "witness": "gyza/verification/respec.py:124",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "external_send_content",
+   "success_condition": "blake3 of the bytes that ACTUALLY left equals the claimed artifact hash, and the byte count matches.",
+   "carrier": "PROOF",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "verify_send_claim recomputes wire_digest over the emitted bytes (respec.py:204); the hash is not taken from the sender",
+   "invariant_class": "N/A: containment ends at emission (C15); nothing accumulates after",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: the emitted bytes are passed by value",
+   "obligations": [
+    "byte_count_matches",
+    "wire_digest_matches"
+   ],
+   "witness": "gyza/verification/respec.py:196",
+   "structurally_ready": false,
+   "blocked_reason": "SUCCESS CONDITION IS NOT FIXED BY THE REGISTRY. The `policy` parameter defaults to None (respec.py:195), and when it is None the policy clause is SKIPPED. So the registered entry verifies hash+length alone at some call sites and hash+length+policy at others. Bind the policy or split the claim type before attesting.",
+   "attestation": null
+  },
+  {
+   "claim_type": "hlc_ordering",
+   "success_condition": "The successor HLC tuple is >= the predecessor's, componentwise.",
+   "carrier": "SPEC",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "the body is a total tuple comparison; it recomputes the ordering rather than sampling it",
+   "invariant_class": "MONOTONE_NON_CUMULATIVE",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: both timestamps passed by value",
+   "obligations": [
+    "successor_not_less_than_predecessor"
+   ],
+   "witness": "[NO WITNESS FIELD] PartialSpec at gyza/verification/adapters.py, authored_by='xan'",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "reputation_score",
+   "success_condition": "The score lies in the closed interval [0.0, 1.0].",
+   "carrier": "SPEC",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "a total range check on one value",
+   "invariant_class": "CONSERVATION",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: a single scalar passed by value",
+   "obligations": [
+    "score_within_unit_interval"
+   ],
+   "witness": "[NO WITNESS FIELD] PartialSpec at gyza/verification/adapters.py, authored_by='xan'",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "work_claim_exclusivity",
+   "success_condition": "At most one claim in the supplied set names the given work item.",
+   "carrier": "SPEC",
+   "carrier_basis": "MEASURED",
+   "carrier_reason": "counts every element of the supplied set; no sampling",
+   "invariant_class": "CONSERVATION",
+   "reference_set_can_move": true,
+   "frame_identifier": "claim_set_digest",
+   "frame_status": "PENDING \u2014 exclusivity counted over a set that can grow between claim and check is not exclusivity",
+   "obligations": [
+    "at_most_one_claim_per_work_item"
+   ],
+   "witness": "[NO WITNESS FIELD] PartialSpec at gyza/verification/adapters.py, authored_by='xan'",
+   "structurally_ready": true,
+   "blocked_reason": null,
+   "attestation": null
+  },
+  {
+   "claim_type": "execution_output_content",
+   "success_condition": "NO MECHANICAL SUCCESS CONDITION EXISTS. restating it as 'output hash = H, checkable by re-execution' verifies REPRODUCIBILITY and discards the property wanted: a deterministic wrong program passes every time.",
+   "carrier": "NONE",
+   "carrier_basis": "UNCLASSIFIABLE",
+   "carrier_reason": "there is no verifier body to read; the carrier is not undetermined but ABSENT, which is a different claim",
+   "invariant_class": "N/A: no verifier",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: no verifier",
+   "obligations": [
+    "__none__"
+   ],
+   "witness": "[NO VERIFIER] enumerated at gyza/verification/adapters.py NO_VERIFIER",
+   "structurally_ready": false,
+   "blocked_reason": "IRREDUCIBLY SEMANTIC: no verifier exists to govern. Not registrable, and recorded so it is not proposed again.",
+   "attestation": null
+  },
+  {
+   "claim_type": "routing_match_quality",
+   "success_condition": "NO MECHANICAL SUCCESS CONDITION EXISTS. the mechanically checkable restatement (routed to argmax of declared capability overlap) is known not to deliver -- R11 ROUTER-DEAD measured failure even with an AUROC-1.000 oracle. Rule 3d: verifiable and known not to deliver is not a win.",
+   "carrier": "NONE",
+   "carrier_basis": "UNCLASSIFIABLE",
+   "carrier_reason": "there is no verifier body to read; the carrier is not undetermined but ABSENT, which is a different claim",
+   "invariant_class": "N/A: no verifier",
+   "reference_set_can_move": false,
+   "frame_identifier": null,
+   "frame_status": "N/A: no verifier",
+   "obligations": [
+    "__none__"
+   ],
+   "witness": "[NO VERIFIER] enumerated at gyza/verification/adapters.py NO_VERIFIER",
+   "structurally_ready": false,
+   "blocked_reason": "IRREDUCIBLY SEMANTIC: no verifier exists to govern. Not registrable, and recorded so it is not proposed again.",
+   "attestation": null
+  }
+ ]
+}

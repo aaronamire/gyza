@@ -33,6 +33,7 @@ import (
 	pb "gyza/netd/internal/grpc/proto"
 
 	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/protocol"
 	"github.com/libp2p/go-libp2p/core/routing"
 
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
@@ -272,6 +273,20 @@ type GyzaDHT struct {
 	republishCount atomic.Uint64
 }
 
+// ProtocolPrefix segregates this DHT from the public IPFS one even when both
+// ride the same wire transport.
+const ProtocolPrefix protocol.ID = "/gyza/1.0"
+
+// ServerProtocolID is the stream protocol a server-mode DHT registers on its
+// host, which is how ServingMode reads the runtime mode. kad-dht builds it as
+// ProtocolPrefix + "/kad/1.0.0" and does not export the result, so it is
+// reconstructed here from the SAME constant passed to kaddht.ProtocolPrefix
+// rather than written out as a second literal that could drift from the
+// first. A reconstruction is a claim about someone else's code, so
+// TestServerProtocolIDMatchesWhatTheHostRegisters checks it against a real
+// server-mode host instead of trusting the arithmetic.
+const ServerProtocolID protocol.ID = ProtocolPrefix + "/kad/1.0.0"
+
 // NewGyzaDHT constructs the Kademlia DHT, registers the gyza
 // validator, and bootstraps the routing table. The caller is
 // responsible for ConnectBootstrap-ing the host first if it expects
@@ -294,7 +309,7 @@ func NewGyzaDHT(ctx context.Context, h host.Host, mode kaddht.ModeOpt) (*GyzaDHT
 	}
 
 	kad, err := kaddht.New(ctx, h,
-		kaddht.ProtocolPrefix("/gyza/1.0"),
+		kaddht.ProtocolPrefix(ProtocolPrefix),
 		kaddht.Mode(mode),
 		kaddht.BucketSize(BucketSize),
 		kaddht.Validator(validator),
@@ -1023,4 +1038,90 @@ func cosine(a, b []float32) float64 {
 		return 0
 	}
 	return dot / (math.Sqrt(na) * math.Sqrt(nb))
+}
+
+// ServingMode reports whether this node is ACTUALLY answering DHT queries
+// right now — "server" or "client".
+//
+// This exists because kaddht.IpfsDHT.Mode() does not answer that question. It
+// returns the ModeOpt the DHT was CONSTRUCTED with, so a node started with
+// ModeAuto reports "auto" forever whether or not it ever promoted. The
+// runtime mode is held in an unexported field behind an unexported getter.
+// The daemon's startup log had the same shape: it printed the value of the
+// --dht-mode flag, which is a claim about what was requested, not about what
+// is true.
+//
+// The runtime mode IS observable, just not through that API. moveToServerMode
+// registers a stream handler for each server protocol on the host and
+// moveToClientMode removes them, so a registered handler for the DHT's server
+// protocol is exactly equivalent to being in server mode.
+//
+// WHY IT MATTERS AT SCALE: ModeAuto promotes only when AutoNAT confirms
+// inbound reachability. A fleet that is mostly behind NAT mostly stays in
+// client mode, and clients consume routing without serving it. The routing
+// layer then rests on whatever handful of nodes are publicly reachable — for
+// this network, the bootstrap hosts. That failure is quiet: every client
+// works fine, and the load lands somewhere the client operator cannot see.
+// This makes the free-rider condition countable instead of assumed.
+func (d *GyzaDHT) ServingMode() string {
+	serving := make(map[protocol.ID]bool, 4)
+	for _, p := range d.kad.Host().Mux().Protocols() {
+		serving[p] = true
+	}
+	if serving[ServerProtocolID] {
+		return "server"
+	}
+	return "client"
+}
+
+// WatchPromotion logs the node's serving mode on every transition, and warns
+// once if a ModeAuto node is still a client after grace has elapsed.
+//
+// The warning is the point. A node that never promotes is indistinguishable
+// from a healthy one from the inside; it just quietly declines to carry any
+// of the routing layer it depends on. Callers pass the mode the operator
+// ASKED for so the message can distinguish "client because you said client"
+// from "client because promotion never happened".
+//
+// Returns immediately; the watch runs until ctx is done.
+func (d *GyzaDHT) WatchPromotion(
+	ctx context.Context, requested string, grace, interval time.Duration,
+	logf func(string, ...any),
+) {
+	if logf == nil || interval <= 0 {
+		return
+	}
+	go func() {
+		last := d.ServingMode()
+		logf("[dht] serving mode=%s (requested=%s)", last, requested)
+
+		deadline := time.Now().Add(grace)
+		warned := false
+		t := time.NewTicker(interval)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+			}
+			now := d.ServingMode()
+			if now != last {
+				logf("[dht] serving mode changed %s -> %s (requested=%s)", last, now, requested)
+				last = now
+				if now == "server" {
+					warned = true // promoted; the grace warning is moot
+				}
+				continue
+			}
+			if !warned && now == "client" && requested == "auto" && time.Now().After(deadline) {
+				warned = true
+				logf("[dht] WARNING: still client-mode %s after start. ModeAuto "+
+					"promotes only when AutoNAT confirms inbound reachability, so this "+
+					"node is consuming the routing layer without serving it. Check NAT "+
+					"traversal, or pass --dht-mode=server if this host is reachable.",
+					grace)
+			}
+		}
+	}()
 }

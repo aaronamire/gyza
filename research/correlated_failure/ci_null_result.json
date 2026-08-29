@@ -1,0 +1,1666 @@
+{
+  "config": {
+    "seed": 1,
+    "n_code": 50,
+    "band": 0.1,
+    "in_band_models": [
+      "meta-llama/llama-3.1-70b-instruct",
+      "google/gemma-2-27b-it",
+      "google/gemma-3-27b-it",
+      "mistralai/mistral-small-24b-instruct-2501",
+      "mistralai/mistral-small-3.2-24b-instruct",
+      "microsoft/phi-4"
+    ],
+    "n_within_pairs": 2,
+    "n_cross_pairs": 13,
+    "sentinel_primary": "{TIMEOUT, IMPORTERR}",
+    "note": "ERR is answer-bearing (behavior) in primary; ERRsens variant excludes all-ERR too."
+  },
+  "reproduce_gate": {
+    "within_conv_mean_ci": [
+      0.6027,
+      0.5625,
+      0.6429
+    ],
+    "cross_conv_mean_ci": [
+      0.5602,
+      0.533,
+      0.5856
+    ],
+    "null_within": 0.0437,
+    "null_cross": 0.0442,
+    "n_within": 2,
+    "n_cross": 13,
+    "R": 1.076
+  },
+  "layer1_variants": {
+    "R1_in_band_primary": {
+      "ref": "in_band",
+      "include_err": false,
+      "min_distinct": null,
+      "n_problems_used": 50,
+      "per_pair": [
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-2-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.5556,
+          "baseline": 0.5817,
+          "excess": -0.0261,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.6071,
+          "baseline": 0.6104,
+          "excess": -0.0032,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.4483,
+          "baseline": 0.5796,
+          "excess": -0.1313,
+          "n_both_wrong": 29
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.5357,
+          "baseline": 0.5897,
+          "excess": -0.054,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.4815,
+          "baseline": 0.6026,
+          "excess": -0.1212,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": true,
+          "observed": 0.6429,
+          "baseline": 0.5779,
+          "excess": 0.0649,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.6129,
+          "baseline": 0.5732,
+          "excess": 0.0397,
+          "n_both_wrong": 31
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.5333,
+          "baseline": 0.5605,
+          "excess": -0.0272,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.5926,
+          "baseline": 0.58,
+          "excess": 0.0126,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.5667,
+          "baseline": 0.5696,
+          "excess": -0.003,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.5862,
+          "baseline": 0.5796,
+          "excess": 0.0066,
+          "n_both_wrong": 29
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.5556,
+          "baseline": 0.5828,
+          "excess": -0.0272,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": true,
+          "observed": 0.5625,
+          "baseline": 0.575,
+          "excess": -0.0125,
+          "n_both_wrong": 32
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.6,
+          "baseline": 0.5909,
+          "excess": 0.0091,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-3.2-24b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.6071,
+          "baseline": 0.5882,
+          "excess": 0.0189,
+          "n_both_wrong": 28
+        }
+      ],
+      "within": {
+        "n_pairs": 2,
+        "observed_mean_ci": [
+          0.6027,
+          0.5625,
+          0.6429
+        ],
+        "baseline_mean_ci": [
+          0.5764,
+          0.575,
+          0.5779
+        ],
+        "excess_mean_ci": [
+          0.0262,
+          -0.0125,
+          0.0649
+        ]
+      },
+      "cross": {
+        "n_pairs": 13,
+        "observed_mean_ci": [
+          0.5602,
+          0.5324,
+          0.5842
+        ],
+        "baseline_mean_ci": [
+          0.5838,
+          0.5768,
+          0.5907
+        ],
+        "excess_mean_ci": [
+          -0.0236,
+          -0.0519,
+          0.0007
+        ]
+      }
+    },
+    "R2_all9_minus_nonanswer": {
+      "ref": "all9",
+      "include_err": false,
+      "min_distinct": null,
+      "n_problems_used": 50,
+      "per_pair": [
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-2-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.5556,
+          "baseline": 0.2408,
+          "excess": 0.3147,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.6071,
+          "baseline": 0.2473,
+          "excess": 0.3599,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.4483,
+          "baseline": 0.2373,
+          "excess": 0.211,
+          "n_both_wrong": 29
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.5357,
+          "baseline": 0.2397,
+          "excess": 0.296,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.4815,
+          "baseline": 0.2445,
+          "excess": 0.237,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": true,
+          "observed": 0.6429,
+          "baseline": 0.2419,
+          "excess": 0.401,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.6129,
+          "baseline": 0.2383,
+          "excess": 0.3746,
+          "n_both_wrong": 31
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.5333,
+          "baseline": 0.2378,
+          "excess": 0.2956,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.5926,
+          "baseline": 0.2439,
+          "excess": 0.3486,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.5667,
+          "baseline": 0.2349,
+          "excess": 0.3318,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.5862,
+          "baseline": 0.239,
+          "excess": 0.3472,
+          "n_both_wrong": 29
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.5556,
+          "baseline": 0.2426,
+          "excess": 0.3129,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": true,
+          "observed": 0.5625,
+          "baseline": 0.2361,
+          "excess": 0.3264,
+          "n_both_wrong": 32
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.6,
+          "baseline": 0.2412,
+          "excess": 0.3588,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-3.2-24b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.6071,
+          "baseline": 0.2432,
+          "excess": 0.3639,
+          "n_both_wrong": 28
+        }
+      ],
+      "within": {
+        "n_pairs": 2,
+        "observed_mean_ci": [
+          0.6027,
+          0.5625,
+          0.6429
+        ],
+        "baseline_mean_ci": [
+          0.239,
+          0.2361,
+          0.2419
+        ],
+        "excess_mean_ci": [
+          0.3637,
+          0.3264,
+          0.401
+        ]
+      },
+      "cross": {
+        "n_pairs": 13,
+        "observed_mean_ci": [
+          0.5602,
+          0.5324,
+          0.5842
+        ],
+        "baseline_mean_ci": [
+          0.2408,
+          0.2391,
+          0.2426
+        ],
+        "excess_mean_ci": [
+          0.3194,
+          0.2923,
+          0.3434
+        ]
+      }
+    },
+    "R3_distinct_ge3": {
+      "ref": "in_band",
+      "include_err": false,
+      "min_distinct": 3,
+      "n_problems_used": 12,
+      "per_pair": [
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-2-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.2222,
+          "baseline": 0.1458,
+          "excess": 0.0764,
+          "n_both_wrong": 9
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.4444,
+          "baseline": 0.1667,
+          "excess": 0.2778,
+          "n_both_wrong": 9
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.0,
+          "baseline": 0.1961,
+          "excess": -0.1961,
+          "n_both_wrong": 10
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.1,
+          "baseline": 0.1765,
+          "excess": -0.0765,
+          "n_both_wrong": 10
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.3333,
+          "baseline": 0.125,
+          "excess": 0.2083,
+          "n_both_wrong": 9
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": true,
+          "observed": 0.2222,
+          "baseline": 0.1522,
+          "excess": 0.07,
+          "n_both_wrong": 9
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.1818,
+          "baseline": 0.2449,
+          "excess": -0.0631,
+          "n_both_wrong": 11
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.0,
+          "baseline": 0.1837,
+          "excess": -0.1837,
+          "n_both_wrong": 11
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.25,
+          "baseline": 0.1333,
+          "excess": 0.1167,
+          "n_both_wrong": 8
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.0,
+          "baseline": 0.2041,
+          "excess": -0.2041,
+          "n_both_wrong": 10
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.2,
+          "baseline": 0.2041,
+          "excess": -0.0041,
+          "n_both_wrong": 10
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.25,
+          "baseline": 0.1111,
+          "excess": 0.1389,
+          "n_both_wrong": 8
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": true,
+          "observed": 0.0833,
+          "baseline": 0.2885,
+          "excess": -0.2051,
+          "n_both_wrong": 12
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.1111,
+          "baseline": 0.2083,
+          "excess": -0.0972,
+          "n_both_wrong": 9
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-3.2-24b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.2222,
+          "baseline": 0.1667,
+          "excess": 0.0556,
+          "n_both_wrong": 9
+        }
+      ],
+      "within": {
+        "n_pairs": 2,
+        "observed_mean_ci": [
+          0.1527,
+          0.0833,
+          0.2222
+        ],
+        "baseline_mean_ci": [
+          0.2203,
+          0.1522,
+          0.2885
+        ],
+        "excess_mean_ci": [
+          -0.0675,
+          -0.2051,
+          0.07
+        ]
+      },
+      "cross": {
+        "n_pairs": 13,
+        "observed_mean_ci": [
+          0.1781,
+          0.1098,
+          0.2442
+        ],
+        "baseline_mean_ci": [
+          0.1743,
+          0.1543,
+          0.1942
+        ],
+        "excess_mean_ci": [
+          0.0038,
+          -0.0788,
+          0.0875
+        ]
+      }
+    },
+    "ERRsens_exclude_all_err": {
+      "ref": "in_band",
+      "include_err": true,
+      "min_distinct": null,
+      "n_problems_used": 50,
+      "per_pair": [
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-2-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.3704,
+          "baseline": 0.3464,
+          "excess": 0.024,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": false,
+          "observed": 0.4286,
+          "baseline": 0.3571,
+          "excess": 0.0714,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.2759,
+          "baseline": 0.3503,
+          "excess": -0.0745,
+          "n_both_wrong": 29
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.3214,
+          "baseline": 0.359,
+          "excess": -0.0375,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "meta-llama/llama-3.1-70b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.3333,
+          "baseline": 0.3444,
+          "excess": -0.011,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "google/gemma-3-27b-it"
+          ],
+          "same_family": true,
+          "observed": 0.4286,
+          "baseline": 0.3571,
+          "excess": 0.0714,
+          "n_both_wrong": 28
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.3871,
+          "baseline": 0.3694,
+          "excess": 0.0177,
+          "n_both_wrong": 31
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.3,
+          "baseline": 0.3631,
+          "excess": -0.0631,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "google/gemma-2-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.3704,
+          "baseline": 0.3467,
+          "excess": 0.0237,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-24b-instruct-2501"
+          ],
+          "same_family": false,
+          "observed": 0.3667,
+          "baseline": 0.3544,
+          "excess": 0.0122,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": false,
+          "observed": 0.3793,
+          "baseline": 0.3694,
+          "excess": 0.0099,
+          "n_both_wrong": 29
+        },
+        {
+          "pair": [
+            "google/gemma-3-27b-it",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.3704,
+          "baseline": 0.3377,
+          "excess": 0.0326,
+          "n_both_wrong": 27
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "mistralai/mistral-small-3.2-24b-instruct"
+          ],
+          "same_family": true,
+          "observed": 0.3125,
+          "baseline": 0.3812,
+          "excess": -0.0687,
+          "n_both_wrong": 32
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-24b-instruct-2501",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.3667,
+          "baseline": 0.3636,
+          "excess": 0.003,
+          "n_both_wrong": 30
+        },
+        {
+          "pair": [
+            "mistralai/mistral-small-3.2-24b-instruct",
+            "microsoft/phi-4"
+          ],
+          "same_family": false,
+          "observed": 0.3571,
+          "baseline": 0.366,
+          "excess": -0.0089,
+          "n_both_wrong": 28
+        }
+      ],
+      "within": {
+        "n_pairs": 2,
+        "observed_mean_ci": [
+          0.3705,
+          0.3125,
+          0.4286
+        ],
+        "baseline_mean_ci": [
+          0.3691,
+          0.3571,
+          0.3812
+        ],
+        "excess_mean_ci": [
+          0.0014,
+          -0.0687,
+          0.0714
+        ]
+      },
+      "cross": {
+        "n_pairs": 13,
+        "observed_mean_ci": [
+          0.3559,
+          0.3345,
+          0.3756
+        ],
+        "baseline_mean_ci": [
+          0.356,
+          0.3506,
+          0.3613
+        ],
+        "excess_mean_ci": [
+          -0.0,
+          -0.021,
+          0.02
+        ]
+      }
+    }
+  },
+  "layer2_concentration": {
+    "include_err": false,
+    "simpson": {
+      "median": 0.6,
+      "iqr": [
+        0.2,
+        1.0
+      ],
+      "n": 34
+    },
+    "distinct_wrong": {
+      "median": 1.0,
+      "iqr": [
+        0.0,
+        2.0
+      ],
+      "n": 50
+    },
+    "eff_wrong": {
+      "median": 1.428,
+      "iqr": [
+        1.0,
+        2.778
+      ],
+      "n": 36
+    },
+    "m_wrong": {
+      "median": 5.0,
+      "iqr": [
+        0.0,
+        6.0
+      ],
+      "n": 50
+    },
+    "simpson_pairs_ge2": {
+      "median": 0.6,
+      "iqr": [
+        0.2,
+        1.0
+      ],
+      "n": 34
+    },
+    "per_problem": [
+      {
+        "q": 0,
+        "m_wrong": 5,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 1,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.6667,
+        "eff_wrong": 1.385
+      },
+      {
+        "q": 2,
+        "m_wrong": 3,
+        "distinct_wrong": 3,
+        "simpson": 0.0,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 3,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.4667,
+        "eff_wrong": 1.8
+      },
+      {
+        "q": 4,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 5,
+        "m_wrong": 3,
+        "distinct_wrong": 3,
+        "simpson": 0.0,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 6,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 7,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 8,
+        "m_wrong": 5,
+        "distinct_wrong": 2,
+        "simpson": 0.6,
+        "eff_wrong": 1.471
+      },
+      {
+        "q": 9,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 10,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 11,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 12,
+        "m_wrong": 5,
+        "distinct_wrong": 3,
+        "simpson": 0.2,
+        "eff_wrong": 2.778
+      },
+      {
+        "q": 13,
+        "m_wrong": 1,
+        "distinct_wrong": 1,
+        "simpson": null,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 14,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.6667,
+        "eff_wrong": 1.385
+      },
+      {
+        "q": 15,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 16,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 17,
+        "m_wrong": 1,
+        "distinct_wrong": 1,
+        "simpson": null,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 18,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.4667,
+        "eff_wrong": 1.8
+      },
+      {
+        "q": 19,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 20,
+        "m_wrong": 6,
+        "distinct_wrong": 3,
+        "simpson": 0.4,
+        "eff_wrong": 2.0
+      },
+      {
+        "q": 21,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 22,
+        "m_wrong": 6,
+        "distinct_wrong": 4,
+        "simpson": 0.2,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 23,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.6667,
+        "eff_wrong": 1.385
+      },
+      {
+        "q": 24,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 25,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.4667,
+        "eff_wrong": 1.8
+      },
+      {
+        "q": 26,
+        "m_wrong": 3,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 27,
+        "m_wrong": 4,
+        "distinct_wrong": 4,
+        "simpson": 0.0,
+        "eff_wrong": 4.0
+      },
+      {
+        "q": 28,
+        "m_wrong": 3,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 29,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 30,
+        "m_wrong": 5,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 31,
+        "m_wrong": 5,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 32,
+        "m_wrong": 6,
+        "distinct_wrong": 4,
+        "simpson": 0.2,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 33,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 34,
+        "m_wrong": 5,
+        "distinct_wrong": 5,
+        "simpson": 0.0,
+        "eff_wrong": 5.0
+      },
+      {
+        "q": 35,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 36,
+        "m_wrong": 5,
+        "distinct_wrong": 5,
+        "simpson": 0.0,
+        "eff_wrong": 5.0
+      },
+      {
+        "q": 37,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 38,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 39,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 40,
+        "m_wrong": 6,
+        "distinct_wrong": 4,
+        "simpson": 0.1333,
+        "eff_wrong": 3.6
+      },
+      {
+        "q": 41,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 42,
+        "m_wrong": 6,
+        "distinct_wrong": 3,
+        "simpson": 0.4,
+        "eff_wrong": 2.0
+      },
+      {
+        "q": 43,
+        "m_wrong": 5,
+        "distinct_wrong": 2,
+        "simpson": 0.6,
+        "eff_wrong": 1.471
+      },
+      {
+        "q": 44,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 45,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 46,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 47,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 48,
+        "m_wrong": 5,
+        "distinct_wrong": 3,
+        "simpson": 0.2,
+        "eff_wrong": 2.778
+      },
+      {
+        "q": 49,
+        "m_wrong": 3,
+        "distinct_wrong": 2,
+        "simpson": 0.3333,
+        "eff_wrong": 1.8
+      }
+    ]
+  },
+  "layer2_concentration_err_excluded": {
+    "include_err": true,
+    "simpson": {
+      "median": 0.4334,
+      "iqr": [
+        0.2,
+        1.0
+      ],
+      "n": 26
+    },
+    "distinct_wrong": {
+      "median": 1.0,
+      "iqr": [
+        0.0,
+        2.0
+      ],
+      "n": 50
+    },
+    "eff_wrong": {
+      "median": 1.6355,
+      "iqr": [
+        1.0,
+        2.778
+      ],
+      "n": 30
+    },
+    "m_wrong": {
+      "median": 2.5,
+      "iqr": [
+        0.0,
+        5.75
+      ],
+      "n": 50
+    },
+    "simpson_pairs_ge2": {
+      "median": 0.4334,
+      "iqr": [
+        0.2,
+        1.0
+      ],
+      "n": 26
+    },
+    "per_problem": [
+      {
+        "q": 0,
+        "m_wrong": 5,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 1,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.6667,
+        "eff_wrong": 1.385
+      },
+      {
+        "q": 2,
+        "m_wrong": 2,
+        "distinct_wrong": 2,
+        "simpson": 0.0,
+        "eff_wrong": 2.0
+      },
+      {
+        "q": 3,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.4667,
+        "eff_wrong": 1.8
+      },
+      {
+        "q": 4,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 5,
+        "m_wrong": 3,
+        "distinct_wrong": 3,
+        "simpson": 0.0,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 6,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 7,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 8,
+        "m_wrong": 1,
+        "distinct_wrong": 1,
+        "simpson": null,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 9,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 10,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 11,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 12,
+        "m_wrong": 5,
+        "distinct_wrong": 3,
+        "simpson": 0.2,
+        "eff_wrong": 2.778
+      },
+      {
+        "q": 13,
+        "m_wrong": 1,
+        "distinct_wrong": 1,
+        "simpson": null,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 14,
+        "m_wrong": 1,
+        "distinct_wrong": 1,
+        "simpson": null,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 15,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 16,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 17,
+        "m_wrong": 1,
+        "distinct_wrong": 1,
+        "simpson": null,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 18,
+        "m_wrong": 4,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 19,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 20,
+        "m_wrong": 6,
+        "distinct_wrong": 3,
+        "simpson": 0.4,
+        "eff_wrong": 2.0
+      },
+      {
+        "q": 21,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 22,
+        "m_wrong": 6,
+        "distinct_wrong": 4,
+        "simpson": 0.2,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 23,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.6667,
+        "eff_wrong": 1.385
+      },
+      {
+        "q": 24,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 25,
+        "m_wrong": 6,
+        "distinct_wrong": 2,
+        "simpson": 0.4667,
+        "eff_wrong": 1.8
+      },
+      {
+        "q": 26,
+        "m_wrong": 3,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 27,
+        "m_wrong": 4,
+        "distinct_wrong": 4,
+        "simpson": 0.0,
+        "eff_wrong": 4.0
+      },
+      {
+        "q": 28,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 29,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 30,
+        "m_wrong": 5,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 31,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 32,
+        "m_wrong": 6,
+        "distinct_wrong": 4,
+        "simpson": 0.2,
+        "eff_wrong": 3.0
+      },
+      {
+        "q": 33,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 34,
+        "m_wrong": 5,
+        "distinct_wrong": 5,
+        "simpson": 0.0,
+        "eff_wrong": 5.0
+      },
+      {
+        "q": 35,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 36,
+        "m_wrong": 5,
+        "distinct_wrong": 5,
+        "simpson": 0.0,
+        "eff_wrong": 5.0
+      },
+      {
+        "q": 37,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 38,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 39,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 40,
+        "m_wrong": 6,
+        "distinct_wrong": 4,
+        "simpson": 0.1333,
+        "eff_wrong": 3.6
+      },
+      {
+        "q": 41,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 42,
+        "m_wrong": 6,
+        "distinct_wrong": 3,
+        "simpson": 0.4,
+        "eff_wrong": 2.0
+      },
+      {
+        "q": 43,
+        "m_wrong": 5,
+        "distinct_wrong": 2,
+        "simpson": 0.6,
+        "eff_wrong": 1.471
+      },
+      {
+        "q": 44,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 45,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 46,
+        "m_wrong": 6,
+        "distinct_wrong": 1,
+        "simpson": 1.0,
+        "eff_wrong": 1.0
+      },
+      {
+        "q": 47,
+        "m_wrong": 0,
+        "distinct_wrong": 0,
+        "simpson": null,
+        "eff_wrong": null
+      },
+      {
+        "q": 48,
+        "m_wrong": 5,
+        "distinct_wrong": 3,
+        "simpson": 0.2,
+        "eff_wrong": 2.778
+      },
+      {
+        "q": 49,
+        "m_wrong": 3,
+        "distinct_wrong": 2,
+        "simpson": 0.3333,
+        "eff_wrong": 1.8
+      }
+    ]
+  },
+  "grid_case": "A: both excess CIs include 0 -> convergence is entirely problem-structural (constrained wrong-answer space); family irrelevant.",
+  "within_reference_caveat": "Only 2 same-family models per family clear the band, so the leave-pair-out reference for a WITHIN pair is composed entirely of OTHER families. Within-excess is therefore a within-vs-cross contrast, not family-neutral. R2 (wider pool) and Layer 2 address this."
+}

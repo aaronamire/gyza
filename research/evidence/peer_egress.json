@@ -1,0 +1,17 @@
+{
+  "actions": 40,
+  "by_channel_bytes": {
+    "publish_delta": 75683
+  },
+  "by_channel_count": {
+    "publish_delta": 81
+  },
+  "inference_bytes_per_action_MEASURED_ELSEWHERE": 1077.0,
+  "mesh_exit_bytes": 75683,
+  "mesh_exit_sends": 81,
+  "peer_bytes_per_action": 1892.075,
+  "saturated_MB_per_hour_per_core": 35.04481967213114,
+  "sends_per_action": 2.025,
+  "total_bytes_per_action": 2969.075,
+  "wall_seconds": 0.18
+}

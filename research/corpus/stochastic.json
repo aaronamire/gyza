@@ -1,0 +1,3026 @@
+{
+ "config": {
+  "models": [
+   "mistralai/mistral-small-24b-instruct-2501",
+   "microsoft/phi-4",
+   "meta-llama/llama-3.1-70b-instruct",
+   "google/gemma-2-27b-it"
+  ],
+  "K": 5,
+  "temperature": 0.7,
+  "n_problems": 50,
+  "seed": 1
+ },
+ "variance_profile": {
+  "n_task_model_pairs": 200,
+  "n_complete": 200,
+  "n_dropped_for_error": 0,
+  "all_K_agree": 156,
+  "samples_differ": 44,
+  "differing_fraction": 0.22,
+  "all_agree_all_pass": 54,
+  "all_agree_all_fail": 102
+ },
+ "records": [
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 0,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 1,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 2,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 3,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 4,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 5,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 6,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 7,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    false,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 8,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 9,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 10,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 11,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 12,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 13,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 14,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 15,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 16,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 17,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 18,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 19,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 20,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 21,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 22,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 23,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 24,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 25,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 26,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 27,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 28,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 29,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 30,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 31,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 32,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 33,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 34,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 35,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 36,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 37,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 38,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 39,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 40,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 41,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 42,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 43,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 44,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 45,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    false,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 46,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 47,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 48,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "mistralai/mistral-small-24b-instruct-2501",
+   "problem_idx": 49,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 0,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 1,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 2,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 3,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 4,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 5,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    true,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 6,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 7,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 8,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 9,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 10,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 11,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 12,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 13,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 14,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 15,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 16,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 17,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 18,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 19,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 20,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 21,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 22,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 23,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 24,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 25,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 26,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 27,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 28,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    true,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 29,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 30,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 31,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 32,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 33,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 34,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 35,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 36,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 37,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 38,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 39,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 40,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 41,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    false,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 42,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 43,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 44,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 45,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 46,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 47,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 48,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "microsoft/phi-4",
+   "problem_idx": 49,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 0,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 1,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 2,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    true,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 3,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 4,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 5,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 6,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 7,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 8,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 9,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 10,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 11,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 12,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 13,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 14,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 15,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 16,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 17,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 18,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 19,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 20,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 21,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 22,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 23,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 24,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 25,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 26,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 27,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 28,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 29,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 30,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 31,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 32,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 33,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 34,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 35,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 36,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 37,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 38,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 39,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    false,
+    false,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 40,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 41,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 42,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 43,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 44,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    false,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 45,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 46,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 47,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 48,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "meta-llama/llama-3.1-70b-instruct",
+   "problem_idx": 49,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 0,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 1,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 2,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 3,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 4,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 5,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 6,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 7,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 8,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 9,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 10,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 11,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 12,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    false,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 13,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 14,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 15,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 16,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 17,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 18,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 19,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 20,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 21,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 22,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 23,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 24,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 25,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 26,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 27,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 28,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 29,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 30,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 31,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 32,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 33,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 34,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 35,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 36,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 37,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 38,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 39,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 40,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 41,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 42,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 43,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 44,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 45,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 46,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 47,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 48,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  },
+  {
+   "model": "google/gemma-2-27b-it",
+   "problem_idx": 49,
+   "K": 5,
+   "temperature": 0.7,
+   "per_sample_outcome": [
+    false,
+    true,
+    true,
+    false,
+    false
+   ],
+   "n_error": 0,
+   "outcome_source": "MBPP asserts EXECUTED (external)"
+  }
+ ]
+}

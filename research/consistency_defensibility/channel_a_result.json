@@ -1,0 +1,717 @@
+{
+  "program": "Channel A Phase 2 \u2014 consistency mechanisms. NOT a Route 2 rescue.",
+  "config": {
+    "seed": 1,
+    "models": [
+      "meta-llama/llama-3.1-70b-instruct",
+      "google/gemma-2-27b-it",
+      "mistralai/mistral-small-3.2-24b-instruct",
+      "microsoft/phi-4"
+    ],
+    "n_items": 80,
+    "surface_cats": [
+      "ii_noop"
+    ],
+    "concept_cats": [
+      "i_classic"
+    ],
+    "trace_model": "google/gemma-2-27b-it"
+  },
+  "DECISION": {
+    "case": "A_LIVE",
+    "surface_A1_J": 0.8148,
+    "surface_A1_J_ci": [
+      0.8162,
+      0.748,
+      0.8794
+    ],
+    "surface_A1_perm_p": 0.0,
+    "concept_A1_J": 0.5437,
+    "cost_matched_A1_minus_SC": {
+      "n": 160,
+      "J_A1": 0.8153,
+      "J_SC": 0.4483,
+      "paired_J_diff_A1_minus_SC_ci": [
+        0.367,
+        0.164,
+        0.5659
+      ]
+    }
+  },
+  "DISSOCIATION_A1": {
+    "surface_noop": {
+      "n": 160,
+      "n_wrong": 25,
+      "TPR": 1.0,
+      "FPR": 0.1852,
+      "firing_rate": 0.3125,
+      "precision": 0.5,
+      "J": 0.8148,
+      "J_boot_ci": [
+        0.8162,
+        0.748,
+        0.8794
+      ],
+      "perm_null_p": 0.0
+    },
+    "concept_classic": {
+      "n": 74,
+      "n_wrong": 10,
+      "TPR": 0.7,
+      "FPR": 0.1562,
+      "firing_rate": 0.2297,
+      "precision": 0.4118,
+      "J": 0.5437,
+      "J_boot_ci": [
+        0.5429,
+        0.2083,
+        0.8485
+      ],
+      "perm_null_p": 0.0007
+    },
+    "substitution": {
+      "n": 80,
+      "n_wrong": 9,
+      "TPR": 0.1111,
+      "FPR": 0.0986,
+      "firing_rate": 0.1,
+      "precision": 0.125,
+      "J": 0.0125,
+      "J_boot_ci": [
+        0.0121,
+        -0.1539,
+        0.277
+      ],
+      "perm_null_p": 0.6347
+    }
+  },
+  "mechanisms": {
+    "A1": {
+      "ALL": {
+        "n": 314,
+        "n_wrong": 44,
+        "TPR": 0.75,
+        "FPR": 0.1556,
+        "firing_rate": 0.2389,
+        "precision": 0.44,
+        "J": 0.5944,
+        "J_boot_ci": [
+          0.5958,
+          0.451,
+          0.729
+        ],
+        "perm_null_p": 0.0
+      },
+      "surface_noop": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 1.0,
+        "FPR": 0.1852,
+        "firing_rate": 0.3125,
+        "precision": 0.5,
+        "J": 0.8148,
+        "J_boot_ci": [
+          0.8162,
+          0.748,
+          0.8794
+        ],
+        "perm_null_p": 0.0
+      },
+      "concept_classic": {
+        "n": 74,
+        "n_wrong": 10,
+        "TPR": 0.7,
+        "FPR": 0.1562,
+        "firing_rate": 0.2297,
+        "precision": 0.4118,
+        "J": 0.5437,
+        "J_boot_ci": [
+          0.5429,
+          0.2083,
+          0.8485
+        ],
+        "perm_null_p": 0.0007
+      },
+      "substitution": {
+        "n": 80,
+        "n_wrong": 9,
+        "TPR": 0.1111,
+        "FPR": 0.0986,
+        "firing_rate": 0.1,
+        "precision": 0.125,
+        "J": 0.0125,
+        "J_boot_ci": [
+          0.0121,
+          -0.1539,
+          0.277
+        ],
+        "perm_null_p": 0.6347
+      },
+      "by_model": {
+        "meta-llama/llama-3.1-70b-instruct": {
+          "n": 79,
+          "n_wrong": 2,
+          "TPR": 1.0,
+          "FPR": 0.1299,
+          "firing_rate": 0.1519,
+          "precision": 0.1667,
+          "J": 0.8701,
+          "J_boot_ci": [
+            0.8705,
+            0.7949,
+            0.9359
+          ],
+          "perm_null_p": 0.0207
+        },
+        "google/gemma-2-27b-it": {
+          "n": 80,
+          "n_wrong": 28,
+          "TPR": 0.9286,
+          "FPR": 0.3269,
+          "firing_rate": 0.5375,
+          "precision": 0.6047,
+          "J": 0.6016,
+          "J_boot_ci": [
+            0.6025,
+            0.4405,
+            0.7551
+          ],
+          "perm_null_p": 0.0
+        },
+        "mistralai/mistral-small-3.2-24b-instruct": {
+          "n": 76,
+          "n_wrong": 6,
+          "TPR": 0.8333,
+          "FPR": 0.2143,
+          "firing_rate": 0.2632,
+          "precision": 0.25,
+          "J": 0.619,
+          "J_boot_ci": [
+            0.6253,
+            0.2496,
+            0.8496
+          ],
+          "perm_null_p": 0.0057
+        },
+        "microsoft/phi-4": {
+          "n": 79,
+          "n_wrong": 8,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        }
+      }
+    },
+    "SC": {
+      "ALL": {
+        "n": 312,
+        "n_wrong": 44,
+        "TPR": 0.4773,
+        "FPR": 0.0821,
+        "firing_rate": 0.1378,
+        "precision": 0.4884,
+        "J": 0.3952,
+        "J_boot_ci": [
+          0.3956,
+          0.2423,
+          0.5473
+        ],
+        "perm_null_p": 0.0
+      },
+      "surface_noop": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.56,
+        "FPR": 0.1111,
+        "firing_rate": 0.1812,
+        "precision": 0.4828,
+        "J": 0.4489,
+        "J_boot_ci": [
+          0.4475,
+          0.2428,
+          0.6487
+        ],
+        "perm_null_p": 0.0
+      },
+      "concept_classic": {
+        "n": 74,
+        "n_wrong": 10,
+        "TPR": 0.6,
+        "FPR": 0.0781,
+        "firing_rate": 0.1486,
+        "precision": 0.5455,
+        "J": 0.5219,
+        "J_boot_ci": [
+          0.518,
+          0.1616,
+          0.8296
+        ],
+        "perm_null_p": 0.0007
+      },
+      "substitution": {
+        "n": 78,
+        "n_wrong": 9,
+        "TPR": 0.1111,
+        "FPR": 0.029,
+        "firing_rate": 0.0385,
+        "precision": 0.3333,
+        "J": 0.0821,
+        "J_boot_ci": [
+          0.0812,
+          -0.058,
+          0.3338
+        ],
+        "perm_null_p": 0.3057
+      },
+      "by_model": {
+        "meta-llama/llama-3.1-70b-instruct": {
+          "n": 77,
+          "n_wrong": 2,
+          "TPR": 1.0,
+          "FPR": 0.12,
+          "firing_rate": 0.1429,
+          "precision": 0.1818,
+          "J": 0.88,
+          "J_boot_ci": [
+            0.8805,
+            0.8026,
+            0.9467
+          ],
+          "perm_null_p": 0.018
+        },
+        "google/gemma-2-27b-it": {
+          "n": 80,
+          "n_wrong": 28,
+          "TPR": 0.5,
+          "FPR": 0.1731,
+          "firing_rate": 0.2875,
+          "precision": 0.6087,
+          "J": 0.3269,
+          "J_boot_ci": [
+            0.3299,
+            0.1133,
+            0.5467
+          ],
+          "perm_null_p": 0.0023
+        },
+        "mistralai/mistral-small-3.2-24b-instruct": {
+          "n": 76,
+          "n_wrong": 6,
+          "TPR": 0.8333,
+          "FPR": 0.0571,
+          "firing_rate": 0.1184,
+          "precision": 0.5556,
+          "J": 0.7762,
+          "J_boot_ci": [
+            0.7793,
+            0.3859,
+            0.9857
+          ],
+          "perm_null_p": 0.0
+        },
+        "microsoft/phi-4": {
+          "n": 79,
+          "n_wrong": 8,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        }
+      }
+    },
+    "A2": {
+      "ALL": {
+        "n": 310,
+        "n_wrong": 41,
+        "TPR": 0.3415,
+        "FPR": 0.0223,
+        "firing_rate": 0.0645,
+        "precision": 0.7,
+        "J": 0.3192,
+        "J_boot_ci": [
+          0.3183,
+          0.1729,
+          0.4659
+        ],
+        "perm_null_p": 0.0
+      },
+      "surface_noop": {
+        "n": 157,
+        "n_wrong": 22,
+        "TPR": 0.5455,
+        "FPR": 0.0148,
+        "firing_rate": 0.0892,
+        "precision": 0.8571,
+        "J": 0.5306,
+        "J_boot_ci": [
+          0.5315,
+          0.3258,
+          0.7427
+        ],
+        "perm_null_p": 0.0
+      },
+      "concept_classic": {
+        "n": 73,
+        "n_wrong": 10,
+        "TPR": 0.2,
+        "FPR": 0.0317,
+        "firing_rate": 0.0548,
+        "precision": 0.5,
+        "J": 0.1683,
+        "J_boot_ci": [
+          0.1719,
+          -0.0476,
+          0.4683
+        ],
+        "perm_null_p": 0.0873
+      },
+      "substitution": {
+        "n": 80,
+        "n_wrong": 9,
+        "TPR": 0.0,
+        "FPR": 0.0282,
+        "firing_rate": 0.025,
+        "precision": 0.0,
+        "J": -0.0282,
+        "J_boot_ci": [
+          -0.0282,
+          -0.0725,
+          0.0
+        ],
+        "perm_null_p": 1.0
+      },
+      "by_model": {
+        "meta-llama/llama-3.1-70b-instruct": {
+          "n": 78,
+          "n_wrong": 2,
+          "TPR": 0.5,
+          "FPR": 0.0263,
+          "firing_rate": 0.0385,
+          "precision": 0.3333,
+          "J": 0.4737,
+          "J_boot_ci": [
+            0.4879,
+            -0.0519,
+            1.0
+          ],
+          "perm_null_p": 0.0747
+        },
+        "google/gemma-2-27b-it": {
+          "n": 77,
+          "n_wrong": 25,
+          "TPR": 0.44,
+          "FPR": 0.0769,
+          "firing_rate": 0.1948,
+          "precision": 0.7333,
+          "J": 0.3631,
+          "J_boot_ci": [
+            0.3621,
+            0.1556,
+            0.5717
+          ],
+          "perm_null_p": 0.0
+        },
+        "mistralai/mistral-small-3.2-24b-instruct": {
+          "n": 76,
+          "n_wrong": 6,
+          "TPR": 0.3333,
+          "FPR": 0.0,
+          "firing_rate": 0.0263,
+          "precision": 1.0,
+          "J": 0.3333,
+          "J_boot_ci": [
+            0.3382,
+            0.0,
+            0.75
+          ],
+          "perm_null_p": 0.0037
+        },
+        "microsoft/phi-4": {
+          "n": 79,
+          "n_wrong": 8,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        }
+      }
+    },
+    "A4": {
+      "ALL": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.04,
+        "FPR": 0.0148,
+        "firing_rate": 0.0187,
+        "precision": 0.3333,
+        "J": 0.0252,
+        "J_boot_ci": [
+          0.026,
+          -0.0308,
+          0.1213
+        ],
+        "perm_null_p": 0.4113
+      },
+      "surface_noop": {
+        "n": 160,
+        "n_wrong": 25,
+        "TPR": 0.04,
+        "FPR": 0.0148,
+        "firing_rate": 0.0187,
+        "precision": 0.3333,
+        "J": 0.0252,
+        "J_boot_ci": [
+          0.0255,
+          -0.0303,
+          0.1219
+        ],
+        "perm_null_p": 0.392
+      },
+      "concept_classic": null,
+      "substitution": null,
+      "by_model": {
+        "meta-llama/llama-3.1-70b-instruct": {
+          "n": 40,
+          "n_wrong": 1,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        },
+        "google/gemma-2-27b-it": {
+          "n": 40,
+          "n_wrong": 20,
+          "TPR": 0.05,
+          "FPR": 0.0,
+          "firing_rate": 0.025,
+          "precision": 1.0,
+          "J": 0.05,
+          "J_boot_ci": [
+            0.0501,
+            0.0,
+            0.1739
+          ],
+          "perm_null_p": 0.4923
+        },
+        "mistralai/mistral-small-3.2-24b-instruct": {
+          "n": 40,
+          "n_wrong": 4,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        },
+        "microsoft/phi-4": {
+          "n": 40,
+          "n_wrong": 0,
+          "TPR": null,
+          "FPR": 0.05,
+          "firing_rate": 0.05,
+          "precision": 0.0,
+          "J": null,
+          "J_boot_ci": [
+            null,
+            null,
+            null
+          ],
+          "perm_null_p": null
+        }
+      }
+    },
+    "A3": {
+      "ALL": {
+        "n": 151,
+        "n_wrong": 13,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_boot_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_null_p": 1.0
+      },
+      "surface_noop": {
+        "n": 69,
+        "n_wrong": 1,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_boot_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_null_p": 1.0
+      },
+      "concept_classic": {
+        "n": 35,
+        "n_wrong": 3,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_boot_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_null_p": 1.0
+      },
+      "substitution": {
+        "n": 47,
+        "n_wrong": 9,
+        "TPR": 0.0,
+        "FPR": 0.0,
+        "firing_rate": 0.0,
+        "precision": null,
+        "J": 0.0,
+        "J_boot_ci": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "perm_null_p": 1.0
+      },
+      "by_model": {
+        "meta-llama/llama-3.1-70b-instruct": {
+          "n": 12,
+          "n_wrong": 1,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        },
+        "google/gemma-2-27b-it": {
+          "n": 19,
+          "n_wrong": 2,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        },
+        "mistralai/mistral-small-3.2-24b-instruct": {
+          "n": 41,
+          "n_wrong": 2,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        },
+        "microsoft/phi-4": {
+          "n": 79,
+          "n_wrong": 8,
+          "TPR": 0.0,
+          "FPR": 0.0,
+          "firing_rate": 0.0,
+          "precision": null,
+          "J": 0.0,
+          "J_boot_ci": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "perm_null_p": 1.0
+        }
+      }
+    }
+  },
+  "cost_matched_A1_vs_selfconsistency": {
+    "ALL": {
+      "n": 312,
+      "J_A1": 0.5956,
+      "J_SC": 0.3949,
+      "paired_J_diff_A1_minus_SC_ci": [
+        0.2007,
+        0.0502,
+        0.3598
+      ]
+    },
+    "surface_noop": {
+      "n": 160,
+      "J_A1": 0.8153,
+      "J_SC": 0.4483,
+      "paired_J_diff_A1_minus_SC_ci": [
+        0.367,
+        0.164,
+        0.5659
+      ]
+    },
+    "concept_classic": {
+      "n": 74,
+      "J_A1": 0.5433,
+      "J_SC": 0.5195,
+      "paired_J_diff_A1_minus_SC_ci": [
+        0.0237,
+        -0.342,
+        0.3905
+      ]
+    }
+  },
+  "note_A3_judge_dependent": "A3 uses a second model as judge; reported separately, NOT pooled with A1/A2/A4.",
+  "data_integrity": "0 failures",
+  "n_records": 314
+}

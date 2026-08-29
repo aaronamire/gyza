@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from gyza.containment.harm import HarmClass, HarmModelRegistry
+from gyza.containment.harm import DriftClass, HarmClass, HarmModelRegistry
 from gyza.containment.invariants import (
     Invariant, InvariantClass, InvariantRegistry,
 )
@@ -182,13 +182,67 @@ def _unsupervised_actions(s0: object, s: object) -> float:
 #: Being listed here costs the containment claim: `can_claim_containment` stays
 #: False while any class is unbounded, signed configuration or not. That price is
 #: correct and is the point -- see research/H3_MESH_EXIT.md §6.
-MEASURED_NOT_BOUNDED: dict[str, str] = {
+#: Classes that WERE registered harm classes and no longer are. Distinct from
+#: UNMODELLED (never had a computable quantity) and from MEASURED_NOT_BOUNDED
+#: (has a quantity and awaits a level): these HAVE a working quantity and can
+#: never carry a level, so leaving them registered would block the containment
+#: claim forever while looking like an open TODO.
+RETIRED_AS_HARM_CLASS: dict[str, str] = {
+    "H6_unsupervised_actions": (
+        "RETIRED 2026-08-21 -- RECLASSIFIED, NOT REPAIRED. It is a review "
+        "CADENCE and was registered as a harm class. Its quantity is the count "
+        "of signed envelopes, and an adversary doing harmful work signs exactly "
+        "as many as a benign agent doing useful work (R-EVID Part B: rho = "
+        "1.000 BY DEFINITION, evidence 0), so its SIGNED level of 10,000 "
+        "asserted only that the agent had not yet run 10,000 actions. "
+        "A TIMER IS EXACTLY WHAT A CADENCE SHOULD BE -- firing periodically is "
+        "its job -- so the mechanism was always correct and only the "
+        "classification was wrong. The interval is UNCHANGED at 10,000 and "
+        "still signed by the same authority; it now lives in the guard "
+        "configuration's `policy` as `review_cadence_actions`, where it no "
+        "longer claims to bound harm and no longer blocks the containment "
+        "claim as a bounded-but-timer class."
+    ),
     "H3_mesh_exit_sends": (
-        "no level until the attainable range is measured. H1_credits was "
-        "retired because 100 was declared without measuring and refused every "
-        "real model's FIRST action; standing rule #4 (check a threshold "
-        "against its feasibility ceiling BEFORE fixing it) has failed four "
-        "times. Instrument, measure, then declare."
+        "RETIRED 2026-08-21. THE MEASURAND CARRIES ZERO EVIDENCE: R-EVID Part B "
+        "measured a benign node and an exfiltrating one emitting EXACTLY 1.000 "
+        "sends per action, so no threshold over the count separates them and "
+        "no level is worth declaring. Superseded by H3_mesh_exit_rate, which "
+        "measures bytes over a trailing window. "
+        "THE RETIREMENT IS NOT COSMETIC: a registered class with no declarable "
+        "level keeps `unbounded` permanently non-empty, so leaving it in place "
+        "made can_claim_containment UNREACHABLE BY CONSTRUCTION -- progress "
+        "that quietly removes the goal. The count is still MEASURED and shown "
+        "by `gyza status` as a diagnostic; it is simply not a harm class."
+    ),
+}
+
+MEASURED_NOT_BOUNDED: dict[str, str] = {
+    "H7_irreversible_actions": (
+        "THE LEVEL IS 0 AND ONLY THE OWNER CAN INSTALL IT. The quantity is "
+        "computed and wired: `irreversibility.classify` reads the signed "
+        "enforcement record, `irreversible_actions_since` folds it from the "
+        "same append-only envelope log the count comes from, and `observe_now` "
+        "supplies it. What is absent is a SIGNED level. "
+        "0 is the only level that is a BOUND rather than a timer, because "
+        "benign drift is exactly 0 under a grant with no network and no writes "
+        "outside an append-only store, and strictly positive under any other "
+        "grant (THEOREMS_C.md). "
+        "IT CANNOT BE INSTALLED FROM THIS HOST, AND THAT IS THE MECHANISM "
+        "WORKING. A bound enters only through a signed guard configuration, "
+        "and the authority key was deliberately moved off-machine so the "
+        "constrained system cannot rewrite the policy constraining it. "
+        "`guard_bounds.v4.draft.json` carries the proposed configuration "
+        "unsigned; one command with the key present installs it. See "
+        "research/IRREVERSIBILITY.md."),
+    "H3_mesh_exit_rate": (
+        "THE SHAPE IS CHOSEN AND THE LEVEL IS NOT. A rate over a trailing "
+        "wall-clock window is the only sound shape available -- mesh exit is "
+        "irreversible so capacity is unavailable, and a cumulative budget is a "
+        "timer. `research/evidence/recommend_h3_rate.py` measures the "
+        "attainable range (a SATURATED benign node emits 12.7 MB/hour on one "
+        "core). Choosing from that range is a product decision informed by the "
+        "measurement, not determined by it (CLAUDE.md §10)."
     ),
 }
 
@@ -219,6 +273,126 @@ def storage_cap_bytes(bounds_file: "str | Path | None" = None) -> int | None:
         return None
 
 
+def _irreversible_actions(s0: object, s: object) -> float:
+    """H7 -- growth in unrecoverable actions between two states.
+
+    A DIFFERENCE over an append-only count, so it cannot go negative and no
+    stored aggregate exists for an unmodelled path to write behind the guard's
+    back. Reads only environment state; imports nothing from any guard module.
+    """
+    # DIRECT ATTRIBUTE ACCESS, NEVER getattr WITH A DEFAULT. A quantity that
+    # returns 0 for a state missing its field is indistinguishable from a
+    # system that is safe, and that is precisely how three of four harm classes
+    # came to be pinned at 0 while carrying signed bounds. An AttributeError
+    # here is the correct outcome: it says "this state was not folded", which
+    # is a different claim from "nothing happened".
+    a = int(s0.irreversible_actions or 0)
+    b = int(s.irreversible_actions or 0)
+    return float(max(0, b - a))
+
+
+def irreversible_actions_since(blackboard: object, origin_ns: int = 0) -> int:
+    """H7's SINGLE SOURCE: fold signed enforcement records into a count.
+
+    The enforcement record lives inside each action's output artifact, which
+    the envelope's `output_hash` commits to -- so this reads exactly what a
+    third party verifying a bundle would read, and cannot drift from it.
+
+    AN ENVELOPE WHOSE ARTIFACT DOES NOT RESOLVE COUNTS AS UNPROVEN, not as
+    reversible. A withheld artifact must never be cheaper than a disclosed one,
+    or withholding becomes the optimal strategy for an agent that wants its
+    irreversible actions uncounted.
+    """
+    import json as _json
+
+    from gyza.containment.irreversibility import UNPROVEN, classify
+
+    envs = blackboard.envelopes_since(int(origin_ns))
+
+    n = 0
+    for env in envs:
+        raw = None
+        try:
+            art = blackboard.get_artifact(env.output_hash)
+            raw = art.data if art is not None else None
+        except Exception:                                      # noqa: BLE001
+            raw = None
+        enf = None
+        if raw:
+            try:
+                obj = _json.loads(raw)
+                enf = obj.get("__enforcement__") if isinstance(obj, dict) else None
+            except (ValueError, TypeError):
+                enf = None
+        if classify(enf, action_id=env.action_id).counted:
+            n += 1
+    return n
+
+
+def mesh_exit_sends_since(blackboard: object, origin_ns: int = 0) -> int:
+    """THE single source for H3's count, filtered the one correct way.
+
+    `count_egress_since` defaults to `classes=None`, which means EVERY class --
+    including `UNBOUNDED_GRANT`. Folding a grant into a send count reports "1"
+    for a capability permitting arbitrarily many unobservable sends, which is
+    the category error `containment/egress.py` was written to prevent and which
+    would fail in the REASSURING direction.
+
+    That accessor had zero production callers, so no code had yet got the
+    filter either right or wrong. This function exists so the next caller
+    cannot get it wrong: `EgressClass.MESH_EXIT` is passed here and nowhere
+    else, mirroring `storage_cap_bytes` as H5's single source.
+    """
+    from gyza.containment.egress import EgressClass
+    return int(blackboard.count_egress_since(
+        int(origin_ns), classes=EgressClass.MESH_EXIT))
+
+
+def mesh_exit_bytes_in_window(blackboard: object, window_ns: int,
+                             now_ns: "int | None" = None) -> int:
+    """THE single source for H3-as-a-rate, windowed the one correct way.
+
+    THE WINDOW ORIGIN ADVANCES WITH THE WALL CLOCK AND NOTHING ELSE. That is
+    the whole distinction from ledger artifact #13, where a gate measured from
+    a checkpoint the AGENT could advance by acting and so bought unlimited
+    drain. An agent cannot buy egress budget by working, only by waiting.
+
+    `EgressClass.MESH_EXIT` is passed here and nowhere else, mirroring
+    `mesh_exit_sends_since`. The class filter is load-bearing twice over: it
+    excludes ATTESTED_PEER, which is what makes the quantity shrink as the mesh
+    grows, and it excludes UNBOUNDED_GRANT, whose byte count is NULL because a
+    grant's volume is genuinely unknowable.
+    """
+    import time as _t
+
+    from gyza.containment.egress import EgressClass
+    if int(window_ns) <= 0:
+        raise ValueError(
+            f"window_ns must be positive, got {window_ns}; a non-positive "
+            f"window makes the lookback empty and the rate unenforceable")
+    now = int(_t.time_ns() if now_ns is None else now_ns)
+    start = max(0, now - int(window_ns))
+    return int(blackboard.mesh_exit_bytes_since(start, EgressClass.MESH_EXIT))
+
+
+def _mesh_exit_rate(s0: object, s: object) -> float:
+    """H3 as a RATE: bytes that left modelled state inside the trailing window.
+
+    `s0` is unused and that is correct, not an oversight. A rate is not a
+    difference from an origin -- the window IS the frame, and subtracting an
+    origin reading would reintroduce the cumulative shape this replaced.
+
+    DIRECT ATTRIBUTE ACCESS, NEVER `getattr(..., 0)`. The first version of this
+    function used a defaulting getattr and
+    `test_the_quantities_REFUSE_a_state_missing_their_field` caught it
+    immediately: a state carrying no egress field would have measured 0.0 --
+    inside any bound, silently passing -- which is the precise defect that test
+    was written to end. A quantity handed a state it cannot measure must raise,
+    because "I could not measure" and "there was no harm" are opposite claims.
+    """
+    return float(s.mesh_exit_bytes_in_window)
+
+
 def _mesh_exit_sends(s0: object, s: object) -> float:
     """H3 -- sends since the origin that did NOT land on an attested peer.
 
@@ -245,7 +419,19 @@ def _mesh_exit_sends(s0: object, s: object) -> float:
     return float(s.mesh_exit_sends - s0.mesh_exit_sends)
 
 
-DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
+#: THE BYTES IN FORCE MUST BE THE BYTES THAT WERE SIGNED.
+#:
+#: This pointed at the UNSIGNED file while a signed one sat beside it, so the
+#: levels actually loaded came from a file the signature did not cover. Editing
+#: `guard_bounds.json` was therefore UNDETECTABLE BY CONSTRUCTION -- the
+#: signature protected a document nothing read. Pointing here at the signed
+#: configuration makes tampering breakable-and-detectable the moment an
+#: authority pubkey is configured, and `SIGNED_UNVERIFIED` names the interim
+#: state honestly rather than reporting it as either signed or plain.
+DEFAULT_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.signed.json")
+
+#: Kept for the development path and for tests that need a plain document.
+PLAIN_BOUNDS_FILE = Path(__file__).with_name("guard_bounds.json")
 
 
 def build_registries(
@@ -259,7 +445,46 @@ def build_registries(
         quantity=_authority_exceedance,
         frame="delegation chain root manifest",
         frame_mutable=False,
-        code_path="gyza/economy/delegation.py:229 verify_delegation",
+        code_path="gyza/economy/delegation.py:264 verify_delegation",
+        drift_class=DriftClass.SILENCE,
+        drift_reason=(
+            "benign rate measured at EXACTLY 0.000 (R-EVID Part B): "
+            "runner.py appends to _authority_violations only inside the "
+            "`if not ok` branch of enforcement_satisfies_manifest, so a "
+            "compliant execution cannot increment it. The walk never takes a "
+            "step, which is why a bound of 0 never false-alarms. This is the "
+            "only registered class whose level is a bound rather than a timer."),
+    ))
+
+    # ---- C-2: the class the model said it did not have --------------------
+    harm.register(HarmClass(
+        id="H7_irreversible_actions",
+        description="count of actions whose effects cannot be shown to be "
+                    "recoverable: network was granted, a writable path lay "
+                    "outside any append-only store, or no enforcement record "
+                    "was stamped at all",
+        quantity=_irreversible_actions,
+        frame="signed enforcement records since the accounting origin",
+        frame_mutable=False,
+        code_path="gyza/containment/irreversibility.py classify/fold",
+        drift_class=DriftClass.SILENCE,
+        drift_reason=(
+            "SOUND BY SILENCE, AND THE CONDITION IS A PROPERTY OF THE GRANT "
+            "RATHER THAN OF THE AGENT -- which is what makes it checkable. An "
+            "agent whose sandbox grants no network and no writes outside an "
+            "append-only store CANNOT increment this quantity however it "
+            "behaves, so b = 0 exactly and a bound of 0 is a real bound with "
+            "false-alarm probability 0. "
+            "THE CONVERSE IS STATED RATHER THAN HIDDEN: under a grant that "
+            "DOES include the network, every action increments it, b > 0, and "
+            "by THEOREMS_C.md any cumulative level over it is a TIMER that "
+            "refuses the agent at ceil(L/b) whatever it did. So containment "
+            "over irreversible effect is claimable exactly for agents that "
+            "were never given the means, and `benign_rate_is_zero` is the "
+            "predicate that says which deployment is in which case. That is a "
+            "narrower claim than 'we bound irreversible harm' and it is the "
+            "one the architecture can actually support."
+        ),
     ))
 
     harm.register(HarmClass(
@@ -269,44 +494,105 @@ def build_registries(
         quantity=_storage_growth,
         frame="the local artifact store",
         frame_mutable=False,
-        code_path="gyza/network/artifact_store.py:115 total_size_bytes",
+        code_path="gyza/network/artifact_store.py:247 total_size_bytes",
+        drift_class=DriftClass.CAPACITY,
+        drift_reason=(
+            "SOUND BY CAPACITY since 2026-08-21, and the capacity condition is "
+            "met BY CONSTRUCTION rather than by measurement. `ArtifactStore` "
+            "now evicts oldest-first when a write would exceed the cap, "
+            "freeing exactly enough to fit the incoming bytes -- so the "
+            "reversal rate is >= the creation rate at every step, which is "
+            "THEOREMS_C.md Theorem 6 satisfied definitionally. Each eviction "
+            "appends a tombstone, so the decrement is an attributable fact "
+            "rather than an absence, matching Wallet.net_balance. "
+            "IT WAS A TIMER UNTIL THEN: max_bytes REFUSED writes once full and "
+            "kept refusing, so the node stopped permanently at the declared "
+            "level -- a refusal is not a reversal. "
+            "WHAT EVICTION COSTS: the evicted artifact's BYTES are gone and its "
+            "content can no longer be inspected. Chain verification is "
+            "unaffected, since verify_chain checks signatures over hashes "
+            "carried in the envelopes. "
+            "PREVIOUS READING, kept because it is why this needed fixing: "
+            "total_size_bytes DOES decrement when "
+            "an artifact is removed (measured: 10,000 -> 9,000 bytes), but "
+            "ArtifactStore exposes no reversal at all and the sole unlink() in "
+            "the tree (artifact_store.py:113) is corruption repair on a hash "
+            "mismatch. So r = 0 < b and Theorem 5(i) applies. Reclassify to "
+            "CAPACITY only when a reversal exists AND its rate is measured to "
+            "exceed the creation rate -- Theorem 6: a tombstone with r < b is "
+            "still a timer, merely a slower one."),
     ))
 
-    harm.register(HarmClass(
-        id="H6_unsupervised_actions",
-        description="signed envelopes since the accounting origin — the review "
-                    "cadence, in the unit a human's attention is spent in",
-        quantity=_unsupervised_actions,
-        frame="the local envelope log",
-        frame_mutable=False,
-        code_path="gyza/blackboard.py count_envelopes_since",
-    ))
 
+    # H3 AS A RATE -- the shape decision, taken 2026-08-21.
+    #
+    # The count below stays REGISTERED AND UNBOUNDED because it is what
+    # `gyza status` has always reported, and because retiring a class that
+    # still measures something real would lose the reading. But it can never
+    # carry a level: R-EVID Part B measured a benign node and an exfiltrating
+    # one at exactly 1.000 sends per action, so the evidence is 0 and no
+    # threshold separates them.
+    #
+    # WHY A RATE AND NOT A CUMULATIVE BYTE BUDGET. Mesh exit is irreversible,
+    # so `sound-by-capacity` is unavailable in principle -- nothing un-sends.
+    # That leaves `sound-by-detection`, which bounds the rate and never the
+    # total (THEOREMS.md 5). Three consequences decided it:
+    #
+    #   1. A cumulative budget is a TIMER: a node that federates well for years
+    #      is refused anyway, at ceil(L/b).
+    #   2. A rate makes federation PAY. As the mesh grows more traffic is
+    #      attested and stops counting, so the same level permits more useful
+    #      work -- the bound loosens as the federation grows.
+    #   3. It is the only one of Part A 5's four exits that does not spend
+    #      HUMAN ATTENTION. Renewable authorisation needs a person per refill,
+    #      which is the H term in N <= H*A and precisely what caps scale.
+    #
+    # NO LEVEL IS DECLARED HERE. `research/evidence/recommend_h3_rate.py`
+    # measures the attainable range -- a fully SATURATED benign node emits
+    # 12.7 MB/hour -- and choosing from it is a product decision, not a
+    # measurement (CLAUDE.md 10). Declaring one before it is chosen is how
+    # H1_credits was retired.
     harm.register(HarmClass(
-        id="H3_mesh_exit_sends",
-        description="sends since the accounting origin that did NOT land on an "
-                    "attested peer — the only declared quantity that shrinks "
-                    "as the mesh grows",
-        quantity=_mesh_exit_sends,
-        frame="the local egress log",
+        id="H3_mesh_exit_rate",
+        description="bytes leaving modelled state inside a trailing wall-clock "
+                    "window — the rate, not the lifetime total",
+        quantity=_mesh_exit_rate,
+        frame="the local egress log over a trailing window",
         frame_mutable=False,
-        code_path="gyza/blackboard.py count_egress_since; "
-                  "classification in gyza/containment/egress.py",
+        code_path="gyza/containment/gyza_model.py mesh_exit_bytes_in_window",
+        drift_class=DriftClass.DETECTION,
+        drift_reason=(
+            "a trailing wall-clock window subtracts a compensation term from "
+            "the fold, giving non-positive benign drift with reflection at "
+            "zero (THEOREMS_C.md Theorem 5(iv)), so a level on it is a bound "
+            "rather than a timer. THE WINDOW ORIGIN ADVANCES WITH TIME AND "
+            "NOTHING ELSE -- an agent cannot buy egress budget by acting, only "
+            "by waiting, which is what distinguishes it from ledger artifact "
+            "#13's agent-advanced checkpoint. Bounds the RATE and never the "
+            "total: unbounded time still permits unbounded total exit, and no "
+            "level here changes that (THEOREMS.md 5)."),
     ))
 
     inv = InvariantRegistry()
     inv.register(Invariant(
-        id="INV-H3-mesh-exit",
-        harm_class="H3_mesh_exit_sends",
+        id="INV-H3-mesh-exit-rate",
+        harm_class="H3_mesh_exit_rate",
+        # TAGGED CUMULATIVE FOR ITS COMPOSITION, NOT ITS MONOTONICITY. The
+        # windowed byte total is NOT monotone -- it falls as old events leave
+        # the window, which is exactly why a level on it is a bound rather than
+        # a timer. But `composes_statelessly` is what the tag decides (C6), and
+        # a running fold over one shared log does not compose concurrently
+        # whether or not it is monotone. Tagging it MONOTONE_NON_CUMULATIVE to
+        # match the quantity's shape would claim stateless composition it does
+        # not have, which is the more dangerous error of the two.
         cls=InvariantClass.CUMULATIVE,
         description=(
-            "sends leaving the attested mesh stay within the declared bound. "
-            "CUMULATIVE: a monotone total over one append-only log, so like H5 "
-            "and H6 it is valid only at a serialization point (C7). Registered "
-            "WITHOUT a declared bound on purpose — E2 established that a harm "
-            "class with no invariant makes the engine refuse every action "
-            "through the same channel as a bound breach, so the invariant must "
-            "exist even while the level does not."),
+            "bytes leaving modelled state within the trailing window stay "
+            "within the declared rate. Registered WITHOUT a level: the shape "
+            "is chosen and the number is a product decision. E2 established "
+            "that a harm class with no invariant makes the engine refuse every "
+            "action through the same channel as a breach, so the invariant "
+            "must exist even while the level does not."),
     ))
     inv.register(Invariant(
         id="INV-H4-attenuation",
@@ -319,21 +605,29 @@ def build_registries(
             "concurrently in the interior (C6)."),
     ))
     inv.register(Invariant(
+        id="INV-H7-irreversibility",
+        harm_class="H7_irreversible_actions",
+        cls=InvariantClass.MONOTONE_NON_CUMULATIVE,
+        description=(
+            "no action executes whose effects cannot be shown to be "
+            "recoverable. MONOTONE_NON_CUMULATIVE: reversibility is a property "
+            "of a SINGLE action's signed enforcement record, decided by "
+            "`irreversibility.classify` from the grant rather than from any "
+            "running total, so the check is per-action and stateless and "
+            "composes concurrently in the interior (C6). "
+            "THE COUNT IS CUMULATIVE AND THE PROPERTY IS NOT, which is why "
+            "the bound of 0 is a real bound rather than a timer: under a grant "
+            "with no network and no writes outside an append-only store the "
+            "benign rate is exactly 0, so a compliant agent cannot increment "
+            "it however it behaves."),
+    ))
+    inv.register(Invariant(
         id="INV-H5-storage",
         harm_class="H5_storage_growth",
         cls=InvariantClass.CUMULATIVE,
         description=(
             "retained bytes stay within the declared bound. CUMULATIVE: a "
             "monotone total over one store, so like H1 it is valid only at a "
-            "serialization point and does not compose concurrently (C6/C7)."),
-    ))
-    inv.register(Invariant(
-        id="INV-H6-cadence",
-        harm_class="H6_unsupervised_actions",
-        cls=InvariantClass.CUMULATIVE,
-        description=(
-            "actions since the origin stay within the declared review cadence. "
-            "CUMULATIVE: a running count over one log, so it is valid only at a "
             "serialization point and does not compose concurrently (C6/C7)."),
     ))
     # H5 HAS NO DECLARED BOUND, DELIBERATELY. `guard_bounds.json` carries no
@@ -365,7 +659,16 @@ def build_registries(
                 f"an authority key was supplied but no configuration exists at "
                 f"{bounds_file!r}. Refusing to run unconfigured: an absent "
                 f"policy is not a permissive policy")
-        store = GuardConfigStore(authority_pubkey)
+        # The version floor lives on the host, not in the repo. Without it a
+        # cold start accepts any previously-signed configuration -- a rollback
+        # needs no key, only a file from git history, and leaves every
+        # signature verifying.
+        try:
+            from gyza.config import load_config as _lc
+            _hist = _lc().guard_config_history_path
+        except Exception:                                    # noqa: BLE001
+            _hist = None
+        store = GuardConfigStore(authority_pubkey, history_path=_hist)
         try:
             store.load_file(bounds_file)
         except (KeyError, TypeError) as e:

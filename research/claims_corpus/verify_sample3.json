@@ -1,0 +1,394 @@
+[
+ {
+  "claim_id": "scikit-learn#34396-0",
+  "text": "Change from: Change to: This makes it consistent with how other deprecated parameters like CODE display their deprecation notice \u2014 visible directly in the parameter description, not just at the bottom of the page.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34396,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34396",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Documentation",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66377-1",
+  "text": "In the 3rd and the 4th cases the \"intersection\" goes to the _columns_ names. 3.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66377,
+  "url": "https://github.com/pandas-dev/pandas/issues/66377",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "API Design",
+   "IO CSV",
+   "IO Excel",
+   "API - Consistency"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34578-0",
+  "text": "The CI has been failing on CODE recently on CODE on all platforms (see #34566).",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34578,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34578",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "module:tree",
+   "Needs Investigation"
+  ]
+ },
+ {
+  "claim_id": "pandas#65915-0",
+  "text": "While writing tests for the plotting of ExtensionArrays (#64535) I noticed that under certain circumstances a CODE used for the x-axis is converted to CODE and thereby is losing the timezone information.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65915,
+  "url": "https://github.com/pandas-dev/pandas/issues/65915",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Visualization",
+   "Needs Discussion"
+  ]
+ },
+ {
+  "claim_id": "pandas#66542-0",
+  "text": "CODE never validates its CODE keyword, so an invalid value travels into the internals until it trips an internal CODE (in CODE or CODE , depending on the input path) and the user gets a bare CODE with no message.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66542,
+  "url": "https://github.com/pandas-dev/pandas/issues/66542",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34537-1",
+  "text": "It is definitely not mentioned in the doc, and I would rather remove all the extra_requires unless someone has a strong use case for it.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34537,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34537",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "RFC"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34087-1",
+  "text": "Support and lack of support for sparse torch inputs should be explicit and possible to deduce from the docs.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34087,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34087",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Documentation",
+   "Needs Decision"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34437-2",
+  "text": "With CODE pointing to gcc-toolset first, it should resolve to the newer gcc-toolset libgomp.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34437,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34437",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Investigation"
+  ]
+ },
+ {
+  "claim_id": "pandas#66490-1",
+  "text": "Specifically, when the array is created with: - CODE - CODE calling CODE produces different outputs, even though both arrays represent the same logical data.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66490,
+  "url": "https://github.com/pandas-dev/pandas/issues/66490",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Algos",
+   "Arrow"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33867-0",
+  "text": "It seems that the URL URL used in our code should have been written URL instead.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33867,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33867",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "module:datasets"
+  ]
+ },
+ {
+  "claim_id": "pandas#66514-1",
+  "text": "I believe the behavior should not change in the new version of pandas.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66514,
+  "url": "https://github.com/pandas-dev/pandas/issues/66514",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34531-1",
+  "text": "The error does not occur in sklearn 1.8.x.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34531,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34531",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "module:linear_model"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34046-0",
+  "text": "Internal utility CODE appears to handle cases like Pandas series correctly with most array API namespaces.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34046,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34046",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Decision",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "pandas#66605-1",
+  "text": "A cumulative bad count over a score-sorted target is how you build a gains or KS table, and with a 0/1 target the running total exceeds int8 on the 128th positive row.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66605,
+  "url": "https://github.com/pandas-dev/pandas/issues/66605",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Needs Triage",
+   "Arrow"
+  ]
+ },
+ {
+  "claim_id": "pandas#66552-1",
+  "text": "CODE catches a sum that goes *below* CODE but not one that lands *on* it, so there is a one-step hole at the bottom of the range: the step further out raises, the step onto the sentinel silently returns CODE .",
+  "repo": "pandas-dev/pandas",
+  "issue": 66552,
+  "url": "https://github.com/pandas-dev/pandas/issues/66552",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Datetime",
+   "Missing-data",
+   "Timedelta"
+  ]
+ },
+ {
+  "claim_id": "pandas#66579-0",
+  "text": "CODE treats every CODE as empty, without ever inspecting whether it carries its own CODE / CODE .",
+  "repo": "pandas-dev/pandas",
+  "issue": 66579,
+  "url": "https://github.com/pandas-dev/pandas/issues/66579",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "IO Excel"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34203-1",
+  "text": "Running the following notebook for fitting a simple masker gives a VERY sluggish browsing experience.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34203,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34203",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Performance",
+   "frontend"
+  ]
+ },
+ {
+  "claim_id": "pandas#65917-0",
+  "text": "It uses: - YOLOv8 for pattern detection on candlestick charts - Multi-timeframe analysis (M5/M15/M30/H1/H4) - Real-time MT5 data integration The analysis results are auto-posted to Telegram channels.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65917,
+  "url": "https://github.com/pandas-dev/pandas/issues/65917",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "scikit-learn#33829-1",
+  "text": "But it appears to still rely on functions with numpy-specific code: URL .. which leads it to throw warnings when used with array API (see code snippet).",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33829,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33829",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33986-0",
+  "text": "This issue is a tracker for the task of adding chunking to the computation in CODE ( CODE ).",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33986,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33986",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Array API"
+  ]
+ },
+ {
+  "claim_id": "pandas#65880-1",
+  "text": "File handles should always be closed, even when exceptions occur.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65880,
+  "url": "https://github.com/pandas-dev/pandas/issues/65880",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": []
+ },
+ {
+  "claim_id": "pandas#65770-1",
+  "text": "In the reproduction, you can observe that the two Series have the same dtype, values, index, and compare equal via CODE , but CODE still fails because it checks the concrete class of the internal backing arrays.",
+  "repo": "pandas-dev/pandas",
+  "issue": 65770,
+  "url": "https://github.com/pandas-dev/pandas/issues/65770",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Testing",
+   "Error Reporting"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#33890-0",
+  "text": "Choose between different binning strategies (\"uniform\" fixed width bins, \"quantile\" equal mass bins) to estimate the calibration curve.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 33890,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/33890",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "New Feature",
+   "Needs Triage"
+  ]
+ },
+ {
+  "claim_id": "pandas#66389-1",
+  "text": "There can also be challenges around proper typing on the helper method, when support for e.g. series and datetime index is required as well.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66389,
+  "url": "https://github.com/pandas-dev/pandas/issues/66389",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Enhancement",
+   "Needs Discussion"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34164-0",
+  "text": "Right now CODE with callbacks end up using a lot of space in people's notebooks/ipython sessions after after they've finished running.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34164,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34164",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Callbacks"
+  ]
+ },
+ {
+  "claim_id": "scikit-learn#34477-2",
+  "text": "The code to reproduce the issue is below.",
+  "repo": "scikit-learn/scikit-learn",
+  "issue": 34477,
+  "url": "https://github.com/scikit-learn/scikit-learn/issues/34477",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ },
+ {
+  "claim_id": "pandas#66518-1",
+  "text": "CODE only ever consults CODE : - the object/category/string rejection checks CODE alone ( skips that guard too.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66518,
+  "url": "https://github.com/pandas-dev/pandas/issues/66518",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug",
+   "Interval"
+  ]
+ },
+ {
+  "claim_id": "pandas#66593-1",
+  "text": "Above, 16.9 MB is reported where 61.4 MB was actually allocated \u2014 a **3.6x under-report**.",
+  "repo": "pandas-dev/pandas",
+  "issue": 66593,
+  "url": "https://github.com/pandas-dev/pandas/issues/66593",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Strings",
+   "Index",
+   "Arrow"
+  ]
+ },
+ {
+  "claim_id": "pandas#65735-2",
+  "text": "output (pandas 3.0): np.float64 output (pandas 3.1 nightly): Float64 output (pandas 3.0): np.float64 output (pandas 3.1 nightly): double[pyarrow]",
+  "repo": "pandas-dev/pandas",
+  "issue": 65735,
+  "url": "https://github.com/pandas-dev/pandas/issues/65735",
+  "issue_state": "open",
+  "issue_state_reason": null,
+  "issue_labels": [
+   "Bug",
+   "Dtype Conversions",
+   "Needs Discussion",
+   "Apply"
+  ]
+ },
+ {
+  "claim_id": "pandas#65700-0",
+  "text": "This now returns False on main but returns True on released 3.0 Caused by URL cc @jbrockmendel",
+  "repo": "pandas-dev/pandas",
+  "issue": 65700,
+  "url": "https://github.com/pandas-dev/pandas/issues/65700",
+  "issue_state": "closed",
+  "issue_state_reason": "completed",
+  "issue_labels": [
+   "Bug"
+  ]
+ }
+]

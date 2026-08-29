@@ -1,0 +1,27 @@
+{
+ "CONCENTRATE": {
+  "k_star": 109,
+  "eligible": 511,
+  "peak": 0.613466106085452
+ },
+ "RANDOM": {
+  "k_star": 103,
+  "eligible": 511,
+  "peak": 0.6132643717174461
+ },
+ "SPARE": {
+  "k_star": 105,
+  "eligible": 504,
+  "peak": 0.6135111903879463
+ },
+ "EVEN_ALL": {
+  "k_star": 55,
+  "eligible": 511,
+  "peak": 0.6077045040882834
+ },
+ "SPARE_EVEN": {
+  "k_star": 55,
+  "eligible": 504,
+  "peak": 0.6078226218858751
+ }
+}

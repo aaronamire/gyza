@@ -1,0 +1,83 @@
+{
+  "_meta": {
+    "labelled": 15,
+    "excluded_notation_false_positive": 10,
+    "excluded_ambiguous_or_truncated": 5,
+    "note": "Hand-labelled first-error step on 30-trace seeded sample. 10/30 were canonicalization false-positives (answer actually CORRECT: \\cfrac/\\dfrac/unicode-sqrt/\\text/\\frac32 unparsed by _sym_equal) -> excluded (no error to locate) and flagged as cross-phase contamination. 5/30 excluded (ambiguous true answer or truncated trace). Error positions NOT front-loaded (median norm ~0.6)."
+  },
+  "meta-llama/llama-3.1-70b-instruct|counting_and_probability#459": {
+    "error_step": 4,
+    "norm_pos": 0.571,
+    "nsteps": 7
+  },
+  "meta-llama/llama-3.1-70b-instruct|number_theory#84": {
+    "error_step": 6,
+    "norm_pos": 0.5,
+    "nsteps": 12
+  },
+  "meta-llama/llama-3.1-70b-instruct|intermediate_algebra#91": {
+    "error_step": 11,
+    "norm_pos": 0.846,
+    "nsteps": 13
+  },
+  "meta-llama/llama-3.1-70b-instruct|precalculus#48": {
+    "error_step": 3,
+    "norm_pos": 0.375,
+    "nsteps": 8
+  },
+  "google/gemma-2-27b-it|intermediate_algebra#689": {
+    "error_step": 9,
+    "norm_pos": 0.692,
+    "nsteps": 13
+  },
+  "google/gemma-2-27b-it|precalculus#280": {
+    "error_step": 3,
+    "norm_pos": 0.6,
+    "nsteps": 5
+  },
+  "google/gemma-2-27b-it|precalculus#87": {
+    "error_step": 7,
+    "norm_pos": 0.219,
+    "nsteps": 32
+  },
+  "google/gemma-2-27b-it|algebra#245": {
+    "error_step": 4,
+    "norm_pos": 0.222,
+    "nsteps": 18
+  },
+  "google/gemma-2-27b-it|counting_and_probability#22": {
+    "error_step": 6,
+    "norm_pos": 0.545,
+    "nsteps": 11
+  },
+  "google/gemma-2-27b-it|counting_and_probability#459": {
+    "error_step": 8,
+    "norm_pos": 0.667,
+    "nsteps": 12
+  },
+  "google/gemma-2-27b-it|algebra#8": {
+    "error_step": 14,
+    "norm_pos": 0.636,
+    "nsteps": 22
+  },
+  "google/gemma-2-27b-it|intermediate_algebra#389": {
+    "error_step": 17,
+    "norm_pos": 0.773,
+    "nsteps": 22
+  },
+  "google/gemma-2-27b-it|intermediate_algebra#551": {
+    "error_step": 9,
+    "norm_pos": 0.562,
+    "nsteps": 16
+  },
+  "google/gemma-2-27b-it|prealgebra#544": {
+    "error_step": 5,
+    "norm_pos": 0.625,
+    "nsteps": 8
+  },
+  "google/gemma-2-27b-it|precalculus#48": {
+    "error_step": 20,
+    "norm_pos": 0.952,
+    "nsteps": 21
+  }
+}
