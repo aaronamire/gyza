@@ -600,7 +600,7 @@ def cmd_swarm(args: argparse.Namespace) -> int:
     node is claimable on every node.
 
     THE DAEMON MUST ALREADY BE RUNNING AND MESHED. This attaches to it; it does
-    not start it. Verify `gyza global peers` shows the expected count on every
+    not start it. Verify `gyza global status` shows the expected count on every
     node BEFORE starting agents, because a roster on an unmeshed node is a
     single-node fleet wearing a distributed name.
     """
@@ -621,7 +621,7 @@ def cmd_swarm(args: argparse.Namespace) -> int:
     sock = _resolve(cfg.netd_socket_path)
     if not Path(sock).exists():
         print(f"no daemon socket at {sock}. Start gyza-netd and confirm the "
-              f"mesh with `gyza global peers` before running agents.",
+              f"mesh with `gyza global status` before running agents.",
               file=sys.stderr)
         return 1
 
