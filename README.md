@@ -283,10 +283,14 @@ appended to it.
   our own result against our own design. Four consequence classes are declared
   under a signed configuration and are **measured, not yet enforced**.
 - **Containment as a whole.** `can_claim_containment` is currently **false**,
-  for one reason: the authority signing key lives on the same host that runs
-  agents, so anything able to read that file could re-sign the policy it is
-  constrained by. Every other gate is closed and verified — `readiness()` with
-  the key absent returns true.
+  and the reason is the mechanism working. The irreversibility class `H7`
+  carries **no signed level**: its quantity is computed and folded from the
+  same signed enforcement records a third party would read, but a level enters
+  only through a signed guard configuration, and the authority key was
+  deliberately moved off this machine so the constrained system cannot rewrite
+  the policy constraining it. Nine tests assert the claim and are **red on
+  purpose**; they clear when the owner signs the prepared configuration, and
+  not before.
 - **Effects that leave modelled state.** A guard can refuse to *emit*. After
   emission, containment has no meaning and no detector would help.
 - **Scale.** The largest measured configuration is 750 agents on one board and
@@ -377,16 +381,18 @@ Stated because a gap you can read is worth more than one you find.
    mesh is never reconciled. Work-item deltas now carry their lineage intent so
    that specific failure self-heals, but a lost *claim* or *completion* does
    not. This is the largest correctness gap in the distributed layer.
-3. **The attestation tier is a scheduling filter that reads like an
-   authorization boundary.** `required_tier` is consulted in one place — the
-   polling query. A tier-0 agent that learns an item id by any other means can
-   claim it, execute it, and sign a valid envelope. The tier is not one of
-   `CapabilitySpec`'s five dimensions, so the attenuation proof says nothing
-   about it. A gap in coverage, not a hole in the proof.
+3. **A bundle's completeness record is attached by nothing.** `verify_closure`
+   runs on every `gyza verify`, and the shipped evidence bundles carry a signed
+   closure — but `attach_closure` has **zero callers in `gyza/`** (AST census,
+   not grep), so every bundle the `gyza bundle` command produces reports
+   `Completeness: NOT ASSERTED`. The checker is wired and the producer is not:
+   this project's own signature failure, in the evidence layer.
 4. **Decomposition is granted but never requested.** See the note above: no
    CLI-selectable executor emits a subtask request.
-5. **Authority key colocation.** The single reason `can_claim_containment` is
-   false.
+5. **H7 has no signed level**, so the containment claim is false. See above.
+   Separately, the plain and signed bounds files both declare `version: 3`
+   while listing **different** bounds — a same-version content divergence in
+   the trust root, caught by a standing test that is currently red.
 6. **Compositor key rotation is deferred**, and a naive implementation would
    pin history to the old key while the live gate reads the new one.
 7. **No external verification.** Nobody outside this project has verified a
